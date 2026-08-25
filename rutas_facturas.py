@@ -31,7 +31,7 @@ def escribir_json(archivo, data):
 
 def procesar_liberacion_si_aplica(f):
     if f.get("aprobado_admin") and f.get("aprobado_corp"):
-        return "\nâœ… Orden aprobada. El taller ha sido autorizado para iniciar la reparaciÃ³n."
+        return "\nâœ… Orden aprobada. El taller ha sido autorizado para iniciar la reparación."
     return ""
 
 
@@ -107,7 +107,7 @@ def nueva_factura():
 
     for u in usuarios_data.get("usuarios", []):
         if u["rol"] == "administracion":
-            subrol = u["datos_perfil"].get("subrol", "AdministraciÃ³n")
+            subrol = u["datos_perfil"].get("subrol", "Administración")
             ciudad_admin = u["datos_perfil"].get("ciudad", "")
             
             # Solo notificar a la Jefatura general o al Supervisor local
@@ -130,7 +130,7 @@ def nueva_factura():
     if correo_proveedor and correo_proveedor.strip():
         enviar_correo_confirmacion_factura(correo_proveedor, proveedor, unidad_sola, precio_float)
 
-    return jsonify({"status": "success", "message": "CotizaciÃ³n enviada correctamente a revisiÃ³n."})
+    return jsonify({"status": "success", "message": "Cotización enviada correctamente a revisión."})
 
 
 @facturas_bp.route("/api/facturas/lista", methods=["GET"])
@@ -155,7 +155,7 @@ def listar_facturas():
                 mi_ciudad = session["usuario"]["datos_perfil"].get("ciudad", "")
                 usuarios_data = leer_json("usuarios.json")
                 
-                # Primero, buscamos cÃ³mo se llaman todos los proveedores de la misma ciudad
+                # Primero, buscamos cómo se llaman todos los proveedores de la misma ciudad
                 proveedores_locales = [u["datos_perfil"]["nombre_proveedor"] for u in usuarios_data.get("usuarios", []) if u["rol"] == "proveedores" and u["datos_perfil"].get("ciudad") == mi_ciudad]
                 
                 # Luego, solo le mostramos al Supervisor las facturas que vengan de esos proveedores locales
@@ -190,7 +190,7 @@ def confirmar_admin():
             if nombre_pdf:
                 f["pdf_cotizacion_asignacion"] = nombre_pdf
             
-            # TambiÃ©n lo copiamos al reporte original para que los PDFs que se imprimen desde el taller
+            # También lo copiamos al reporte original para que los PDFs que se imprimen desde el taller
             # puedan visualizar este dato si consultan el reporte original.
             reportes_data = leer_json("reportes.json")
             for r in reportes_data.get("reportes", []):
@@ -204,7 +204,7 @@ def confirmar_admin():
             f["estado_custom"] = ""
             mensaje_extra = procesar_liberacion_si_aplica(f)
             escribir_json("facturas.json", data)
-            return jsonify({"status": "success", "message": "Orden asignada y validada por AdministraciÃ³n." + mensaje_extra})
+            return jsonify({"status": "success", "message": "Orden asignada y validada por Administración." + mensaje_extra})
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
 
@@ -218,14 +218,14 @@ def confirmar_corp():
             f["estado_custom"] = ""
             mensaje_extra = procesar_liberacion_si_aplica(f)
             escribir_json("facturas.json", data)
-            return jsonify({"status": "success", "message": "AutorizaciÃ³n financiera aprobada." + mensaje_extra})
+            return jsonify({"status": "success", "message": "Autorización financiera aprobada." + mensaje_extra})
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
 
 @facturas_bp.route("/api/facturas/rechazar", methods=["POST"])
 def rechazar_factura():
     factura_id = request.json.get("id")
-    motivo = request.json.get("motivo", "Motivo no especificado por la administraciÃ³n.")
+    motivo = request.json.get("motivo", "Motivo no especificado por la administración.")
     
     data = leer_json("facturas.json")
     nuevas_facturas = []
@@ -372,7 +372,7 @@ def subir_factura_final():
     archivo_pdf = request.files.get('pdf_factura')
     
     if not archivo_pdf or not archivo_pdf.filename.endswith('.pdf'):
-        return jsonify({"status": "error", "message": "Debe subir un archivo en formato PDF vÃ¡lido."})
+        return jsonify({"status": "error", "message": "Debe subir un archivo en formato PDF válido."})
         
     data = leer_json('facturas.json')
     for f in data.get('facturas', []):
@@ -386,10 +386,10 @@ def subir_factura_final():
             f['validacion_fiscal'] = 'Pendiente'
             escribir_json('facturas.json', data)
             
-            # Enviar notificaciÃ³n a administraciÃ³n
-            enviar_correo_factura_fiscal_subida("armandoramireztelnor2026@gmail.com", f.get('proveedor', 'Proveedor'), f.get('unidad', 'S/N'), f.get('titulo', 'Sin TÃ­tulo'), folio)
+            # Enviar notificación a administración
+            enviar_correo_factura_fiscal_subida("armandoramireztelnor2026@gmail.com", f.get('proveedor', 'Proveedor'), f.get('unidad', 'S/N'), f.get('titulo', 'Sin Título'), folio)
             
-            return jsonify({"status": "success", "message": "Factura fiscal subida y adjuntada correctamente al expediente. Se ha notificado a AdministraciÃ³n."})
+            return jsonify({"status": "success", "message": "Factura fiscal subida y adjuntada correctamente al expediente. Se ha notificado a Administración."})
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
@@ -426,7 +426,7 @@ def rechazar_fiscal():
             f.pop('pdf_fiscal', None)
             f['validacion_fiscal'] = 'Rechazada'
             
-            # Opcional: Agregar comentario al ticket o mandar correo aquÃ­, por ahora solo retro interna
+            # Opcional: Agregar comentario al ticket o mandar correo aquí, por ahora solo retro interna
             if not f.get('retro'): f['retro'] = ""
             f['retro'] += f"\n\n[ADMINISTRACIÃ“N - Factura Rechazada]: {motivo}"
             
@@ -442,7 +442,7 @@ def rechazar_fiscal():
             if correo_proveedor:
                 enviar_correo_factura_fiscal_rechazada(correo_proveedor, f.get('proveedor'), f.get('unidad'), folio_borrado, motivo)
             
-            return jsonify({"status": "success", "message": "Factura rechazada. Se notificarÃ¡ al proveedor para que la suba de nuevo."})
+            return jsonify({"status": "success", "message": "Factura rechazada. Se notificará al proveedor para que la suba de nuevo."})
     return jsonify({"status": "error", "message": "Factura no encontrada."})
 
 @facturas_bp.route('/api/facturas/doc50', methods=['POST'])
@@ -455,7 +455,7 @@ def doc50():
     file = request.files.get('pdf')
 
     if not file or file.filename == '':
-        return jsonify({'status': 'error', 'message': 'No se seleccionÃ³ archivo.'})
+        return jsonify({'status': 'error', 'message': 'No se seleccionó archivo.'})
 
     filename = secure_filename(f'doc50_{factura_id}_{file.filename}')
     file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
