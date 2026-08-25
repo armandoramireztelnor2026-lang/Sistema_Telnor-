@@ -1,0 +1,270 @@
+<!-- =========================================================
+     ARCHIVO: templates/proveedores.html
+     PROPÓSITO: Portal Proveedores
+     ========================================================= -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Portal Proveedores</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <input type="hidden" id="rol-actual" value="proveedores">
+    <div class="dashboard-container">
+        
+        <aside class="sidebar">
+            <img src="{% if usuario.datos_perfil.foto_ruta %}/static/logos_proveedores/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/112641/40916c?text=Logo{% endif %}" alt="Logo" class="profile-pic" onclick="abrirMiPerfil()">
+            <div class="sidebar-name">{{ usuario.datos_perfil.nombre_proveedor }}</div>
+            <div class="sidebar-sub">Encargado: {{ usuario.datos_perfil.encargado }}</div>
+            <div class="sidebar-badge">PROVEEDOR</div>
+            
+            <nav class="nav-menu">
+                <button class="btn-sidebar" onclick="cambiarVistaProv('reportes')">Tickets de Trabajo</button>
+                <button class="btn-sidebar" onclick="cambiarVistaProv('facturas')">Cotizaciones</button>
+                <button class="btn-sidebar" onclick="cambiarVistaProv('facturas_finales')">Facturas</button>
+            </nav>
+            <div class="btn-logout-container"><a href="/logout" class="btn-logout" onclick="return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
+        </aside>
+
+        <main class="main-content">
+            <div id="vista-facturas">
+                <div class="top-bar">
+                    <h2>Cotizaciones</h2>
+                    <button class="btn-action" onclick="abrirModalNuevaFactura()">+ Nueva Cotización Libre</button>
+                </div>
+                <div class="admin-container">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Fecha</th><th>Unidad</th><th>Título</th><th>Precio s/IVA</th><th>Estado</th><th>Acciones / Orden</th></tr>
+                            </thead>
+                            <tbody id="tabla-facturas"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vista-reportes-prov" style="display: none;">
+                <div class="top-bar">
+                    <h2>Tickets de Trabajo Asignados</h2>
+                </div>
+                <div class="admin-container">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Ticket</th><th>Fecha</th><th>Unidad</th><th>Falla / Servicio</th><th>Mantenimiento</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody id="tabla-reportes-prov"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vista-facturas-finales" style="display: none;">
+                <div class="top-bar">
+                    <h2>Facturas Oficiales (Por Cobrar / Pagadas)</h2>
+                </div>
+                <div class="admin-container">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Folio Fiscal</th><th>Fecha</th><th>Unidad</th><th>Título</th><th>Precio s/IVA</th><th>Estado</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody id="tabla-facturas-finales"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-ver-reporte-prov" class="modal-overlay" style="display: none;">
+        <div class="modal-box large">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-ver-reporte-prov')">×</button>
+            <h3 class="modal-header">Detalles del Ticket de Trabajo</h3>
+            <div id="contenido-reporte-prov"></div>
+            
+            <div class="modal-actions" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn-info" style="width: 100%; background-color: #0284c7; padding: 12px; font-size: 15px;" onclick="imprimirReporteTaller()">📄 Ver Documento de Ticket / Imprimir</button>
+                <button class="btn-success-modal" style="width: 100%; background-color: #f59e0b; padding: 12px; font-size: 15px;" onclick="iniciarFacturaDesdeReporte()">Crear Cotización para este Ticket</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-pdf-orden-trabajo" class="modal-overlay" style="display: none;">
+        <div class="pdf-modal-box">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-pdf-orden-trabajo')" style="color: #112641;">×</button>
+            <h3 style="color: #112641; margin-bottom: 20px;">Ticket de Trabajo Oficial</h3>
+            
+            <div id="pdf-orden-contenido" class="pdf-document">
+                <div class="pdf-header-doc">
+                    <h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2>
+                    <p>TICKET DE TRABAJO Y SERVICIO (TALLER)</p>
+                </div>
+                <div id="pdf-orden-cuerpo"></div>
+                <div class="pdf-footer">Documento generado el: <span id="pdf-orden-fecha"></span></div>
+            </div>
+            
+            <div class="modal-actions" style="max-width: 750px; margin-top: 20px;">
+                <button class="btn-danger" onclick="volverAReporteProv()">Volver</button>
+                <button class="btn-success-modal" onclick="descargarPDFOrden()">Descargar PDF / Imprimir</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-nueva-factura" class="modal-overlay">
+        <div class="modal-box large">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-nueva-factura')">×</button>
+            <h3 class="modal-header">Crear Nueva Cotización</h3>
+            <form id="form-nueva-factura" onsubmit="event.preventDefault(); previsualizarFactura();">
+                
+                <input type="hidden" name="numero_reporte" id="hidden_numero_reporte">
+                <div id="etiqueta-reporte-vinculado" style="display:none; background:#1b4332; color:white; padding:10px; border-radius:8px; margin-bottom:15px; font-weight:bold; font-size: 0.9em;">
+                    ✅ Cotización vinculada al Ticket de Trabajo: <span id="span-ticket-vinculado" style="color: #f59e0b;"></span>
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Número de Unidad</label>
+                        <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text" name="unidad" id="input_nueva_unidad" maxlength="4" required oninput="validarNumeros(this)"></div>
+                    </div>
+                    <div class="input-group"><label>Responsable en Turno</label><input type="text" name="responsable" required oninput="validarLetras(this)"></div>
+                    <div class="input-group"><label>Teléfono</label><input type="text" name="telefono" maxlength="15" required oninput="validarNumeros(this)"></div>
+                    <div class="input-group"><label>Fecha</label><input type="date" name="fecha" required></div>
+                    <div class="input-group full-width"><label>Título de la Factura</label><input type="text" name="titulo" required></div>
+                    
+                    <div class="input-group full-width"><label>Retro (Problema/Situación)</label><textarea name="retro" id="input_nueva_retro" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none; resize: vertical; min-height: 80px;"></textarea></div>
+                    
+                    <div class="input-group full-width"><label>Diagnóstico de Mecánico</label><textarea name="diagnostico" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none; resize: vertical; min-height: 80px;"></textarea></div>
+                    <div class="input-group full-width"><label>Descripción del Trabajo a Realizar</label><textarea name="trabajo_realizar" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none; resize: vertical; min-height: 80px;"></textarea></div>
+                    <div class="input-group">
+                        <label>Tipo de Mantenimiento</label>
+                        <select name="mantenimiento" id="input_nuevo_mantenimiento" class="input-form" required><option value="" disabled selected>Selecciona</option><option value="Preventivo">Preventivo</option><option value="Correctivo">Correctivo</option></select>
+                    </div>
+                    <div class="input-group"><label>Precio (Sin IVA) MXN</label><input type="text" name="precio" placeholder="$0.00 MXN" required onblur="formatearEnInput(this)" onfocus="limpiarInput(this)"></div>
+                    
+                    <div class="input-group"><label style="color:#0284c7;">Subir Cotización (Fotos/PDF)</label><input type="file" id="fotos_cotizacion" name="fotos_cotizacion" multiple accept="image/*,.pdf" style="padding:5px;"><div id="preview-cotizacion" class="preview-container"></div></div>
+                    <div class="input-group"><label style="color:#40916c;">Subir Evidencias (Fotos)</label><input type="file" id="fotos_evidencia" name="fotos_evidencia" multiple accept="image/*" style="padding:5px;"><div id="preview-evidencia" class="preview-container"></div></div>
+                </div>
+                <div class="modal-actions"><button class="btn-success-modal" type="submit" style="width: 100%;">Revisar y Continuar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-previsualizacion-factura" class="modal-overlay">
+        <div class="pdf-modal-box">
+            <h3 style="color: #112641; margin-bottom: 20px;">Vista Previa Final de tu Factura</h3>
+            
+            <div id="hoja-factura-pdf" class="pdf-document">
+                <div class="pdf-header-doc"><h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2><p>REPORTE DE MANTENIMIENTO Y FACTURACIÓN</p></div>
+                
+                <div id="pdf-seccion-reporte" style="display:none; margin-bottom: 20px; border: 2px dashed #f59e0b; padding: 15px; border-radius: 8px; background-color: #fafafa;">
+                    <div class="pdf-section-title" style="color: #b45309; border-bottom: 1px solid #f59e0b; padding-bottom: 5px;">■ SECCIÓN 1: REPORTE DE INCIDENCIA (ORIGEN)</div>
+                    <div style="display: flex; gap: 40px; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <div class="pdf-line" style="color: #333;"><strong>Ticket No.:</strong> <span id="prev-rep-ticket" style="color:#b45309; font-weight:bold;"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Fecha de Reporte:</strong> <span id="prev-rep-fecha"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Unidad:</strong> <span id="prev-rep-unidad"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Marca y Modelo:</strong> <span id="prev-rep-marca"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Mantenimiento:</strong> <span id="prev-rep-mantenimiento"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Kilometraje:</strong> <span id="prev-rep-km"></span></div>
+                            <!-- AQUI INYECTAMOS LA CIUDAD EN EL PDF -->
+                            <div class="pdf-line" style="color: #333;"><strong>Ciudad / Ubicación:</strong> <span id="prev-rep-ciudad" style="color:#0ea5e9; font-weight:bold;"></span></div>
+                            <div class="pdf-line" id="pdf-line-cotizacion" style="color: #333; display: none;"><strong>No. de Solicitud de Pedido:</strong> <span id="prev-rep-cotizacion"></span></div>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="pdf-line" style="color: #333;"><strong>Operador:</strong> <span id="prev-rep-empleado"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Departamento:</strong> <span id="prev-rep-depto"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Celular:</strong> <span id="prev-rep-celular"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Correo Electrónico:</strong> <span id="prev-rep-email"></span></div>
+                        </div>
+                    </div>
+                    <div class="pdf-line" style="color: #333; margin-top: 10px;"><strong>Falla Reportada:</strong> <div id="prev-rep-falla" class="texto-largo" style="margin-top: 5px; padding: 10px; background: #fff8e1; border-left: 3px solid #f59e0b; color: #333; font-style: italic;"></div></div>
+                </div>
+
+                <div style="margin-bottom: 20px; border: 2px dashed #0284c7; padding: 15px; border-radius: 8px; background-color: #fafafa;">
+                    <div class="pdf-section-title" style="color: #0284c7; border-bottom: 1px solid #0284c7; padding-bottom: 5px;">■ SECCIÓN 2: DIAGNÓSTICO Y FACTURACIÓN (TALLER)</div>
+                    <div class="pdf-line"><strong>Unidad:</strong> <span id="prev-unidad"></span></div>
+                    <div class="pdf-line"><strong>Responsable:</strong> <span id="prev-responsable"></span></div>
+                    <div class="pdf-line"><strong>Teléfono:</strong> <span id="prev-telefono"></span></div>
+                    <div class="pdf-line"><strong>Fecha Taller:</strong> <span id="prev-fecha"></span></div>
+                    <div class="pdf-line"><strong>Tipo de Mantenimiento:</strong> <span id="prev-mantenimiento"></span></div>
+                    <div class="pdf-line" style="margin-bottom: 15px;"><strong>Precio (Sin IVA):</strong> <span id="prev-precio"></span></div>
+                    
+                    <div class="pdf-section-title" style="color: #0284c7;">■ DETALLES DEL TRABAJO</div>
+                    <div class="pdf-line"><strong>Título:</strong> <span id="prev-titulo" class="texto-largo"></span></div>
+                    <div class="pdf-line"><strong>Retro:</strong> <div id="prev-retro" class="texto-largo" style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div></div>
+                    <div class="pdf-line"><strong>Diagnóstico de Mecánico:</strong> <div id="prev-diagnostico" class="texto-largo" style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div></div>
+                    <div class="pdf-line" style="margin-bottom: 15px;"><strong>Descripción del Trabajo a Realizar:</strong> <div id="prev-trabajo-realizar" class="texto-largo" style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div></div>
+                    
+                    <div class="pdf-section-title" style="color: #0284c7;">■ DOCUMENTOS DE COTIZACIÓN</div>
+                    <div id="prev-cotizaciones-container" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px; margin-bottom: 15px;"></div>
+                    
+                    <div class="pdf-section-title" style="color: #0284c7;">■ ANEXO FOTOGRÁFICO (EVIDENCIAS)</div>
+                    <div id="prev-evidencias-container" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;"></div>
+                </div>
+            </div>
+            <div class="modal-actions" style="max-width: 750px; margin-top: 20px;">
+                <button class="btn-danger" onclick="volverAEditar()">Volver a Editar</button><button class="btn-success-modal" onclick="enviarFacturaDefinitiva()">Confirmar y Enviar Factura</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-detalles-general" class="modal-overlay">
+        <div class="modal-box large">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-detalles-general')">×</button>
+            <h3 class="modal-header">Detalles de Factura Emitida</h3>
+            <div id="detalles-contenido"></div>
+            <div class="modal-actions"><button class="btn-success-modal" id="btn-descargar-pdf" style="width: 100%;">Descargar PDF Oficial</button></div>
+        </div>
+    </div>
+
+    <div id="lightbox-modal" class="lightbox-overlay" onclick="cerrarLightbox(event)"><span class="lightbox-close" onclick="cerrarLightbox(event)">&times;</span><img id="lightbox-img" class="lightbox-content" src=""></div>
+    
+    <!-- NUEVO: MODAL PDF PERFIL PROVEEDOR -->
+    <div id="modal-mi-perfil" class="modal-overlay">
+        <div class="pdf-modal-box">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-mi-perfil')" style="color: #112641;">×</button>
+            <h3 style="color: #112641; margin-bottom: 20px;">Vista Previa del Documento</h3>
+            <div id="pdf-content" class="pdf-document">
+                <div class="pdf-header-doc">
+                    <h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2>
+                    <p>PERFIL DE USUARIO - PROVEEDOR</p>
+                </div>
+                <div class="pdf-body">
+                    <img src="{% if usuario.datos_perfil.foto_ruta %}/static/logos_proveedores/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/ffffff/000000?text=Logo{% endif %}" class="pdf-photo-doc" onclick="abrirLightbox(this.src)">
+                    <div class="pdf-details">
+                        <div class="pdf-section-title">■ DATOS DE LA EMPRESA</div>
+                        <div class="pdf-line"><strong>Razón Social / Empresa:</strong> {{ usuario.datos_perfil.nombre_proveedor }}</div>
+                        <div class="pdf-line"><strong>Descripción:</strong> <span class="texto-largo">{{ usuario.datos_perfil.descripcion }}</span></div>
+                        <div class="pdf-line"><strong>Usuario del Sistema:</strong> {{ usuario.usuario }}</div>
+                        <br>
+                        <div class="pdf-section-title">■ INFORMACIÓN DE CONTACTO</div>
+                        <div class="pdf-line"><strong>Encargado Principal:</strong> {{ usuario.datos_perfil.encargado }}</div>
+                        <!-- NUEVA LÍNEA DE CIUDAD -->
+                        <div class="pdf-line"><strong>Ciudad Base:</strong> <span style="color:#0284c7; font-weight:bold;">{{ usuario.datos_perfil.ciudad | default('No especificada') }}</span></div>
+                        <div class="pdf-line"><strong>Teléfono:</strong> {{ usuario.datos_perfil.telefono }}</div>
+                        <div class="pdf-line"><strong>Correo Electrónico:</strong> {{ usuario.datos_perfil.correo }}</div>
+                        <div class="pdf-line"><strong>Dirección:</strong> <span class="texto-largo">{{ usuario.datos_perfil.direccion }}</span></div>
+                    </div>
+                </div>
+                <div class="pdf-footer">Documento extraído de la Base de Datos Central el: <span id="pdf-fecha"></span></div>
+            </div>
+            <div class="modal-actions" style="max-width: 750px; margin-top: 20px;">
+                <button class="btn-danger" onclick="cerrarModal('modal-mi-perfil')">Cancelar</button>
+                <button class="btn-success-modal" onclick="descargarPDF()">Confirmar y Descargar PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    
+    <!-- Módulos de Facturación -->
+    <script src="/static/facturas_herramientas.js"></script>
+    <script src="/static/facturas_archivos.js"></script>
+    <script src="/static/facturas_pdf.js"></script>
+    <script src="/static/facturas_principal.js"></script>
+</body>
+</html>

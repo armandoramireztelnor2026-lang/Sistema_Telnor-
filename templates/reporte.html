@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Falla - RUMN</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background-color: #081422; }
+        .report-container { width: 100%; max-width: 800px; background-color: #112641; padding: 30px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin: auto; }
+        .report-header { text-align: center; margin-bottom: 25px; }
+        .report-header h2 { color: #f59e0b; margin-bottom: 10px; }
+        .report-header p { color: #a3b1c6; font-size: 14px; }
+        .form-grid-smart { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 600px) { .form-grid-smart { grid-template-columns: 1fr 1fr; } .full-width-smart { grid-column: span 2; } body { align-items: center; } }
+        @media (max-width: 599px) { body { align-items: flex-start; } }
+        .mantenimiento-cards { display: flex; gap: 15px; margin-top: 10px; }
+        .m-card { flex: 1; background: #0b1c30; border: 2px solid #1f395a; border-radius: 8px; padding: 20px 10px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .m-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .m-card.active-prev { border-color: #0284c7; background: #0ea5e9; transform: scale(1.05); box-shadow: 0 0 20px rgba(2, 132, 199, 0.6); }
+        .m-card.active-prev .m-title, .m-card.active-prev .m-desc { color: #ffffff; }
+        .m-card.active-corr { border-color: #dc2626; background: #ef4444; transform: scale(1.05); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+        .m-card.active-corr .m-title, .m-card.active-corr .m-desc { color: #ffffff; }
+        .m-card.apagado { opacity: 0.4; transform: scale(0.95); filter: grayscale(80%); }
+        .m-icon { font-size: 32px; display: block; margin-bottom: 10px; }
+        .m-title { font-weight: bold; color: #ffffff; margin-bottom: 5px; font-size: 16px; transition: color 0.3s; }
+        .m-desc { font-size: 12px; color: #a3b1c6; transition: color 0.3s; }
+
+        /* PANTALLA DE CARGA DEL CHOFER */
+        #loader-reporte {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 13, 24, 0.95); z-index: 999999; flex-direction: column;
+            align-items: center; justify-content: center; backdrop-filter: blur(5px);
+        }
+        .loader-box {
+            background: linear-gradient(145deg, #0b1c30, #081422); border: 1px solid #f59e0b;
+            padding: 40px; border-radius: 16px; text-align: center;
+            box-shadow: 0 15px 35px rgba(245, 158, 11, 0.3); display: flex;
+            flex-direction: column; align-items: center; gap: 20px; width: 300px;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #1f395a;
+            border-top: 5px solid #f59e0b; border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-text { color: #ffffff; font-size: 1.1rem; font-weight: 600; font-family: 'Poppins', sans-serif; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA DE CARGA FLOTANTE -->
+    <div id="loader-reporte">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <div class="loader-text">Enviando reporte al sistema...</div>
+            <div style="color: #a3b1c6; font-size: 0.85em; margin-top:-10px;">Notificando a Automotriz 📧</div>
+        </div>
+    </div>
+
+    <div class="report-container">
+        <div class="report-header">
+            <h2>⚠️ Reporte de Falla o Mantenimiento</h2>
+            <p>Complete este formulario para notificar al departamento de Automotriz. Se generará un ticket de servicio.</p>
+        </div>
+
+        <form id="form-reporte-externo" onsubmit="event.preventDefault(); enviarReporte();">
+            <div class="form-grid-smart">
+                
+                <div class="input-group"><label>Fecha</label><input type="date" name="fecha" required></div>
+                <div class="input-group"><label>Kilometraje</label><input type="text" name="kilometraje" placeholder="Ej. 125000" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                
+                <div class="input-group full-width-smart">
+                    <label>No. Económico (Unidad)</label>
+                    <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text" name="unidad" maxlength="4" placeholder="Ej. 1234" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                </div>
+                
+                <div class="input-group"><label>Marca</label><input type="text" name="marca" placeholder="Marca del vehículo" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ0-9\s]/g, '')" required></div>
+                <div class="input-group"><label>Modelo</label><input type="text" name="modelo" placeholder="Modelo / Año" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ0-9\s-]/g, '')" required></div>
+                
+                <div class="input-group"><label>Celular</label><input type="text" name="celular" placeholder="Número de contacto" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="15" required></div>
+                <div class="input-group"><label>Nombre del Empleado (Completo)</label><input type="text" name="empleado" placeholder="Escriba su nombre completo" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                
+                <div class="input-group full-width-smart"><label>Email <span style="color:#a3b1c6; font-size:12px;">(Opcional)</span></label><input type="email" name="email" placeholder="usuario@correo.com"></div>
+                
+                <!-- ¡NUEVOS CAMPOS EN CASCADA PARA EL CHOFER! -->
+                <div class="input-group">
+                    <label>Ciudad / Municipio Base</label>
+                    <select name="ciudad" id="ciudad-reporte" required style="width: 100%; padding: 12px; background: #0b1c30; color: #fff; border: 1px solid #1f395a; border-radius: 8px; font-family: 'Poppins', sans-serif;" onchange="actualizarCopeReporte()">
+                        <option value="" disabled selected>Seleccione la ciudad...</option>
+                        <option value="Tijuana">Tijuana</option>
+                        <option value="Tecate">Tecate</option>
+                        <option value="Ensenada">Ensenada</option>
+                        <option value="San Quintin">San Quintin</option>
+                        <option value="Mexicali">Mexicali</option>
+                        <option value="San Luis Rio Colorado">San Luis Rio Colorado</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>COPE / Edificio</label>
+                    <select name="cope" id="cope-reporte" required style="width: 100%; padding: 12px; background: #0b1c30; color: #fff; border: 1px solid #1f395a; border-radius: 8px; font-family: 'Poppins', sans-serif;">
+                        <option value="" disabled selected>Primero seleccione una ciudad...</option>
+                    </select>
+                </div>
+
+                <div class="input-group full-width-smart"><label>Departamento al que pertenece</label><input type="text" name="departamento" placeholder="Ej. Logística, Ventas..." oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                
+                <div class="input-group full-width-smart">
+                    <label style="text-align: center; display: block; font-size: 16px; margin-bottom: 10px; color: #f59e0b;">Seleccione el Tipo de Mantenimiento Requerido:</label>
+                    <div class="mantenimiento-cards">
+                        <div class="m-card" id="card-prev" onclick="selectMantenimiento('Preventivo', 'card-prev', 'active-prev', 'card-corr')">
+                            <span class="m-icon">🛠️</span>
+                            <div class="m-title">Preventivo</div>
+                            <div class="m-desc">Servicio de rutina o afinación</div>
+                        </div>
+                        <div class="m-card" id="card-corr" onclick="selectMantenimiento('Correctivo', 'card-corr', 'active-corr', 'card-prev')">
+                            <span class="m-icon">⚠️</span>
+                            <div class="m-title">Correctivo</div>
+                            <div class="m-desc">Reparación de fallas o averías</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="mantenimiento" id="hidden_mantenimiento" required>
+                </div>
+                
+                <div class="input-group full-width-smart">
+                    <label>Descripción detallada del problema:</label>
+                    <textarea name="falla" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none; resize: vertical; min-height: 120px;" placeholder="Explique cómo y cuándo ocurre el mal funcionamiento, ruidos extraños, testigos encendidos, etc..."></textarea>
+                </div>
+                <div class="input-group full-width-smart" style="text-align: center; margin-top: 15px;">
+                    <label style="color: #f59e0b; font-size: 16px; margin-bottom: 10px; display: block;">Firma del Empleado / Chofer:</label>
+                    <div style="background: white; border: 2px dashed #1f395a; border-radius: 8px; display: inline-block; position: relative;">
+                        <canvas id="canvas-firma" width="400" height="200" style="cursor: crosshair; display: block; border-radius: 8px;"></canvas>
+                        <button type="button" onclick="limpiarFirma()" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Limpiar</button>
+                    </div>
+                    <p style="color: #a3b1c6; font-size: 12px; margin-top: 5px;">Use el ratón o el dedo (en pantalla táctil) para firmar en el recuadro blanco.</p>
+                    <input type="hidden" name="firma_chofer" id="hidden_firma" required>
+                </div>
+            </div>
+            
+            <button class="btn-success-modal" type="submit" id="btn-enviar-reporte" style="width: 100%; margin-top: 25px; padding: 15px; font-size: 16px;">Enviar Reporte al Sistema</button>
+        </form>
+    </div>
+
+    <script>
+        // LÓGICA DE CASCADA (REPORTE EXTERNO)
+        const zonasCope = {
+            "Tijuana": ["PE CALLE 10", "PIO PICO", "CALLE QUINTA", "RIO", "LIBERTAD", "METRO", "PE OTAY INDUSTRIAL", "PE SEMINARIO", "PE PLAYAS", "PE ROSARITO", "PE TECATE"],
+            "Tecate": ["PE CALLE 10", "PIO PICO", "CALLE QUINTA", "RIO", "LIBERTAD", "METRO", "PE OTAY INDUSTRIAL", "PE SEMINARIO", "PE PLAYAS", "PE ROSARITO", "PE TECATE"],
+            "Ensenada": ["PE ENSENADA", "PE SAN QUINTIN"],
+            "San Quintin": ["PE ENSENADA", "PE SAN QUINTIN"],
+            "Mexicali": ["PE PERIFERICO", "REFORMA", "ANAHUAC", "DE PIONEROS"],
+            "San Luis Rio Colorado": ["PE SAN LUIS RC", "CALLE 14"]
+        };
+
+        function actualizarCopeReporte() {
+            const ciudad = document.getElementById('ciudad-reporte').value;
+            const copeSelect = document.getElementById('cope-reporte');
+            copeSelect.innerHTML = '<option value="" disabled selected>Seleccione COPE / Edificio...</option>';
+            if(zonasCope[ciudad]) {
+                zonasCope[ciudad].forEach(c => {
+                    copeSelect.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+            }
+        }
+
+        // --- LÓGICA DEL CANVAS DE FIRMA ---
+        const canvas = document.getElementById('canvas-firma');
+        const ctx = canvas.getContext('2d');
+        let dibujando = false;
+        
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#112641"; // Color azul oscuro para la tinta
+
+        function getMousePos(canvas, evt) {
+            let rect = canvas.getBoundingClientRect();
+            // Soporte para táctil y ratón
+            let clientX = evt.clientX;
+            let clientY = evt.clientY;
+            
+            if (evt.touches && evt.touches.length > 0) {
+                clientX = evt.touches[0].clientX;
+                clientY = evt.touches[0].clientY;
+            }
+            
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function iniciarDibujo(e) {
+            e.preventDefault(); // Evitar scroll en táctiles
+            dibujando = true;
+            let pos = getMousePos(canvas, e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function dibujar(e) {
+            e.preventDefault();
+            if (!dibujando) return;
+            let pos = getMousePos(canvas, e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+        }
+
+        function detenerDibujo(e) {
+            e.preventDefault();
+            dibujando = false;
+            ctx.closePath();
+        }
+
+        // Eventos para mouse
+        canvas.addEventListener("mousedown", iniciarDibujo);
+        canvas.addEventListener("mousemove", dibujar);
+        canvas.addEventListener("mouseup", detenerDibujo);
+        canvas.addEventListener("mouseout", detenerDibujo);
+
+        // Eventos para táctiles (celulares)
+        canvas.addEventListener("touchstart", iniciarDibujo, {passive: false});
+        canvas.addEventListener("touchmove", dibujar, {passive: false});
+        canvas.addEventListener("touchend", detenerDibujo, {passive: false});
+
+        function limpiarFirma() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Verifica si el canvas está vacío comparándolo con uno limpio
+        function esCanvasVacio(c) {
+            const blank = document.createElement('canvas');
+            blank.width = c.width;
+            blank.height = c.height;
+            return c.toDataURL() === blank.toDataURL();
+        }
+        // ------------------------------------
+
+        function selectMantenimiento(tipo, idSeleccionada, claseActiva, idRival) {
+            document.getElementById('hidden_mantenimiento').value = tipo;
+            const cardSeleccionada = document.getElementById(idSeleccionada);
+            const cardRival = document.getElementById(idRival);
+            cardSeleccionada.classList.remove('active-prev', 'active-corr', 'apagado');
+            cardRival.classList.remove('active-prev', 'active-corr', 'apagado');
+            cardSeleccionada.classList.add(claseActiva);
+            cardRival.classList.add('apagado');
+        }
+
+        function enviarReporte() {
+            if(!document.getElementById('hidden_mantenimiento').value) {
+                alert("Por favor seleccione un Tipo de Mantenimiento (Preventivo o Correctivo) tocando uno de los recuadros grandes.");
+                return;
+            }
+
+            if(esCanvasVacio(canvas)) {
+                alert("Por favor firme el reporte en el recuadro blanco usando su dedo o el ratón.");
+                return;
+            }
+
+            if(!confirm("¿Estás seguro de enviar este reporte de falla/mantenimiento al sistema?")) {
+                return; 
+            }
+
+            // Capturar la firma en base64
+            document.getElementById('hidden_firma').value = canvas.toDataURL("image/png");
+
+            const btn = document.getElementById('btn-enviar-reporte');
+            btn.innerText = "Procesando...";
+            btn.disabled = true;
+
+            const formData = new FormData(document.getElementById('form-reporte-externo'));
+            if(!formData.get('email')) formData.set('email', 'No proporcionado');
+            
+            document.getElementById('loader-reporte').style.display = 'flex';
+
+            fetch('/api/reportes/nuevo', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loader-reporte').style.display = 'none';
+                
+                if(data.status === 'success') {
+                    alert("✅ " + data.message + "\n\nGuarde su número de ticket: " + data.ticket);
+                    document.getElementById('form-reporte-externo').reset();
+                    document.getElementById('card-prev').classList.remove('active-prev', 'apagado');
+                    document.getElementById('card-corr').classList.remove('active-corr', 'apagado');
+                    document.getElementById('hidden_mantenimiento').value = "";
+                    document.getElementById('cope-reporte').innerHTML = '<option value="" disabled selected>Primero seleccione una ciudad...</option>';
+                    limpiarFirma(); // Limpiar firma tras enviar
+                } else {
+                    alert("❌ Hubo un error al enviar el reporte.");
+                }
+                btn.innerText = "Enviar Reporte al Sistema";
+                btn.disabled = false;
+            })
+            .catch(err => {
+                document.getElementById('loader-reporte').style.display = 'none';
+                alert("❌ Hubo un error de conexión.");
+                btn.innerText = "Enviar Reporte al Sistema";
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

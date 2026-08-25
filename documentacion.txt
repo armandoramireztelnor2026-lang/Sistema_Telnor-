@@ -1,0 +1,70 @@
+Estrutura de los archivos:
+📁 Tu_Proyecto/
+│
+├── app.py                (Tu motor principal actual. Queda intacto, solo le agregaremos una línea para que llame al nuevo archivo).
+├── notificaciones.py     (¡NUEVO! Aquí vivirá el código que genera el número de 8 dígitos y el "cartero" que envía el correo).
+│
+├── static/
+│   ├── style.css         (Tus estilos actuales).
+│   ├── script.js         (Tus scripts generales).
+│   ├── facturas.js       (Tu gestor de facturas. Solo le agregaremos el dibujo del botón).
+│   └── liberacion.js     (¡NUEVO! Aquí vivirá toda la inteligencia de la ventana que valida el código del chofer).
+│
+└── 📁 templates/
+    ├── administracion.html (A este solo le inyectaremos la ventana invisible hasta el final).
+    ├── proveedores.html  
+    └── reporte.html
+
+=================================================================================================================================================
+Como el reporte genera el numero de Ticket??
+
+La forma en la que el sistema crea ese "Número de Ticket" o código de reporte es a través de un método 
+llamado "Marca de Tiempo Exacta" (Timestamp).
+
+En lugar de usar números consecutivos simples (como 1, 2, 3...) que pueden causar problemas si se borra uno o si dos personas 
+envían un reporte al mismo tiempo, el "cerebro" del sistema (tu archivo Python) toma la fecha y la hora exacta hasta el 
+último segundo en que el usuario presionó el botón de "Enviar".
+
+El sistema construye el código uniendo estas piezas como si fueran bloques de Lego:
+
+El Prefijo: Siempre empieza con las letras REP- (para que cuando lo veas en una lista, sepas de inmediato que es un Reporte y 
+no una Factura).
+
+El Año: 4 dígitos (Ej. 2026).
+
+El Mes: 2 dígitos (Ej. 08 para agosto).
+
+El Día: 2 dígitos (Ej. 06).
+
+La Hora: 2 dígitos en formato de 24 horas (Ej. 14 si son las 2:00 PM).
+
+Los Minutos: 2 dígitos.
+
+Los Segundos: 2 dígitos.
+
+Un ejemplo real:
+Si un chofer entra hoy, 6 de agosto de 2026 a las 11:11 con 37 segundos de la mañana y envía un reporte, el sistema leerá el 
+reloj interno y creará este código único:
+👉 REP-20260806111137
+
+=====================================================================================================================================
+Contraseña de aplicacion:
+Cómo activar tu Correo Remitente (Paso a Paso)
+Para que tu archivo notificaciones.py funcione y envíe los correos sin ser bloqueado, sigue estos pasos con cualquier 
+cuenta normal de Gmail (puede ser una que ya tengas o puedes crear una nueva como tu.empresa.avisos@gmail.com):
+
+Inicia sesión en esa cuenta de Gmail y ve a Gestionar tu Cuenta de Google (haciendo clic en tu foto arriba a la derecha).
+
+Ve a la pestaña de Seguridad (a la izquierda).
+
+Asegúrate de tener activada la Verificación en 2 pasos (te pedirá un número de celular rápido para confirmar).
+
+Una vez activada, en la barra de búsqueda superior escribe "Contraseñas de aplicación" (o "App Passwords").
+
+Te pedirá que le des un nombre. Escribe algo como "Sistema Mantenimiento RUMN" y dale a Crear.
+
+¡Listo! Te aparecerá un recuadro amarillo con una contraseña de 16 letras. Cópiala.
+
+Abre el archivo notificaciones.py que creamos antes, y pega tu correo y esa contraseña de 16 letras (sin espacios) en las variables 
+CORREO_REMITENTE y CONTRASENA_REMITENTE.
+

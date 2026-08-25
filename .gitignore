@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# SQLite databases (Descomenta la siguiente línea si NO quieres subir la base de datos de los usuarios a GitHub)
+# *.db
+# *.sqlite3
+
+# Archivos temporales o de subidas
+static/logos_proveedores/temp_*
+static/facturas_archivos/temp_*

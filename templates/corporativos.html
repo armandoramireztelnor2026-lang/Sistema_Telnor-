@@ -1,0 +1,135 @@
+<!-- =========================================================
+     ARCHIVO: templates/corporativos.html
+     ========================================================= -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Corporativo</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <input type="hidden" id="rol-actual" value="corporativos">
+    <div class="dashboard-container">
+        <!-- BARRA LATERAL -->
+        <aside class="sidebar">
+            <img src="{% if usuario.datos_perfil.foto_ruta %}/static/foto_corporativos/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/112641/40916c?text=Corp{% endif %}" alt="Foto Corp" class="profile-pic" onclick="abrirMiPerfil()">
+            <div class="sidebar-name">{{ usuario.datos_perfil.nombres }}</div>
+            <div class="sidebar-sub">Ciudad: {{ usuario.datos_perfil.ciudad | default('No especificada') }}</div>
+            <div class="sidebar-badge" style="background:#0284c7;">DIRECCIÓN CORP.</div>
+            
+            <nav class="nav-menu">
+            </nav>
+            <div class="btn-logout-container"><a href="/logout" class="btn-logout" onclick="return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar"><h2>Bandeja de Autorizaciones Financieras (+$10,000)</h2></div>
+            <div class="admin-container">
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Fecha</th><th>Proveedor</th><th>Unidad</th><th>Título</th><th>Precio s/IVA</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <tbody id="tabla-facturas"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL REVISIÓN CORPORATIVO -->
+    <div id="modal-revision-corp" class="modal-overlay">
+        <div class="modal-box large">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-revision-corp')">×</button>
+            <h3 class="modal-header">Revisión de Factura Mayor</h3>
+            <div id="revision-contenido-corp"></div>
+            <input type="hidden" id="rev-id-corp">
+            <div class="modal-actions" style="margin-top: 25px;">
+                <button class="btn-danger" onclick="rechazarFactura('rev-id-corp')">Rechazar Gasto</button>
+                <button class="btn-success-modal" onclick="confirmarFacturaCorp()">Aprobar Gasto Financiero</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL LECTURA DETALLES (UNIVERSAL) -->
+    <div id="modal-detalles-general" class="modal-overlay">
+        <div class="modal-box large">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-detalles-general')">×</button>
+            <h3 class="modal-header">Detalles de Factura Emitida</h3>
+            <div id="detalles-contenido"></div>
+            <div class="modal-actions"><button class="btn-success-modal" id="btn-descargar-pdf" style="width: 100%;">Descargar PDF Oficial</button></div>
+        </div>
+    </div>
+
+    <!-- PLANTILLA OCULTA DE PDF FACTURA -->
+    <div id="hoja-factura-pdf" class="pdf-document" style="display:none;">
+        <div class="pdf-header-doc"><h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2><p>REPORTE DE MANTENIMIENTO Y FACTURACIÓN</p></div>
+        <div style="margin-bottom: 20px; border: 2px dashed #0284c7; padding: 15px; border-radius: 8px; background-color: #fafafa;">
+            <div class="pdf-section-title" style="color: #0284c7; border-bottom: 1px solid #0284c7; padding-bottom: 5px;">■ DATOS GENERALES</div>
+            <div class="pdf-line"><strong>Unidad:</strong> <span id="prev-unidad"></span></div>
+            <div class="pdf-line"><strong>Responsable:</strong> <span id="prev-responsable"></span></div>
+            <div class="pdf-line"><strong>Teléfono:</strong> <span id="prev-telefono"></span></div>
+            <div class="pdf-line"><strong>Fecha:</strong> <span id="prev-fecha"></span></div>
+            <div class="pdf-line"><strong>Tipo de Mantenimiento:</strong> <span id="prev-mantenimiento"></span></div>
+            <div class="pdf-line" style="margin-bottom: 15px;"><strong>Precio (Sin IVA):</strong> <span id="prev-precio"></span></div>
+            
+            <div class="pdf-section-title" style="color: #0284c7;">■ DETALLES DEL TRABAJO</div>
+            <div class="pdf-line"><strong>Título:</strong> <span id="prev-titulo" class="texto-largo"></span></div>
+            <div class="pdf-line" style="margin-bottom: 15px;"><strong>Retro:</strong> <div id="prev-retro" class="texto-largo" style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div></div>
+            
+            <div class="pdf-section-title" style="color: #0284c7;">■ DOCUMENTOS DE COTIZACIÓN</div>
+            <div id="prev-cotizaciones-container" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px; margin-bottom: 15px;"></div>
+            
+            <div class="pdf-section-title" style="color: #0284c7;">■ ANEXO FOTOGRÁFICO (EVIDENCIAS)</div>
+            <div id="prev-evidencias-container" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <!-- VISOR DE IMÁGENES -->
+    <div id="lightbox-modal" class="lightbox-overlay" onclick="cerrarLightbox(event)"><span class="lightbox-close" onclick="cerrarLightbox(event)">&times;</span><img id="lightbox-img" class="lightbox-content" src=""></div>
+    
+    <!-- MODAL PDF PERFIL CORPORATIVO -->
+    <div id="modal-mi-perfil" class="modal-overlay">
+        <div class="pdf-modal-box">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-mi-perfil')" style="color: #112641;">×</button>
+            <h3 style="color: #112641; margin-bottom: 20px;">Vista Previa del Documento</h3>
+            <div id="pdf-content" class="pdf-document">
+                <div class="pdf-header-doc">
+                    <h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2>
+                    <p>PERFIL DE USUARIO - DIRECCIÓN CORPORATIVA</p>
+                </div>
+                <div class="pdf-body">
+                    <img src="{% if usuario.datos_perfil.foto_ruta %}/static/foto_corporativos/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/ffffff/000000?text=Foto{% endif %}" class="pdf-photo-doc" onclick="abrirLightbox(this.src)">
+                    <div class="pdf-details">
+                        <div class="pdf-section-title">■ INFORMACIÓN DEL DIRECTIVO</div>
+                        <div class="pdf-line"><strong>Nombre Completo:</strong> {{ usuario.datos_perfil.nombres }} {{ usuario.datos_perfil.apellido_paterno }}</div>
+                        <div class="pdf-line"><strong>Ciudad Base:</strong> <span style="color:#0284c7; font-weight:bold;">{{ usuario.datos_perfil.ciudad | default('No especificada') }}</span></div>
+                        <div class="pdf-line"><strong>Área Asignada:</strong> {{ usuario.datos_perfil.area }}</div>
+                        <div class="pdf-line"><strong>Número de Empleado:</strong> {{ usuario.datos_perfil.num_empleado }}</div>
+                        
+                        <!-- NUEVA LÍNEA DE CORREO CORPORATIVO -->
+                        <div class="pdf-line"><strong>Correo Electrónico:</strong> {{ usuario.datos_perfil.correo | default('N/A') }}</div>
+                        <br>
+                        <div class="pdf-section-title">■ CREDENCIALES DEL SISTEMA</div>
+                        <div class="pdf-line"><strong>Usuario Asignado:</strong> {{ usuario.usuario }}</div>
+                        <div class="pdf-line"><strong>Nivel de Acceso:</strong> Autorización Financiera y Supervisión</div>
+                    </div>
+                </div>
+                <div class="pdf-footer">Documento extraído de la Base de Datos Central el: <span id="pdf-fecha"></span></div>
+            </div>
+            <div class="modal-actions" style="max-width: 750px; margin-top: 20px;">
+                <button class="btn-danger" onclick="cerrarModal('modal-mi-perfil')">Cancelar</button>
+                <button class="btn-success-modal" onclick="descargarPDF()">Confirmar y Descargar PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    
+    <!-- Módulos de Facturación -->
+    <script src="/static/facturas_herramientas.js"></script>
+    <script src="/static/facturas_archivos.js"></script>
+    <script src="/static/facturas_pdf.js"></script>
+    <script src="/static/facturas_principal.js"></script>
+</body>
+</html>

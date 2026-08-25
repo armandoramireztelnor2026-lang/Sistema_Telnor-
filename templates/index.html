@@ -1,0 +1,238 @@
+<!-- =========================================================
+     ARCHIVO: templates/index.html
+     PROPÓSITO: Interfaz Principal - Formularios con Vista Previa
+     ========================================================= -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Facturación | RUMN</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="index-body">
+    <!-- BOTÓN DE REPORTE EXTERNO -->
+    <button onclick="window.open('/reportar', '_blank')" style="position: absolute; top: 25px; right: 25px; background-color: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: bold; cursor: pointer; z-index: 100; font-family: 'Poppins', sans-serif; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); transition: transform 0.2s;">
+        ⚠️ Levantar Reporte de Falla
+    </button>
+
+    <div class="header-titles">
+        <h1>Sistema de Facturación Central (RUMN)</h1>
+        <p>Seleccione su portal de acceso corporativo</p>
+    </div>
+
+    <div class="cards-container">
+        
+        <!-- Tarjeta Proveedores -->
+        <div class="card-index card-prov">
+            <img src="/static/imagen_proveedores.jpg" alt="Portal Proveedores">
+            <h3>Portal de Talleres</h3>
+            <div class="btn-group">
+                <button class="btn-action btn-prov-primary" onclick="abrirDirecto('proveedores', 'login')">Ingresar a Taller</button>
+                <button class="btn-action btn-prov-secondary" onclick="abrirDirecto('proveedores', 'registro')">Registrar mi Taller</button>
+            </div>
+        </div>
+
+        <!-- Tarjeta Administración -->
+        <div class="card-index card-admin">
+            <img src="/static/imagen_administracion.jpg" alt="Portal Administración">
+            <h3>Panel Administrativo</h3>
+            <div class="btn-group">
+                <button class="btn-action btn-admin-primary" onclick="abrirDirecto('administracion', 'login')">Ingresar a Panel</button>
+                <button class="btn-action btn-admin-secondary" onclick="abrirDirecto('administracion', 'registro')">Solicitar Credenciales</button>
+            </div>
+        </div>
+
+        <!-- Tarjeta Corporativos -->
+        <div class="card-index card-corp">
+            <img src="/static/imagen_corporativos.jpg" alt="Portal Corporativos">
+            <h3>Portal Corporativo</h3>
+            <div class="btn-group">
+                <button class="btn-action btn-corp-primary" onclick="abrirDirecto('corporativos', 'login')">Acceso Ejecutivo</button>
+                <button class="btn-action btn-corp-secondary" onclick="abrirDirecto('corporativos', 'registro')">Solicitar Acceso</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         CUADRO: PROVEEDORES
+         ========================================== -->
+    <div id="auth-proveedores" class="auth-box">
+        <h2 id="titulo-proveedores">Ingreso - Proveedores</h2>
+        
+        <div id="login-view-proveedores">
+            <div class="form-grid" style="grid-template-columns: 1fr;">
+                <div class="input-group"><input type="text" id="user-proveedores" placeholder="Usuario Proveedor"></div>
+                <div class="input-group"><input type="password" id="pass-proveedores" placeholder="Contraseña"></div>
+            </div>
+            <button class="btn-primary" onclick="procesarLogin('proveedores')">Iniciar Sesión</button>
+        </div>
+
+        <form id="registro-view-proveedores" style="display:none;" onsubmit="event.preventDefault(); procesarRegistro('proveedores');">
+            <div class="form-grid">
+                <div class="input-group full-width file-upload">
+                    <span class="file-label" id="label-prov">📸 Haz clic para subir el Logo</span>
+                    <span class="file-sub" id="sub-prov">Formatos aceptados: JPG, PNG</span>
+                    <img id="preview-prov" class="image-preview" src="" alt="Vista previa">
+                    <input type="file" id="foto-prov" accept="image/*" required onchange="mostrarVistaPrevia(this, 'preview-prov', 'label-prov', 'sub-prov')">
+                </div>
+                
+                <div class="input-group"><input type="text" id="nom-prov" placeholder="Nombre de la Empresa" required></div>
+                <div class="input-group"><input type="email" id="correo-prov" placeholder="Correo electrónico" required></div>
+                <div class="input-group"><input type="text" id="encargado-prov" placeholder="Encargado (Nombre Completo)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                <div class="input-group"><input type="text" id="responsable-prov" placeholder="Responsable (Opcional)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')"></div>
+                <div class="input-group"><input type="text" id="tel-prov" placeholder="Teléfono" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                <div class="input-group"><input type="text" id="cp-prov" placeholder="Código Postal" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                
+                <!-- Los campos de ciudad y COPE han sido removidos de proveedores -->
+
+                <div class="input-group full-width"><input type="text" id="dir-prov" placeholder="Dirección Completa" required></div>
+                <div class="input-group full-width"><textarea id="desc-prov" placeholder="Descripción del Proveedor / Servicios" required style="width: 100%; min-height: 80px; padding: 12px 15px; border-radius: 8px; border: 1px solid #1f395a; background-color: #112641; color: white; font-family: 'Poppins', sans-serif; resize: vertical;"></textarea></div>
+            </div>
+            <button class="btn-primary" type="submit">Enviar Solicitud</button>
+        </form>
+        <span class="toggle-link" id="link-proveedores" onclick="toggleModo('proveedores')">¿No tienes cuenta? Solicitar Registro</span>
+    </div>
+
+    <!-- ==========================================
+         CUADRO: ADMINISTRACIÓN
+         ========================================== -->
+    <div id="auth-administracion" class="auth-box">
+        <h2 id="titulo-administracion">Ingreso - Administración</h2>
+        
+        <div id="login-view-administracion">
+            <div class="form-grid" style="grid-template-columns: 1fr;">
+                <div class="input-group"><input type="text" id="user-administracion" placeholder="Usuario Administrador"></div>
+                <div class="input-group"><input type="password" id="pass-administracion" placeholder="Contraseña"></div>
+            </div>
+            <button class="btn-primary" onclick="procesarLogin('administracion')">Iniciar Sesión</button>
+        </div>
+
+        <form id="registro-view-administracion" style="display:none;" onsubmit="event.preventDefault(); procesarRegistro('administracion');">
+            <div class="form-grid">
+                <div class="input-group full-width file-upload">
+                    <span class="file-label" id="label-admin">📸 Haz clic para subir Foto de Perfil</span>
+                    <span class="file-sub" id="sub-admin">Formatos aceptados: JPG, PNG</span>
+                    <img id="preview-admin" class="image-preview" src="" alt="Vista previa">
+                    <input type="file" id="foto-admin" accept="image/*" required onchange="mostrarVistaPrevia(this, 'preview-admin', 'label-admin', 'sub-admin')">
+                </div>
+                
+                <div class="input-group"><input type="text" id="nom-admin" placeholder="Nombre(s)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                <div class="input-group"><input type="text" id="ap-admin" placeholder="Apellido Paterno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                <div class="input-group"><input type="text" id="am-admin" placeholder="Apellido Materno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                <div class="input-group"><input type="text" id="num-admin" placeholder="Número de Empleado" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                
+                <div class="input-group">
+                    <select id="subrol-admin" name="subrol" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;">
+                        <option value="" disabled selected>Puesto / Categoría...</option>
+                        <option value="Jefatura">Jefatura</option>
+                        <option value="Supervisor">Supervisor</option>
+                    </select>
+                </div>
+                <div class="input-group"><input type="email" id="correo-admin" placeholder="Correo Electrónico (Para alertas)" required></div>
+
+                <!-- ¡NUEVOS CAMPOS EN CASCADA PARA ADMIN! -->
+                <div class="input-group">
+                    <select id="ciudad-admin" name="ciudad" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;" onchange="actualizarCopeSelect('ciudad-admin', 'cope-admin')">
+                        <option value="" disabled selected>Seleccione Ciudad Base...</option>
+                        <option value="Tijuana">Tijuana</option>
+                        <option value="Tecate">Tecate</option>
+                        <option value="Ensenada">Ensenada</option>
+                        <option value="San Quintin">San Quintin</option>
+                        <option value="Mexicali">Mexicali</option>
+                        <option value="San Luis Rio Colorado">San Luis Rio Colorado</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <select id="cope-admin" name="cope" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;">
+                        <option value="" disabled selected>Primero seleccione una ciudad...</option>
+                    </select>
+                </div>
+
+                <div class="input-group full-width"><input type="text" id="area-admin" placeholder="Área de asignación" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+            </div>
+            <button class="btn-primary" type="submit">Enviar Solicitud</button>
+        </form>
+        <span class="toggle-link" id="link-administracion" onclick="toggleModo('administracion')">¿No tienes cuenta? Solicitar Registro</span>
+    </div>
+
+    <!-- ==========================================
+         CUADRO: CORPORATIVOS
+         ========================================== -->
+    <div id="auth-corporativos" class="auth-box">
+        <h2 id="titulo-corporativos">Ingreso - Corporativo</h2>
+        
+        <div id="login-view-corporativos">
+            <div class="form-grid" style="grid-template-columns: 1fr;">
+                <div class="input-group"><input type="text" id="user-corporativos" placeholder="Usuario Corporativo"></div>
+                <div class="input-group"><input type="password" id="pass-corporativos" placeholder="Contraseña"></div>
+            </div>
+            <button class="btn-primary" onclick="procesarLogin('corporativos')">Iniciar Sesión</button>
+        </div>
+
+        <form id="registro-view-corporativos" style="display:none;" onsubmit="event.preventDefault(); procesarRegistro('corporativos');">
+            <div class="form-grid">
+                <div class="input-group full-width file-upload">
+                    <span class="file-label" id="label-corp">📸 Haz clic para subir Foto de Perfil</span>
+                    <span class="file-sub" id="sub-corp">Formatos aceptados: JPG, PNG</span>
+                    <img id="preview-corp" class="image-preview" src="" alt="Vista previa">
+                    <input type="file" id="foto-corp" accept="image/*" required onchange="mostrarVistaPrevia(this, 'preview-corp', 'label-corp', 'sub-corp')">
+                </div>
+                
+                <div class="input-group"><input type="text" id="nom-corp" placeholder="Nombre(s)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                <div class="input-group"><input type="text" id="ap-corp" placeholder="Apellido Paterno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                <div class="input-group"><input type="text" id="am-corp" placeholder="Apellido Materno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                <div class="input-group"><input type="text" id="num-corp" placeholder="Número de Empleado" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                
+                <!-- ¡NUEVOS CAMPOS EN CASCADA PARA CORPORATIVOS! -->
+                <div class="input-group">
+                    <select id="ciudad-corp" name="ciudad" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;" onchange="actualizarCopeSelect('ciudad-corp', 'cope-corp')">
+                        <option value="" disabled selected>Seleccione Ciudad Base...</option>
+                        <option value="Tijuana">Tijuana</option>
+                        <option value="Tecate">Tecate</option>
+                        <option value="Ensenada">Ensenada</option>
+                        <option value="San Quintin">San Quintin</option>
+                        <option value="Mexicali">Mexicali</option>
+                        <option value="San Luis Rio Colorado">San Luis Rio Colorado</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <select id="cope-corp" name="cope" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;">
+                        <option value="" disabled selected>Primero seleccione una ciudad...</option>
+                    </select>
+                </div>
+
+                <div class="input-group"><input type="email" id="correo-corp" placeholder="Correo Electrónico (Para alertas)" required></div>
+                <div class="input-group full-width"><input type="text" id="area-corp" placeholder="Área Corporativa" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+            </div>
+            <button class="btn-primary" type="submit">Enviar Solicitud</button>
+        </form>
+        <span class="toggle-link" id="link-corporativos" onclick="toggleModo('corporativos')">¿No tienes cuenta? Solicitar Registro</span>
+    </div>
+
+    <!-- SCRIPTS ORIGINALES -->
+    <script src="/static/script.js"></script>
+
+    <!-- SCRIPT DE APOYO PARA LA NUEVA LÓGICA DE BOTONES -->
+    <script>
+        function abrirDirecto(rol, vista) {
+            if(typeof mostrarAuth === 'function') {
+                mostrarAuth(rol);
+            }
+            
+            if (vista === 'login') {
+                document.getElementById('login-view-' + rol).style.display = 'block';
+                document.getElementById('registro-view-' + rol).style.display = 'none';
+                document.getElementById('link-' + rol).innerText = '¿No tienes cuenta? Solicitar Registro';
+                document.getElementById('titulo-' + rol).innerText = 'Ingreso - ' + (rol.charAt(0).toUpperCase() + rol.slice(1));
+            } else if (vista === 'registro') {
+                document.getElementById('login-view-' + rol).style.display = 'none';
+                document.getElementById('registro-view-' + rol).style.display = 'block';
+                document.getElementById('link-' + rol).innerText = '¿Ya tienes cuenta? Iniciar Sesión';
+                document.getElementById('titulo-' + rol).innerText = 'Registro - ' + (rol.charAt(0).toUpperCase() + rol.slice(1));
+            }
+        }
+    </script>
+</body>
+</html>

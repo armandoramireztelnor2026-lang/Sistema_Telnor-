@@ -1,0 +1,129 @@
+{
+    "usuarios": [
+        {
+            "usuario": "Jesus_Ramirez-RUMN-2026-admin",
+            "password": "nHdhann9",
+            "rol": "administracion",
+            "datos_perfil": {
+                "rol": "administracion",
+                "apellido_paterno": "Ramirez",
+                "apellido_materno": "Genesis",
+                "nombres": "Jesus ",
+                "num_empleado": "298172819",
+                "area": "Automotriz",
+                "foto_ruta": "temp_20260811124519_foto_administracion.jpg",
+                "ciudad": "Tijuana",
+                "correo": "luisquinto664@gmail.com",
+                "subrol": "Jefatura",
+                "cope": "PIO PICO"
+            }
+        },
+        {
+            "usuario": "Alejandro_Gimenez-RUMN-2026-corp",
+            "password": "LnryypPu",
+            "rol": "corporativos",
+            "datos_perfil": {
+                "rol": "corporativos",
+                "apellido_paterno": "Gimenez",
+                "apellido_materno": "Lao",
+                "nombres": "Alejandro",
+                "num_empleado": "23145",
+                "area": "Contabilidad",
+                "foto_ruta": "temp_20260811124629_foto_corporativo.jpg",
+                "ciudad": "Tijuana",
+                "correo": "luisquinto664@gmail.com",
+                "cope": "PIO PICO"
+            }
+        },
+        {
+            "usuario": "Armando_Cardenas-RUMN-2026-admin",
+            "password": "9dfc7FIS",
+            "rol": "administracion",
+            "datos_perfil": {
+                "rol": "administracion",
+                "cope": "PE SAN QUINTIN",
+                "apellido_paterno": "Cardenas",
+                "apellido_materno": "Espinosa",
+                "nombres": "Armando",
+                "ciudad": "San Quintin",
+                "num_empleado": "21312",
+                "area": "Automotriz",
+                "correo": "luisquinto664@gmail.com",
+                "subrol": "Supervisor",
+                "foto_ruta": "temp_20260819230313_subjefe_3.jpg"
+            }
+        },
+        {
+            "usuario": "Fernando_Cardenas-RUMN-2026-admin",
+            "password": "8aKtv0Ho",
+            "rol": "administracion",
+            "datos_perfil": {
+                "rol": "administracion",
+                "cope": "PE PERIFERICO",
+                "apellido_paterno": "Cardenas",
+                "apellido_materno": "Parra",
+                "nombres": "Fernando",
+                "ciudad": "Mexicali",
+                "num_empleado": "21411",
+                "area": "Recursos Humanos",
+                "correo": "luisquinto664@gmail.com",
+                "subrol": "Supervisor",
+                "foto_ruta": "temp_20260819230413_subjefe_4.jpg"
+            }
+        },
+        {
+            "usuario": "Fernando_De La Cruz -RUMN-2026-admin",
+            "password": "sbeKNMDU",
+            "rol": "administracion",
+            "datos_perfil": {
+                "rol": "administracion",
+                "cope": "CALLE 14",
+                "apellido_paterno": "De La Cruz ",
+                "apellido_materno": "Cardenas",
+                "nombres": "Fernando",
+                "ciudad": "San Luis Rio Colorado",
+                "num_empleado": "24412",
+                "area": "Contabilidad",
+                "correo": "luisquinto664@gmail.com",
+                "subrol": "Supervisor",
+                "foto_ruta": "temp_20260819230837_subjefe_5.jpg"
+            }
+        },
+        {
+            "usuario": "LuisArmando_Cardenas-RUMN-2026-admin",
+            "password": "mBi06y31",
+            "rol": "administracion",
+            "datos_perfil": {
+                "rol": "administracion",
+                "cope": "PE CALLE 10",
+                "apellido_paterno": "Cardenas",
+                "apellido_materno": "Ramirez",
+                "nombres": "Luis Armando",
+                "ciudad": "Tijuana",
+                "num_empleado": "188918",
+                "area": "Contabilidad",
+                "correo": "luisquinto664@gmail.com",
+                "subrol": "Supervisor",
+                "foto_ruta": "temp_20260819231212_subjefe_1.jpg"
+            }
+        },
+        {
+            "usuario": "AutopartesyMotoresB.C.-RUMN-2026-prov",
+            "password": "M33BdAlg",
+            "rol": "proveedores",
+            "datos_perfil": {
+                "rol": "proveedores",
+                "cope": "No especificado",
+                "nombre_proveedor": "Autopartes y Motores B.C.",
+                "encargado": "Armando Ramirez",
+                "responsable": "Dilan Fernandez",
+                "telefono": "6634041184",
+                "direccion": "Blvd. Fundadores 5045, Fracc El Rub\u00ed, 22637 Tijuana, B.C.",
+                "codigo_postal": "22435",
+                "descripcion": "Venta y suministro de refacciones automotrices, aceites, lubricantes y componentes mec\u00e1nicos generales para todo tipo de autom\u00f3viles.",
+                "correo": "luisquinto664@gmail.com",
+                "foto_ruta": "temp_20260820125349_autopartes_motores.png"
+            }
+        }
+    ]
+}
