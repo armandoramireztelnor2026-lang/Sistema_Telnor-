@@ -32,6 +32,36 @@
             "factura_folio": "2123132",
             "factura_pdf": "FACTURA_FINAL_20260824213309_Armando_Ramirez_-_Curriculum.pdf",
             "validacion_fiscal": "Pendiente"
+        },
+        {
+            "id": "20260824230030",
+            "proveedor": "Autopartes y Motores B.C.",
+            "unidad": "8090-1231",
+            "responsable": "Luis Ramirez",
+            "telefono": "6634041184",
+            "titulo": "Cambio balatas",
+            "retro": "[TICKET:REP-20260824225542]\r\nREPORTE ORIGINAL DEL CHOFER: Hola",
+            "diagnostico": "Holi",
+            "trabajo_realizar": "HOli",
+            "mantenimiento": "Correctivo",
+            "precio": 1211.0,
+            "fecha": "2026-08-24",
+            "numero_orden": "",
+            "compania": "Telnor",
+            "aprobado_admin": false,
+            "aprobado_corp": true,
+            "timestamp": "2026-08-24T23:00:30.208536",
+            "estado_custom": "",
+            "fotos_cotizacion": [
+                "fotos_cotizacion_20260824230030_Meta_1.1_Prieto_Esquivel.pdf"
+            ],
+            "fotos_evidencia": [
+                "fotos_evidencia_20260824230030_mantenimiento_3.jpg",
+                "fotos_evidencia_20260824230030_mantenimiento_2.jpg",
+                "fotos_evidencia_20260824230030_mantenimiento_1.jpg"
+            ],
+            "codigo_liberacion": "",
+            "entregado": "No"
         }
     ]
 }

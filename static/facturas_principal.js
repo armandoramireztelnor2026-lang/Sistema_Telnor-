@@ -263,43 +263,78 @@ function procesarSubidaFactura() {
 }
 
 function abrirModalRechazo(idItem, tipo) {
-    let accion = tipo === 'factura' ? 'RECHAZAR esta cotización' : 'ELIMINAR este reporte';
-    if (!confirm(`¿Estás 100% seguro de ${accion}? Esta acción es irreversible.`)) return;
+    // Esconder otros modales si están abiertos
+    let modAdmin = document.getElementById('modal-revision-admin');
+    if (modAdmin) modAdmin.style.display = 'none';
+    let modCorp = document.getElementById('modal-revision-corp');
+    if (modCorp) modCorp.style.display = 'none';
+    let modFiscal = document.getElementById('modal-validacion-fiscal');
+    if (modFiscal) modFiscal.style.display = 'none';
 
-    let motivo = prompt(`Escribe el motivo exacto para ${accion}:\n(Esta explicación se enviará por correo al proveedor)`);
-    if (motivo === null) return;
-    if (motivo.trim() === '') {
-        alert("El motivo es obligatorio para notificar al proveedor.");
+    let hiddenId = document.getElementById('hidden-rechazo-id');
+    let hiddenTipo = document.getElementById('hidden-rechazo-tipo');
+    let inputMotivo = document.getElementById('input-motivo-rechazo');
+    let modalMotivo = document.getElementById('modal-motivo-rechazo');
+
+    if (!hiddenId || !hiddenTipo || !inputMotivo || !modalMotivo) {
+        alert("Error: El modal de rechazo no se encuentra en esta página.");
         return;
     }
 
-    if (tipo === 'factura') {
-        let modAdmin = document.getElementById('modal-revision-admin');
-        if (modAdmin) modAdmin.style.display = 'none';
-        let modCorp = document.getElementById('modal-revision-corp');
-        if (modCorp) modCorp.style.display = 'none';
+    hiddenId.value = idItem;
+    hiddenTipo.value = tipo;
+    inputMotivo.value = '';
+    
+    modalMotivo.style.display = 'flex';
+}
+
+function procesarRechazoConMotivo() {
+    let idItem = document.getElementById('hidden-rechazo-id').value;
+    let tipo = document.getElementById('hidden-rechazo-tipo').value;
+    let motivo = document.getElementById('input-motivo-rechazo').value.trim();
+
+    if (!motivo) {
+        alert("Por favor, especifique el motivo del rechazo en el cuadro de texto.");
+        return;
     }
 
-    mostrarLoaderDinamico("Procesando...", "Notificando motivo al usuario 📧");
-    let url = tipo === 'factura' ? '/api/facturas/rechazar' : '/api/reportes/eliminar';
+    let accionTxt = "RECHAZAR o ELIMINAR este registro";
+    if (tipo === 'factura') accionTxt = "RECHAZAR esta cotización";
+    if (tipo === 'reporte') accionTxt = "ELIMINAR este reporte";
+    if (tipo === 'fiscal') accionTxt = "RECHAZAR esta factura fiscal";
+    if (tipo === 'usuario') accionTxt = "RECHAZAR y ELIMINAR este usuario";
+
+    if (!confirm(`¿Estás 100% seguro de ${accionTxt}? Esta acción es irreversible.`)) return;
+
+    document.getElementById('modal-motivo-rechazo').style.display = 'none';
+    mostrarLoaderDinamico("Procesando...", "Notificando motivo al usuario \u23F3");
+
+    let url = '';
+    if (tipo === 'factura') url = '/api/facturas/rechazar';
+    else if (tipo === 'reporte') url = '/api/reportes/eliminar';
+    else if (tipo === 'fiscal') url = '/api/facturas/rechazar_fiscal';
+    else if (tipo === 'usuario') url = '/api/rechazar';
+
+    let payload = tipo === 'usuario' ? { identificador: idItem, motivo: motivo } : { id: idItem, motivo: motivo };
 
     fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: idItem, motivo: motivo.trim() })
+        body: JSON.stringify(payload)
     })
     .then(res => res.json())
     .then(data => {
         ocultarLoaderDinamico();
         alert(data.message);
         if (data.status === 'success') {
-            if (tipo === 'factura') { if(typeof cargarFacturasAdmin === 'function') cargarFacturasAdmin(); else cargarFacturas(); }
-            else { if(typeof cargarReportesAdmin === 'function') cargarReportesAdmin(); else cargarFacturas(); }
+            if (tipo === 'usuario') { if(typeof cargarPendientes === 'function') cargarPendientes(); }
+            else if (tipo === 'reporte') { if(typeof cargarReportesAdmin === 'function') cargarReportesAdmin(); else cargarFacturas(); }
+            else { if(typeof cargarFacturasAdmin === 'function') cargarFacturasAdmin(); else cargarFacturas(); }
         }
     })
     .catch(err => {
         ocultarLoaderDinamico();
-        console.error(err);
+        console.error("Error al procesar rechazo:", err);
     });
 }
 
@@ -1006,46 +1041,8 @@ function abrirModalValidacionFiscal(id, folio, pdf, unidad) {
 }
 
 function mostrarRechazoFiscal() {
-    let container = document.getElementById('val-rechazo-container');
-    let btn = document.querySelector('#modal-validacion-fiscal .btn-danger-sm');
-    
-    // Si el contenedor está oculto, lo mostramos (Primer clic)
-    if (container.style.display === 'none') {
-        container.style.display = 'block';
-        btn.innerHTML = '⚠️ Confirmar Rechazo Definitivo';
-        document.getElementById('val-motivo-rechazo').focus();
-        return;
-    }
-
-    // Si ya está visible, procedemos con la validación y el envío (Segundo clic)
     let id = document.getElementById('val-factura-id').value;
-    let motivo = document.getElementById('val-motivo-rechazo').value.trim();
-
-    if (!motivo) {
-        alert("Por favor, especifique el motivo del rechazo en el cuadro de texto.");
-        return;
-    }
-
-    if (!confirm("¿Estás 100% seguro de RECHAZAR esta factura fiscal? Esta acción es irreversible.")) return;
-
-    document.getElementById('modal-validacion-fiscal').style.display = 'none';
-    mostrarLoaderDinamico("Rechazando factura...", "Notificando al proveedor 📧");
-
-    fetch('/api/facturas/rechazar_fiscal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id, motivo: motivo })
-    })
-    .then(res => res.json())
-    .then(data => {
-        ocultarLoaderDinamico();
-        alert(data.message);
-        if (data.status === 'success') cargarFacturas();
-    })
-    .catch(err => {
-        ocultarLoaderDinamico();
-        console.error("Error al rechazar factura fiscal:", err);
-    });
+    abrirModalRechazo(id, 'fiscal');
 }
 
 function validarFacturaFiscalModal() {

@@ -124,6 +124,28 @@
         </div>
     </div>
 
+    
+    <!-- CUADRO: MOTIVO DE RECHAZO / ELIMINACIÓN -->
+    <div id="modal-motivo-rechazo" class="modal-overlay">
+        <div class="modal-box">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-motivo-rechazo')">×</button>
+            <h3 class="modal-header" style="color: #ef4444;">&#x26A0;️ Motivo de Rechazo / Eliminación</h3>
+            <p style="color: #a3b1c6; margin-bottom: 15px; font-size: 14px;">Escribe la causa exacta. Esta explicación
+                se enviará automáticamente por correo electrónico al usuario afectado.</p>
+            <textarea id="input-motivo-rechazo" rows="5"
+                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #1f395a; background: #0b1c30; color: white; font-family: 'Poppins', sans-serif; resize: vertical;"
+                placeholder="Ej. La cotización es incorrecta, las fotos están borrosas..."></textarea>
+            <input type="hidden" id="hidden-rechazo-id">
+            <input type="hidden" id="hidden-rechazo-tipo">
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn-danger" onclick="cerrarModal('modal-motivo-rechazo')"
+                    style="background:#475569;">Cancelar</button>
+                <button class="btn-success-modal" style="background: #dc2626;"
+                    onclick="procesarRechazoConMotivo()">Confirmar y Notificar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/script.js"></script>
     
     <!-- Módulos de Facturación -->

@@ -245,7 +245,17 @@ function abrirModalDetalles(identificador) {
 }
 
 function procesarAccion(identificador, accion) {
-    let mensaje = accion === 'aprobar' ? '¿Aceptar usuario y generar credenciales?' : '¿Rechazar y ELIMINAR esta solicitud permanentemente?';
+    if (accion === 'rechazar') {
+        cerrarModal('modal-detalles');
+        if (typeof abrirModalRechazo === 'function') {
+            abrirModalRechazo(identificador, 'usuario');
+        } else {
+            alert("Error: No se pudo cargar el componente de rechazo.");
+        }
+        return;
+    }
+
+    let mensaje = '¿Aceptar usuario y generar credenciales?';
     if(confirm(mensaje)) {
         fetch(`/api/${accion}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ identificador: identificador })
         }).then(res => res.json()).then(data => { alert(data.message); cerrarModal('modal-detalles'); cargarPendientes(); });
