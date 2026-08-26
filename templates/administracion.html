@@ -142,6 +142,7 @@
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('reportes')">Bandeja de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('facturas')">Cotizaciones y Órdenes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('facturas_finales')">Facturas</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Documentos Contables</button>
 
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-prov')">Directorio Talleres</button>
 
@@ -452,25 +453,65 @@
                 </div>
             </div>
 
-
             <div id="vista-documentos-contables" style="display: none;">
                 <div class="top-bar">
-                    <h2>Documentos Contables</h2>
+                    <h2>Documentos Contables Pendientes</h2>
                 </div>
-                <div class="admin-container" style="text-align: center; padding: 40px; color: #a3b1c6;">
-                    <h3>Sección en construcción</h3>
+                <div class="admin-container">
+                    <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
+                        <span class="buscador-icono">&#x1F50D;</span>
+                        <input type="text" id="buscador-doc-contables" class="buscador-pildora"
+                            placeholder="Buscar por folio, unidad, proveedor..."
+                            onkeyup="filtrarTabla('buscador-doc-contables', 'tabla-doc-contables')">
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Folio Fiscal</th>
+                                    <th>Fecha</th>
+                                    <th>Proveedor</th>
+                                    <th>Unidad</th>
+                                    <th>Título</th>
+                                    <th>Precio s/IVA</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-doc-contables"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <div id="vista-archivo" style="display: none;">
                 <div class="top-bar">
-                    <h2>Archivo</h2>
+                    <h2>Archivo Histórico</h2>
                 </div>
-                <div class="admin-container" style="text-align: center; padding: 40px; color: #a3b1c6;">
-                    <h3>Sección en construcción</h3>
+                <div class="admin-container">
+                    <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
+                        <span class="buscador-icono">&#x1F50D;</span>
+                        <input type="text" id="buscador-archivo" class="buscador-pildora"
+                            placeholder="Buscar por folio, unidad, doc contable..."
+                            onkeyup="filtrarTabla('buscador-archivo', 'tabla-archivo')">
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Doc. Contable</th>
+                                    <th>Folio Fiscal</th>
+                                    <th>Unidad</th>
+                                    <th>Proveedor</th>
+                                    <th>Total Aprobado</th>
+                                    <th>Expediente Completo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-archivo"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
         </main>
     </div>
 
@@ -583,7 +624,6 @@
         </div>
     </div>
 
-
     <div id="modal-revision-admin" class="modal-overlay">
         <div class="modal-box large">
             <button class="btn-close-modal" onclick="cerrarModal('modal-revision-admin')">×</button>
@@ -652,11 +692,15 @@
 
             <div class="modal-actions" style="display: flex; gap: 20px; margin-top: 10px;">
                 <button class="btn-success-modal"
-                    style="flex: 1; font-size: 1.1em; padding: 14px 24px; border-radius: 30px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease;"
-                    onclick="validarFacturaFiscalModal()">&#x2705; Aprobar Factura</button>
+                    style="flex: 1; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; font-size: 1.1em; padding: 14px 24px; border-radius: 30px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.4)';"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.3)';"
+                    onclick="validarFacturaFiscalModal()">✅ Aprobar Factura</button>
                 <button class="btn-danger-sm"
-                    style="flex: 1; font-size: 1.1em; padding: 14px 24px; border-radius: 4px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.2);"
-                    onclick="mostrarRechazoFiscal()">&#x274C; No Aprobar</button>
+                    style="flex: 1; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; font-size: 1.1em; padding: 14px 24px; border-radius: 30px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.4)';"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(239, 68, 68, 0.3)';"
+                    onclick="mostrarRechazoFiscal()">❌ No Aprobar</button>
             </div>
         </div>
     </div>
@@ -732,7 +776,7 @@
             <button class="btn-close-modal" onclick="cerrarModal('modal-motivo-rechazo')">×</button>
             <h3 class="modal-header" style="color: #ef4444;">&#x26A0;️ Motivo de Rechazo / Eliminación</h3>
             <p style="color: #a3b1c6; margin-bottom: 15px; font-size: 14px;">Escribe la causa exacta. Esta explicación
-                se enviará automáticamente por correo electrónico al usuario afectado.</p>
+                se enviaráá automáticamente por correo electrónico al usuario afectado.</p>
             <textarea id="input-motivo-rechazo" rows="5"
                 style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #1f395a; background: #0b1c30; color: white; font-family: 'Poppins', sans-serif; resize: vertical;"
                 placeholder="Ej. La cotización es incorrecta, las fotos están borrosas..."></textarea>
@@ -806,7 +850,7 @@
                 <div class="pdf-line" style="color: #333; margin-bottom: 5px;"><strong>Firma del Operador:</strong>
                 </div>
                 <img id="prev-rep-firma-img" src="" alt="Firma del Chofer"
-                    style="max-width: 250px; border-bottom: 2px solid #333; padding-bottom: 5px;">
+                    style="width: 250px; height: auto; border-bottom: 2px solid #333; padding-bottom: 5px; display: inline-block;">
             </div>
         </div>
         <div
@@ -874,6 +918,39 @@
     <script src="/static/facturas_archivos.js"></script>
     <script src="/static/facturas_pdf.js"></script>
     <script src="/static/facturas_principal.js"></script>
+    <!-- MODAL DOC CONTABLE -->
+    <div id="modal-doc-contable" class="modal-overlay">
+        <div class="modal-box">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-doc-contable')">×</button>
+            <h3 class="modal-header">Subir Documento Contable Final</h3>
+            <p style="color: #a3b1c6; margin-bottom: 20px; font-size: 0.9em;">
+                Adjunta el documento final y escribe su número de identificación. Esto cerrará el ciclo y moverá el ticket al Archivo Histórico.
+            </p>
+            <form id="form-doc-contable">
+                <input type="hidden" id="hidden-doc-contable-id">
+                
+                <label style="color: #e0e6ed; font-weight: 600; display: block; margin-bottom: 8px;">Número de Documento Contable:</label>
+                <input type="text" id="input-numero-doc-contable" required 
+                       style="width: 100%; padding: 12px; background: #0b1c30; border: 1px solid #1f395a; border-radius: 8px; color: white; margin-bottom: 20px;"
+                       placeholder="Ej. DC-908123">
+
+                <label class="file-upload" style="margin-bottom: 20px;">
+                    <input type="file" id="input-pdf-doc-contable" accept="application/pdf" required>
+                    <span class="file-label">📄 Seleccionar PDF del Documento Contable</span>
+                    <span class="file-sub" id="nombre-pdf-doc-contable">Ningún archivo seleccionado</span>
+                </label>
+
+                <button type="button" class="btn-success-modal" onclick="subirDocContable()">Subir Documento y Archivar Ticket</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('input-pdf-doc-contable').addEventListener('change', function(e) {
+            let n = e.target.files[0] ? e.target.files[0].name : "Ningún archivo seleccionado";
+            document.getElementById('nombre-pdf-doc-contable').textContent = n;
+        });
+    </script>
 </body>
 
 </html>

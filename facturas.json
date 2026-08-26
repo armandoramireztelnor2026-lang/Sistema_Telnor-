@@ -1,67 +1,75 @@
 {
     "facturas": [
         {
-            "id": "20260824213309",
-            "proveedor": "Autopartes y Motores B.C.",
-            "unidad": "8090-3214",
-            "responsable": "Luis Ramirez",
-            "telefono": "6634041184",
-            "titulo": "Cambio balatas",
-            "retro": "[TICKET:REP-20260824212626]\r\nREPORTE ORIGINAL DEL CHOFER: hola",
-            "diagnostico": "hola",
-            "trabajo_realizar": "hola",
-            "mantenimiento": "Preventivo",
-            "precio": 1211.0,
-            "fecha": "2026-08-24",
-            "numero_orden": "21121",
-            "compania": "RUMN",
-            "aprobado_admin": true,
-            "aprobado_corp": true,
-            "timestamp": "2026-08-24T21:33:09.059613",
-            "estado_custom": "",
-            "fotos_cotizacion": [
-                "fotos_cotizacion_20260824213309_Meta0_DeLaCruz_Jeremy_Garnica_Alexis_Ramirez_Armando_1.pdf"
-            ],
-            "fotos_evidencia": [
-                "fotos_evidencia_20260824213309_mantenimiento_1.jpg"
-            ],
-            "codigo_liberacion": "38032601",
-            "entregado": "S\u00ed",
-            "numero_cotizacion_asignacion": "2900000012",
-            "pdf_cotizacion_asignacion": "Cotizacion_20260824213309_Meta_1.1_Prieto_Esquivel.pdf",
-            "factura_folio": "2123132",
-            "factura_pdf": "FACTURA_FINAL_20260824213309_Armando_Ramirez_-_Curriculum.pdf",
-            "validacion_fiscal": "Pendiente"
-        },
-        {
-            "id": "20260824230030",
+            "id": "20260825132008",
             "proveedor": "Autopartes y Motores B.C.",
             "unidad": "8090-1231",
             "responsable": "Luis Ramirez",
             "telefono": "6634041184",
             "titulo": "Cambio balatas",
-            "retro": "[TICKET:REP-20260824225542]\r\nREPORTE ORIGINAL DEL CHOFER: Hola",
-            "diagnostico": "Holi",
-            "trabajo_realizar": "HOli",
-            "mantenimiento": "Correctivo",
+            "retro": "[TICKET:REP-20260825120711]\r\nREPORTE ORIGINAL DEL CHOFER: hola\n\n[ADMINISTRACI\u00c3\u201cN - Factura Rechazada]: hola",
+            "diagnostico": "hola",
+            "trabajo_realizar": "hola",
+            "mantenimiento": "Preventivo",
             "precio": 1211.0,
-            "fecha": "2026-08-24",
-            "numero_orden": "",
-            "compania": "Telnor",
-            "aprobado_admin": false,
+            "fecha": "2026-08-25",
+            "numero_orden": "21121",
+            "compania": "RUMN",
+            "aprobado_admin": true,
             "aprobado_corp": true,
-            "timestamp": "2026-08-24T23:00:30.208536",
+            "timestamp": "2026-08-25T13:20:08.524921",
             "estado_custom": "",
             "fotos_cotizacion": [
-                "fotos_cotizacion_20260824230030_Meta_1.1_Prieto_Esquivel.pdf"
+                "fotos_cotizacion_20260825132008_Meta0_DeLaCruz_Jeremy_Garnica_Alexis_Ramirez_Armando.pdf"
             ],
             "fotos_evidencia": [
-                "fotos_evidencia_20260824230030_mantenimiento_3.jpg",
-                "fotos_evidencia_20260824230030_mantenimiento_2.jpg",
-                "fotos_evidencia_20260824230030_mantenimiento_1.jpg"
+                "fotos_evidencia_20260825132008_mantenimiento_2.jpg"
             ],
-            "codigo_liberacion": "",
-            "entregado": "No"
+            "codigo_liberacion": "19826880",
+            "entregado": "S\u00ed",
+            "numero_cotizacion_asignacion": "290000121231",
+            "pdf_cotizacion_asignacion": "Cotizacion_20260825132008_Meta_1.1._Fundamentos_de_Auditoria_de_TI_e_Innovacion.pdf",
+            "validacion_fiscal": "Aprobada",
+            "factura_folio": "12312",
+            "factura_pdf": "FACTURA_FINAL_20260825132008_Meta_1.2_Cuadro_Comparativo_de_segmentacion_generacional.pdf",
+            "numero_doc50": "121132",
+            "pdf_doc50": "doc50_20260825132008_Meta_1.2_Cuadro_Comparativo_de_segmentacion_generacional.pdf",
+            "estado": "Archivado"
+        },
+        {
+            "id": "20260825171307",
+            "proveedor": "Autopartes y Motores B.C.",
+            "unidad": "8090-1231",
+            "responsable": "Dilan Fernandez",
+            "telefono": "6634041184",
+            "titulo": "Cambio balatas",
+            "retro": "[TICKET:REP-20260825170922]\r\nREPORTE ORIGINAL DEL CHOFER: hola",
+            "diagnostico": "hola",
+            "trabajo_realizar": "hola",
+            "mantenimiento": "Preventivo",
+            "precio": 1000.0,
+            "fecha": "2026-08-25",
+            "numero_orden": "21121",
+            "compania": "RUMN",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-08-25T17:13:07.026449",
+            "estado_custom": "",
+            "fotos_cotizacion": [
+                "fotos_cotizacion_20260825171307_Meta0_DeLaCruz_Jeremy_Garnica_Alexis_Ramirez_Armando.pdf"
+            ],
+            "fotos_evidencia": [
+                "fotos_evidencia_20260825171307_mantenimiento_3.jpg",
+                "fotos_evidencia_20260825171307_mantenimiento_2.jpg",
+                "fotos_evidencia_20260825171307_mantenimiento_1.jpg"
+            ],
+            "codigo_liberacion": "83162987",
+            "entregado": "S\u00ed",
+            "numero_cotizacion_asignacion": "2900001231",
+            "pdf_cotizacion_asignacion": "Cotizacion_20260825171307_Factura_8090-1231_2026-08-25.pdf",
+            "factura_folio": "12312",
+            "factura_pdf": "FACTURA_FINAL_20260825171307_M1.2_Ramirez_Cardenas_Luis_Armando.pdf",
+            "validacion_fiscal": "Pendiente"
         }
     ]
 }

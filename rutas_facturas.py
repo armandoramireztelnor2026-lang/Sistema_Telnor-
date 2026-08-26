@@ -1,4 +1,4 @@
-﻿# =========================================================
+# =========================================================
 # ARCHIVO: rutas_facturas.py
 # =========================================================
 from flask import Blueprint, request, jsonify, session
@@ -31,7 +31,7 @@ def escribir_json(archivo, data):
 
 def procesar_liberacion_si_aplica(f):
     if f.get("aprobado_admin") and f.get("aprobado_corp"):
-        return "\nâœ… Orden aprobada. El taller ha sido autorizado para iniciar la reparación."
+        return "\n✅ Orden aprobada. El taller ha sido autorizado para iniciar la reparación."
     return ""
 
 
@@ -458,13 +458,14 @@ def doc50():
         return jsonify({'status': 'error', 'message': 'No se seleccionó archivo.'})
 
     filename = secure_filename(f'doc50_{factura_id}_{file.filename}')
-    file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+    file.save(os.path.join(CARPETA_FACTURAS, filename))
 
     data = leer_json('facturas.json')
     for f in data.get('facturas', []):
         if str(f['id']) == str(factura_id):
             f['numero_doc50'] = numero_doc50
             f['pdf_doc50'] = filename
+            f['estado'] = 'Archivado'
             escribir_json('facturas.json', data)
             return jsonify({'status': 'success', 'message': 'Documento Contable subido y guardado correctamente. El proceso ha concluido.'})
 

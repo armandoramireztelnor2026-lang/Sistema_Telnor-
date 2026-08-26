@@ -82,7 +82,7 @@ function procesarLogin(rol) {
 }
 
 function procesarRegistro(rol) {
-    if (!confirm('¿Estás seguro de que deseas enviar tu solicitud de registro?')) return;
+    if (!confirm('¿Estás seguro de que deseas enviará tu solicitud de registro?')) return;
     let formData = new FormData();
     formData.append('rol', rol);
 
@@ -255,7 +255,7 @@ function procesarAccion(identificador, accion) {
         return;
     }
 
-    let mensaje = '¿Aceptar usuario y generar credenciales?';
+    let mensaje = '¿¿Aceptar usuario y generar credenciales?';
     if(confirm(mensaje)) {
         fetch(`/api/${accion}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ identificador: identificador })
         }).then(res => res.json()).then(data => { alert(data.message); cerrarModal('modal-detalles'); cargarPendientes(); });
@@ -378,7 +378,7 @@ function cargarListaUsuarios(rolBuscado, idTabla) {
 }
 
 function eliminarUsuario(usuarioId, rol) {
-    if(confirm(`⚠️ ATENCIÓN ⚠️\n¿Eliminar COMPLETAMENTE a este usuario? Esta acción no se puede deshacer.`)) {
+    if(confirm(`⚠️ ATENCIÓN ⚠️\n¿¿Eliminar COMPLETAMENTE a este usuario? Esta acción no se puede deshacer.`)) {
         fetch('/api/eliminar_usuario', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: usuarioId })
         }).then(res => res.json()).then(data => { alert(data.message); cargarListaUsuarios(rol, 'tabla-lista-' + (rol === 'proveedores' ? 'prov' : (rol === 'administracion' ? 'admin' : 'corp'))); cargarAccesos(); });
     }
@@ -506,7 +506,7 @@ function abrirMiPerfil() {
 }
 
 function descargarPDF() {
-    if(confirm('¿Confirmas que deseas descargar este perfil en formato PDF?')) {
+    if(confirm('¿¿Confirmas que deseas descargar este perfil en formato PDF?')) {
         const elemento = document.getElementById('pdf-content');
         const opciones = {
             margin:       0.4,

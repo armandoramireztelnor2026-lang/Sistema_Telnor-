@@ -143,6 +143,12 @@ function imprimirReporteTaller() {
         <br>
         <div class="pdf-section-title">■ DESCRIPCIÓN DEL INCIDENTE / FALLA REPORTADA</div>
         <div class="pdf-line"><div class="texto-largo" style="background: #f9f9f9; border-left: 3px solid #f59e0b; padding: 15px; font-style: italic; color: #333;">"${r.falla}"</div></div>
+        ${r.firma_chofer ? `
+        <br>
+        <div class="pdf-section-title">■ FIRMA DEL OPERADOR / CHOFER</div>
+        <div class="pdf-line" style="text-align: center;">
+            <img src="${r.firma_chofer}" alt="Firma del Chofer" style="background: white; border-radius: 8px; max-width: 300px; border: 2px solid #333; padding: 5px;">
+        </div>` : ''}
     `;
     
     document.getElementById('pdf-orden-cuerpo').innerHTML = html;
@@ -155,7 +161,7 @@ function imprimirReporteTaller() {
 function descargarPDFOrden() {
     const elemento = document.getElementById('pdf-orden-contenido');
     const r = reporteSeleccionado;
-    if(confirm('¿Confirmas que deseas descargar esta Orden de Trabajo en formato PDF?')) {
+    if(confirm('¿¿Confirmas que deseas descargar esta Orden de Trabajo en formato PDF?')) {
         const opciones = {
             margin:       0.4,
             filename:     `Orden_Trabajo_${r.id}.pdf`,
@@ -165,4 +171,9 @@ function descargarPDFOrden() {
         };
         html2pdf().set(opciones).from(elemento).save();
     }
+}
+
+function volverAReporteProv() {
+    document.getElementById('modal-pdf-orden-trabajo').style.display = 'none';
+    document.getElementById('modal-ver-reporte-prov').style.display = 'flex';
 }
