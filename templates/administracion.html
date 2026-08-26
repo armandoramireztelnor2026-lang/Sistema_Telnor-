@@ -647,11 +647,11 @@
                 </div>
 
                 <div style="margin-top: 15px;">
-                    <label style="color:#40916c; font-weight:bold; display:block; margin-bottom:10px;">PDF de Solicitud
-                        de Pedido:</label>
+                    <label style="color:#0ea5e9; font-weight:600; margin-bottom:8px; display:block;">Subir PDF de Orden de Pedido:</label>
                     <input type="file" id="pdf-cotizacion-admin" accept=".pdf"
                         style="width: 100%; padding: 10px; background: #0b1c30; color: white; border: 1px solid #1f395a; border-radius: 8px;"
                         onchange="validarOrden()">
+                    <div id="preview-cotizacion-admin-container" style="display:none; margin-top:10px; width:100%;"></div>
                 </div>
             </div>
             <div class="modal-actions"><button class="btn-success-modal" id="btn-confirmar-admin"
@@ -939,6 +939,7 @@
                     <span class="file-label">📄 Seleccionar PDF del Documento Contable</span>
                     <span class="file-sub" id="nombre-pdf-doc-contable">Ningún archivo seleccionado</span>
                 </label>
+                <div id="preview-doc-contable-container" style="display:none; margin-bottom:20px; width:100%;"></div>
 
                 <button type="button" class="btn-success-modal" onclick="subirDocContable()">Subir Documento y Archivar Ticket</button>
             </form>
@@ -947,8 +948,18 @@
     
     <script>
         document.getElementById('input-pdf-doc-contable').addEventListener('change', function(e) {
-            let n = e.target.files[0] ? e.target.files[0].name : "Ningún archivo seleccionado";
+            let file = e.target.files[0];
+            let n = file ? file.name : "Ningún archivo seleccionado";
             document.getElementById('nombre-pdf-doc-contable').textContent = n;
+            
+            let previewContainer = document.getElementById('preview-doc-contable-container');
+            if (file && file.type === 'application/pdf') {
+                previewContainer.style.display = 'block';
+                previewContainer.innerHTML = `<iframe src="${URL.createObjectURL(file)}" style="width:100%; height:200px; border:1px solid #1f395a; border-radius:5px;"></iframe>`;
+            } else {
+                previewContainer.style.display = 'none';
+                previewContainer.innerHTML = '';
+            }
         });
     </script>
 </body>

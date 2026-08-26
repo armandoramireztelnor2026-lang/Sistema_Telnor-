@@ -75,7 +75,7 @@ async function cargarFacturas() {
                     if (tbodyArchivo && rolUsuario === 'administracion') {
                         let btnVerExp = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
                             <button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0; width:100%;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>
-                            <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin:0; width:100%;" onclick="window.open('/static/facturas_archivos/${f.pdf_doc50}', '_blank')">📄 Ver Documento Contable</button>
+                            <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin:0; width:100%;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.pdf_doc50}')">📄 Ver Documento Contable</button>
                             <button class="btn-danger-sm" style="width:100%; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaDefinitiva('${f.id}')">Eliminar</button>
                         </div>`;
                         let idReporteAsociado = obtenerIdReporte(f) || 'N/A';
@@ -143,7 +143,7 @@ async function cargarFacturas() {
                         if (!f.factura_folio) {
                             btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; margin-top:5px; width:100%;" onclick="abrirModalSubirFactura('${f.id}')">🧾 Subir Factura Final (PDF)</button>`;
                         } else {
-                            btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="window.open('/static/facturas_archivos/${f.pdf_fiscal || f.factura_pdf}', '_blank')">📄 Ver Factura Subida</button>`;
+                            btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.pdf_fiscal || f.factura_pdf}')">📄 Ver Factura Subida</button>`;
                         }
                     }
                     btnAccion += `</div>`;
@@ -188,7 +188,7 @@ async function cargarFacturas() {
                                     btnAdminExtra += `<button class="btn-success" style="width:100%; margin:0;" onclick="abrirModalValidacionFiscal('${f.id}', '${f.factura_folio}', '${f.pdf_fiscal || f.factura_pdf}', '${f.unidad}')">Revisar y Validar</button>`;
                                 } else if (valFiscal === 'Aprobada') {
                                     estadoFiscalBadge = `<span style="background:#2d6a4f; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">Factura Aprobada</span>`;
-                                    btnAdminExtra += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin:0; width:100%;" onclick="window.open('/static/facturas_archivos/${f.pdf_fiscal || f.factura_pdf}', '_blank')">📄 Ver Factura PDF</button>`;
+                                    btnAdminExtra += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin:0; width:100%;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.pdf_fiscal || f.factura_pdf}')">📄 Ver Factura PDF</button>`;
                                     btnAdminExtra += `<button class="btn-info" style="background:#f59e0b; width:100%; margin:0;" onclick="abrirModalEditarAdmin('${f.id}')">Editar Datos</button>`;
                                 } else {
                                     estadoFiscalBadge = `<span style="background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">Rechazada</span>`;
@@ -478,7 +478,7 @@ function previsualizarFactura() {
 
     const contCotizacion = document.getElementById('prev-cotizaciones-container'); const contEvidencia = document.getElementById('prev-evidencias-container');
     contCotizacion.innerHTML = ''; contEvidencia.innerHTML = '';
-    const renderizarAnexo = (archivos, etiqueta, contenedor) => { Array.from(archivos).forEach(file => { const divInfo = document.createElement('div'); divInfo.className = 'pdf-image-container'; if (file.type.startsWith('image/')) { divInfo.innerHTML = `<img src="${URL.createObjectURL(file)}" class="pdf-anexo-img"><p class="pdf-anexo-label">${etiqueta}: ${file.name}</p>`; } else if (file.name.endsWith('.pdf')) { divInfo.innerHTML = `<div style="font-size:40px; color:#ef4444; margin-bottom:10px;">📄</div><p class="pdf-anexo-label">${etiqueta} (PDF Adjunto): ${file.name}</p>`; } contenedor.appendChild(divInfo); }); };
+    const renderizarAnexo = (archivos, etiqueta, contenedor) => { Array.from(archivos).forEach(file => { const divInfo = document.createElement('div'); divInfo.className = 'pdf-image-container'; if (file.type.startsWith('image/')) { divInfo.innerHTML = `<img src="${URL.createObjectURL(file)}" class="pdf-anexo-img"><p class="pdf-anexo-label">${etiqueta}: ${file.name}</p>`; } else if (file.name.endsWith('.pdf')) { divInfo.innerHTML = `<iframe src="${URL.createObjectURL(file)}" style="width:100%; height:150px; border:1px solid #1f395a; border-radius:5px; margin-bottom:5px;"></iframe><p class="pdf-anexo-label">${etiqueta} (PDF Adjunto): ${file.name}</p>`; } contenedor.appendChild(divInfo); }); };
     renderizarAnexo(dtCotizacion.files, 'Cotización', contCotizacion); renderizarAnexo(dtEvidencia.files, 'Evidencia del Trabajo', contEvidencia);
 
     document.getElementById('modal-nueva-factura').style.display = 'none'; document.getElementById('modal-previsualizacion-factura').style.display = 'flex';
@@ -535,7 +535,7 @@ function generarHtmlDetalles(f, modo, precioBonito) {
                 <div style="color: #10b981; font-weight: bold; font-size:1.1em; margin-bottom:10px;">■ SECCIÓN 3: CIERRE CONTABLE (FACTURA FISCAL)</div>
                 <div class="modal-info-line" style="font-size:16px;"><strong>Folio Fiscal Emitido:</strong> <span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></div>
                 <div style="margin-top:15px;">
-                    <a href="/static/facturas_archivos/${f.factura_pdf}" target="_blank" class="btn-success-modal" style="background:#10b981; text-decoration:none; padding:10px 20px; display:inline-block; border-radius:8px;">📥 Ver / Descargar PDF Oficial</a>
+                    <button type="button" class="btn-success-modal" style="background:#10b981; border:none; padding:10px 20px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.factura_pdf}')">📥 Ver PDF Oficial</button>
                 </div>
             </div>
         `;
@@ -548,7 +548,7 @@ function generarHtmlDetalles(f, modo, precioBonito) {
                 <div style="color: #eab308; font-weight: bold; font-size:1.1em; margin-bottom:10px;">■ SECCIÓN 4: DOCUMENTO CONTABLE Y ARCHIVADO</div>
                 <div class="modal-info-line" style="font-size:16px;"><strong>Número de Documento:</strong> <span style="color:#eab308; font-weight:bold;">${f.numero_doc50}</span></div>
                 <div style="margin-top:15px;">
-                    <a href="/static/facturas_archivos/${f.pdf_doc50}" target="_blank" class="btn-success-modal" style="background:#eab308; text-decoration:none; padding:10px 20px; display:inline-block; border-radius:8px; color: #111;">📥 Ver / Descargar Documento Contable</a>
+                    <button type="button" class="btn-success-modal" style="background:#eab308; border:none; padding:10px 20px; border-radius:8px; color:#111; font-weight:bold; cursor:pointer;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.pdf_doc50}')">📥 Ver Documento Contable</button>
                 </div>
             </div>
         `;
@@ -575,7 +575,7 @@ function generarHtmlDetalles(f, modo, precioBonito) {
             <div style="margin-top:15px;">
                 <strong>Cotizaciones (${f.fotos_cotizacion.length} archivos):</strong><br>
                 <div style="display:flex; gap:10px; overflow-x:auto; padding:10px 0;">
-                    ${f.fotos_cotizacion.map(foto => (foto.endsWith('.pdf') ? `<a href="/static/facturas_archivos/${foto}" target="_blank" style="font-size:30px; text-decoration:none;">📄</a>` : `<img src="/static/facturas_archivos/${foto}" style="height:70px; border-radius:5px; border:2px solid #0284c7; cursor:zoom-in;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')">`)).join('')}
+                    ${f.fotos_cotizacion.map(foto => (foto.endsWith('.pdf') ? `<button type="button" style="background:#0284c7; color:white; border:none; border-radius:5px; padding:10px 15px; cursor:pointer; font-weight:bold; font-size: 0.9em; display:flex; align-items:center; gap:5px;" onclick="abrirVisorPDF('/static/facturas_archivos/${foto}')">📄 Ver PDF Cotización</button>` : `<img src="/static/facturas_archivos/${foto}" style="height:70px; border-radius:5px; border:2px solid #0284c7; cursor:zoom-in;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')">`)).join('')}
                 </div>
                 <strong>Evidencias (${f.fotos_evidencia.length} archivos):</strong><br>
                 <div style="display:flex; gap:10px; overflow-x:auto; padding:10px 0;">
@@ -605,6 +605,17 @@ function validarOrden() {
     let inputCotizacion = document.getElementById('num-cotizacion-admin').value.trim();
     let pdfCotizacion = document.getElementById('pdf-cotizacion-admin').files[0];
     let btn = document.getElementById('btn-confirmar-admin'); 
+    let previewContainer = document.getElementById('preview-cotizacion-admin-container');
+    
+    if (pdfCotizacion && pdfCotizacion.type === 'application/pdf') {
+        previewContainer.style.display = 'block';
+        previewContainer.innerHTML = `<iframe src="${URL.createObjectURL(pdfCotizacion)}" style="width:100%; height:200px; border:1px solid #1f395a; border-radius:5px;"></iframe>`;
+    } else {
+        if (previewContainer) {
+            previewContainer.style.display = 'none';
+            previewContainer.innerHTML = '';
+        }
+    }
     
     if (inputNumOrden.length > 0 && inputCotizacion.length > 0 && pdfCotizacion) { 
         btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; 
@@ -1132,4 +1143,34 @@ function subirDocContable() {
         console.error(err);
         alert("Error de conexión.");
     });
+}
+
+
+function abrirVisorPDF(url) {
+    if (window.innerWidth <= 768) {
+        window.open(url, '_blank');
+        return;
+    }
+    let modal = document.getElementById('global-pdf-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'global-pdf-modal';
+        modal.className = 'modal-overlay';
+        modal.style.zIndex = '999999';
+        modal.innerHTML = `
+            <div class="modal-box large" style="max-width: 1000px; width: 95vw; height: 90vh; padding: 0; background: #0b1c30; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #1f395a; border-radius: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #081422; border-bottom: 1px solid #1f395a;">
+                    <h3 style="margin: 0; color: white; font-size: 1.2em;">📄 Visor de PDF</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="window.open(document.getElementById('global-pdf-frame').src, '_blank')" style="background: #0284c7; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s;" onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">📥 Descargar</button>
+                        <button onclick="document.getElementById('global-pdf-modal').style.display='none'; document.getElementById('global-pdf-frame').src='';" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#ef4444'">Cerrar</button>
+                    </div>
+                </div>
+                <iframe id="global-pdf-frame" src="" style="flex: 1; width: 100%; border: none; background: white;"></iframe>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    document.getElementById('global-pdf-frame').src = url;
+    modal.style.display = 'flex';
 }
