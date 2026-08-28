@@ -712,60 +712,72 @@
             <form id="form-editar-admin" onsubmit="event.preventDefault(); actualizarFacturaAdmin();">
                 <input type="hidden" name="id_factura" id="edit_id_factura">
                 <div class="form-grid">
-                    <div class="input-group"><label>Número de Unidad</label>
-                        <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text"
-                                name="unidad" id="edit_unidad" maxlength="4" required oninput="validarNumeros(this)">
-                        </div>
+                    <!-- CAMPOS COMPARTIDOS O ESPECÍFICOS -->
+                    <div class="input-group" data-seccion="1 2"><label>Fecha</label><input type="date" name="fecha" id="edit_fecha" required></div>
+                    <div class="input-group" data-seccion="1"><label>Kilometraje</label><input type="text" name="kilometraje" id="edit_kilometraje" oninput="validarNumeros(this)"></div>
+                    
+                    <div class="input-group" data-seccion="1 2"><label>No. Económico (Unidad)</label>
+                        <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text" name="unidad" id="edit_unidad" maxlength="4" required oninput="validarNumeros(this)"></div>
                     </div>
-                    <div class="input-group"><label>Núm. Orden (Opcional)</label><input type="text" name="numero_orden"
-                            id="edit_numero_orden"></div>
-                    <div class="input-group"><label>Responsable</label><input type="text" name="responsable"
-                            id="edit_responsable" required oninput="validarLetras(this)"></div>
-                    <div class="input-group"><label>Teléfono</label><input type="text" name="telefono"
-                            id="edit_telefono" maxlength="15" required oninput="validarNumeros(this)"></div>
-                    <div class="input-group"><label>Fecha</label><input type="date" name="fecha" id="edit_fecha"
-                            required></div>
-                    <div class="input-group"><label>Precio (Sin IVA)</label><input type="text" name="precio"
-                            id="edit_precio" required onblur="formatearEnInput(this)" onfocus="limpiarInput(this)">
-                    </div>
-                    <div class="input-group full-width"><label>Título</label><input type="text" name="titulo"
-                            id="edit_titulo" required></div>
-                    <div class="input-group full-width"><label>Retro</label><textarea name="retro" id="edit_retro"
-                            required
-                            style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none; resize: vertical; min-height: 80px;"></textarea>
-                    </div>
-                    <div class="input-group full-width"><label>Diagnóstico de Mecánico</label><textarea
-                            name="diagnostico" id="edit_diagnostico" required
-                            style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none; resize: vertical; min-height: 80px;"></textarea>
-                    </div>
-                    <div class="input-group full-width"><label>Descripción del Trabajo a Realizar</label><textarea
-                            name="trabajo_realizar" id="edit_trabajo_realizar" required
-                            style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none; resize: vertical; min-height: 80px;"></textarea>
-                    </div>
-                    <div class="input-group full-width"><label>Tipo de Mantenimiento</label><select name="mantenimiento"
-                            id="edit_mantenimiento" class="input-form" required>
+                    
+                    <div class="input-group" data-seccion="1"><label>Marca</label><input type="text" name="marca" id="edit_marca"></div>
+                    <div class="input-group" data-seccion="1"><label>Modelo</label><input type="text" name="modelo" id="edit_modelo"></div>
+                    
+                    <div class="input-group" data-seccion="1 2"><label>Celular / Teléfono</label><input type="text" name="telefono" id="edit_telefono" maxlength="15" required oninput="validarNumeros(this)"></div>
+                    <div class="input-group" data-seccion="1 2"><label id="label_edit_responsable">Nombre del Empleado (Completo)</label><input type="text" name="responsable" id="edit_responsable" required oninput="validarLetras(this)"></div>
+                    
+                    <div class="input-group" data-seccion="1"><label>Email (Opcional)</label><input type="email" name="email" id="edit_email"></div>
+                    <div class="input-group" data-seccion="1"><label>Ciudad / Municipio Base</label><input type="text" name="ciudad" id="edit_ciudad"></div>
+                    <div class="input-group" data-seccion="1"><label>COPE / Edificio</label><input type="text" name="cope" id="edit_cope"></div>
+                    <div class="input-group" data-seccion="1"><label>Departamento</label><input type="text" name="departamento" id="edit_departamento"></div>
+                    
+                    <div class="input-group full-width" data-seccion="1 2"><label>Tipo de Mantenimiento</label>
+                        <select name="mantenimiento" id="edit_mantenimiento" class="input-form" required>
                             <option value="Preventivo">Preventivo</option>
                             <option value="Correctivo">Correctivo</option>
-                        </select></div>
-                    <div class="input-group full-width">
-                        <h4 style="color:#0284c7; margin-bottom:5px;">Cotizaciones Guardadas (Elimina con la X)</h4>
-                        <div id="edit-preview-cotizacion-guardadas" class="preview-container"
-                            style="margin-bottom:15px;"></div><label style="color:#0284c7;">Añadir NUEVAS
-                            Cotizaciones</label><input type="file" id="edit_fotos_cotizacion_nuevas"
-                            name="fotos_cotizacion_nuevas" multiple accept="image/*,.pdf" style="padding:5px;">
+                        </select>
+                    </div>
+                    
+                    <div class="input-group full-width" data-seccion="1 2"><label id="label_edit_titulo">Título del Reporte</label><input type="text" name="titulo" id="edit_titulo" required></div>
+                    <div class="input-group full-width" data-seccion="1 2"><label id="label_edit_retro">Descripción Detallada del Problema (Retro)</label>
+                        <textarea name="retro" id="edit_retro" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
+                    </div>
+                    
+                    <div class="input-group full-width" data-seccion="1" id="container-firma" style="display:none;">
+                        <label>Firma del Operador (Solo Lectura)</label>
+                        <div style="background:#0b1c30; border:1px solid #1f395a; border-radius:8px; padding:10px; text-align:center;">
+                            <img id="img-firma-operador" src="" style="max-height: 100px; max-width:100%; object-fit:contain; filter: invert(1);">
+                        </div>
+                    </div>
+
+                    <!-- GENERAL (NO RESTRINGIDO) -->
+                    <div class="input-group"><label>Núm. Orden (Opcional)</label><input type="text" name="numero_orden" id="edit_numero_orden"></div>
+
+                    <!-- EXCLUSIVOS DE SECCIÓN 2 (TALLER) -->
+                    <div class="input-group" data-seccion="2"><label>Precio (Sin IVA) MXN</label><input type="text" name="precio" id="edit_precio" required onblur="formatearEnInput(this)" onfocus="limpiarInput(this)"></div>
+                    <div class="input-group full-width" data-seccion="2"><label>Diagnóstico de Mecánico</label>
+                        <textarea name="diagnostico" id="edit_diagnostico" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
+                    </div>
+                    <div class="input-group full-width" data-seccion="2"><label>Descripción del Trabajo a Realizar</label>
+                        <textarea name="trabajo_realizar" id="edit_trabajo_realizar" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
+                    </div>
+                    
+                    <div class="input-group full-width" data-seccion="2">
+                        <h4 style="color:#0284c7; margin-bottom:5px;">Subir Cotización (Fotos/PDF)</h4>
+                        <div id="edit-preview-cotizacion-guardadas" class="preview-container" style="margin-bottom:15px;"></div>
+                        <label style="color:#0284c7;">Añadir NUEVAS Cotizaciones</label>
+                        <input type="file" id="edit_fotos_cotizacion_nuevas" name="fotos_cotizacion_nuevas" multiple accept="image/*,.pdf" style="padding:5px;">
                         <div id="edit-preview-cotizacion-nuevas" class="preview-container"></div>
                     </div>
-                    <div class="input-group full-width">
-                        <h4 style="color:#40916c; margin-bottom:5px;">Evidencias Guardadas (Elimina con la X)</h4>
-                        <div id="edit-preview-evidencia-guardadas" class="preview-container"
-                            style="margin-bottom:15px;"></div><label style="color:#40916c;">Añadir NUEVAS
-                            Evidencias</label><input type="file" id="edit_fotos_evidencia_nuevas"
-                            name="fotos_evidencia_nuevas" multiple accept="image/*" style="padding:5px;">
+                    <div class="input-group full-width" data-seccion="2">
+                        <h4 style="color:#40916c; margin-bottom:5px;">Subir Evidencias (Fotos)</h4>
+                        <div id="edit-preview-evidencia-guardadas" class="preview-container" style="margin-bottom:15px;"></div>
+                        <label style="color:#40916c;">Añadir NUEVAS Evidencias</label>
+                        <input type="file" id="edit_fotos_evidencia_nuevas" name="fotos_evidencia_nuevas" multiple accept="image/*" style="padding:5px;">
                         <div id="edit-preview-evidencia-nuevas" class="preview-container"></div>
                     </div>
                 </div>
-                <div class="modal-actions"><button class="btn-success-modal" type="submit"
-                        style="width: 100%; background:#f59e0b;">Actualizar Factura y Guardar Cambios</button></div>
+                <div class="modal-actions"><button class="btn-success-modal" type="submit" style="width: 100%; background:#f59e0b;">Actualizar Factura y Guardar Cambios</button></div>
             </form>
         </div>
     </div>
@@ -917,7 +929,7 @@
     <script src="/static/facturas_herramientas.js"></script>
     <script src="/static/facturas_archivos.js"></script>
     <script src="/static/facturas_pdf.js"></script>
-    <script src="/static/facturas_principal.js"></script>
+    <script src="/static/facturas_principal.js?v=15?v=11?v=10"></script>
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">
         <div class="modal-box">
@@ -953,6 +965,62 @@
             document.getElementById('nombre-pdf-doc-contable').textContent = n;
             
             let previewContainer = document.getElementById('preview-doc-contable-container');
+            if (file && file.type === 'application/pdf') {
+                previewContainer.style.display = 'block';
+                previewContainer.innerHTML = `<iframe src="${URL.createObjectURL(file)}" style="width:100%; height:200px; border:1px solid #1f395a; border-radius:5px;"></iframe>`;
+            } else {
+                previewContainer.style.display = 'none';
+                previewContainer.innerHTML = '';
+            }
+        });
+    </script>
+    <div id="modal-editar-seccion" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-editar-seccion')">×</button>
+            <h3 class="modal-header" id="header-editar-seccion">Editar Sección</h3>
+            <p style="color: #a3b1c6; margin-bottom: 20px; font-size: 0.9em;">
+                Actualiza el número de identificación y sube un nuevo archivo PDF. El archivo anterior será reemplazado.
+            </p>
+            <form id="form-editar-seccion" onsubmit="event.preventDefault(); guardarEdicionSeccion();">
+                <input type="hidden" id="edit-sec-id-factura">
+                <input type="hidden" id="edit-sec-tipo">
+                
+                <label id="label-edit-sec-numero" style="color: #e0e6ed; font-weight: 600; display: block; margin-bottom: 8px;">Nuevo Número:</label>
+                <input type="text" id="edit-sec-numero" required 
+                       style="width: 100%; padding: 12px; background: #0b1c30; border: 1px solid #1f395a; border-radius: 8px; color: white; margin-bottom: 20px;">
+
+                <label class="file-upload" style="margin-bottom: 20px;">
+                    <input type="file" id="edit-sec-pdf" accept="application/pdf" required>
+                    <span class="file-label">📄 Seleccionar Nuevo PDF</span>
+                    <span class="file-sub" id="nombre-edit-sec-pdf">Ningún archivo seleccionado</span>
+                </label>
+                <div id="preview-edit-sec-container" style="display:none; margin-bottom:20px; width:100%;"></div>
+
+                
+                <div id="current-file-container" style="margin-bottom: 20px; display: none;">
+                    <strong style="color: #0ea5e9;">Dato/Archivo Actual:</strong>
+                    <div style="margin-top: 5px; margin-bottom: 10px; font-size: 15px;">
+                        <strong>Número Registrado:</strong> <span id="current-file-number" style="color:#f59e0b; font-weight:bold;"></span>
+                    </div>
+                    <div style="margin-top: 5px;">
+                        <button type="button" id="btn-view-current-file" class="btn-info" style="font-size:0.9em; padding:8px 12px; background:#40916c; border:none; cursor:pointer;" >📄 Ver Archivo Guardado</button>
+                    </div>
+                </div>
+                <div class="modal-actions" style="display: flex; gap: 15px;">
+                    <button type="button" class="btn-danger" style="flex:1;" onclick="cerrarModal('modal-editar-seccion')">Cancelar</button>
+                    <button type="submit" class="btn-success-modal" style="flex:1;">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('edit-sec-pdf').addEventListener('change', function(e) {
+            let file = e.target.files[0];
+            let n = file ? file.name : "Ningún archivo seleccionado";
+            document.getElementById('nombre-edit-sec-pdf').textContent = n;
+            
+            let previewContainer = document.getElementById('preview-edit-sec-container');
             if (file && file.type === 'application/pdf') {
                 previewContainer.style.display = 'block';
                 previewContainer.innerHTML = `<iframe src="${URL.createObjectURL(file)}" style="width:100%; height:200px; border:1px solid #1f395a; border-radius:5px;"></iframe>`;

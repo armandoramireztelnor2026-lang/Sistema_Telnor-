@@ -43,7 +43,7 @@
             "responsable": "Dilan Fernandez",
             "telefono": "6634041184",
             "titulo": "Cambio balatas",
-            "retro": "[TICKET:REP-20260825170922]\r\nREPORTE ORIGINAL DEL CHOFER: hola",
+            "retro": "[TICKET:REP-20260825170922]\r\nREPORTE ORIGINAL DEL CHOFER: hola\n\n[ADMINISTRACI\u00c3\u201cN - Factura Rechazada]: hola",
             "diagnostico": "hola",
             "trabajo_realizar": "hola",
             "mantenimiento": "Preventivo",
@@ -67,9 +67,50 @@
             "entregado": "S\u00ed",
             "numero_cotizacion_asignacion": "2900001231",
             "pdf_cotizacion_asignacion": "Cotizacion_20260825171307_Factura_8090-1231_2026-08-25.pdf",
-            "factura_folio": "12312",
-            "factura_pdf": "FACTURA_FINAL_20260825171307_M1.2_Ramirez_Cardenas_Luis_Armando.pdf",
-            "validacion_fiscal": "Pendiente"
+            "validacion_fiscal": "Aprobada",
+            "factura_folio": "1241",
+            "factura_pdf": "FACTURA_FINAL_20260825171307_CONSTANCIA_SSP_2200607.pdf",
+            "numero_doc50": "123123",
+            "pdf_doc50": "doc50_20260825171307_Meta0_DeLaCruz_Jeremy_Garnica_Alexis_Ramirez_Armando.pdf",
+            "estado": "Archivado"
+        },
+        {
+            "id": "20260827222646",
+            "proveedor": "Autopartes y Motores B.C.",
+            "unidad": "8090-3214",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "Cambio balatas",
+            "retro": "[TICKET:REP-20260827214648]\r\nREPORTE ORIGINAL DEL CHOFER: hola",
+            "diagnostico": "hola",
+            "trabajo_realizar": "hola",
+            "mantenimiento": "Correctivo",
+            "precio": 1500.0,
+            "fecha": "2026-08-27",
+            "numero_orden": "3441",
+            "compania": "Telnor",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-08-27T22:26:46.096582",
+            "estado_custom": "",
+            "fotos_cotizacion": [
+                "fotos_cotizacion_20260827222646_UNIDAD_I_Fundamentos_de_la_Comercializacion_de_Tecnologias_F.pdf"
+            ],
+            "fotos_evidencia": [
+                "fotos_evidencia_20260827222646_mantenimiento_3.jpg",
+                "fotos_evidencia_20260827222646_mantenimiento_2.jpg",
+                "fotos_evidencia_20260827222646_mantenimiento_1.jpg"
+            ],
+            "codigo_liberacion": "95163179",
+            "entregado": "S\u00ed",
+            "numero_cotizacion_asignacion": "2900001212",
+            "pdf_cotizacion_asignacion": "Cotizacion_20260827222646_KARDEX_2026-2_2200607.pdf",
+            "factura_folio": "1241",
+            "factura_pdf": "FACTURA_FINAL_20260827222646_Primer_Cv_Ramirez_Cardenas_Luis_Armando.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "123123",
+            "pdf_doc50": "doc50_20260827222646_Meta0_DeLaCruz_Jeremy_Garnica_Alexis_Ramirez_Armando.pdf",
+            "estado": "Archivado"
         }
     ]
 }

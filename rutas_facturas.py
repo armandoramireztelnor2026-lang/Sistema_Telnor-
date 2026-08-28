@@ -161,6 +161,22 @@ def listar_facturas():
                 # Luego, solo le mostramos al Supervisor las facturas que vengan de esos proveedores locales
                 facturas = [f for f in facturas if f.get("proveedor") in proveedores_locales]
                 
+
+    # INYECTAR DATOS DEL REPORTE INICIAL
+    try:
+        reportes_data = leer_json("reportes.json").get("reportes", [])
+        reportes_dict = {str(r.get("id")): r for r in reportes_data}
+        
+        for f in facturas:
+            retro = f.get("retro", "")
+            match = re.search(r"\[TICKET:(.*?)\]", retro)
+            if match:
+                ticket_id = match.group(1).strip()
+                if ticket_id in reportes_dict:
+                    f["reporte_inicial"] = reportes_dict[ticket_id]
+    except Exception as e:
+        pass
+
     return jsonify({"facturas": facturas})
 
 
@@ -470,3 +486,69 @@ def doc50():
             return jsonify({'status': 'success', 'message': 'Documento Contable subido y guardado correctamente. El proceso ha concluido.'})
 
     return jsonify({'status': 'error', 'message': 'Factura no encontrada.'})
+
+
+@facturas_bp.route("/api/facturas/editar_seccion_especifica", methods=["POST"])
+def editar_seccion_especifica():
+    if "usuario" not in session or session["usuario"]["rol"] != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"})
+    
+    id_factura = request.form.get("id_factura")
+    seccion = request.form.get("seccion")
+    identificador = request.form.get("identificador")
+    pdf_file = request.files.get("pdf_file")
+    
+    if not all([id_factura, seccion, identificador, pdf_file]):
+        return jsonify({"status": "error", "message": "Faltan datos requeridos."})
+        
+    data = leer_json("facturas.json")
+    factura = next((f for f in data.get("facturas", []) if str(f["id"]) == str(id_factura)), None)
+    
+    if not factura:
+        return jsonify({"status": "error", "message": "Factura no encontrada."})
+        
+    filename = f"{seccion}_{id_factura}_{secure_filename(pdf_file.filename)}"
+    filepath = os.path.join(CARPETA_FACTURAS, filename)
+    pdf_file.save(filepath)
+    
+    pdf_antiguo = None
+    
+    if seccion == "orden":
+        pdf_antiguo = factura.get("pdf_cotizacion_asignacion")
+        factura["numero_cotizacion_asignacion"] = identificador
+        factura["numero_orden"] = identificador
+        factura["pdf_cotizacion_asignacion"] = filename
+        
+        # Sincronizar con reportes.json
+        reportes_data = leer_json("reportes.json")
+        for r in reportes_data.get("reportes", []):
+            if str(r.get("id")) == str(factura.get("id_reporte")):
+                r["numero_cotizacion_asignacion"] = identificador
+                r["pdf_cotizacion_asignacion"] = filename
+                break
+        escribir_json("reportes.json", reportes_data)
+        
+    elif seccion == "factura":
+        pdf_antiguo = factura.get("factura_pdf") or factura.get("pdf_fiscal")
+        factura["factura_folio"] = identificador
+        factura["factura_pdf"] = filename
+        factura["pdf_fiscal"] = filename
+        
+    elif seccion == "doc_contable":
+        pdf_antiguo = factura.get("pdf_doc50")
+        factura["numero_doc50"] = identificador
+        factura["pdf_doc50"] = filename
+        
+    escribir_json("facturas.json", data)
+    
+    # Eliminar PDF antiguo si existe
+    if pdf_antiguo:
+        try:
+            ruta_antigua = os.path.join(CARPETA_FACTURAS, pdf_antiguo)
+            if os.path.exists(ruta_antigua):
+                os.remove(ruta_antigua)
+        except Exception as e:
+            print(f"Error al borrar pdf antiguo {pdf_antiguo}: {e}")
+            
+    return jsonify({"status": "success"})
+

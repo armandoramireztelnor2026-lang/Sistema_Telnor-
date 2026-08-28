@@ -1,0 +1,2582 @@
+{
+    "100126": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "100428": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2026"
+    },
+    "80900713": {
+        "Marca": "FORD",
+        "Modelo": "1993"
+    },
+    "80901096": {
+        "Marca": "FORD",
+        "Modelo": "1998"
+    },
+    "80901099": {
+        "Marca": "FORD",
+        "Modelo": "1998"
+    },
+    "80901104": {
+        "Marca": "FORD",
+        "Modelo": "1998"
+    },
+    "80901105": {
+        "Marca": "FORD",
+        "Modelo": "1998"
+    },
+    "80901107": {
+        "Marca": "FORD",
+        "Modelo": "1998"
+    },
+    "80901109": {
+        "Marca": "FORD",
+        "Modelo": "1998"
+    },
+    "80901121": {
+        "Marca": "FORD",
+        "Modelo": "1998"
+    },
+    "80901133": {
+        "Marca": "FORD",
+        "Modelo": "1998"
+    },
+    "80901134": {
+        "Marca": "FORD",
+        "Modelo": "1998"
+    },
+    "80901139": {
+        "Marca": "FORD",
+        "Modelo": "1998"
+    },
+    "80901212": {
+        "Marca": "CHEVROLET",
+        "Modelo": "1999"
+    },
+    "80901231": {
+        "Marca": "CHEVROLET",
+        "Modelo": "1999"
+    },
+    "80901281": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901282": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901289": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901293": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901294": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901295": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901296": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901297": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901299": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901302": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901303": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901304": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901305": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901306": {
+        "Marca": "FORD",
+        "Modelo": "2000"
+    },
+    "80901309": {
+        "Marca": "CHEVROLET",
+        "Modelo": "1999"
+    },
+    "80901319": {
+        "Marca": "FORD",
+        "Modelo": "2001"
+    },
+    "80901324": {
+        "Marca": "FORD",
+        "Modelo": "2001"
+    },
+    "80901325": {
+        "Marca": "FORD",
+        "Modelo": "2001"
+    },
+    "80901339": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901351": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901352": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901358": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901359": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901363": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901364": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901365": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901377": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901378": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901379": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901380": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901391": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901393": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901395": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901396": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901400": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901402": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901408": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901412": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901422": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901424": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901435": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901449": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901450": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901453": {
+        "Marca": "FORD",
+        "Modelo": "2002"
+    },
+    "80901460": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2002"
+    },
+    "80901465": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901467": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901468": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901472": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901473": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901478": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901490": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2003"
+    },
+    "80901493": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901494": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901496": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901497": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901502": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901503": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901505": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901507": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901509": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901510": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2003"
+    },
+    "80901518": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901520": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901521": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901522": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901523": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901524": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901530": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901537": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901540": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901541": {
+        "Marca": "FORD",
+        "Modelo": "2004"
+    },
+    "80901542": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901556": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80901559": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2004"
+    },
+    "80901560": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2004"
+    },
+    "80901561": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2004"
+    },
+    "80901562": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2004"
+    },
+    "80901563": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2004"
+    },
+    "80901565": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2004"
+    },
+    "80901566": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2004"
+    },
+    "80901570": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2004"
+    },
+    "80901590": {
+        "Marca": "FORD",
+        "Modelo": "2005"
+    },
+    "80901592": {
+        "Marca": "FORD",
+        "Modelo": "2005"
+    },
+    "80901594": {
+        "Marca": "FORD",
+        "Modelo": "2005"
+    },
+    "80901595": {
+        "Marca": "FORD",
+        "Modelo": "2005"
+    },
+    "80901599": {
+        "Marca": "FORD",
+        "Modelo": "2005"
+    },
+    "80901603": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901604": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901607": {
+        "Marca": "FORD",
+        "Modelo": "2005"
+    },
+    "80901609": {
+        "Marca": "FORD",
+        "Modelo": "2005"
+    },
+    "80901610": {
+        "Marca": "FORD",
+        "Modelo": "2005"
+    },
+    "80901615": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901616": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901617": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901619": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901620": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901621": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901623": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901624": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901626": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901633": {
+        "Marca": "FORD",
+        "Modelo": "2006"
+    },
+    "80901638": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2006"
+    },
+    "80901640": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901641": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901642": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901643": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901644": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901645": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901647": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901648": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901649": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901650": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901651": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901652": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901653": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901655": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901657": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901659": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901661": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901662": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901663": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901664": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901666": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901668": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901669": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901671": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901672": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901673": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901674": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901675": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901676": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901677": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901678": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901679": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901680": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901681": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901682": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901684": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901685": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901686": {
+        "Marca": "FORD",
+        "Modelo": "2007"
+    },
+    "80901687": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2007"
+    },
+    "80901688": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2008"
+    },
+    "80901689": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901690": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2008"
+    },
+    "80901691": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901692": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901693": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901694": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2008"
+    },
+    "80901695": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901696": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901697": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901698": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901699": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901700": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901701": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901702": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901703": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901704": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901705": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901706": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901707": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2008"
+    },
+    "80901712": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901713": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901714": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901715": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901717": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2008"
+    },
+    "80901718": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2008"
+    },
+    "80901720": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2008"
+    },
+    "80901722": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901723": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901724": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901803": {
+        "Marca": "INTERNATIONAL",
+        "Modelo": "2011"
+    },
+    "80901727": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901804": {
+        "Marca": "INTERNATIONAL",
+        "Modelo": "2011"
+    },
+    "80901729": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901807": {
+        "Marca": "INTERNATIONAL",
+        "Modelo": "2011"
+    },
+    "80901731": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901732": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901733": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901734": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901736": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901737": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901738": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901739": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901740": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901741": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901742": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901743": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901744": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901745": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901746": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901747": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901748": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901749": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901750": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901751": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901752": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901753": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901754": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901755": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901756": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901758": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901759": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901760": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901761": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901762": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901763": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901764": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901765": {
+        "Marca": "FORD",
+        "Modelo": "2008"
+    },
+    "80901767": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901951": {
+        "Marca": "FREIGHTLINER",
+        "Modelo": "2013"
+    },
+    "80901769": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901770": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901771": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901772": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901773": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901774": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901775": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901776": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901777": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901778": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901779": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901780": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901781": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901782": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901783": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901784": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901785": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901952": {
+        "Marca": "FREIGHTLINER",
+        "Modelo": "2013"
+    },
+    "80901787": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901789": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901790": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901791": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901792": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901793": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901795": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901796": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901797": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901798": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901799": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901800": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901801": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901802": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80902032": {
+        "Marca": "FREIGHTLINER",
+        "Modelo": "2014"
+    },
+    "80902214": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2000"
+    },
+    "80901805": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901726": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901808": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901809": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901810": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901811": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901812": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901815": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901816": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901817": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901819": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901820": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901821": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901822": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901823": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901825": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901826": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901827": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901828": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901829": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901830": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901831": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901832": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901833": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901834": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901836": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901837": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901838": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901839": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901840": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901841": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901842": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901843": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901844": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901845": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901846": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901847": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901848": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901849": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901850": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901851": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901852": {
+        "Marca": "FORD",
+        "Modelo": "2011"
+    },
+    "80901728": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901854": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901855": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901856": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901857": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901858": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901859": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901860": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901861": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901862": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2010"
+    },
+    "80901863": {
+        "Marca": "DODGE",
+        "Modelo": "2011"
+    },
+    "80901864": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901865": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901866": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901867": {
+        "Marca": "NISSAN",
+        "Modelo": "2012"
+    },
+    "80901868": {
+        "Marca": "NISSAN",
+        "Modelo": "2012"
+    },
+    "80901869": {
+        "Marca": "NISSAN",
+        "Modelo": "2012"
+    },
+    "80901870": {
+        "Marca": "NISSAN",
+        "Modelo": "2012"
+    },
+    "80901871": {
+        "Marca": "NISSAN",
+        "Modelo": "2012"
+    },
+    "80901873": {
+        "Marca": "NISSAN",
+        "Modelo": "2012"
+    },
+    "80901874": {
+        "Marca": "NISSAN",
+        "Modelo": "2012"
+    },
+    "80901875": {
+        "Marca": "NISSAN",
+        "Modelo": "2012"
+    },
+    "80901876": {
+        "Marca": "NISSAN",
+        "Modelo": "2012"
+    },
+    "80901877": {
+        "Marca": "NISSAN",
+        "Modelo": "2012"
+    },
+    "80901878": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901879": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901880": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901881": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901882": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901883": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901884": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901885": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901886": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901887": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901888": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901890": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901891": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901892": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901893": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901894": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901895": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901896": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901897": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901898": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901899": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901900": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901901": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901902": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901903": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901904": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901905": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901906": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901907": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901908": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901909": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901910": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901911": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901912": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2011"
+    },
+    "80901914": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901917": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901918": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901919": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901920": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901921": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901922": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901923": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901925": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901926": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901927": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901928": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901929": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901930": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901931": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901932": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901933": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901934": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901935": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901936": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901937": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901938": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901939": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901940": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901941": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901942": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901943": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901944": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901945": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901946": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901947": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901948": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901949": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901950": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901730": {
+        "Marca": "FORD",
+        "Modelo": "2009"
+    },
+    "80901768": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901953": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901955": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901956": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901957": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901958": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901959": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901960": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901961": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901962": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901963": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80901964": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80901965": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80901966": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80901967": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80901969": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901970": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901971": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80901972": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901973": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901974": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901975": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901976": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901977": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901978": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901979": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901980": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901981": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901982": {
+        "Marca": "NISSAN",
+        "Modelo": "2013"
+    },
+    "80901786": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80901984": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80901985": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901986": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80901987": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80901988": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901989": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901990": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901992": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901993": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901994": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901995": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901996": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901997": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901998": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901999": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80902000": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902001": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902002": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902003": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902004": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902005": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902006": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902007": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902008": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902009": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902010": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902011": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902012": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902013": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902014": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902015": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902016": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902017": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902018": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902019": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902020": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902021": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902022": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902023": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902024": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902025": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902026": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902027": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902028": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902029": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902030": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80902031": {
+        "Marca": "NISSAN",
+        "Modelo": "2014"
+    },
+    "80901853": {
+        "Marca": "FORD",
+        "Modelo": "2010"
+    },
+    "80902033": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80902034": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80902035": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80902036": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80902037": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80901983": {
+        "Marca": "DODGE",
+        "Modelo": "2013"
+    },
+    "80902039": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80902040": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80902041": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80902044": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902046": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902047": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902048": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902049": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902050": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902051": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902053": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902054": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902055": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902056": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902057": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902058": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902059": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902060": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902061": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902062": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902063": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902064": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902065": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902066": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902068": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902069": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902070": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902071": {
+        "Marca": "NISSAN",
+        "Modelo": "2015"
+    },
+    "80902073": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902074": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902075": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902076": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902078": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902079": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902080": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902081": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902082": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902084": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902085": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902086": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2015"
+    },
+    "80902088": {
+        "Marca": "DODGE",
+        "Modelo": "2015"
+    },
+    "80902089": {
+        "Marca": "DODGE",
+        "Modelo": "2015"
+    },
+    "80902090": {
+        "Marca": "DODGE",
+        "Modelo": "2015"
+    },
+    "80902092": {
+        "Marca": "DODGE",
+        "Modelo": "2015"
+    },
+    "80902103": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902104": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902105": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902106": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902136": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902169": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902172": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902173": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902180": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902181": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902182": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902183": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902184": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902185": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902186": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902187": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902188": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902189": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    },
+    "80902198": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902199": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902200": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902201": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902202": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902203": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902204": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902205": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902206": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902207": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902208": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902209": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902210": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902211": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902212": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902213": {
+        "Marca": "NISSAN",
+        "Modelo": "2016"
+    },
+    "80902038": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2013"
+    },
+    "80902215": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2018"
+    },
+    "80902217": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902218": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902219": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902220": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902221": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902222": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902223": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902224": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902225": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902226": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2021"
+    },
+    "80902227": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902228": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902229": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902230": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902231": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902232": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902233": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902234": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902235": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902236": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902237": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902238": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902239": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902240": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902241": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902242": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902243": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902244": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902245": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902246": {
+        "Marca": "NISSAN",
+        "Modelo": "2019"
+    },
+    "80902247": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2020"
+    },
+    "80902248": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2021"
+    },
+    "80902249": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2021"
+    },
+    "80902250": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2021"
+    },
+    "80902251": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2021"
+    },
+    "80902252": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2021"
+    },
+    "80902253": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902254": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902255": {
+        "Marca": "FORD",
+        "Modelo": "2012"
+    },
+    "80902256": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2023"
+    },
+    "80902257": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2024"
+    },
+    "80902258": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2024"
+    },
+    "80902259": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2024"
+    },
+    "80902260": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2024"
+    },
+    "80902261": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2024"
+    },
+    "80902262": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2024"
+    },
+    "80902263": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2024"
+    },
+    "80902264": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2024"
+    },
+    "80902265": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2024"
+    },
+    "80902266": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902267": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902268": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902269": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902270": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902271": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902272": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902273": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902274": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902275": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902276": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902277": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902278": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902279": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902280": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902281": {
+        "Marca": "GMC",
+        "Modelo": "2019"
+    },
+    "80902282": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902283": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902284": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902285": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902286": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902287": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902288": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902289": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902290": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902291": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902292": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902293": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902294": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902295": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902296": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902297": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2025"
+    },
+    "80902298": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2019"
+    },
+    "80902299": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2012"
+    },
+    "80901487": {
+        "Marca": "FORD",
+        "Modelo": "2003"
+    },
+    "80902093": {
+        "Marca": "CHEVROLET",
+        "Modelo": "2016"
+    }
+}
