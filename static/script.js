@@ -140,6 +140,7 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'lista-prov') cargarListaUsuarios('proveedores', 'tabla-lista-prov');
     if (vista === 'lista-corp') cargarListaUsuarios('corporativos', 'tabla-lista-corp');
     if (vista === 'lista-admin') cargarListaUsuarios('administracion', 'tabla-lista-admin');
+    if (vista === 'unidades') cargarUnidades();
     
     if (vista === 'reportes' && typeof cargarReportesAdmin === 'function') cargarReportesAdmin();
     if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'documentos_contables') && typeof cargarFacturas === 'function') cargarFacturas();
@@ -153,6 +154,9 @@ function cambiarVistaProv(vista) {
     if(document.getElementById('vista-facturas-finales')) {
         document.getElementById('vista-facturas-finales').style.display = 'none';
     }
+    if(document.getElementById('vista-archivo')) {
+        document.getElementById('vista-archivo').style.display = 'none';
+    }
     
     if(vista === 'facturas') {
         document.getElementById('vista-facturas').style.display = 'block';
@@ -162,6 +166,11 @@ function cambiarVistaProv(vista) {
     } else if (vista === 'facturas_finales') {
         document.getElementById('vista-facturas-finales').style.display = 'block';
         if (typeof cargarFacturas === 'function') cargarFacturas(); 
+    } else if (vista === 'archivo') {
+        if(document.getElementById('vista-archivo')) {
+            document.getElementById('vista-archivo').style.display = 'block';
+        }
+        if (typeof cargarFacturas === 'function') cargarFacturas();
     }
 }
 

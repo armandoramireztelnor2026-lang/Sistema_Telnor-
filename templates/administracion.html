@@ -150,11 +150,12 @@
                 {% if usuario.datos_perfil.subrol == 'Jefatura' %}
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-corp')">Lista de Corporativos</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-admin')">Lista Automotriz</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('unidades')">Unidades</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('pendientes')">Nuevos Registros</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('accesos')">Accesos (Credenciales)</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de
                     Reportes</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
                 {% endif %}
 
             </nav>
@@ -163,7 +164,39 @@
         </aside>
 
         <main class="main-content">
+            
+            <div id="vista-unidades" style="display: none;">
+                <div class="top-bar">
+                    <h2>Directorio de Unidades</h2>
+                </div>
+                <div class="admin-container">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                        <div class="buscador-wrapper-div" style="max-width: 500px; margin:0; flex:1;">
+                            <span class="buscador-icono">&#x1F50D;</span>
+                            <input type="text" id="search-unidades" placeholder="Buscar por Unidad, Marca o Modelo..." class="buscador-pildora" onkeyup="filtrarTabla('search-unidades', 'tbody-unidades')">
+                        </div>
+                        <button onclick="abrirModalUnidad('agregar')" class="btn-info" style="margin-left:15px; padding:10px 20px; background:#10b981; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">+ Agregar Unidad</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No. Económico (Unidad)</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-unidades">
+                                <tr><td colspan="3" style="text-align:center;">Cargando unidades...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
             <div id="vista-facturas">
+
                 <div class="top-bar">
                     <h2>Bandeja de Cotizaciones (Aprobación de Órdenes)</h2>
                 </div>
@@ -485,10 +518,16 @@
 
             <div id="vista-archivo" style="display: none;">
                 <div class="top-bar">
-                    <h2>Archivo Histórico</h2>
+                    <h2>Archivo General</h2>
                 </div>
                 <div class="admin-container">
-                    <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
+                    <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                        <button id="btn-tab-archivo-normal" class="btn-info" style="flex:1; font-weight:bold; background:#0ea5e9; border:none;" onclick="switchTabArchivo('normal')">Tickets Finalizados</button>
+                        <button id="btn-tab-archivo-cancelado" class="btn-info" style="flex:1; font-weight:bold; background:#475569; border:none;" onclick="switchTabArchivo('cancelado')">Tickets Cancelados (Cotización Cara)</button>
+                    </div>
+                    
+                    <div id="contenedor-archivo-normal">
+                        <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
                         <input type="text" id="buscador-archivo" class="buscador-pildora"
                             placeholder="Buscar por folio, unidad, doc contable..."
@@ -510,12 +549,52 @@
                             <tbody id="tabla-archivo"></tbody>
                         </table>
                     </div>
+                    </div> <!-- fin contenedor normal -->
+                    
+                    <div id="contenedor-archivo-cancelado" style="display:none;">
+                        <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
+                            <span class="buscador-icono">&#x1F50D;</span>
+                            <input type="text" id="buscador-archivo-cancelado" class="buscador-pildora"
+                                placeholder="Buscar tickets cancelados..."
+                                onkeyup="filtrarTabla('buscador-archivo-cancelado', 'tabla-archivo-cancelado')">
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Ticket</th>
+                                        <th>Unidad</th>
+                                        <th>Proveedor</th>
+                                        <th>Motivo Cancelación</th>
+                                        <th>Detalles</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-archivo-cancelado"></tbody>
+                            </table>
+                        </div>
+                    </div> <!-- fin contenedor cancelado -->
                 </div>
             </div>
         </main>
     </div>
 
     <!-- MODALES VARIOS -->
+
+    <!-- MODAL CONFIRMAR CANCELACIÓN COTIZACIÓN CARA -->
+    <div id="modal-confirmar-cancelacion" class="modal-overlay" style="z-index: 9999999;">
+        <div class="modal-box">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-confirmar-cancelacion')">×</button>
+            <h3 class="modal-header" style="color: #ef4444;">⚠️ Confirmar Cancelación</h3>
+            <p style="margin-top:15px; font-size:1.1em; color:#e0e6ed;">¿Estás seguro de <strong>CANCELAR</strong> este ticket por ser una cotización cara?</p>
+            <p style="margin-top:10px; color:#a3b1c6;">El ticket se detendrá por completo y se enviará directamente a la pestaña de "Tickets Cancelados" en el Archivo General.</p>
+            
+            <div class="modal-actions" style="margin-top:25px;">
+                <button class="btn-info" onclick="cerrarModal('modal-confirmar-cancelacion')" style="background:#475569; border:none; flex:1;">Volver atrás</button>
+                <button class="btn-danger-modal" onclick="ejecutarCancelacionTicket()" style="background:#ef4444; border:none; flex:1;">Sí, Cancelar Ticket</button>
+            </div>
+        </div>
+    </div>
+    
     <div id="modal-asignar-reporte" class="modal-overlay">
         <div class="modal-box large">
             <button class="btn-close-modal" onclick="cerrarModal('modal-asignar-reporte')">×</button>
@@ -655,7 +734,8 @@
                 </div>
             </div>
             <div class="modal-actions"><button class="btn-success-modal" id="btn-confirmar-admin"
-                    onclick="confirmarFacturaAdmin()" disabled style="width:100%;">Confirmar Factura</button></div>
+                    onclick="confirmarFacturaAdmin()" disabled style="width:100%;">Confirmar Factura</button>
+                    <button class="btn-danger-modal" id="btn-cancelar-cotizacion" onclick="cancelarTicketAdmin()">Cancelar Ticket (Cotización Cara)</button></div>
         </div>
     </div>
 
@@ -738,7 +818,7 @@
                         </select>
                     </div>
                     
-                    <div class="input-group full-width" data-seccion="1 2"><label id="label_edit_titulo">Título del Reporte</label><input type="text" name="titulo" id="edit_titulo" required></div>
+                    <div class="input-group full-width" data-seccion="2"><label id="label_edit_titulo">Título del Reporte</label><input type="text" name="titulo" id="edit_titulo" required></div>
                     <div class="input-group full-width" data-seccion="1 2"><label id="label_edit_retro">Descripción Detallada del Problema (Retro)</label>
                         <textarea name="retro" id="edit_retro" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
                     </div>
@@ -751,7 +831,7 @@
                     </div>
 
                     <!-- GENERAL (NO RESTRINGIDO) -->
-                    <div class="input-group"><label>Núm. Orden (Opcional)</label><input type="text" name="numero_orden" id="edit_numero_orden"></div>
+                    <div class="input-group" data-seccion="3"><label>Núm. Orden (Opcional)</label><input type="text" name="numero_orden" id="edit_numero_orden"></div>
 
                     <!-- EXCLUSIVOS DE SECCIÓN 2 (TALLER) -->
                     <div class="input-group" data-seccion="2"><label>Precio (Sin IVA) MXN</label><input type="text" name="precio" id="edit_precio" required onblur="formatearEnInput(this)" onfocus="limpiarInput(this)"></div>
@@ -924,12 +1004,13 @@
     <div id="lightbox-modal" class="lightbox-overlay" onclick="cerrarLightbox(event)"><span class="lightbox-close"
             onclick="cerrarLightbox(event)">&times;</span><img id="lightbox-img" class="lightbox-content" src=""></div>
 
-    <script src="/static/script.js"></script>
+    <script src="/static/script.js?v=3"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js"></script>
     <script src="/static/facturas_archivos.js"></script>
     <script src="/static/facturas_pdf.js"></script>
-    <script src="/static/facturas_principal.js?v=15?v=11?v=10"></script>
+    <script src="/static/unidades.js?v=7"></script>
+    <script src="/static/facturas_principal.js?v=16?v=11?v=10"></script>
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">
         <div class="modal-box">
@@ -1030,6 +1111,38 @@
             }
         });
     </script>
+
+    <!-- MODAL UNIDAD -->
+    <div id="modal-unidad" class="modal-overlay" style="display:none; z-index:2000;">
+        <div class="modal-box" style="max-width:400px; padding:20px; border-radius:10px; background:#0b1c30; border:1px solid #1f395a;">
+            <h2 id="modal-unidad-title" style="color:#0ea5e9; margin-top:0;">Agregar Unidad</h2>
+            <form id="form-unidad" onsubmit="event.preventDefault(); guardarUnidad();">
+                <input type="hidden" id="unidad-modo" value="agregar">
+                <input type="hidden" id="unidad-old-numero" value="">
+                
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; color:white; margin-bottom:5px;">No. Económico</label>
+                    <input type="text" id="unidad-numero" required style="width:100%; padding:10px; border-radius:5px; border:1px solid #1f395a; background:#111; color:white;">
+                </div>
+                
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; color:white; margin-bottom:5px;">Marca</label>
+                    <input type="text" id="unidad-marca" style="width:100%; padding:10px; border-radius:5px; border:1px solid #1f395a; background:#111; color:white;">
+                </div>
+                
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; color:white; margin-bottom:5px;">Modelo</label>
+                    <input type="text" id="unidad-modelo" style="width:100%; padding:10px; border-radius:5px; border:1px solid #1f395a; background:#111; color:white;">
+                </div>
+                
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" onclick="document.getElementById('modal-unidad').style.display='none'" style="padding:10px 15px; border:none; border-radius:5px; background:#475569; color:white; cursor:pointer;">Cancelar</button>
+                    <button type="submit" id="btn-unidad-submit" style="padding:10px 15px; border:none; border-radius:5px; background:#10b981; color:white; cursor:pointer; font-weight:bold;">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
 
 </html>

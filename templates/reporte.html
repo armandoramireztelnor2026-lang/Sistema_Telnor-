@@ -71,11 +71,11 @@
                 
                 <div class="input-group full-width-smart">
                     <label>No. Económico (Unidad)</label>
-                    <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text" name="unidad" maxlength="4" placeholder="Ej. 1234" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                    <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text" name="unidad" id="unidad-input" maxlength="4" placeholder="Ej. 1234" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
                 </div>
                 
-                <div class="input-group"><label>Marca</label><input type="text" name="marca" placeholder="Marca del vehículo" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ0-9\s]/g, '')" required></div>
-                <div class="input-group"><label>Modelo</label><input type="text" name="modelo" placeholder="Modelo / Año" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ0-9\s-]/g, '')" required></div>
+                <div class="input-group"><label>Marca</label><input type="text" name="marca" id="marca-input" readonly style="background:#e2e8f0; cursor:not-allowed; color:#000000; font-weight:bold;" placeholder="Marca del vehículo" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ0-9\s]/g, '')" required></div>
+                <div class="input-group"><label>Modelo</label><input type="text" name="modelo" id="modelo-input" readonly style="background:#e2e8f0; cursor:not-allowed; color:#000000; font-weight:bold;" placeholder="Modelo / Año" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ0-9\s-]/g, '')" required></div>
                 
                 <div class="input-group"><label>Celular</label><input type="text" name="celular" placeholder="Número de contacto" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="15" required></div>
                 <div class="input-group"><label>Nombre del Empleado (Completo)</label><input type="text" name="empleado" placeholder="Escriba su nombre completo" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
@@ -300,6 +300,84 @@
                 btn.disabled = false;
             });
         }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            let unidadesData = {};
+            try {
+                const res = await fetch('/api/unidades');
+                unidadesData = await res.json();
+            } catch(e) {
+                console.error("Error cargando unidades:", e);
+            }
+            
+            const unidadInput = document.getElementById('unidad-input');
+            const marcaInput = document.getElementById('marca-input');
+            const modeloInput = document.getElementById('modelo-input');
+            
+            if (unidadInput && marcaInput && modeloInput) {
+                unidadInput.addEventListener('input', () => {
+                    // Remover maxLength temporalmente si el usuario dijo que podía ser más largo, pero el form actual tiene , lo respetamos.
+                    // (Actually the user JSON has IDs like "80901231" which are 8 digits!)
+                    // Let's remove the  in case they have longer IDs.
+                    const val = unidadInput.value.trim();
+                    if (unidadesData[val]) {
+                        marcaInput.value = unidadesData[val].Marca || '';
+                        modeloInput.value = unidadesData[val].Modelo || '';
+                    } else {
+                        marcaInput.value = '';
+                        modeloInput.value = '';
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script>
+        let globalUnidadesData = {};
+        
+        async function loadUnidades() {
+            try {
+                const res = await fetch('/api/unidades');
+                globalUnidadesData = await res.json();
+                console.log("Unidades cargadas exitosamente:", Object.keys(globalUnidadesData).length);
+            } catch(e) {
+                console.error("Error cargando unidades:", e);
+            }
+        }
+        
+        function checkAutoFill() {
+            const unidadInput = document.getElementById('unidad-input');
+            const marcaInput = document.getElementById('marca-input');
+            const modeloInput = document.getElementById('modelo-input');
+            
+            if (!unidadInput || !marcaInput || !modeloInput) return;
+            
+            const rawVal = unidadInput.value.trim();
+            const val = "8090" + rawVal;
+            console.log("Tecleando unidad:", val);
+            
+            if (globalUnidadesData[val]) {
+                console.log("Encontrada:", globalUnidadesData[val]);
+                marcaInput.value = globalUnidadesData[val].Marca || '';
+                modeloInput.value = globalUnidadesData[val].Modelo || '';
+            } else {
+                marcaInput.value = '';
+                modeloInput.value = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUnidades();
+            const unidadInput = document.getElementById('unidad-input');
+            if (unidadInput) {
+                // Event listeners on keyup to ensure value is captured after replace
+                unidadInput.addEventListener('keyup', checkAutoFill);
+                unidadInput.addEventListener('input', checkAutoFill);
+                unidadInput.addEventListener('change', checkAutoFill);
+            }
+        });
     </script>
 </body>
 </html>

@@ -12,6 +12,7 @@
 </head>
 <body>
     <input type="hidden" id="rol-actual" value="proveedores">
+    <input type="hidden" id="nombre-proveedor-actual" value="{{ usuario.datos_perfil.nombre_proveedor }}">
     <div class="dashboard-container">
         
         <aside class="sidebar">
@@ -24,6 +25,7 @@
                 <button class="btn-sidebar" onclick="cambiarVistaProv('reportes')">Tickets de Trabajo</button>
                 <button class="btn-sidebar" onclick="cambiarVistaProv('facturas')">Cotizaciones</button>
                 <button class="btn-sidebar" onclick="cambiarVistaProv('facturas_finales')">Facturas</button>
+                <button class="btn-sidebar" onclick="cambiarVistaProv('archivo')">Archivo Histórico</button>
             </nav>
             <div class="btn-logout-container"><a href="/logout" class="btn-logout" onclick="return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
         </aside>
@@ -77,6 +79,24 @@
                     </div>
                 </div>
             </div>
+        
+            <div id="vista-archivo" style="display: none;">
+                <div class="top-bar">
+                    <h2>Archivo Histórico</h2>
+                </div>
+                <div class="admin-container">
+                    <input type="text" id="buscador-archivo-prov" class="buscador-pildora" placeholder="Buscar ticket en el archivo..." onkeyup="filtrarTabla('buscador-archivo-prov', 'tabla-archivo-prov')" style="margin-bottom: 20px; width: 100%; max-width: 400px; padding: 12px; border-radius: 20px; border: 1px solid #1f395a; background: #0b1c30; color: white;">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Folio Oficial</th><th>Unidad</th><th>Título</th><th>Precio s/IVA</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody id="tabla-archivo-prov"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -263,12 +283,12 @@
         </div>
     </div>
 
-    <script src="/static/script.js"></script>
+    <script src="/static/script.js?v=1788153941"></script>
     
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js"></script>
     <script src="/static/facturas_archivos.js"></script>
     <script src="/static/facturas_pdf.js"></script>
-    <script src="/static/facturas_principal.js"></script>
+    <script src="/static/facturas_principal.js?v=1788153941"></script>
 </body>
 </html>

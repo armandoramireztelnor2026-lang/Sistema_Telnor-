@@ -238,7 +238,21 @@ def confirmar_corp():
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
 
+
+@facturas_bp.route("/api/facturas/cancelar_cotizacion", methods=["POST"])
+def cancelar_cotizacion():
+    factura_id = request.form.get("id")
+    data = leer_json("facturas.json")
+    for f in data.get("facturas", []):
+        if f["id"] == factura_id:
+            f["estado"] = "Cancelado_Cotizacion_Cara"
+            escribir_json("facturas.json", data)
+            return jsonify({"status": "success", "message": "Ticket cancelado por cotización cara. Se movió a la pestaña correspondiente en Archivo General."})
+    return jsonify({"status": "error", "message": "Factura no encontrada."})
+
 @facturas_bp.route("/api/facturas/rechazar", methods=["POST"])
+
+
 def rechazar_factura():
     factura_id = request.json.get("id")
     motivo = request.json.get("motivo", "Motivo no especificado por la administración.")
@@ -552,3 +566,48 @@ def editar_seccion_especifica():
             
     return jsonify({"status": "success"})
 
+
+@facturas_bp.route("/api/facturas/eliminar_silencioso", methods=["POST"])
+def eliminar_silencioso():
+    if "usuario" not in session or session["usuario"]["rol"] != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"})
+
+    factura_id = request.json.get("id")
+    data = leer_json("facturas.json")
+    nuevas_facturas = []
+    eliminada = False
+    factura_a_eliminar = None
+    
+    for f in data.get("facturas", []):
+        if f["id"] == factura_id:
+            eliminada = True
+            factura_a_eliminar = f
+            for tipo in ["fotos_cotizacion", "fotos_evidencia"]:
+                for foto in f.get(tipo, []):
+                    import os
+                    ruta = os.path.join(CARPETA_FACTURAS, foto)
+                    if os.path.exists(ruta): os.remove(ruta)
+        else: nuevas_facturas.append(f)
+            
+    if eliminada and factura_a_eliminar:
+        data["facturas"] = nuevas_facturas
+        escribir_json("facturas.json", data)
+        
+        # Eliminar tambin el reporte (ticket) original asociado para que no regrese a la bandeja de reportes
+        reporte_id = factura_a_eliminar.get("numero_reporte", "")
+        if not reporte_id:
+            retro = factura_a_eliminar.get("retro", "")
+            if "[TICKET:" in retro:
+                import re
+                match = re.search(r"\[TICKET:(.*?)\]", retro)
+                if match:
+                    reporte_id = match.group(1).strip()
+                    
+        if reporte_id:
+            rep_data = leer_json("reportes.json")
+            nuevos_reportes = [r for r in rep_data.get("reportes", []) if str(r.get("id")) != str(reporte_id)]
+            rep_data["reportes"] = nuevos_reportes
+            escribir_json("reportes.json", rep_data)
+
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error", "message": "Factura no encontrada"})

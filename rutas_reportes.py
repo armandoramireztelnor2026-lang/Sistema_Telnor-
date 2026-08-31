@@ -166,3 +166,99 @@ def eliminar_reporte():
         
         return jsonify({"status": "success", "message": "Reporte eliminado y usuario notificado."})
 
+
+@reportes_bp.route("/api/unidades", methods=["GET"])
+def obtener_unidades():
+    if not os.path.exists("unidades.json"):
+        return jsonify({})
+    with open("unidades.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return jsonify(data)
+
+@reportes_bp.route("/api/unidades/guardar", methods=["POST"])
+def guardar_unidad():
+    import json
+    import os
+    try:
+        numero = request.form.get('numero', '').strip()
+        marca = request.form.get('marca', '').strip()
+        modelo = request.form.get('modelo', '').strip()
+        modo = request.form.get('modo', 'agregar')
+        old_numero = request.form.get('old_numero', '').strip()
+        
+        if not numero:
+            return jsonify({'status': 'error', 'message': 'El número económico es requerido.'})
+            
+        archivo = "unidades.json"
+        data = {}
+        if os.path.exists(archivo):
+            with open(archivo, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                
+        if modo == 'agregar' and numero in data:
+            return jsonify({'status': 'error', 'message': 'Esta unidad ya existe.'})
+            
+        if modo == 'editar' and old_numero and old_numero != numero:
+            if numero in data:
+                return jsonify({'status': 'error', 'message': 'El nuevo número de unidad ya está registrado.'})
+            if old_numero in data:
+                del data[old_numero]
+                
+        data[numero] = {
+            "Marca": marca,
+            "Modelo": modelo
+        }
+        
+        with open(archivo, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+            
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
+@reportes_bp.route("/api/unidades/eliminar", methods=["POST"])
+def eliminar_unidad():
+    import json
+    import os
+    try:
+        numero = request.form.get('numero', '').strip()
+        archivo = "unidades.json"
+        
+        if not os.path.exists(archivo):
+            return jsonify({'status': 'error', 'message': 'Archivo no encontrado.'})
+            
+        with open(archivo, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            
+        if numero in data:
+            del data[numero]
+            with open(archivo, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+            return jsonify({'status': 'success'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Unidad no encontrada.'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
+@reportes_bp.route("/api/reportes/eliminar_silencioso", methods=["POST"])
+def eliminar_reporte_silencioso():
+    if "usuario" not in session or session["usuario"]["rol"] != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"})
+
+    reporte_id = request.json.get("id")
+    data = leer_json("reportes.json")
+    nuevos_reportes = []
+    eliminado = False
+    
+    for r in data.get("reportes", []):
+        if r["id"] == reporte_id:
+            eliminado = True
+        else:
+            nuevos_reportes.append(r)
+
+    if eliminado:
+        data["reportes"] = nuevos_reportes
+        escribir_json("reportes.json", data)
+        return jsonify({"status": "success"})
+        
+    return jsonify({"status": "error", "message": "Reporte no encontrado"})

@@ -1469,3 +1469,67 @@ th {
 .dropdown-menu button:hover { background-color: #f59e0b; color: #111; font-weight: bold; }
 /* Removed hover behavior */
 
+
+/* MINIMENÚ DE EDICIÓN (ARCHIVOS) */
+.dropdown-menu-fixed {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #112641;
+    border: 1px solid #1f395a;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.dropdown-menu-fixed.show {
+    display: block;
+    animation: fadeInDropdown 0.2s ease-in-out;
+}
+
+@keyframes fadeInDropdown {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-menu-fixed button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 15px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #1f395a;
+    color: #e0e6ed;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.dropdown-menu-fixed button:last-child {
+    border-bottom: none;
+}
+
+.dropdown-menu-fixed button:hover {
+    background-color: #1a365d;
+    color: #38bdf8;
+}
+
+.btn-danger-modal {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+    font-size: 14.4px; /* to match font size */
+}
+.btn-danger-modal:hover {
+    background: #dc2626;
+}

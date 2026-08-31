@@ -1,0 +1,28 @@
+if (f.estado === 'Archivado') {
+                    if (tbodyArchivo && rolUsuario === 'administracion') {
+                        let btnVerExp = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                            <button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0; width:100%;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>
+                            <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#ef4444; border:none; margin:0; width:100%;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.pdf_doc50}')">📄 Ver Documento Contable</button>
+                            <div class="dropdown-container" style="position:relative;">
+                                <button class="btn-dropdown-toggle btn-info" style="font-size:0.8em; padding:8px 10px; background:#f59e0b; border:none; margin:0; width:100%;" onclick="toggleDropdownFixed(event, this)">✏️ Editar Sección ▼</button>
+                                <div class="dropdown-menu-fixed">
+                                    <button onclick="abrirModalEditarAdmin('${f.id}', 1)">1. Reporte de Incidencia</button>
+                                    <button onclick="abrirModalEditarAdmin('${f.id}', 2)">2. Diagnóstico y Cotización</button>
+                                    <button onclick="abrirModalEdicionSeccion('${f.id}', 'orden')">3. Orden de Pedido</button>
+                                    <button onclick="abrirModalEdicionSeccion('${f.id}', 'factura')">4. Factura Fiscal</button>
+                                    <button onclick="abrirModalEdicionSeccion('${f.id}', 'doc_contable')">5. Documento Contable</button>
+                                </div>
+                            </div>
+                            <button class="btn-danger-sm" style="width:100%; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar</button>
+                        </div>`;
+                        let idReporteAsociado = obtenerIdReporte(f) || 'N/A';
+                        tbodyArchivo.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idReporteAsociado}</span></td><td><strong>${f.numero_doc50}</strong></td><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.unidad}</td><td><strong>${f.proveedor}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
+                        countArchivo++;
+                    }
+                    
+                    if (tbodyArchivoProv && rolUsuario === 'proveedores' && f.proveedor === nombreProveedorActual) {
+                        let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
+                        tbodyArchivoProv.innerHTML += `<tr><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.unidad}</td><td><strong>${f.titulo}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
+                        countArchivoProv++;
+                    }
+                    return;
