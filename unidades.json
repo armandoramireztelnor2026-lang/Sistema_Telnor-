@@ -41,7 +41,8 @@
     },
     "80901133": {
         "Marca": "FORD",
-        "Modelo": "1998"
+        "Modelo": "1998",
+        "Estado": "Inactiva"
     },
     "80901134": {
         "Marca": "FORD",
@@ -57,7 +58,8 @@
     },
     "80901231": {
         "Marca": "CHEVROLET",
-        "Modelo": "1999"
+        "Modelo": "1999",
+        "Estado": "Activa"
     },
     "80901281": {
         "Marca": "FORD",

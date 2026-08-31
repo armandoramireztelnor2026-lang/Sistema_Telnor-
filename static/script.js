@@ -122,7 +122,7 @@ function procesarRegistro(rol) {
 }
 
 function cambiarVistaAdmin(vista) {
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo'];
+    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';

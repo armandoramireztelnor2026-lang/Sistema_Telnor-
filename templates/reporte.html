@@ -245,6 +245,11 @@
         }
 
         function enviarReporte() {
+            const marca = document.getElementById('marca-input').value;
+            if (marca === '' || marca === 'UNIDAD INACTIVA') {
+                alert("La unidad ingresada no es válida o se encuentra Inactiva. Verifique el número.");
+                return;
+            }
             if(!document.getElementById('hidden_mantenimiento').value) {
                 alert("Por favor seleccione un Tipo de Mantenimiento (Preventivo o Correctivo) tocando uno de los recuadros grandes.");
                 return;
@@ -358,10 +363,14 @@
             const val = "8090" + rawVal;
             console.log("Tecleando unidad:", val);
             
-            if (globalUnidadesData[val]) {
-                console.log("Encontrada:", globalUnidadesData[val]);
-                marcaInput.value = globalUnidadesData[val].Marca || '';
-                modeloInput.value = globalUnidadesData[val].Modelo || '';
+                        if (globalUnidadesData[val]) {
+                if (globalUnidadesData[val].Estado === 'Inactiva') {
+                    marcaInput.value = 'UNIDAD INACTIVA';
+                    modeloInput.value = 'NO DISPONIBLE';
+                } else {
+                    marcaInput.value = globalUnidadesData[val].Marca || '';
+                    modeloInput.value = globalUnidadesData[val].Modelo || '';
+                }
             } else {
                 marcaInput.value = '';
                 modeloInput.value = '';

@@ -262,3 +262,25 @@ def eliminar_reporte_silencioso():
         return jsonify({"status": "success"})
         
     return jsonify({"status": "error", "message": "Reporte no encontrado"})
+
+@reportes_bp.route("/api/unidades/toggle_estado", methods=["POST"])
+def toggle_estado_unidad():
+    numero = request.form.get("numero")
+    
+    if not numero:
+        return jsonify({"status": "error", "message": "Falta el numero de la unidad"})
+        
+    try:
+        data = leer_json("unidades.json")
+        if not data:
+            data = {}
+            
+        if numero in data:
+            current = data[numero].get("Estado", "Activa")
+            data[numero]["Estado"] = "Inactiva" if current == "Activa" else "Activa"
+            escribir_json("unidades.json", data)
+            return jsonify({"status": "success", "message": f"Estado cambiado a {data[numero]['Estado']}"})
+        else:
+            return jsonify({"status": "error", "message": "Unidad no encontrada"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})

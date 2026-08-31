@@ -18,7 +18,11 @@ async function cargarUnidades() {
                     <td>${info.Modelo || 'N/A'}</td>
                     <td>
                         <button onclick="abrirModalUnidad('editar', '${idUnidad}', '${info.Marca || ''}', '${info.Modelo || ''}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; margin-right:5px;">Editar</button>
-                        <button onclick="eliminarUnidad('${idUnidad}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Eliminar</button>
+                        <button onclick="eliminarUnidad('${idUnidad}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; margin-right:5px;">Eliminar</button>
+                        ${info.Estado === 'Inactiva' 
+                            ? `<button onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Activar</button>`
+                            : `<button onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#f59e0b; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Desactivar</button>`
+                        }
                     </td>
                 </tr>
             `;
@@ -119,5 +123,25 @@ async function eliminarUnidad(numero) {
     } catch (e) {
         console.error(e);
         alert('Error al eliminar.');
+    }
+}
+
+async function toggleEstadoUnidad(numero) {
+    if (!confirm('¿Estás seguro de cambiar el estado de la unidad ' + numero + '?')) return;
+
+    let fd = new FormData();
+    fd.append('numero', numero);
+
+    try {
+        let res = await fetch('/api/unidades/toggle_estado', { method: 'POST', body: fd });
+        let data = await res.json();
+        if (data.status === 'success') {
+            cargarUnidades();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error al cambiar el estado.');
     }
 }

@@ -247,6 +247,15 @@ def cancelar_cotizacion():
         if f["id"] == factura_id:
             f["estado"] = "Cancelado_Cotizacion_Cara"
             escribir_json("facturas.json", data)
+            try:
+                unidad_num = f.get("unidad", "").replace("8090-", "")
+                if unidad_num:
+                    unidades = leer_json("unidades.json")
+                    if unidades and unidad_num in unidades:
+                        unidades[unidad_num]["Estado"] = "Inactiva"
+                        escribir_json("unidades.json", unidades)
+            except Exception as e:
+                print("Error desactivando unidad:", str(e))
             return jsonify({"status": "success", "message": "Ticket cancelado por cotización cara. Se movió a la pestaña correspondiente en Archivo General."})
     return jsonify({"status": "error", "message": "Factura no encontrada."})
 
