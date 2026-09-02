@@ -85,7 +85,7 @@ async function cargarFacturas() {
 
                 let tituloCompleto = f.titulo || 'Sin Título';
                 if (f.cotizaciones && f.cotizaciones.length > 1) {
-                    tituloCompleto = f.cotizaciones.map((c, i) => `Cot ${i+1}: ${c.titulo || 'Sin Título'}`).join('<br>');
+                    tituloCompleto = f.cotizaciones.map((c, i) => `Cot ${i + 1}: ${c.titulo || 'Sin Título'}`).join('<br>');
                 }
 
                 let precioFormatArch = parseFloat(f.precio_estimado || f.precio || 0).toLocaleString('en-US');
@@ -100,11 +100,10 @@ async function cargarFacturas() {
                     return; // skip active trays
                 }
 
-                if (f.estado === 'Archivado' || (rolUsuario === 'proveedores' && f.factura_folio)) {
+                if (f.estado === 'Archivado' || (rolUsuario === 'proveedores' && f.validacion_fiscal === 'Aprobada')) {
                     if (f.estado === 'Archivado' && tbodyArchivo && rolUsuario === 'administracion') {
                         let btnVerExp = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
                             <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; color:white; margin:0; width:100%;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>
-                            <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#10b981; border:none; color:white; margin:0; width:100%;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.pdf_doc50}')">📄 Ver Documento Contable</button>
                             <div class="dropdown-container" style="position:relative;">
                                 <button class="btn-dropdown-toggle btn-info" style="font-size:0.8em; padding:8px 10px; background:#f59e0b; border:none; color:#111; margin:0; width:100%;" onclick="toggleDropdownFixed(event, this)">✏️ Editar Sección ▼</button>
                                 <div class="dropdown-menu-fixed">
@@ -184,7 +183,11 @@ async function cargarFacturas() {
                         if (!f.factura_folio) {
                             btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; margin-top:5px; width:100%;" onclick="abrirModalSubirFactura('${f.id}')">🧾 Subir Factura Final (PDF)</button>`;
                         } else {
-                            btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.pdf_fiscal || f.factura_pdf}')">📄 Ver Factura Subida</button>`;
+                            if (f.cotizaciones && f.cotizaciones.length > 1) {
+                                btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Facturas Subidas</button>`;
+                            } else {
+                                btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Factura Subida</button>`;
+                            }
                         }
                     }
                     btnAccion += `</div>`;
@@ -196,7 +199,14 @@ async function cargarFacturas() {
 
                 if ((rolUsuario === 'proveedores' || rolUsuario === 'administracion') && entregadoTexto === 'Sí') {
                     if (tbodyFinales) {
-                        let badgeFolio = f.factura_folio ? `<span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span>` : `<span style="color:#ef4444; font-weight:bold;">Pendiente</span>`;
+                        let foliosArr = [];
+                        let f_cots = f.cotizaciones && f.cotizaciones.length > 0 ? f.cotizaciones : [f];
+                        f_cots.forEach((c, idx) => {
+                            if (c.factura_folio) foliosArr.push(f_cots.length > 1 ? `Cot ${idx + 1}: ${c.factura_folio}` : c.factura_folio);
+                        });
+                        let badgeFolio = foliosArr.length > 0
+                            ? `<span style="color:#10b981; font-weight:bold;">${foliosArr.join('<br>')}</span>`
+                            : `<span style="color:#ef4444; font-weight:bold;">Pendiente</span>`;
                         let btnAdminExtra = '';
                         let estadoFiscalBadge = '';
 
@@ -248,7 +258,15 @@ async function cargarFacturas() {
                         let tdEntregadoFinal = rolUsuario === 'administracion' ? `<td>${entregadoBadge}</td>` : '';
                         let acciones = rolUsuario === 'administracion' ? btnAdminExtra : btnAccion;
 
-                        tbodyFinales.innerHTML += `<tr><td>${badgeFolio}</td><td>${f.fecha}</td>${tdProv}<td>${f.unidad}</td>${tdTitulo}<td>$${precioBonito} MXN</td>${tdEstadoFiscal}${tdEstado}${tdEntregadoFinal}<td>${acciones}</td></tr>`;
+                        let indStr = '';
+                        if (f.cotizaciones && f.cotizaciones.length > 1) {
+                            indStr = f.cotizaciones.map((c, i) => `Cot ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
+                        } else {
+                            indStr = `$${parseFloat(f.precio || 0).toLocaleString('en-US')}`;
+                        }
+                        let tdPrecioInd = `<td><small style="color:#a3b1c6;">${indStr}</small></td>`;
+
+                        tbodyFinales.innerHTML += `<tr><td>${badgeFolio}</td><td>${f.fecha}</td>${tdProv}<td>${f.unidad}</td>${tdTitulo}${tdPrecioInd}<td><strong>$${precioBonito} MXN</strong></td>${tdEstadoFiscal}${tdEstado}${tdEntregadoFinal}<td>${acciones}</td></tr>`;
                         countFacturas++;
                     }
                 } else {
@@ -327,13 +345,99 @@ function abrirModalSubirFactura(idFactura) {
                 </div>
                 <div class="input-group full-width" style="margin-top:15px;">
                     <label>Archivo PDF de la Factura Oficial</label>
-                    <input type="file" name="pdf_factura[]" accept=".pdf" required style="padding:10px; background:#112641; border:1px solid #1f395a; border-radius:8px; color:white; width:100%;">
+                    <input type="file" name="pdf_factura[]" accept=".pdf" required onchange="previsualizarPDFLocal(this)" style="padding:10px; background:#112641; border:1px solid #1f395a; border-radius:8px; color:white; width:100%;">
+                    <div class="pdf-preview-container" style="margin-top: 15px; display: none;">
+                        <iframe src="" width="100%" height="400px" style="border: 1px solid #10b981; border-radius: 8px;"></iframe>
+                    </div>
                 </div>
             </div>
         `;
     });
 
     document.getElementById('hidden-factura-final-id').value = idFactura;
+    modal.style.display = 'flex';
+}
+
+function previsualizarPDFLocal(input) {
+    let previewContainer = input.nextElementSibling;
+    if (previewContainer && previewContainer.classList.contains('pdf-preview-container')) {
+        let iframe = previewContainer.querySelector('iframe');
+        if (input.files && input.files[0]) {
+            let file = input.files[0];
+            if (file.type === "application/pdf") {
+                let fileUrl = URL.createObjectURL(file);
+                iframe.src = fileUrl;
+                previewContainer.style.display = 'block';
+            } else {
+                alert("Por favor selecciona un archivo PDF válido.");
+                input.value = "";
+                iframe.src = '';
+                previewContainer.style.display = 'none';
+            }
+        } else {
+            iframe.src = '';
+            previewContainer.style.display = 'none';
+        }
+    }
+}
+
+function abrirModalVerFacturasSubidas(idFactura) {
+    let modal = document.getElementById('modal-ver-facturas-prov');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-ver-facturas-prov';
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-box large" style="max-width: 1200px; width: 90vw;">
+                <button class="btn-close-modal" onclick="cerrarModal('modal-ver-facturas-prov')">×</button>
+                <h3 class="modal-header" style="color: #40916c;">📄 Facturas Fiscales Subidas</h3>
+                <div style="background: #081422; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #1f395a; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #a3b1c6; font-size: 1.1em;">Folio(s): <strong id="ver-prov-folio-text" style="color: #10b981; font-size: 1.2em;"></strong></span>
+                    <span style="color: #a3b1c6; font-size: 1.1em;">Unidad: <strong id="ver-prov-unidad-text" style="color: white;"></strong></span>
+                </div>
+                <div id="ver-prov-nav-facturas" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;"></div>
+                <div style="margin-bottom: 20px; height: 60vh; min-height: 400px; border: 2px solid #1f395a; border-radius: 8px; overflow: hidden; background: white;">
+                    <iframe id="ver-prov-pdf-frame" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+                <div class="modal-actions" style="margin-top: 15px;">
+                    <button type="button" class="btn-danger" style="width:100%; margin:0;" onclick="cerrarModal('modal-ver-facturas-prov')">Cerrar Visor</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    const f = facturasGlobal.find(x => String(x.id) === String(idFactura));
+    if (!f) return;
+
+    document.getElementById('ver-prov-unidad-text').innerText = f.unidad;
+    let cots = f.cotizaciones && f.cotizaciones.length > 0 ? f.cotizaciones : [f];
+    let allFacturas = cots.filter(c => c.factura_folio || c.factura_pdf || c.pdf_fiscal);
+
+    let folioText = "";
+    if (f.cotizaciones && f.cotizaciones.length > 1) {
+        folioText = allFacturas.map((c, i) => `Cot ${i + 1}: ${c.factura_folio || 'N/A'}`).join(' | ');
+    } else {
+        folioText = f.factura_folio || 'N/A';
+    }
+    document.getElementById('ver-prov-folio-text').innerText = folioText;
+
+    let navContainer = document.getElementById('ver-prov-nav-facturas');
+    navContainer.innerHTML = '';
+
+    if (allFacturas.length > 0) {
+        let firstPdf = allFacturas[0].factura_pdf || allFacturas[0].pdf_fiscal || f.factura_pdf || f.pdf_fiscal;
+        document.getElementById('ver-prov-pdf-frame').src = '/static/facturas_archivos/' + firstPdf;
+
+        if (allFacturas.length > 1) {
+            navContainer.innerHTML = allFacturas.map((c, i) =>
+                `<button type="button" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85em;" onclick="document.getElementById('ver-prov-pdf-frame').src='/static/facturas_archivos/${c.factura_pdf || c.pdf_fiscal}'">📄 Cotización ${i + 1}: ${c.factura_folio || 'N/A'}</button>`
+            ).join('');
+        }
+    } else {
+        document.getElementById('ver-prov-pdf-frame').src = '';
+    }
+
     modal.style.display = 'flex';
 }
 
@@ -1018,7 +1122,7 @@ function generarPDFSilencioso(idFactura) {
         let multiCot = cots.length > 1;
         cots.forEach((c, idx) => {
             let tituloGlobalText = multiCot ? `■ SECCIÓN 2: DIAGNÓSTICO Y COTIZACIÓN ${idx + 1}` : '■ SECCIÓN 2: DIAGNÓSTICO Y COTIZACIÓN';
-            
+
             let evHTML = '';
             if (c.fotos_evidencia && c.fotos_evidencia.length > 0) {
                 c.fotos_evidencia.forEach(foto => {
@@ -1539,11 +1643,6 @@ function abrirModalDocContable(idFactura) {
                            style="width: 100%; padding: 12px; background: #112641; border: 1px solid #1f395a; border-radius: 8px; color: white; margin-bottom: 10px;"
                            placeholder="Ej. DC-908123">
                 </div>
-                <div class="input-group full-width">
-                    <label style="color: #e0e6ed; font-weight: 600; display: block; margin-bottom: 8px;">PDF del Documento Contable:</label>
-                    <input type="file" name="pdf_doc50[]" accept="application/pdf" required
-                           style="padding:10px; background:#112641; border:1px solid #1f395a; border-radius:8px; color:white; width:100%;">
-                </div>
             </div>
         `;
     });
@@ -1554,25 +1653,23 @@ function abrirModalDocContable(idFactura) {
 function subirDocContable() {
     const id = document.getElementById('hidden-doc-contable-id').value;
     let nums = document.querySelectorAll('input[name="numero_doc50[]"]');
-    let pdfs = document.querySelectorAll('input[name="pdf_doc50[]"]');
 
     // Validar que todos los campos estén completos
     let allValid = true;
-    nums.forEach((n, i) => {
-        if (!n.value.trim() || !pdfs[i].files[0]) allValid = false;
+    nums.forEach((n) => {
+        if (!n.value.trim()) allValid = false;
     });
     if (!allValid) {
-        alert("Por favor complete el número y seleccione el PDF para cada cotización.");
+        alert("Por favor complete el número de documento contable para cada cotización.");
         return;
     }
 
-    if (!confirm("¿Subir todos los documentos contables y archivar el ticket?")) return;
+    if (!confirm("¿Guardar todos los documentos contables y archivar el ticket?")) return;
 
     const formData = new FormData();
     formData.append('id_factura', id);
-    nums.forEach((n, i) => {
+    nums.forEach((n) => {
         formData.append('numero_doc50[]', n.value.trim());
-        formData.append('pdf_doc50[]', pdfs[i].files[0]);
     });
 
     mostrarLoaderDinamico("Guardando Documentos Contables...", "Finalizando y Archivando Ticket 🗃️");

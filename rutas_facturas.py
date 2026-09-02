@@ -233,12 +233,23 @@ def listar_facturas():
         if rol == "proveedores":
             proveedor_actual = session["usuario"]["datos_perfil"]["nombre_proveedor"]
             facturas = [f for f in facturas if f.get("proveedor") == proveedor_actual]
+            
+        elif rol == "corporativos":
+            facturas = [f for f in facturas if float(f.get("precio", 0)) >= 10001.0]
+            
+        elif rol == "administracion":
+            # --- FILTRO GEOGRÁFICO PARA SUPERVISORES ---
+            subrol = session["usuario"]["datos_perfil"].get("subrol", "")
+            if subrol == "Supervisor":
+                mi_ciudad = session["usuario"]["datos_perfil"].get("ciudad", "")
+                usuarios_data = leer_json("usuarios.json")
+                
                 # Primero, buscamos cómo se llaman todos los proveedores de la misma ciudad
                 proveedores_locales = [u["datos_perfil"]["nombre_proveedor"] for u in usuarios_data.get("usuarios", []) if u["rol"] == "proveedores" and u["datos_perfil"].get("ciudad") == mi_ciudad]
                 
                 # Luego, solo le mostramos al Supervisor las facturas que vengan de esos proveedores locales
                 facturas = [f for f in facturas if f.get("proveedor") in proveedores_locales]
-                
+
 
     # INYECTAR DATOS DEL REPORTE INICIAL
     try:
@@ -522,7 +533,27 @@ def subir_factura_final():
     if not pdfs_factura:
         return jsonify({"status": "error", "message": "Debe subir los archivos PDF."})
         
+    folios_limpios = [str(fol).strip().upper() for fol in folios if str(fol).strip()]
+    if len(folios_limpios) != len(set(folios_limpios)):
+        return jsonify({"status": "error", "message": "No puedes ingresar folios repetidos para distintas cotizaciones en el mismo ticket."})
+        
     data = leer_json('facturas.json')
+    
+    todos_los_folios = set()
+    for f_db in data.get('facturas', []):
+        # Excluir el ticket actual de la validación global por si se están resubiendo
+        if str(f_db.get('id')) == str(factura_id):
+            continue
+        if f_db.get('factura_folio'):
+            todos_los_folios.add(str(f_db['factura_folio']).strip().upper())
+        for c_db in f_db.get('cotizaciones', []):
+            if c_db.get('factura_folio'):
+                todos_los_folios.add(str(c_db['factura_folio']).strip().upper())
+                
+    for fol in folios_limpios:
+        if fol in todos_los_folios:
+            return jsonify({"status": "error", "message": f"El folio fiscal '{fol}' ya se encuentra registrado en otro ticket del sistema."})
+
     for f in data.get('facturas', []):
         if str(f['id']) == str(factura_id):
             
@@ -619,17 +650,14 @@ def doc50():
     if not factura_id: factura_id = request.form.get('id')
 
     nums_doc50 = request.form.getlist('numero_doc50[]')
-    pdfs_doc50 = request.files.getlist('pdf_doc50[]')
 
     # Compatibilidad
     if not nums_doc50:
         num = request.form.get('numero_doc50')
         if num: nums_doc50 = [num]
-        pdf = request.files.get('pdf')
-        if pdf: pdfs_doc50 = [pdf]
 
-    if not pdfs_doc50:
-        return jsonify({'status': 'error', 'message': 'No se seleccionaron archivos.'})
+    if not nums_doc50:
+        return jsonify({'status': 'error', 'message': 'Faltan números de documento contable.'})
 
     data = leer_json('facturas.json')
     for f in data.get('facturas', []):
@@ -639,14 +667,8 @@ def doc50():
             for i, cot in enumerate(cots):
                 if i < len(nums_doc50):
                     cot['numero_doc50'] = nums_doc50[i]
-                if i < len(pdfs_doc50) and pdfs_doc50[i] and pdfs_doc50[i].filename != '':
-                    pdf = pdfs_doc50[i]
-                    filename = secure_filename(f'doc50_{factura_id}_{i}_{pdf.filename}')
-                    pdf.save(os.path.join(CARPETA_FACTURAS, filename))
-                    cot['pdf_doc50'] = filename
                     if i == 0:
                         f['numero_doc50'] = nums_doc50[i]
-                        f['pdf_doc50'] = filename
 
             f['estado'] = 'Archivado'
             escribir_json('facturas.json', data)
