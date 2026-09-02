@@ -708,31 +708,8 @@
             <button class="btn-close-modal" onclick="cerrarModal('modal-revision-admin')">×</button>
             <h3 class="modal-header">Asignación de Orden Administrativa</h3>
             <div id="revision-contenido-admin"></div>
-            <div
-                style="margin-top: 20px; background: #081422; padding: 15px; border-radius: 8px; border: 1px dashed #40916c;">
-                <label style="color:#40916c; font-weight:bold; display:block; margin-bottom:10px;">Asignar Número de
-                    Orden</label>
-                <input type="text" id="input-num-orden" placeholder="Escribe el número de orden..."
-                    oninput="validarOrden()" style="width: 100%; padding: 10px; border-radius: 8px;"><input
-                    type="hidden" id="rev-id-admin">
-
-                <div style="margin-top: 15px;">
-                    <label style="color:#40916c; font-weight:bold; display:block; margin-bottom:10px;">Favor de ingresar
-                        la Solicitud de Pedido:</label>
-                    <input type="text" id="num-cotizacion-admin" placeholder="Escriba el número aquí..."
-                        autocomplete="off"
-                        style="width: 100%; padding: 10px; background: #0b1c30; color: white; border: 1px solid #1f395a; border-radius: 8px;"
-                        oninput="validarOrden()">
-                </div>
-
-                <div style="margin-top: 15px;">
-                    <label style="color:#0ea5e9; font-weight:600; margin-bottom:8px; display:block;">Subir PDF de Orden de Pedido:</label>
-                    <input type="file" id="pdf-cotizacion-admin" accept=".pdf"
-                        style="width: 100%; padding: 10px; background: #0b1c30; color: white; border: 1px solid #1f395a; border-radius: 8px;"
-                        onchange="validarOrden()">
-                    <div id="preview-cotizacion-admin-container" style="display:none; margin-top:10px; width:100%;"></div>
-                </div>
-            </div>
+            <div id="revision-inputs-admin-container" style="margin-top: 20px; background: #081422; padding: 15px; border-radius: 8px; border: 1px dashed #40916c;"></div>
+            <input type="hidden" id="rev-id-admin">
             <div class="modal-actions"><button class="btn-success-modal" id="btn-confirmar-admin"
                     onclick="confirmarFacturaAdmin()" disabled style="width:100%;">Confirmar Factura</button>
                     <button class="btn-danger-modal" id="btn-cancelar-cotizacion" onclick="cancelarTicketAdmin()">Cancelar Ticket (Cotización Cara)</button></div>
@@ -784,6 +761,7 @@
             </div>
         </div>
     </div>
+
 
     <div id="modal-editar-admin" class="modal-overlay">
         <div class="modal-box large">
@@ -945,43 +923,7 @@
                     style="width: 250px; height: auto; border-bottom: 2px solid #333; padding-bottom: 5px; display: inline-block;">
             </div>
         </div>
-        <div
-            style="margin-bottom: 20px; border: 2px dashed #0284c7; padding: 15px; border-radius: 8px; background-color: #fafafa;">
-            <div class="pdf-section-title"
-                style="color: #0284c7; border-bottom: 1px solid #0284c7; padding-bottom: 5px;">■ SECCIÓN 2:
-                DIAGNÓSTICO Y FACTURACIÓN (TALLER)</div>
-            <div class="pdf-line"><strong>Unidad:</strong> <span id="prev-unidad"></span></div>
-            <div class="pdf-line"><strong>Responsable:</strong> <span id="prev-responsable"></span></div>
-            <div class="pdf-line"><strong>Teléfono:</strong> <span id="prev-telefono"></span></div>
-            <div class="pdf-line"><strong>Fecha Taller:</strong> <span id="prev-fecha"></span></div>
-            <div class="pdf-line"><strong>Tipo de Mantenimiento:</strong> <span id="prev-mantenimiento"></span></div>
-            <div class="pdf-line" style="margin-bottom: 15px;"><strong>Precio (Sin IVA):</strong> <span
-                    id="prev-precio"></span></div>
-
-            <div class="pdf-section-title" style="color: #0284c7;">■ DETALLES DEL TRABAJO</div>
-            <div class="pdf-line"><strong>Título:</strong> <span id="prev-titulo" class="texto-largo"></span></div>
-            <div class="pdf-line"><strong>Retro:</strong>
-                <div id="prev-retro" class="texto-largo"
-                    style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div>
-            </div>
-            <div class="pdf-line"><strong>Diagnóstico de Mecánico:</strong>
-                <div id="prev-diagnostico" class="texto-largo"
-                    style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div>
-            </div>
-            <div class="pdf-line" style="margin-bottom: 15px;"><strong>Descripción del Trabajo a Realizar:</strong>
-                <div id="prev-trabajo-realizar" class="texto-largo"
-                    style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div>
-            </div>
-
-            <div class="pdf-section-title" style="color: #0284c7;">■ DOCUMENTOS DE COTIZACIÓN</div>
-            <div id="prev-cotizaciones-container"
-                style="display: flex; flex-direction: column; align-items: center; margin-top: 15px; margin-bottom: 15px;">
-            </div>
-
-            <div class="pdf-section-title" style="color: #0284c7;">■ ANEXO FOTOGRÁFICO (EVIDENCIAS)</div>
-            <div id="prev-evidencias-container"
-                style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;"></div>
-        </div>
+        <div id="pdf-cotizaciones-dinamicas"></div>
     </div>
 
     <div id="modal-validar-codigo" class="modal-overlay">
@@ -1010,51 +952,22 @@
     <script src="/static/facturas_archivos.js"></script>
     <script src="/static/facturas_pdf.js"></script>
     <script src="/static/unidades.js?v=7"></script>
-    <script src="/static/facturas_principal.js?v=16?v=11?v=10"></script>
+    <script src="/static/facturas_principal.js"></script>
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">
-        <div class="modal-box">
+        <div class="modal-box large">
             <button class="btn-close-modal" onclick="cerrarModal('modal-doc-contable')">×</button>
             <h3 class="modal-header">Subir Documento Contable Final</h3>
             <p style="color: #a3b1c6; margin-bottom: 20px; font-size: 0.9em;">
-                Adjunta el documento final y escribe su número de identificación. Esto cerrará el ciclo y moverá el ticket al Archivo Histórico.
+                Adjunta el documento final y escribe su número de identificación para cada cotización. Esto cerrará el ciclo y moverá el ticket al Archivo Histórico.
             </p>
             <form id="form-doc-contable">
                 <input type="hidden" id="hidden-doc-contable-id">
-                
-                <label style="color: #e0e6ed; font-weight: 600; display: block; margin-bottom: 8px;">Número de Documento Contable:</label>
-                <input type="text" id="input-numero-doc-contable" required 
-                       style="width: 100%; padding: 12px; background: #0b1c30; border: 1px solid #1f395a; border-radius: 8px; color: white; margin-bottom: 20px;"
-                       placeholder="Ej. DC-908123">
-
-                <label class="file-upload" style="margin-bottom: 20px;">
-                    <input type="file" id="input-pdf-doc-contable" accept="application/pdf" required>
-                    <span class="file-label">📄 Seleccionar PDF del Documento Contable</span>
-                    <span class="file-sub" id="nombre-pdf-doc-contable">Ningún archivo seleccionado</span>
-                </label>
-                <div id="preview-doc-contable-container" style="display:none; margin-bottom:20px; width:100%;"></div>
-
-                <button type="button" class="btn-success-modal" onclick="subirDocContable()">Subir Documento y Archivar Ticket</button>
+                <div id="doc-contable-container"></div>
+                <button type="button" class="btn-success-modal" style="margin-top:20px;" onclick="subirDocContable()">Subir Documentos y Archivar Ticket</button>
             </form>
         </div>
     </div>
-    
-    <script>
-        document.getElementById('input-pdf-doc-contable').addEventListener('change', function(e) {
-            let file = e.target.files[0];
-            let n = file ? file.name : "Ningún archivo seleccionado";
-            document.getElementById('nombre-pdf-doc-contable').textContent = n;
-            
-            let previewContainer = document.getElementById('preview-doc-contable-container');
-            if (file && file.type === 'application/pdf') {
-                previewContainer.style.display = 'block';
-                previewContainer.innerHTML = `<iframe src="${URL.createObjectURL(file)}" style="width:100%; height:200px; border:1px solid #1f395a; border-radius:5px;"></iframe>`;
-            } else {
-                previewContainer.style.display = 'none';
-                previewContainer.innerHTML = '';
-            }
-        });
-    </script>
     <div id="modal-editar-seccion" class="modal-overlay" style="display: none;">
         <div class="modal-box">
             <button class="btn-close-modal" onclick="cerrarModal('modal-editar-seccion')">×</button>

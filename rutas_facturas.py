@@ -43,37 +43,133 @@ def nueva_factura():
     proveedor = session["usuario"]["datos_perfil"]["nombre_proveedor"]
     unidad_sola = request.form.get("unidad")
     unidad = f"8090-{unidad_sola}"
+    responsable = request.form.get("responsable")
+    telefono = request.form.get("telefono")
+    fecha = request.form.get("fecha")
 
-    precio_str = request.form.get("precio", "0")
-    precio_limpio = "".join(c for c in precio_str if c.isdigit() or c == ".")
-    precio_float = float(precio_limpio)
-    necesita_corp = precio_float >= 10001.0
-    
-    retro = request.form.get("retro", "")
+    # Leer arrays de cotizaciones
+    precios = request.form.getlist("precio[]")
+    pdfs_cotizacion = request.files.getlist("pdf_cotizacion[]")
+    titulos = request.form.getlist("titulo[]")
+    mantenimientos = request.form.getlist("mantenimiento[]")
+    retros = request.form.getlist("retro[]")
+    diagnosticos = request.form.getlist("diagnostico[]")
+    trabajos = request.form.getlist("trabajo_realizar[]")
+
+    import time
+    timestamp_base = int(time.time() * 1000)
+    factura_id = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+    precio_total = 0.0
+    necesita_corp = False
+    cotizaciones_array = []
+
+    # Si no hay arrays (formulario viejo), crear una sola cotización con datos globales
+    if len(precios) == 0:
+        precio_str = request.form.get("precio", "0")
+        precio_limpio = "".join(c for c in precio_str if c.isdigit() or c == ".")
+        precio_float = float(precio_limpio) if precio_limpio else 0.0
+        precio_total = precio_float
+        necesita_corp = precio_float >= 10001.0
+
+        cot = {
+            "id_cotizacion": "1",
+            "titulo": request.form.get("titulo", "Sin título"),
+            "mantenimiento": request.form.get("mantenimiento", "General"),
+            "retro": request.form.get("retro", ""),
+            "diagnostico": request.form.get("diagnostico", ""),
+            "trabajo_realizar": request.form.get("trabajo_realizar", ""),
+            "precio": precio_float,
+            "fotos_evidencia": [],
+        }
+
+        # Archivos (viejo formato)
+        for tipo in ["fotos_cotizacion", "fotos_evidencia"]:
+            archivos = request.files.getlist(tipo)
+            saved = []
+            for archivo in archivos:
+                if archivo and archivo.filename:
+                    filename = secure_filename(archivo.filename)
+                    nombre_unico = f"{tipo}_{factura_id}_{filename}"
+                    archivo.save(os.path.join(CARPETA_FACTURAS, nombre_unico))
+                    saved.append(nombre_unico)
+            if tipo == "fotos_cotizacion" and saved:
+                cot["pdf_cotizacion"] = saved[0]
+            elif tipo == "fotos_evidencia":
+                cot["fotos_evidencia"] = saved
+
+        cotizaciones_array.append(cot)
+    else:
+        # Nuevo formato multi-cotización
+        for i in range(len(precios)):
+            try:
+                precio_val = float(precios[i].replace(",", "").replace("$", "").strip())
+            except (ValueError, TypeError):
+                precio_val = 0.0
+
+            precio_total += precio_val
+            if precio_val >= 10001.0:
+                necesita_corp = True
+
+            cot = {
+                "id_cotizacion": str(i + 1),
+                "precio": precio_val,
+                "titulo": titulos[i] if i < len(titulos) else "Sin título",
+                "mantenimiento": mantenimientos[i] if i < len(mantenimientos) else "General",
+                "retro": retros[i] if i < len(retros) else "",
+                "diagnostico": diagnosticos[i] if i < len(diagnosticos) else "",
+                "trabajo_realizar": trabajos[i] if i < len(trabajos) else "",
+                "fotos_evidencia": [],
+            }
+
+            if i < len(pdfs_cotizacion) and pdfs_cotizacion[i] and pdfs_cotizacion[i].filename != "":
+                pdf = pdfs_cotizacion[i]
+                filename = secure_filename(pdf.filename)
+                nombre_unico = f"{timestamp_base}_{i}_{filename}"
+                pdf.save(os.path.join(CARPETA_FACTURAS, nombre_unico))
+                cot["pdf_cotizacion"] = nombre_unico
+
+            archivos_ev = request.files.getlist(f"fotos_evidencia_{i}[]")
+            for archivo in archivos_ev:
+                if archivo and archivo.filename:
+                    filename = secure_filename(archivo.filename)
+                    nombre_unico = f"evidencia_{timestamp_base}_{i}_{filename}"
+                    archivo.save(os.path.join(CARPETA_FACTURAS, nombre_unico))
+                    cot["fotos_evidencia"].append(nombre_unico)
+
+            cotizaciones_array.append(cot)
+
+    # Detectar compañía desde ticket vinculado
+    retro_global = cotizaciones_array[0].get("retro", "") if cotizaciones_array else ""
     compania_asignada = "RUMN"
-    import re
-    match = re.search(r"\[TICKET:(.*?)\]", retro)
-    if match:
-        ticket_id = match.group(1).strip()
+    import re as re_mod
+    match_ticket = re_mod.search(r"\[TICKET:(.*?)\]", retro_global)
+    if match_ticket:
+        ticket_id = match_ticket.group(1).strip()
         rep_data = leer_json("reportes.json")
         for r in rep_data.get("reportes", []):
             if str(r.get("id")) == str(ticket_id):
                 compania_asignada = r.get("compania", "RUMN")
                 break
 
-    nueva_factura = {
-        "id": datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+    # Título global = primer título de cotización
+    titulo_global = cotizaciones_array[0].get("titulo", "Sin título") if cotizaciones_array else "Sin título"
+    if len(cotizaciones_array) > 1:
+        titulo_global = f"{titulo_global} (+{len(cotizaciones_array)-1} más)"
+
+    nueva = {
+        "id": factura_id,
         "proveedor": proveedor,
         "unidad": unidad,
-        "responsable": request.form.get("responsable"),
-        "telefono": request.form.get("telefono"),
-        "titulo": request.form.get("titulo"),
-        "retro": retro,
-        "diagnostico": request.form.get("diagnostico", ""),
-        "trabajo_realizar": request.form.get("trabajo_realizar", ""),
-        "mantenimiento": request.form.get("mantenimiento"),
-        "precio": precio_float,
-        "fecha": request.form.get("fecha"),
+        "responsable": responsable,
+        "telefono": telefono,
+        "titulo": titulo_global,
+        "retro": retro_global,
+        "diagnostico": cotizaciones_array[0].get("diagnostico", "") if cotizaciones_array else "",
+        "trabajo_realizar": cotizaciones_array[0].get("trabajo_realizar", "") if cotizaciones_array else "",
+        "mantenimiento": cotizaciones_array[0].get("mantenimiento", "General") if cotizaciones_array else "General",
+        "precio": precio_total,
+        "fecha": fecha,
         "numero_orden": "",
         "compania": compania_asignada,
         "aprobado_admin": False,
@@ -84,33 +180,23 @@ def nueva_factura():
         "fotos_evidencia": [],
         "codigo_liberacion": "",
         "entregado": "No",
+        "cotizaciones": cotizaciones_array,
     }
 
-    for tipo in ["fotos_cotizacion", "fotos_evidencia"]:
-        archivos = request.files.getlist(tipo)
-        for archivo in archivos:
-            if archivo and archivo.filename:
-                filename = secure_filename(archivo.filename)
-                nombre_unico = f"{tipo}_{nueva_factura['id']}_{filename}"
-                archivo.save(os.path.join(CARPETA_FACTURAS, nombre_unico))
-                nueva_factura[tipo].append(nombre_unico)
-
     data = leer_json("facturas.json")
-    data.setdefault("facturas", []).append(nueva_factura)
+    data.setdefault("facturas", []).append(nueva)
     escribir_json("facturas.json", data)
 
     usuarios_data = leer_json("usuarios.json")
     admins_data = []
     corps_data = []
-    
+
     proveedor_ciudad = session["usuario"]["datos_perfil"].get("ciudad", "")
 
     for u in usuarios_data.get("usuarios", []):
         if u["rol"] == "administracion":
             subrol = u["datos_perfil"].get("subrol", "Administración")
             ciudad_admin = u["datos_perfil"].get("ciudad", "")
-            
-            # Solo notificar a la Jefatura general o al Supervisor local
             if subrol == "Jefatura" or ciudad_admin == proveedor_ciudad:
                 correo = u["datos_perfil"].get("correo")
                 if correo:
@@ -123,12 +209,15 @@ def nueva_factura():
                 nombre = f"{u['datos_perfil'].get('nombres', '')} {u['datos_perfil'].get('apellido_paterno', '')}".strip()
                 corps_data.append({"correo": correo, "nombre": nombre})
 
-    if admins_data: enviar_correo_nueva_factura(admins_data, proveedor, unidad_sola, precio_float)
-    if necesita_corp and corps_data: enviar_correo_nueva_factura_corp(corps_data, proveedor, unidad_sola, precio_float)
+    titulo_correo = f"Cotización: {titulo_global}"
+    if admins_data:
+        enviar_correo_nueva_factura(admins_data, proveedor, unidad_sola, precio_total, titulo=titulo_correo, cotizaciones=cotizaciones_array)
+    if necesita_corp and corps_data:
+        enviar_correo_nueva_factura_corp(corps_data, proveedor, unidad_sola, precio_total, titulo=titulo_correo)
 
     correo_proveedor = session["usuario"]["datos_perfil"].get("correo")
     if correo_proveedor and correo_proveedor.strip():
-        enviar_correo_confirmacion_factura(correo_proveedor, proveedor, unidad_sola, precio_float)
+        enviar_correo_confirmacion_factura(correo_proveedor, proveedor, unidad_sola, precio_total)
 
     return jsonify({"status": "success", "message": "Cotización enviada correctamente a revisión."})
 
@@ -144,17 +233,6 @@ def listar_facturas():
         if rol == "proveedores":
             proveedor_actual = session["usuario"]["datos_perfil"]["nombre_proveedor"]
             facturas = [f for f in facturas if f.get("proveedor") == proveedor_actual]
-            
-        elif rol == "corporativos":
-            facturas = [f for f in facturas if float(f.get("precio", 0)) >= 10001.0]
-            
-        elif rol == "administracion":
-            # --- FILTRO GEOGRÃFICO PARA SUPERVISORES ---
-            subrol = session["usuario"]["datos_perfil"].get("subrol", "")
-            if subrol == "Supervisor":
-                mi_ciudad = session["usuario"]["datos_perfil"].get("ciudad", "")
-                usuarios_data = leer_json("usuarios.json")
-                
                 # Primero, buscamos cómo se llaman todos los proveedores de la misma ciudad
                 proveedores_locales = [u["datos_perfil"]["nombre_proveedor"] for u in usuarios_data.get("usuarios", []) if u["rol"] == "proveedores" and u["datos_perfil"].get("ciudad") == mi_ciudad]
                 
@@ -183,44 +261,60 @@ def listar_facturas():
 @facturas_bp.route("/api/facturas/confirmar_admin", methods=["POST"])
 def confirmar_admin():
     factura_id = request.form.get("id")
-    num_orden = request.form.get("numero_orden")
-    numero_cotizacion = request.form.get("numero_cotizacion", "")
     
-    pdf_cotizacion = request.files.get("pdf_cotizacion")
-    nombre_pdf = ""
-    if pdf_cotizacion and pdf_cotizacion.filename != '':
-        carpeta_cotizaciones = os.path.join("static", "facturas_archivos")
-        if not os.path.exists(carpeta_cotizaciones):
-            os.makedirs(carpeta_cotizaciones)
-        
-        nombre_pdf = f"Cotizacion_{factura_id}_{secure_filename(pdf_cotizacion.filename)}"
-        pdf_cotizacion.save(os.path.join(carpeta_cotizaciones, nombre_pdf))
+    # Manejar posibles arrays de ordenes (nuevo formato)
+    nums_orden = request.form.getlist("numero_orden[]")
+    nums_cotizacion = request.form.getlist("numero_cotizacion[]")
+    pdfs_orden = request.files.getlist("pdf_orden[]")
+    
+    # Compatibilidad formato viejo
+    if not nums_orden:
+        num = request.form.get("numero_orden")
+        if num: nums_orden = [num]
+        cot = request.form.get("numero_cotizacion")
+        if cot: nums_cotizacion = [cot]
+        pdf = request.files.get("pdf_cotizacion")
+        if pdf: pdfs_orden = [pdf]
 
     data = leer_json("facturas.json")
     
     for f in data.get("facturas", []):
-        if f["id"] == factura_id:
+        if str(f["id"]) == str(factura_id):
             f["aprobado_admin"] = True
-            f["numero_orden"] = num_orden
-            f["numero_cotizacion_asignacion"] = numero_cotizacion
-            if nombre_pdf:
-                f["pdf_cotizacion_asignacion"] = nombre_pdf
+            f["estado_custom"] = ""
             
-            # También lo copiamos al reporte original para que los PDFs que se imprimen desde el taller
-            # puedan visualizar este dato si consultan el reporte original.
+            # Guardamos los primeros datos en la raiz por compatibilidad vieja
+            if nums_orden: f["numero_orden"] = nums_orden[0]
+            if nums_cotizacion: f["numero_cotizacion_asignacion"] = nums_cotizacion[0]
+            
+            cots = f.get("cotizaciones", [])
+            for i, cot in enumerate(cots):
+                if i < len(nums_orden):
+                    cot["numero_orden"] = nums_orden[i]
+                if i < len(nums_cotizacion):
+                    cot["numero_cotizacion_asignacion"] = nums_cotizacion[i]
+                    
+                if i < len(pdfs_orden) and pdfs_orden[i] and pdfs_orden[i].filename != '':
+                    pdf = pdfs_orden[i]
+                    carpeta_cotizaciones = os.path.join("static", "facturas_archivos")
+                    if not os.path.exists(carpeta_cotizaciones): os.makedirs(carpeta_cotizaciones)
+                    nombre_pdf = f"Cotizacion_Orden_{factura_id}_{i}_{secure_filename(pdf.filename)}"
+                    pdf.save(os.path.join(carpeta_cotizaciones, nombre_pdf))
+                    cot["pdf_cotizacion_asignacion"] = nombre_pdf
+                    if i == 0: f["pdf_cotizacion_asignacion"] = nombre_pdf
+
             reportes_data = leer_json("reportes.json")
             for r in reportes_data.get("reportes", []):
-                if str(r.get("id")) == str(f.get("reporte_id")):
-                    r["numero_cotizacion_asignacion"] = numero_cotizacion
-                    if nombre_pdf:
-                        r["pdf_cotizacion_asignacion"] = nombre_pdf
+                if str(r.get("id")) == str(f.get("reporte_id", "")):
+                    if nums_cotizacion: r["numero_cotizacion_asignacion"] = nums_cotizacion[0]
+                    if f.get("pdf_cotizacion_asignacion"): r["pdf_cotizacion_asignacion"] = f["pdf_cotizacion_asignacion"]
                     escribir_json("reportes.json", reportes_data)
                     break
 
-            f["estado_custom"] = ""
             mensaje_extra = procesar_liberacion_si_aplica(f)
             escribir_json("facturas.json", data)
-            return jsonify({"status": "success", "message": "Orden asignada y validada por Administración." + mensaje_extra})
+            return jsonify({"status": "success", "message": "Órdenes asignadas y validadas por Administración." + mensaje_extra})
+            
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
 
@@ -275,6 +369,14 @@ def rechazar_factura():
         if f["id"] == factura_id:
             eliminada = True
             factura_a_eliminar = f
+            for cot in f.get("cotizaciones", []):
+                if cot.get("pdf_cotizacion"):
+                    ruta = os.path.join(CARPETA_FACTURAS, cot["pdf_cotizacion"])
+                    if os.path.exists(ruta): os.remove(ruta)
+                for foto in cot.get("fotos_evidencia", []):
+                    ruta = os.path.join(CARPETA_FACTURAS, foto)
+                    if os.path.exists(ruta): os.remove(ruta)
+            
             for tipo in ["fotos_cotizacion", "fotos_evidencia"]:
                 for foto in f.get(tipo, []):
                     ruta = os.path.join(CARPETA_FACTURAS, foto)
@@ -397,7 +499,7 @@ def marcar_lista():
             exito, msg_correo = enviar_correo_liberacion(correo_chofer, ticket_id or "N/A", unidad_limpia, codigo, nombre_chofer, telefono_chofer)
             
             escribir_json('facturas.json', data)
-            return jsonify({"status": "success", "message": "Â¡Unidad marcada como lista! El PIN ha sido enviado al chofer."})
+            return jsonify({"status": "success", "message": "¡Unidad marcada como lista! El PIN ha sido enviado al chofer."})
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
@@ -407,28 +509,45 @@ def subir_factura_final():
         return jsonify({"status": "error", "message": "No autorizado"})
         
     factura_id = request.form.get('id_factura')
-    folio = request.form.get('folio')
-    archivo_pdf = request.files.get('pdf_factura')
+    folios = request.form.getlist('folio[]')
+    pdfs_factura = request.files.getlist('pdf_factura[]')
     
-    if not archivo_pdf or not archivo_pdf.filename.endswith('.pdf'):
-        return jsonify({"status": "error", "message": "Debe subir un archivo en formato PDF válido."})
+    # Compatibilidad vieja
+    if not folios:
+        fol = request.form.get('folio')
+        if fol: folios = [fol]
+        pdf = request.files.get('pdf_factura')
+        if pdf: pdfs_factura = [pdf]
+        
+    if not pdfs_factura:
+        return jsonify({"status": "error", "message": "Debe subir los archivos PDF."})
         
     data = leer_json('facturas.json')
     for f in data.get('facturas', []):
-        if f['id'] == factura_id:
-            filename = secure_filename(archivo_pdf.filename)
-            nombre_unico = f"FACTURA_FINAL_{f['id']}_{filename}"
-            archivo_pdf.save(os.path.join(CARPETA_FACTURAS, nombre_unico))
+        if str(f['id']) == str(factura_id):
             
-            f['factura_folio'] = folio
-            f['factura_pdf'] = nombre_unico
+            cots = f.get("cotizaciones", [])
+            for i, cot in enumerate(cots):
+                if i < len(folios):
+                    cot["factura_folio"] = folios[i]
+                if i < len(pdfs_factura) and pdfs_factura[i] and pdfs_factura[i].filename != '':
+                    pdf = pdfs_factura[i]
+                    filename = secure_filename(pdf.filename)
+                    nombre_unico = f"FACTURA_FINAL_{factura_id}_{i}_{filename}"
+                    pdf.save(os.path.join(CARPETA_FACTURAS, nombre_unico))
+                    cot["factura_pdf"] = nombre_unico
+                    if i == 0: 
+                        f['factura_folio'] = folios[i]
+                        f['factura_pdf'] = nombre_unico
+
             f['validacion_fiscal'] = 'Pendiente'
             escribir_json('facturas.json', data)
             
-            # Enviar notificación a administración
-            enviar_correo_factura_fiscal_subida("armandoramireztelnor2026@gmail.com", f.get('proveedor', 'Proveedor'), f.get('unidad', 'S/N'), f.get('titulo', 'Sin Título'), folio)
+            # Notificar
+            enviar_correo_factura_fiscal_subida("armandoramireztelnor2026@gmail.com", f.get('proveedor', 'Proveedor'), f.get('unidad', 'S/N'), f.get('titulo', 'Sin Título'), folios[0] if folios else 'Varios')
+            return jsonify({"status": "success", "message": "Facturas fiscales subidas correctamente. Se notificó a Administración."})
             
-            return jsonify({"status": "success", "message": "Factura fiscal subida y adjuntada correctamente al expediente. Se ha notificado a Administración."})
+    return jsonify({"status": "error", "message": "No se encontró el registro."})
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
@@ -459,15 +578,22 @@ def rechazar_fiscal():
     for f in data.get('facturas', []):
         if str(f['id']) == str(factura_id):
             folio_borrado = f.get('factura_folio', 'Desconocido')
-            # Limpiamos el folio y PDF para que el proveedor vuelva a subir
             f.pop('factura_folio', None)
             f.pop('factura_pdf', None)
             f.pop('pdf_fiscal', None)
+            
+            for cot in f.get('cotizaciones', []):
+                if not folio_borrado or folio_borrado == 'Desconocido':
+                    folio_borrado = cot.get('factura_folio', 'Desconocido')
+                cot.pop('factura_folio', None)
+                cot.pop('factura_pdf', None)
+                cot.pop('pdf_fiscal', None)
+
             f['validacion_fiscal'] = 'Rechazada'
             
             # Opcional: Agregar comentario al ticket o mandar correo aquí, por ahora solo retro interna
             if not f.get('retro'): f['retro'] = ""
-            f['retro'] += f"\n\n[ADMINISTRACIÃ“N - Factura Rechazada]: {motivo}"
+            f['retro'] += f"\n\n[ADMINISTRACIÓN - Factura Rechazada]: {motivo}"
             
             escribir_json('facturas.json', data)
             
@@ -489,24 +615,42 @@ def doc50():
     if 'usuario' not in session or session['usuario']['rol'] != 'administracion':
         return jsonify({'status': 'error', 'message': 'No tienes permisos.'})
 
-    factura_id = request.form.get('id')
-    numero_doc50 = request.form.get('numero_doc50')
-    file = request.files.get('pdf')
+    factura_id = request.form.get('id_factura') # El form envía id_factura, no id
+    if not factura_id: factura_id = request.form.get('id')
 
-    if not file or file.filename == '':
-        return jsonify({'status': 'error', 'message': 'No se seleccionó archivo.'})
+    nums_doc50 = request.form.getlist('numero_doc50[]')
+    pdfs_doc50 = request.files.getlist('pdf_doc50[]')
 
-    filename = secure_filename(f'doc50_{factura_id}_{file.filename}')
-    file.save(os.path.join(CARPETA_FACTURAS, filename))
+    # Compatibilidad
+    if not nums_doc50:
+        num = request.form.get('numero_doc50')
+        if num: nums_doc50 = [num]
+        pdf = request.files.get('pdf')
+        if pdf: pdfs_doc50 = [pdf]
+
+    if not pdfs_doc50:
+        return jsonify({'status': 'error', 'message': 'No se seleccionaron archivos.'})
 
     data = leer_json('facturas.json')
     for f in data.get('facturas', []):
         if str(f['id']) == str(factura_id):
-            f['numero_doc50'] = numero_doc50
-            f['pdf_doc50'] = filename
+            
+            cots = f.get("cotizaciones", [])
+            for i, cot in enumerate(cots):
+                if i < len(nums_doc50):
+                    cot['numero_doc50'] = nums_doc50[i]
+                if i < len(pdfs_doc50) and pdfs_doc50[i] and pdfs_doc50[i].filename != '':
+                    pdf = pdfs_doc50[i]
+                    filename = secure_filename(f'doc50_{factura_id}_{i}_{pdf.filename}')
+                    pdf.save(os.path.join(CARPETA_FACTURAS, filename))
+                    cot['pdf_doc50'] = filename
+                    if i == 0:
+                        f['numero_doc50'] = nums_doc50[i]
+                        f['pdf_doc50'] = filename
+
             f['estado'] = 'Archivado'
             escribir_json('facturas.json', data)
-            return jsonify({'status': 'success', 'message': 'Documento Contable subido y guardado correctamente. El proceso ha concluido.'})
+            return jsonify({'status': 'success', 'message': 'Documentos Contables subidos. El proceso ha concluido para todas las cotizaciones.'})
 
     return jsonify({'status': 'error', 'message': 'Factura no encontrada.'})
 

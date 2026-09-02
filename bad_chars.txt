@@ -1,0 +1,2 @@
+Line 241:             # --- FILTRO GEOGRÃFICO PARA SUPERVISORES ---
+Line 607:             f['retro'] += f"\n\n[ADMINISTRACIÃ“N - Factura Rechazada]: {motivo}"

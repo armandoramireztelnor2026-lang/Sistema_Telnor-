@@ -15,10 +15,10 @@ const zonasCopeGlobal = {
 function actualizarCopeSelect(ciudadSelectId, copeSelectId, valorPreseleccionado = '') {
     const ciudad = document.getElementById(ciudadSelectId).value;
     const copeSelect = document.getElementById(copeSelectId);
-    if(!copeSelect) return;
-    
+    if (!copeSelect) return;
+
     copeSelect.innerHTML = '<option value="" disabled selected>Seleccione COPE / Edificio...</option>';
-    if(zonasCopeGlobal[ciudad]) {
+    if (zonasCopeGlobal[ciudad]) {
         zonasCopeGlobal[ciudad].forEach(c => {
             let sel = (c === valorPreseleccionado) ? 'selected' : '';
             copeSelect.innerHTML += `<option value="${c}" ${sel}>${c}</option>`;
@@ -28,8 +28,8 @@ function actualizarCopeSelect(ciudadSelectId, copeSelectId, valorPreseleccionado
 // ----------------------------------------
 
 let modosLogin = { 'proveedores': true, 'administracion': true, 'corporativos': true };
-let pendientesGlobal = []; 
-let usuariosGlobal = []; 
+let pendientesGlobal = [];
+let usuariosGlobal = [];
 
 function mostrarAuth(rol) {
     document.getElementById('auth-proveedores').style.display = 'none';
@@ -60,7 +60,7 @@ function toggleModo(rol) {
 function mostrarVistaPrevia(input, previewId, labelId, subId) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             document.getElementById(previewId).src = e.target.result;
             document.getElementById(previewId).style.display = 'block';
             document.getElementById(labelId).style.display = 'none';
@@ -74,7 +74,8 @@ function procesarLogin(rol) {
     const usuario = document.getElementById('user-' + rol).value.trim();
     const password = document.getElementById('pass-' + rol).value.trim();
     if (!usuario || !password) return alert("Completa usuario y contraseña.");
-    fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario, password, rol: rol })
+    fetch('/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario, password, rol: rol })
     }).then(res => res.json()).then(data => {
         if (data.status === 'success') window.location.href = data.redirect;
         else alert(data.message);
@@ -102,11 +103,11 @@ function procesarRegistro(rol) {
         formData.append('apellido_paterno', document.getElementById('ap-' + pref).value);
         formData.append('apellido_materno', document.getElementById('am-' + pref).value);
         formData.append('nombres', document.getElementById('nom-' + pref).value);
-        formData.append('ciudad', document.getElementById('ciudad-' + pref).value); 
-        formData.append('cope', document.getElementById('cope-' + pref) ? document.getElementById('cope-' + pref).value : 'No especificado'); 
+        formData.append('ciudad', document.getElementById('ciudad-' + pref).value);
+        formData.append('cope', document.getElementById('cope-' + pref) ? document.getElementById('cope-' + pref).value : 'No especificado');
         formData.append('num_empleado', document.getElementById('num-' + pref).value);
         formData.append('area', document.getElementById('area-' + pref).value);
-        
+
         if (rol === 'administracion') {
             formData.append('correo', document.getElementById('correo-admin').value);
             formData.append('subrol', document.getElementById('subrol-admin').value);
@@ -127,11 +128,11 @@ function cambiarVistaAdmin(vista) {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';
     });
-    
+
     let vistaId = vista;
     if (vista === 'facturas_finales') vistaId = 'facturas-finales';
     if (vista === 'documentos_contables') vistaId = 'documentos-contables';
-    
+
     let elVista = document.getElementById('vista-' + vistaId);
     if (elVista) elVista.style.display = 'block';
 
@@ -141,33 +142,33 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'lista-corp') cargarListaUsuarios('corporativos', 'tabla-lista-corp');
     if (vista === 'lista-admin') cargarListaUsuarios('administracion', 'tabla-lista-admin');
     if (vista === 'unidades') cargarUnidades();
-    
+
     if (vista === 'reportes' && typeof cargarReportesAdmin === 'function') cargarReportesAdmin();
     if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'documentos_contables') && typeof cargarFacturas === 'function') cargarFacturas();
 }
 
 function cambiarVistaProv(vista) {
     document.getElementById('vista-facturas').style.display = 'none';
-    if(document.getElementById('vista-reportes-prov')) {
+    if (document.getElementById('vista-reportes-prov')) {
         document.getElementById('vista-reportes-prov').style.display = 'none';
     }
-    if(document.getElementById('vista-facturas-finales')) {
+    if (document.getElementById('vista-facturas-finales')) {
         document.getElementById('vista-facturas-finales').style.display = 'none';
     }
-    if(document.getElementById('vista-archivo')) {
+    if (document.getElementById('vista-archivo')) {
         document.getElementById('vista-archivo').style.display = 'none';
     }
-    
-    if(vista === 'facturas') {
+
+    if (vista === 'facturas') {
         document.getElementById('vista-facturas').style.display = 'block';
     } else if (vista === 'reportes') {
         document.getElementById('vista-reportes-prov').style.display = 'block';
         if (typeof cargarReportesProv === 'function') cargarReportesProv();
     } else if (vista === 'facturas_finales') {
         document.getElementById('vista-facturas-finales').style.display = 'block';
-        if (typeof cargarFacturas === 'function') cargarFacturas(); 
+        if (typeof cargarFacturas === 'function') cargarFacturas();
     } else if (vista === 'archivo') {
-        if(document.getElementById('vista-archivo')) {
+        if (document.getElementById('vista-archivo')) {
             document.getElementById('vista-archivo').style.display = 'block';
         }
         if (typeof cargarFacturas === 'function') cargarFacturas();
@@ -182,14 +183,14 @@ function filtrarTabla(inputId, tbodyId) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
     const filas = tbody.getElementsByTagName('tr');
-    
+
     for (let i = 0; i < filas.length; i++) {
         if (filas[i].cells.length === 1 && filas[i].cells[0].colSpan > 1) {
             continue;
         }
-        
+
         const textoFila = filas[i].textContent.toLowerCase();
-        
+
         if (textoFila.includes(filtro)) {
             filas[i].style.display = '';
         } else {
@@ -200,7 +201,7 @@ function filtrarTabla(inputId, tbodyId) {
 
 function cargarPendientes() {
     fetch('/api/pendientes').then(res => res.json()).then(data => {
-        pendientesGlobal = data.pendientes; 
+        pendientesGlobal = data.pendientes;
         const tbody = document.getElementById('tabla-pendientes');
         tbody.innerHTML = '';
         if (pendientesGlobal.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay solicitudes</td></tr>'; return; }
@@ -215,14 +216,14 @@ function cargarPendientes() {
 
 function abrirModalDetalles(identificador) {
     const user = pendientesGlobal.find(u => u.correo === identificador || u.num_empleado === identificador);
-    if(!user) return;
-    
+    if (!user) return;
+
     let html = `<img src="/static/registros_confirmar/${user.foto_ruta}" class="modal-photo" onerror="this.src='https://via.placeholder.com/100/112641/40916c?text=Foto'">
                 <div class="form-grid" style="grid-template-columns: 1fr 1fr; text-align: left; margin-bottom: 20px;">`;
-    
+
     let ciudadCopeTexto = user.ciudad ? `${user.ciudad} / ${user.cope || 'N/A'}` : 'No especificada';
 
-    if(user.rol === 'proveedores') {
+    if (user.rol === 'proveedores') {
         html += `
             <div class="modal-info-line full-width"><strong style="color:#40916c;">Razón Social / Empresa:</strong> ${user.nombre_proveedor}</div>
             <div class="modal-info-line"><strong>Encargado Principal:</strong> ${user.encargado}</div>
@@ -240,16 +241,16 @@ function abrirModalDetalles(identificador) {
             <div class="modal-info-line"><strong>Ubicación Base:</strong> <span style="color:#0ea5e9; font-weight:bold;">${ciudadCopeTexto}</span></div>
             <div class="modal-info-line"><strong>Área:</strong> ${user.area}</div>
             <div class="modal-info-line"><strong>Correo Alertas:</strong> ${user.correo || 'N/A'}</div>
-            <div class="modal-info-line"><strong>Rol Solicitado:</strong> <span style="text-transform: capitalize;">${user.rol}</span> ${user.subrol ? '<strong style="color:#f59e0b">('+user.subrol+')</strong>' : ''}</div>
+            <div class="modal-info-line"><strong>Rol Solicitado:</strong> <span style="text-transform: capitalize;">${user.rol}</span> ${user.subrol ? '<strong style="color:#f59e0b">(' + user.subrol + ')</strong>' : ''}</div>
         `;
     }
-    
+
     html += `</div>`;
-    
+
     document.getElementById('modal-contenido').innerHTML = html;
     document.getElementById('btn-aceptar').setAttribute('onclick', `procesarAccion('${identificador}', 'aprobar')`);
     document.getElementById('btn-rechazar').setAttribute('onclick', `procesarAccion('${identificador}', 'rechazar')`);
-    
+
     document.getElementById('modal-detalles').style.display = 'flex';
 }
 
@@ -265,21 +266,22 @@ function procesarAccion(identificador, accion) {
     }
 
     let mensaje = '¿¿Aceptar usuario y generar credenciales?';
-    if(confirm(mensaje)) {
-        fetch(`/api/${accion}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ identificador: identificador })
+    if (confirm(mensaje)) {
+        fetch(`/api/${accion}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ identificador: identificador })
         }).then(res => res.json()).then(data => { alert(data.message); cerrarModal('modal-detalles'); cargarPendientes(); });
     }
 }
 
 function abrirModalDetallesUsuario(usuarioId) {
     const user = usuariosGlobal.find(u => u.usuario === usuarioId);
-    if(!user) return;
+    if (!user) return;
 
     const dp = user.datos_perfil;
     const carpeta = (user.rol === 'proveedores') ? 'logos_proveedores' : ((user.rol === 'administracion') ? 'foto_administracion' : 'foto_corporativos');
     const rolTexto = user.rol.toUpperCase();
     let ciudadCopeTexto = dp.ciudad ? `${dp.ciudad} / ${dp.cope || 'N/A'}` : 'No especificada';
-    
+
     let htmlContent = `
         <div class="pdf-header-doc">
             <h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2>
@@ -290,7 +292,7 @@ function abrirModalDetallesUsuario(usuarioId) {
             <div class="pdf-details">
     `;
 
-    if(user.rol === 'proveedores') {
+    if (user.rol === 'proveedores') {
         htmlContent += `
             <div class="pdf-section-title">■ DATOS DE LA EMPRESA</div>
             <div class="pdf-line"><strong>Razón Social:</strong> ${dp.nombre_proveedor}</div>
@@ -332,11 +334,11 @@ function abrirModalDetallesUsuario(usuarioId) {
 function descargarPDFUsuario() {
     const elemento = document.getElementById('pdf-perfil-contenido');
     const opciones = {
-        margin:       0.4,
-        filename:     'Perfil_Usuario_RUMN.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        margin: 0.4,
+        filename: 'Perfil_Usuario_RUMN.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
     html2pdf().set(opciones).from(elemento).save();
 }
@@ -346,9 +348,9 @@ function cargarListaUsuarios(rolBuscado, idTabla) {
         usuariosGlobal = data.usuarios || [];
         const tbody = document.getElementById(idTabla);
         tbody.innerHTML = '';
-        
+
         let filtrados = usuariosGlobal.filter(u => u.rol === rolBuscado && u.datos_perfil);
-        
+
         // --- ¡NUEVO!: FILTRO GEOGRÁFICO PARA EL SUPERVISOR EN LA INTERFAZ ---
         let subrolActualElement = document.getElementById('subrol-actual');
         let ciudadActualElement = document.getElementById('ciudad-actual');
@@ -359,14 +361,14 @@ function cargarListaUsuarios(rolBuscado, idTabla) {
         // -------------------------------------------------------------------
 
         if (filtrados.length === 0) { tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;">No hay usuarios en esta sección</td></tr>`; return; }
-        
+
         filtrados.forEach(u => {
             const dp = u.datos_perfil;
             const carpeta = (rolBuscado === 'proveedores') ? 'logos_proveedores' : ((rolBuscado === 'administracion') ? 'foto_administracion' : 'foto_corporativos');
             const img = `<img src="/static/${carpeta}/${dp.foto_ruta}" class="mini-profile-pic" onerror="this.src='https://via.placeholder.com/40/112641/40916c?text=X'">`;
-            
-            const ciudad = dp.ciudad ? `${dp.ciudad} <br><small style="color:#f59e0b;">${dp.cope || ''}</small>` : 'No especificada'; 
-            
+
+            const ciudad = dp.ciudad ? `${dp.ciudad} <br><small style="color:#f59e0b;">${dp.cope || ''}</small>` : 'No especificada';
+
             const btnAcciones = `
                 <div class="acciones-td" style="flex-direction: column;">
                     <button class="btn-danger" style="background-color: #b45309; margin-bottom: 5px; width: 100%;" onclick="abrirModalDetallesUsuario('${u.usuario}')">📄 Ver PDF / Detalles</button>
@@ -375,34 +377,35 @@ function cargarListaUsuarios(rolBuscado, idTabla) {
                         <button class="btn-danger-sm" onclick="eliminarUsuario('${u.usuario}', '${rolBuscado}')" style="flex:1;">Eliminar</button>
                     </div>
                 </div>`;
-            
-            if(rolBuscado === 'proveedores') { 
-                tbody.innerHTML += `<tr><td>${img}</td><td><strong>${dp.nombre_proveedor}</strong></td><td style="color:#40916c">${u.usuario}</td><td>${dp.encargado}</td><td>${dp.responsable || 'N/A'}</td><td>${dp.telefono}</td><td>${dp.correo}</td><td>${dp.direccion}</td><td>${dp.codigo_postal}</td><td><div style="min-width: 400px; width: 400px; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4;">${dp.descripcion}</div></td><td>${btnAcciones}</td></tr>`; 
-            } else { 
+
+            if (rolBuscado === 'proveedores') {
+                tbody.innerHTML += `<tr><td>${img}</td><td><strong>${dp.nombre_proveedor}</strong></td><td style="color:#40916c">${u.usuario}</td><td>${dp.encargado}</td><td>${dp.responsable || 'N/A'}</td><td>${dp.telefono}</td><td>${dp.correo}</td><td>${dp.direccion}</td><td>${dp.codigo_postal}</td><td><div style="min-width: 400px; width: 400px; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4;">${dp.descripcion}</div></td><td>${btnAcciones}</td></tr>`;
+            } else {
                 let areaYRol = dp.subrol ? `${dp.area} <br><small style="color:#f59e0b; font-weight:bold;">[${dp.subrol}]</small>` : dp.area;
-                tbody.innerHTML += `<tr><td>${img}</td><td><strong>${dp.nombres} ${dp.apellido_paterno} ${dp.apellido_materno || ''}</strong><br><small style="color:#a3b1c6;">${dp.correo || ''}</small></td><td style="color:#40916c">${u.usuario}</td><td>${dp.num_empleado}</td><td><span style="color:#0ea5e9; font-weight:bold;">${ciudad}</span></td><td>${areaYRol}</td><td>${btnAcciones}</td></tr>`; 
+                tbody.innerHTML += `<tr><td>${img}</td><td><strong>${dp.nombres} ${dp.apellido_paterno} ${dp.apellido_materno || ''}</strong><br><small style="color:#a3b1c6;">${dp.correo || ''}</small></td><td style="color:#40916c">${u.usuario}</td><td>${dp.num_empleado}</td><td><span style="color:#0ea5e9; font-weight:bold;">${ciudad}</span></td><td>${areaYRol}</td><td>${btnAcciones}</td></tr>`;
             }
         });
     });
 }
 
 function eliminarUsuario(usuarioId, rol) {
-    if(confirm(`⚠️ ATENCIÓN ⚠️\n¿¿Eliminar COMPLETAMENTE a este usuario? Esta acción no se puede deshacer.`)) {
-        fetch('/api/eliminar_usuario', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: usuarioId })
+    if (confirm(`⚠️ ATENCIÓN ⚠️\n¿¿Eliminar COMPLETAMENTE a este usuario? Esta acción no se puede deshacer.`)) {
+        fetch('/api/eliminar_usuario', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: usuarioId })
         }).then(res => res.json()).then(data => { alert(data.message); cargarListaUsuarios(rol, 'tabla-lista-' + (rol === 'proveedores' ? 'prov' : (rol === 'administracion' ? 'admin' : 'corp'))); cargarAccesos(); });
     }
 }
 
 function abrirModalEditar(usuarioId) {
     const user = usuariosGlobal.find(u => u.usuario === usuarioId);
-    if(!user) return;
+    if (!user) return;
     document.getElementById('edit-usuario-id').value = user.usuario;
     document.getElementById('edit-rol').value = user.rol;
     document.getElementById('edit-foto').value = '';
     document.getElementById('edit-preview').style.display = 'none';
     document.getElementById('edit-label').style.display = 'block';
     document.getElementById('edit-sub').style.display = 'block';
-    
+
     const dp = user.datos_perfil;
     let camposHtml = '';
 
@@ -410,12 +413,12 @@ function abrirModalEditar(usuarioId) {
         <div class="input-group">
             <label>Ciudad / Municipio Base</label>
             <select name="ciudad" id="edit-ciudad" class="input-form" required onchange="actualizarCopeSelect('edit-ciudad', 'edit-cope')">
-                <option value="Tijuana" ${dp.ciudad==='Tijuana'?'selected':''}>Tijuana</option>
-                <option value="Tecate" ${dp.ciudad==='Tecate'?'selected':''}>Tecate</option>
-                <option value="Ensenada" ${dp.ciudad==='Ensenada'?'selected':''}>Ensenada</option>
-                <option value="San Quintin" ${dp.ciudad==='San Quintin'?'selected':''}>San Quintin</option>
-                <option value="Mexicali" ${dp.ciudad==='Mexicali'?'selected':''}>Mexicali</option>
-                <option value="San Luis Rio Colorado" ${dp.ciudad==='San Luis Rio Colorado'?'selected':''}>San Luis Rio Colorado</option>
+                <option value="Tijuana" ${dp.ciudad === 'Tijuana' ? 'selected' : ''}>Tijuana</option>
+                <option value="Tecate" ${dp.ciudad === 'Tecate' ? 'selected' : ''}>Tecate</option>
+                <option value="Ensenada" ${dp.ciudad === 'Ensenada' ? 'selected' : ''}>Ensenada</option>
+                <option value="San Quintin" ${dp.ciudad === 'San Quintin' ? 'selected' : ''}>San Quintin</option>
+                <option value="Mexicali" ${dp.ciudad === 'Mexicali' ? 'selected' : ''}>Mexicali</option>
+                <option value="San Luis Rio Colorado" ${dp.ciudad === 'San Luis Rio Colorado' ? 'selected' : ''}>San Luis Rio Colorado</option>
             </select>
         </div>
         <div class="input-group">
@@ -423,17 +426,17 @@ function abrirModalEditar(usuarioId) {
             <select name="cope" id="edit-cope" class="input-form" required></select>
         </div>
     `;
-    
-    if(user.rol === 'proveedores') {
+
+    if (user.rol === 'proveedores') {
         camposHtml += `<div class="input-group full-width"><label>Empresa</label><input type="text" name="nombre_proveedor" value="${dp.nombre_proveedor}" required></div><div class="input-group"><label>Encargado</label><input type="text" name="encargado" value="${dp.encargado}" required></div><div class="input-group"><label>Responsable</label><input type="text" name="responsable" value="${dp.responsable || ''}"></div><div class="input-group"><label>Teléfono</label><input type="text" name="telefono" value="${dp.telefono}" required></div><div class="input-group"><label>Correo</label><input type="text" name="correo" value="${dp.correo}" required></div><div class="input-group"><label>C.P.</label><input type="text" name="codigo_postal" value="${dp.codigo_postal}" required></div><div class="input-group full-width"><label>Dirección</label><input type="text" name="direccion" value="${dp.direccion}" required></div><div class="input-group full-width"><label>Descripción</label><textarea name="descripcion" required style="width: 100%; min-height: 80px; padding: 12px 15px; border-radius: 8px; border: 1px solid #1f395a; background-color: #112641; color: white; font-family: 'Poppins', sans-serif; resize: vertical;">${dp.descripcion}</textarea></div>`;
     } else if (user.rol === 'administracion') {
-        camposHtml += `<div class="input-group full-width"><label>Nombre(s)</label><input type="text" name="nombres" value="${dp.nombres}" required></div><div class="input-group"><label>Apellido Paterno</label><input type="text" name="apellido_paterno" value="${dp.apellido_paterno}" required></div><div class="input-group"><label>Apellido Materno</label><input type="text" name="apellido_materno" value="${dp.apellido_materno || ''}"></div>${htmlCiudadCope}<div class="input-group"><label>Núm. Empleado</label><input type="text" name="num_empleado" value="${dp.num_empleado}" required></div><div class="input-group"><label>Área</label><input type="text" name="area" value="${dp.area}" required></div><div class="input-group"><label>Correo Alertas</label><input type="email" name="correo" value="${dp.correo || ''}" required></div><div class="input-group"><label>Puesto</label><select name="subrol" class="input-form" required><option value="Jefatura" ${dp.subrol==='Jefatura'?'selected':''}>Jefatura</option><option value="Supervisor" ${dp.subrol==='Supervisor'?'selected':''}>Supervisor</option></select></div>`;
+        camposHtml += `<div class="input-group full-width"><label>Nombre(s)</label><input type="text" name="nombres" value="${dp.nombres}" required></div><div class="input-group"><label>Apellido Paterno</label><input type="text" name="apellido_paterno" value="${dp.apellido_paterno}" required></div><div class="input-group"><label>Apellido Materno</label><input type="text" name="apellido_materno" value="${dp.apellido_materno || ''}"></div>${htmlCiudadCope}<div class="input-group"><label>Núm. Empleado</label><input type="text" name="num_empleado" value="${dp.num_empleado}" required></div><div class="input-group"><label>Área</label><input type="text" name="area" value="${dp.area}" required></div><div class="input-group"><label>Correo Alertas</label><input type="email" name="correo" value="${dp.correo || ''}" required></div><div class="input-group"><label>Puesto</label><select name="subrol" class="input-form" required><option value="Jefatura" ${dp.subrol === 'Jefatura' ? 'selected' : ''}>Jefatura</option><option value="Supervisor" ${dp.subrol === 'Supervisor' ? 'selected' : ''}>Supervisor</option></select></div>`;
     } else if (user.rol === 'corporativos') {
         camposHtml += `<div class="input-group full-width"><label>Nombre(s)</label><input type="text" name="nombres" value="${dp.nombres}" required></div><div class="input-group"><label>Apellido Paterno</label><input type="text" name="apellido_paterno" value="${dp.apellido_paterno}" required></div><div class="input-group"><label>Apellido Materno</label><input type="text" name="apellido_materno" value="${dp.apellido_materno || ''}"></div>${htmlCiudadCope}<div class="input-group"><label>Núm. Empleado</label><input type="text" name="num_empleado" value="${dp.num_empleado}" required></div><div class="input-group"><label>Área</label><input type="text" name="area" value="${dp.area}" required></div><div class="input-group full-width"><label>Correo Electrónico</label><input type="email" name="correo" value="${dp.correo || ''}" required></div>`;
     }
-    
+
     document.getElementById('edit-campos-dinamicos').innerHTML = camposHtml;
-    if(document.getElementById('edit-ciudad')) {
+    if (document.getElementById('edit-ciudad')) {
         actualizarCopeSelect('edit-ciudad', 'edit-cope', dp.cope);
     }
     document.getElementById('modal-editar').style.display = 'flex';
@@ -445,24 +448,24 @@ function procesarEdicion() {
     let formData = new FormData(document.getElementById('form-editar'));
     formData.append('usuario_id', document.getElementById('edit-usuario-id').value);
     formData.append('rol', document.getElementById('edit-rol').value);
-    
+
     let elCiudad = document.getElementById('edit-ciudad');
-    if(elCiudad) formData.append('ciudad', elCiudad.value);
-    
+    if (elCiudad) formData.append('ciudad', elCiudad.value);
+
     let elCope = document.getElementById('edit-cope');
-    if(elCope) formData.append('cope', elCope.value);
+    if (elCope) formData.append('cope', elCope.value);
 
     const foto = document.getElementById('edit-foto').files[0];
-    if(foto) formData.append('foto', foto);
+    if (foto) formData.append('foto', foto);
     fetch('/api/editar_usuario', { method: 'POST', body: formData }).then(res => res.json()).then(data => {
         alert(data.message);
-        if(data.status === 'success') { cerrarModal('modal-editar'); let rol = document.getElementById('edit-rol').value; cargarListaUsuarios(rol, 'tabla-lista-' + (rol === 'proveedores' ? 'prov' : (rol === 'administracion' ? 'admin' : 'corp'))); }
+        if (data.status === 'success') { cerrarModal('modal-editar'); let rol = document.getElementById('edit-rol').value; cargarListaUsuarios(rol, 'tabla-lista-' + (rol === 'proveedores' ? 'prov' : (rol === 'administracion' ? 'admin' : 'corp'))); }
     });
 }
 
 function togglePass(id) {
     let input = document.getElementById('pass-' + id);
-    if(input.type === 'password') {
+    if (input.type === 'password') {
         input.type = 'text';
     } else {
         input.type = 'password';
@@ -474,18 +477,18 @@ function cargarAccesos() {
         const tbody = document.getElementById('tabla-accesos');
         tbody.innerHTML = '';
         if (!data.usuarios || data.usuarios.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay credenciales</td></tr>'; return; }
-        
+
         data.usuarios.forEach(user => {
-            if(user.datos_perfil) {
+            if (user.datos_perfil) {
                 let nombreCompleto = '';
-                if(user.rol === 'proveedores') {
+                if (user.rol === 'proveedores') {
                     nombreCompleto = user.datos_perfil.nombre_proveedor;
                 } else {
                     nombreCompleto = `${user.datos_perfil.nombres} ${user.datos_perfil.apellido_paterno}`;
                 }
-                
+
                 let rolYNombre = `<span style="text-transform: capitalize; font-weight:bold; color:#0284c7;">${user.rol}</span><br><small style="color:#a3b1c6;">${nombreCompleto}</small>`;
-                
+
                 let passHtml = `
                     <div style="display:flex; align-items:center; gap:10px;">
                         <input type="password" value="${user.password}" id="pass-${user.usuario}" readonly style="background:transparent; border:none; color:#f59e0b; font-weight:bold; letter-spacing:2px; width:120px; outline:none;">
@@ -499,15 +502,16 @@ function cargarAccesos() {
 }
 
 function renovarPassword(usuarioId) {
-    if(confirm('¿Generar una NUEVA contraseña para este usuario? La contraseña anterior dejará de funcionar.')) {
-        fetch('/api/renovar_password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: usuarioId })
+    if (confirm('¿Generar una NUEVA contraseña para este usuario? La contraseña anterior dejará de funcionar.')) {
+        fetch('/api/renovar_password', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: usuarioId })
         }).then(res => res.json()).then(data => { alert(data.message); cargarAccesos(); });
     }
 }
 
 function abrirMiPerfil() {
     const dateSpan = document.getElementById('pdf-fecha');
-    if(dateSpan) {
+    if (dateSpan) {
         const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
         dateSpan.innerText = new Date().toLocaleDateString('es-MX', opciones);
     }
@@ -515,20 +519,20 @@ function abrirMiPerfil() {
 }
 
 function descargarPDF() {
-    if(confirm('¿¿Confirmas que deseas descargar este perfil en formato PDF?')) {
+    if (confirm('¿¿Confirmas que deseas descargar este perfil en formato PDF?')) {
         const elemento = document.getElementById('pdf-content');
         const opciones = {
-            margin:       0.4,
-            filename:     'Perfil_Usuario_RUMN.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            margin: 0.4,
+            filename: 'Perfil_Usuario_RUMN.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
         html2pdf().set(opciones).from(elemento).save();
     }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     if (document.getElementById('vista-pendientes')) { cambiarVistaAdmin('facturas'); }
     if (document.getElementById('vista-reportes-prov')) { cambiarVistaProv('facturas'); }
 });

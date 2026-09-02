@@ -64,25 +64,7 @@
     <!-- PLANTILLA OCULTA DE PDF FACTURA -->
     <div id="hoja-factura-pdf" class="pdf-document" style="display:none;">
         <div class="pdf-header-doc"><h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2><p>REPORTE DE MANTENIMIENTO Y FACTURACIÓN</p></div>
-        <div style="margin-bottom: 20px; border: 2px dashed #0284c7; padding: 15px; border-radius: 8px; background-color: #fafafa;">
-            <div class="pdf-section-title" style="color: #0284c7; border-bottom: 1px solid #0284c7; padding-bottom: 5px;">■ DATOS GENERALES</div>
-            <div class="pdf-line"><strong>Unidad:</strong> <span id="prev-unidad"></span></div>
-            <div class="pdf-line"><strong>Responsable:</strong> <span id="prev-responsable"></span></div>
-            <div class="pdf-line"><strong>Teléfono:</strong> <span id="prev-telefono"></span></div>
-            <div class="pdf-line"><strong>Fecha:</strong> <span id="prev-fecha"></span></div>
-            <div class="pdf-line"><strong>Tipo de Mantenimiento:</strong> <span id="prev-mantenimiento"></span></div>
-            <div class="pdf-line" style="margin-bottom: 15px;"><strong>Precio (Sin IVA):</strong> <span id="prev-precio"></span></div>
-            
-            <div class="pdf-section-title" style="color: #0284c7;">■ DETALLES DEL TRABAJO</div>
-            <div class="pdf-line"><strong>Título:</strong> <span id="prev-titulo" class="texto-largo"></span></div>
-            <div class="pdf-line" style="margin-bottom: 15px;"><strong>Retro:</strong> <div id="prev-retro" class="texto-largo" style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div></div>
-            
-            <div class="pdf-section-title" style="color: #0284c7;">■ DOCUMENTOS DE COTIZACIÓN</div>
-            <div id="prev-cotizaciones-container" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px; margin-bottom: 15px;"></div>
-            
-            <div class="pdf-section-title" style="color: #0284c7;">■ ANEXO FOTOGRÁFICO (EVIDENCIAS)</div>
-            <div id="prev-evidencias-container" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;"></div>
-        </div>
+        <div id="pdf-cotizaciones-dinamicas"></div>
     </div>
 
     <!-- VISOR DE IMÁGENES -->

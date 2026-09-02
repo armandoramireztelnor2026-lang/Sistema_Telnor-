@@ -135,7 +135,7 @@
     </div>
 
     <div id="modal-nueva-factura" class="modal-overlay">
-        <div class="modal-box large">
+        <div class="modal-box extra-large">
             <button class="btn-close-modal" onclick="cerrarModal('modal-nueva-factura')">×</button>
             <h3 class="modal-header">Crear Nueva Cotización</h3>
             <form id="form-nueva-factura" onsubmit="event.preventDefault(); previsualizarFactura();">
@@ -153,21 +153,16 @@
                     <div class="input-group"><label>Responsable en Turno</label><input type="text" name="responsable" required oninput="validarLetras(this)"></div>
                     <div class="input-group"><label>Teléfono</label><input type="text" name="telefono" maxlength="15" required oninput="validarNumeros(this)"></div>
                     <div class="input-group"><label>Fecha</label><input type="date" name="fecha" required></div>
-                    <div class="input-group full-width"><label>Título de la Factura</label><input type="text" name="titulo" required></div>
                     
-                    <div class="input-group full-width"><label>Retro (Problema/Situación)</label><textarea name="retro" id="input_nueva_retro" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none; resize: vertical; min-height: 80px;"></textarea></div>
-                    
-                    <div class="input-group full-width"><label>Diagnóstico de Mecánico</label><textarea name="diagnostico" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none; resize: vertical; min-height: 80px;"></textarea></div>
-                    <div class="input-group full-width"><label>Descripción del Trabajo a Realizar</label><textarea name="trabajo_realizar" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; outline: none; resize: vertical; min-height: 80px;"></textarea></div>
-                    <div class="input-group">
-                        <label>Tipo de Mantenimiento</label>
-                        <select name="mantenimiento" id="input_nuevo_mantenimiento" class="input-form" required><option value="" disabled selected>Selecciona</option><option value="Preventivo">Preventivo</option><option value="Correctivo">Correctivo</option></select>
+                    <div id="cotizaciones-dinamicas-container" style="grid-column: 1 / -1; background: #0b1c30; padding: 15px; border-radius: 8px; border: 1px solid #1f395a;">
+                        <h4 style="color:#0ea5e9; margin-bottom:15px; font-size:16px;">Paquete de Cotizaciones del Ticket</h4>
+                        <div id="lista-cotizaciones">
+                            <!-- Inyectado por JS -->
+                        </div>
+                        <button type="button" class="btn-info" onclick="agregarCotizacionFila()" style="background:#0ea5e9; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; width:auto; display:inline-block; margin-top:10px;">+ Añadir Otra Cotización al Ticket</button>
                     </div>
-                    <div class="input-group"><label>Precio (Sin IVA) MXN</label><input type="text" name="precio" placeholder="$0.00 MXN" required onblur="formatearEnInput(this)" onfocus="limpiarInput(this)"></div>
-                    
-                    <div class="input-group"><label style="color:#0284c7;">Subir Cotización (Fotos/PDF)</label><input type="file" id="fotos_cotizacion" name="fotos_cotizacion" multiple accept="image/*,.pdf" style="padding:5px;"><div id="preview-cotizacion" class="preview-container"></div></div>
-                    <div class="input-group"><label style="color:#40916c;">Subir Evidencias (Fotos)</label><input type="file" id="fotos_evidencia" name="fotos_evidencia" multiple accept="image/*" style="padding:5px;"><div id="preview-evidencia" class="preview-container"></div></div>
                 </div>
+
                 <div class="modal-actions"><button class="btn-success-modal" type="submit" style="width: 100%;">Revisar y Continuar</button></div>
             </form>
         </div>
@@ -208,27 +203,7 @@
                     </div>
                 </div>
 
-                <div style="margin-bottom: 20px; border: 2px dashed #0284c7; padding: 15px; border-radius: 8px; background-color: #fafafa;">
-                    <div class="pdf-section-title" style="color: #0284c7; border-bottom: 1px solid #0284c7; padding-bottom: 5px;">■ SECCIÓN 2: DIAGNÓSTICO Y FACTURACIÓN (TALLER)</div>
-                    <div class="pdf-line"><strong>Unidad:</strong> <span id="prev-unidad"></span></div>
-                    <div class="pdf-line"><strong>Responsable:</strong> <span id="prev-responsable"></span></div>
-                    <div class="pdf-line"><strong>Teléfono:</strong> <span id="prev-telefono"></span></div>
-                    <div class="pdf-line"><strong>Fecha Taller:</strong> <span id="prev-fecha"></span></div>
-                    <div class="pdf-line"><strong>Tipo de Mantenimiento:</strong> <span id="prev-mantenimiento"></span></div>
-                    <div class="pdf-line" style="margin-bottom: 15px;"><strong>Precio (Sin IVA):</strong> <span id="prev-precio"></span></div>
-                    
-                    <div class="pdf-section-title" style="color: #0284c7;">■ DETALLES DEL TRABAJO</div>
-                    <div class="pdf-line"><strong>Título:</strong> <span id="prev-titulo" class="texto-largo"></span></div>
-                    <div class="pdf-line"><strong>Retro:</strong> <div id="prev-retro" class="texto-largo" style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div></div>
-                    <div class="pdf-line"><strong>Diagnóstico de Mecánico:</strong> <div id="prev-diagnostico" class="texto-largo" style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div></div>
-                    <div class="pdf-line" style="margin-bottom: 15px;"><strong>Descripción del Trabajo a Realizar:</strong> <div id="prev-trabajo-realizar" class="texto-largo" style="margin-top: 5px; padding: 10px; background: #f9f9f9; border-left: 3px solid #0284c7;"></div></div>
-                    
-                    <div class="pdf-section-title" style="color: #0284c7;">■ DOCUMENTOS DE COTIZACIÓN</div>
-                    <div id="prev-cotizaciones-container" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px; margin-bottom: 15px;"></div>
-                    
-                    <div class="pdf-section-title" style="color: #0284c7;">■ ANEXO FOTOGRÁFICO (EVIDENCIAS)</div>
-                    <div id="prev-evidencias-container" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;"></div>
-                </div>
+                <div id="pdf-cotizaciones-dinamicas"></div>
             </div>
             <div class="modal-actions" style="max-width: 750px; margin-top: 20px;">
                 <button class="btn-danger" onclick="volverAEditar()">Volver a Editar</button><button class="btn-success-modal" onclick="enviarFacturaDefinitiva()">Confirmar y Enviar Factura</button>
@@ -289,6 +264,6 @@
     <script src="/static/facturas_herramientas.js"></script>
     <script src="/static/facturas_archivos.js"></script>
     <script src="/static/facturas_pdf.js"></script>
-    <script src="/static/facturas_principal.js?v=1788153941"></script>
+    <script src="/static/facturas_principal.js"></script>
 </body>
 </html>

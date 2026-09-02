@@ -1,6 +1,8 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+import os
 import random
 
 # =======================================================
@@ -13,12 +15,24 @@ def generar_codigo_liberacion():
     """Genera un número aleatorio de 8 dígitos matemáticamente seguro."""
     return str(random.randint(10000000, 99999999))
 
-def disparar_correo(destino, asunto, cuerpo_html):
+def disparar_correo(destino, asunto, cuerpo_html, adjuntos=None):
     msg = MIMEMultipart()
     msg['From'] = CORREO_REMITENTE
     msg['To'] = destino
     msg['Subject'] = asunto
     msg.attach(MIMEText(cuerpo_html, 'html'))
+    
+    if adjuntos:
+        for adjunto in adjuntos:
+            if os.path.exists(adjunto):
+                try:
+                    with open(adjunto, "rb") as file_adj:
+                        part = MIMEApplication(file_adj.read(), Name=os.path.basename(adjunto))
+                    part['Content-Disposition'] = f'attachment; filename="{os.path.basename(adjunto)}"'
+                    msg.attach(part)
+                except Exception as ex:
+                    print(f"Error adjuntando {adjunto}: {ex}")
+
     try:
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
@@ -88,11 +102,35 @@ def enviar_correo_nueva_orden(correo_destino, nombre_proveedor, ticket, unidad, 
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
 
-def enviar_correo_nueva_factura(lista_admins, proveedor, unidad, precio):
+def enviar_correo_nueva_factura(lista_admins, proveedor, unidad, precio, titulo=None, cotizaciones=None):
     if not lista_admins:
         return False, "No hay correos"
 
     asunto = f"Revisión de Cotización: Proveedor {proveedor} (Unidad 8090-{unidad})"
+    
+    lista_html = ""
+    adjuntos = []
+    
+    if cotizaciones and len(cotizaciones) > 0:
+        for idx, cot in enumerate(cotizaciones):
+            precio_cot = cot.get('precio', 0.0)
+            titulo_cot = cot.get('titulo', 'Sin Título')
+            lista_html += f"""
+                <li style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb;">
+                    <strong>Cotización #{idx+1}:</strong> {titulo_cot}<br>
+                    <strong>Costo:</strong> ${precio_cot:,.2f} MXN (Sin IVA)
+                </li>
+            """
+            
+            # Recopilar documentos
+            base_dir = os.path.join(os.getcwd(), 'static', 'facturas_archivos')
+            if cot.get("pdf_cotizacion"):
+                adjuntos.append(os.path.join(base_dir, cot["pdf_cotizacion"]))
+            for foto in cot.get("fotos_evidencia", []):
+                adjuntos.append(os.path.join(base_dir, foto))
+    else:
+        lista_html = f'<li style="margin-bottom: 8px;"><strong>Costo Estimado:</strong> ${precio:,.2f} MXN (Sin IVA)</li>'
+
     for admin in lista_admins:
         cuerpo_html = f"""
         <html>
@@ -104,21 +142,25 @@ def enviar_correo_nueva_factura(lista_admins, proveedor, unidad, precio):
                 <div style="padding: 20px;">
                     <p>Hola <strong>{admin['nombre']} ({admin['puesto']})</strong>,</p>
                     <p>Se le notifica que ha recibido una nueva cotización mecánica pendiente de validación y asignación de orden.</p>
+                    
                     <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
-                        <li style="margin-bottom: 8px;"><strong>Taller Emisor:</strong> {proveedor}</li>
-                        <li style="margin-bottom: 8px;"><strong>Unidad atendida:</strong> 8090-{unidad}</li>
-                        <li style="margin-bottom: 8px;"><strong>Costo Estimado:</strong> ${precio:,.2f} MXN (Sin IVA)</li>
+                        <li style="margin-bottom: 8px; font-size: 1.1em; color: #0284c7;"><strong>Taller Emisor:</strong> {proveedor}</li>
+                        <li style="margin-bottom: 15px; font-size: 1.1em; color: #0284c7;"><strong>Unidad atendida:</strong> 8090-{unidad}</li>
+                        {lista_html}
+                        <li style="margin-top: 15px; font-weight:bold;"><strong>Costo Total Estimado:</strong> ${precio:,.2f} MXN (Sin IVA)</li>
                     </ul>
+                    
+                    <p style="font-size: 0.9em; color: #6b7280; font-style: italic;">Nota: Los documentos (PDF de cotización y fotos de evidencia) han sido adjuntados a este correo para su revisión rápida.</p>
                     <p>Ingrese al panel de Automotriz para proceder con la revisión técnica y emitir su fallo.</p>
                 </div>
             </div>
         </body>
         </html>
         """
-        disparar_correo(admin['correo'], asunto, cuerpo_html)
+        disparar_correo(admin['correo'], asunto, cuerpo_html, adjuntos=adjuntos)
     return True, "Enviado"
 
-def enviar_correo_nueva_factura_corp(lista_corps, proveedor, unidad, precio):
+def enviar_correo_nueva_factura_corp(lista_corps, proveedor, unidad, precio, titulo=None):
     if not lista_corps:
         return False, "No hay correos"
 
