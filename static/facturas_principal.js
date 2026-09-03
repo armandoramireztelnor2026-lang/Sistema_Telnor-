@@ -720,7 +720,7 @@ function previsualizarFactura() {
         seccion2HTML += `<div style="margin-top:20px; padding-top:15px; border-top:1px dashed #0284c7;">`;
         seccion2HTML += `<h4 style="color:#0284c7; margin-bottom:10px;">Cotización ${i + 1}: ${t}</h4>`;
         seccion2HTML += `<div class="pdf-line"><strong>Mantenimiento:</strong> ${m}</div>`;
-        seccion2HTML += `<div class="pdf-line"><strong>Precio Cotizado (Sin IVA):</strong> <span style="color:#10b981;">${p}</span></div>`;
+        seccion2HTML += `<div class="pdf-line"><strong>Precio Cotizado (Sin IVA):</strong> <span style="color:#000000;">${p}</span></div>`;
         seccion2HTML += `<div class="pdf-line"><strong>Retro:</strong> <div class="texto-largo" style="margin-top:5px; padding:10px; background:#f9f9f9; border-left:3px solid #0284c7; color:#333;">${r}</div></div>`;
         seccion2HTML += `<div class="pdf-line"><strong>Diagnóstico:</strong> <div class="texto-largo" style="margin-top:5px; padding:10px; background:#f9f9f9; border-left:3px solid #0284c7; color:#333;">${d}</div></div>`;
         seccion2HTML += `<div class="pdf-line"><strong>Trabajo a Realizar:</strong> <div class="texto-largo" style="margin-top:5px; padding:10px; background:#f9f9f9; border-left:3px solid #0284c7; color:#333;">${tr}</div></div>`;
@@ -1209,6 +1209,95 @@ function generarPDFSilencioso(idFactura) {
             </div>
             `;
         });
+
+        let adminSeccionHTML = '';
+        let hasAdminData = false;
+        cots.forEach((c, idx) => {
+            let numOrd = c.numero_orden;
+            let numCot = c.numero_cotizacion_asignacion;
+            let pdfOrd = c.pdf_orden || c.pdf_cotizacion_asignacion;
+            
+            if (numOrd || pdfOrd) {
+                hasAdminData = true;
+                let tituloAdmin = multiCot ? `ORDEN DE PEDIDO ${idx + 1}` : 'ORDEN DE PEDIDO';
+                adminSeccionHTML += `
+                <div style="margin-top:15px; border-top: 1px dashed #374151; padding-top:10px;">
+                    <div style="color: #374151; font-weight: bold; font-size:1.1em; margin-bottom:10px;">${tituloAdmin}</div>
+                    <div class="pdf-line"><strong>N&uacute;m. Orden de Trabajo:</strong> <span>${numOrd || 'Pendiente'}</span></div>
+                    ${numCot ? `<div class="pdf-line"><strong>No. de Solicitud de Pedido:</strong> <span>${numCot}</span></div>` : ''}
+                    <div class="pdf-line"><strong>PDF Orden de Pedido:</strong> <span style="word-break: break-all;">${pdfOrd || 'Sin documento'}</span></div>
+                </div>
+                `;
+            }
+        });
+
+        if (hasAdminData) {
+            cotDinamicas.innerHTML += `
+            <div style="margin-bottom: 20px; border: 2px dashed #374151; padding: 15px; border-radius: 8px; background-color: #f3f4f6; page-break-inside: avoid;">
+                <div class="pdf-section-title" style="color: #374151; border-bottom: 1px solid #374151; padding-bottom: 5px;">■ SECCIÓN 3: ÓRDENES DE PEDIDO (ADMINISTRACIÓN)</div>
+                ${adminSeccionHTML}
+            </div>
+            `;
+        }
+
+        // SECCION 4: FACTURA FISCAL
+        let fiscalSeccionHTML = '';
+        let hasFiscalData = false;
+        cots.forEach((c, idx) => {
+            let fFolio = c.factura_folio;
+            let pdfFiscal = c.pdf_fiscal || c.factura_pdf;
+            let xmlFile = c.xml_file;
+            
+            if (fFolio || pdfFiscal) {
+                hasFiscalData = true;
+                let tituloFiscal = multiCot ? `FACTURA FISCAL ${idx + 1}` : 'FACTURA FISCAL';
+                fiscalSeccionHTML += `
+                <div style="margin-top:15px; border-top: 1px dashed #10b981; padding-top:10px;">
+                    <div style="color: #10b981; font-weight: bold; font-size:1.1em; margin-bottom:10px;">${tituloFiscal}</div>
+                    <div class="pdf-line"><strong>Folio Fiscal Emitido:</strong> <span>${fFolio || 'Pendiente'}</span></div>
+                    <div class="pdf-line"><strong>PDF Oficial:</strong> <span style="word-break: break-all;">${pdfFiscal || 'Sin documento'}</span></div>
+                    ${xmlFile ? `<div class="pdf-line"><strong>XML:</strong> <span style="word-break: break-all;">${xmlFile}</span></div>` : ''}
+                </div>
+                `;
+            }
+        });
+
+        if (hasFiscalData) {
+            cotDinamicas.innerHTML += `
+            <div style="margin-bottom: 20px; border: 2px dashed #10b981; padding: 15px; border-radius: 8px; background-color: #ecfdf5; page-break-inside: avoid;">
+                <div class="pdf-section-title" style="color: #10b981; border-bottom: 1px solid #10b981; padding-bottom: 5px;">■ SECCIÓN 4: CIERRE CONTABLE (FACTURA FISCAL)</div>
+                ${fiscalSeccionHTML}
+            </div>
+            `;
+        }
+
+        // SECCION 5: DOC CONTABLE
+        let doc50SeccionHTML = '';
+        let hasDoc50Data = false;
+        cots.forEach((c, idx) => {
+            let numDoc50 = c.numero_doc50;
+            let pdfDoc50 = c.pdf_doc50;
+            
+            if (numDoc50) {
+                hasDoc50Data = true;
+                let tituloDoc = multiCot ? `DOCUMENTO CONTABLE ${idx + 1}` : 'DOCUMENTO CONTABLE';
+                doc50SeccionHTML += `
+                <div style="margin-top:15px; border-top: 1px dashed #eab308; padding-top:10px;">
+                    <div style="color: #eab308; font-weight: bold; font-size:1.1em; margin-bottom:10px;">${tituloDoc}</div>
+                    <div class="pdf-line"><strong>N&uacute;mero de Documento:</strong> <span>${numDoc50 || 'Pendiente'}</span></div>
+                </div>
+                `;
+            }
+        });
+
+        if (hasDoc50Data) {
+            cotDinamicas.innerHTML += `
+            <div style="margin-bottom: 20px; border: 2px dashed #eab308; padding: 15px; border-radius: 8px; background-color: #fefce8; page-break-inside: avoid;">
+                <div class="pdf-section-title" style="color: #eab308; border-bottom: 1px solid #eab308; padding-bottom: 5px;">■ SECCIÓN 5: NÚMERO DE DOCUMENTO CONTABLE Y ARCHIVADO</div>
+                ${doc50SeccionHTML}
+            </div>
+            `;
+        }
     }
 
     const overlay = document.createElement('div'); overlay.style.position = 'fixed'; overlay.style.top = '0'; overlay.style.left = '0'; overlay.style.width = '100vw'; overlay.style.height = '100vh'; overlay.style.backgroundColor = 'rgba(11, 28, 48, 0.95)'; overlay.style.zIndex = '999999'; overlay.style.display = 'flex'; overlay.style.flexDirection = 'column'; overlay.style.alignItems = 'center'; overlay.style.overflowY = 'auto'; overlay.style.padding = '40px 0';
@@ -2059,7 +2148,8 @@ function previsualizarArchivoCotizacion(input, previewId) {
     previewDiv.style.position = 'relative';
 
     let contentHtml = '';
-    if (file.type === 'application/pdf') {
+    let isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (isPdf) {
         contentHtml = `
             <button type="button" onclick="abrirVisorArchivoLocal('${previewId}')" 
                 style="background:#0284c7; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-size:0.85em; display:flex; align-items:center; gap:5px;">
@@ -2092,6 +2182,11 @@ function previsualizarArchivoCotizacion(input, previewId) {
         previewDiv.style.display = 'none';
     };
     previewDiv.appendChild(btnEliminar);
+    
+    // Auto-open if it's a PDF to ensure they see it immediately
+    if (isPdf) {
+        setTimeout(() => abrirVisorArchivoLocal(previewId), 100);
+    }
 }
 
 function previsualizarFotosEvidencia(input, previewId) {
@@ -2172,12 +2267,12 @@ function abrirVisorArchivoLocal(previewId) {
                         <button onclick="document.getElementById('modal-visor-archivo-local').style.display='none'" 
                             style="background:#ef4444; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">✕ Cerrar</button>
                     </div>
-                    <iframe id="iframe-visor-local" src="" style="flex:1; width:100%; border:none; border-radius:8px;"></iframe>
+                    <embed id="embed-visor-local" src="" type="application/pdf" style="flex:1; width:100%; border:none; border-radius:8px;"></embed>
                 </div>
             `;
             document.body.appendChild(modal);
         }
-        document.getElementById('iframe-visor-local').src = url;
+        document.getElementById('embed-visor-local').src = url;
         modal.style.display = 'flex';
     } else if (tipo === 'image') {
         // Use existing lightbox
