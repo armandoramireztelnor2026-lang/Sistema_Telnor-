@@ -776,7 +776,7 @@ function previsualizarFactura() {
             document.getElementById('prev-rep-depto').innerText = r.departamento;
             document.getElementById('prev-rep-km').innerText = r.kilometraje;
             document.getElementById('prev-rep-falla').innerText = r.falla;
-            
+
             if (r.firma_chofer && document.getElementById('prev-rep-firma-container')) {
                 document.getElementById('prev-rep-firma-container').style.display = 'block';
                 document.getElementById('prev-rep-firma-img').src = r.firma_chofer;
