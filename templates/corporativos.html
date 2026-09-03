@@ -20,18 +20,38 @@
             <div class="sidebar-badge" style="background:#0284c7;">DIRECCIÓN CORP.</div>
             
             <nav class="nav-menu">
+                <button class="btn-sidebar" onclick="cambiarVistaCorp('cotizaciones')">Cotizaciones</button>
+                <button class="btn-sidebar" onclick="cambiarVistaCorp('archivo')">Archivo Histórico</button>
             </nav>
             <div class="btn-logout-container"><a href="/logout" class="btn-logout" onclick="return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
         </aside>
 
         <main class="main-content">
-            <div class="top-bar"><h2>Bandeja de Autorizaciones Financieras (+$10,000)</h2></div>
-            <div class="admin-container">
-                <div class="table-responsive">
-                    <table>
-                        <thead><tr><th>Fecha</th><th>Proveedor</th><th>Unidad</th><th>Título</th><th>Precio s/IVA</th><th>Estado</th><th>Acciones</th></tr></thead>
-                        <tbody id="tabla-facturas"></tbody>
-                    </table>
+            <div id="vista-cotizaciones-corp">
+                <div class="top-bar"><h2>Bandeja de Autorizaciones Financieras (+$10,000)</h2></div>
+                <div class="admin-container">
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Ticket</th><th>Fecha</th><th>Proveedor</th><th>Unidad</th><th>Título</th><th>Precio s/IVA (Indiv.)</th><th>Precio s/IVA (Total)</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody id="tabla-facturas"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vista-archivo-corp" style="display: none;">
+                <div class="top-bar"><h2>Archivo Histórico Corporativo</h2></div>
+                <div class="admin-container">
+                    <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
+                        <span class="buscador-icono">&#x1F50D;</span>
+                        <input type="text" id="buscador-archivo-corp" class="buscador-pildora" placeholder="Buscar por ticket, folio, unidad, proveedor..." onkeyup="filtrarTabla('buscador-archivo-corp', 'tabla-archivo-corp')">
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Ticket</th><th>Folio Fiscal</th><th>Unidad</th><th>Proveedor</th><th>Título</th><th>Precio s/IVA</th><th>Acciones</th></tr></thead>
+                            <tbody id="tabla-archivo-corp"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
@@ -131,9 +151,9 @@
     <script src="/static/script.js"></script>
     
     <!-- Módulos de Facturación -->
-    <script src="/static/facturas_herramientas.js"></script>
-    <script src="/static/facturas_archivos.js"></script>
-    <script src="/static/facturas_pdf.js"></script>
-    <script src="/static/facturas_principal.js"></script>
+    <script src="/static/facturas_herramientas.js?v=1788419321"></script>
+    <script src="/static/facturas_archivos.js?v=1788419321"></script>
+    <script src="/static/facturas_pdf.js?v=1788419321"></script>
+    <script src="/static/facturas_principal.js?v=1788419321"></script>
 </body>
 </html>

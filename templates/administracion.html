@@ -211,11 +211,13 @@
                         <table>
                             <thead>
                                 <tr>
+                                    <th>Ticket</th>
                                     <th>Fecha</th>
                                     <th>Proveedor</th>
                                     <th>Unidad</th>
                                     <th>Título de Trabajo</th>
-                                    <th>Precio s/IVA</th>
+                                    <th>Precio s/IVA (Indiv.)</th>
+                                    <th>Precio s/IVA (Total)</th>
                                     <th>Estado</th>
                                     <th>Entrega Física</th>
                                     <th>Acciones</th>
@@ -242,6 +244,7 @@
                         <table>
                             <thead>
                                 <tr>
+                                    <th>Ticket</th>
                                     <th>Folio Fiscal</th>
                                     <th>Fecha</th>
                                     <th>Proveedor</th>
@@ -502,12 +505,14 @@
                         <table>
                             <thead>
                                 <tr>
+                                    <th>Ticket</th>
                                     <th>Folio Fiscal</th>
                                     <th>Fecha</th>
                                     <th>Proveedor</th>
                                     <th>Unidad</th>
                                     <th>Título</th>
-                                    <th>Precio s/IVA</th>
+                                    <th>Precio s/IVA (Indiv.)</th>
+                                    <th>Precio s/IVA (Total)</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -949,23 +954,23 @@
 
     <script src="/static/script.js?v=3"></script>
     <script src="/static/liberacion.js"></script>
-    <script src="/static/facturas_herramientas.js"></script>
-    <script src="/static/facturas_archivos.js"></script>
-    <script src="/static/facturas_pdf.js"></script>
+    <script src="/static/facturas_herramientas.js?v=1788419321"></script>
+    <script src="/static/facturas_archivos.js?v=1788419321"></script>
+    <script src="/static/facturas_pdf.js?v=1788419321"></script>
     <script src="/static/unidades.js?v=7"></script>
-    <script src="/static/facturas_principal.js"></script>
+    <script src="/static/facturas_principal.js?v=1788419321"></script>
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">
         <div class="modal-box large">
             <button class="btn-close-modal" onclick="cerrarModal('modal-doc-contable')">×</button>
-            <h3 class="modal-header">Subir Documento Contable Final</h3>
+            <h3 class="modal-header">Ingresar Número de Documento Contable</h3>
             <p style="color: #a3b1c6; margin-bottom: 20px; font-size: 0.9em;">
-                Adjunta el documento final y escribe su número de identificación para cada cotización. Esto cerrará el ciclo y moverá el ticket al Archivo Histórico.
+                Escribe el número de identificación para cada cotización. Esto cerrará el ciclo y moverá el ticket al Archivo Histórico.
             </p>
             <form id="form-doc-contable">
                 <input type="hidden" id="hidden-doc-contable-id">
                 <div id="doc-contable-container"></div>
-                <button type="button" class="btn-success-modal" style="margin-top:20px;" onclick="subirDocContable()">Subir Documentos y Archivar Ticket</button>
+                <button type="button" class="btn-success-modal" style="margin-top:20px;" onclick="subirDocContable()">Guardar Números y Archivar Ticket</button>
             </form>
         </div>
     </div>

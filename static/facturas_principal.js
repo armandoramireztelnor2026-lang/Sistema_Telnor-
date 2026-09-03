@@ -59,6 +59,7 @@ async function cargarFacturas() {
         const tbodyDocContables = document.getElementById('tabla-doc-contables');
         const tbodyArchivo = document.getElementById('tabla-archivo');
         const tbodyArchivoProv = document.getElementById('tabla-archivo-prov');
+        const tbodyArchivoCorp = document.getElementById('tabla-archivo-corp');
         const rolUsuario = document.getElementById('rol-actual').value;
         const nombreProveedorActual = document.getElementById('nombre-proveedor-actual') ? document.getElementById('nombre-proveedor-actual').value : '';
 
@@ -69,6 +70,7 @@ async function cargarFacturas() {
         let tbodyArchivoCancelado = document.getElementById('tabla-archivo-cancelado');
         if (tbodyArchivoCancelado) tbodyArchivoCancelado.innerHTML = '';
         if (tbodyArchivoProv) tbodyArchivoProv.innerHTML = '';
+        if (tbodyArchivoCorp) tbodyArchivoCorp.innerHTML = '';
 
         if (facturasGlobal.length === 0) {
             if (tbody) tbody.innerHTML = `<tr><td colspan="${rolUsuario === 'administracion' ? '8' : '7'}" style="text-align:center;">No hay cotizaciones registradas</td></tr>`;
@@ -80,6 +82,7 @@ async function cargarFacturas() {
             let countDocContables = 0;
             let countArchivo = 0;
             let countArchivoProv = 0;
+            let countArchivoCorp = 0;
 
             facturasGlobal.forEach(f => {
 
@@ -122,9 +125,17 @@ async function cargarFacturas() {
                     }
 
                     if (tbodyArchivoProv && rolUsuario === 'proveedores' && f.proveedor === nombreProveedorActual) {
+                        let idRepArchProv = obtenerIdReporte(f) || 'S/T';
                         let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                        tbodyArchivoProv.innerHTML += `<tr><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.unidad}</td><td><strong>${tituloCompleto}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
+                        tbodyArchivoProv.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepArchProv}</span></td><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.unidad}</td><td><strong>${tituloCompleto}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
                         countArchivoProv++;
+                    }
+
+                    if (tbodyArchivoCorp && rolUsuario === 'corporativos') {
+                        let idRepArchCorp = obtenerIdReporte(f) || 'S/T';
+                        let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
+                        tbodyArchivoCorp.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepArchCorp}</span></td><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.unidad}</td><td><strong>${f.proveedor}</strong></td><td><strong>${tituloCompleto}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
+                        countArchivoCorp++;
                     }
                     return; // Skip rendering in active trays
                 }
@@ -197,6 +208,17 @@ async function cargarFacturas() {
                 let infoExtra = `<br><small style="color:#a3b1c6;">Ticket: ${obtenerIdReporte(f) || 'S/T'} | Orden: <strong style="color:#f59e0b;">${f.numero_orden || 'Pendiente'}</strong>${ciaExtra}</small>`;
                 let tdTitulo = `<td>${tituloCompleto}${infoExtra}</td>`;
 
+                let indStr = '';
+                if (f.cotizaciones && f.cotizaciones.length > 1) {
+                    indStr = f.cotizaciones.map((c, i) => `Cot ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
+                } else {
+                    indStr = `$${parseFloat(f.precio || 0).toLocaleString('en-US')}`;
+                }
+                let tdPrecioInd = `<td><small style="color:#a3b1c6;">${indStr}</small></td>`;
+
+                let idRepForTable = obtenerIdReporte(f) || 'S/T';
+                let tdTicket = `<td><span style="color:#0ea5e9; font-weight:bold;">${idRepForTable}</span></td>`;
+
                 if ((rolUsuario === 'proveedores' || rolUsuario === 'administracion') && entregadoTexto === 'Sí') {
                     if (tbodyFinales) {
                         let foliosArr = [];
@@ -222,10 +244,10 @@ async function cargarFacturas() {
                                     if (tbodyDocContables) {
                                         let btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
                                             <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>
-                                            <button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalDocContable('${f.id}')">Subir Documento Final</button>
+                                            <button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalDocContable('${f.id}')">Ingresar Número de Doc. Contable</button>
                                             <button class="btn-danger-sm" style="display:block; width:100%; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaDefinitiva('${f.id}')">Eliminar</button>
                                         </div>`;
-                                        tbodyDocContables.innerHTML += `<tr><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td>$${precioBonito} MXN</td><td>${btnDoc}</td></tr>`;
+                                        tbodyDocContables.innerHTML += `<tr>${tdTicket}<td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td>${tdPrecioInd}<td><strong>$${precioBonito} MXN</strong></td><td>${btnDoc}</td></tr>`;
                                         countDocContables++;
                                     }
                                     return; // Ocultar de la bandeja Facturas de administracion
@@ -258,21 +280,13 @@ async function cargarFacturas() {
                         let tdEntregadoFinal = rolUsuario === 'administracion' ? `<td>${entregadoBadge}</td>` : '';
                         let acciones = rolUsuario === 'administracion' ? btnAdminExtra : btnAccion;
 
-                        let indStr = '';
-                        if (f.cotizaciones && f.cotizaciones.length > 1) {
-                            indStr = f.cotizaciones.map((c, i) => `Cot ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
-                        } else {
-                            indStr = `$${parseFloat(f.precio || 0).toLocaleString('en-US')}`;
-                        }
-                        let tdPrecioInd = `<td><small style="color:#a3b1c6;">${indStr}</small></td>`;
-
-                        tbodyFinales.innerHTML += `<tr><td>${badgeFolio}</td><td>${f.fecha}</td>${tdProv}<td>${f.unidad}</td>${tdTitulo}${tdPrecioInd}<td><strong>$${precioBonito} MXN</strong></td>${tdEstadoFiscal}${tdEstado}${tdEntregadoFinal}<td>${acciones}</td></tr>`;
+                        tbodyFinales.innerHTML += `<tr>${tdTicket}<td>${badgeFolio}</td><td>${f.fecha}</td>${tdProv}<td>${f.unidad}</td>${tdTitulo}${tdPrecioInd}<td><strong>$${precioBonito} MXN</strong></td>${tdEstadoFiscal}${tdEstado}${tdEntregadoFinal}<td>${acciones}</td></tr>`;
                         countFacturas++;
                     }
                 } else {
                     if (tbody) {
                         let tdEntregado = rolUsuario === 'administracion' ? `<td>${entregadoBadge}</td>` : '';
-                        tbody.innerHTML += `<tr><td>${f.fecha}</td>${rolUsuario !== 'proveedores' ? `<td><strong>${f.proveedor}</strong></td>` : ''}<td>${f.unidad}</td>${tdTitulo}<td>$${precioBonito} MXN</td><td>${estadoBadge}</td>${tdEntregado}<td>${btnAccion}</td></tr>`;
+                        tbody.innerHTML += `<tr>${tdTicket}<td>${f.fecha}</td>${rolUsuario !== 'proveedores' ? `<td><strong>${f.proveedor}</strong></td>` : ''}<td>${f.unidad}</td>${tdTitulo}${tdPrecioInd}<td><strong>$${precioBonito} MXN</strong></td><td>${estadoBadge}</td>${tdEntregado}<td>${btnAccion}</td></tr>`;
                         countCotizaciones++;
                     }
                 }
@@ -283,6 +297,7 @@ async function cargarFacturas() {
             if (tbodyFinales && countFacturas === 0) tbodyFinales.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay facturas registradas</td></tr>`;
             if (tbodyDocContables && countDocContables === 0) tbodyDocContables.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay documentos contables pendientes</td></tr>`;
             if (tbodyArchivo && countArchivo === 0) tbodyArchivo.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay registros archivados</td></tr>`;
+            if (tbodyArchivoCorp && countArchivoCorp === 0) tbodyArchivoCorp.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay registros archivados</td></tr>`;
         }
     } catch (err) { console.error("Error al cargar datos globales", err); }
 }
@@ -683,12 +698,12 @@ function previsualizarFactura() {
     });
 
     // Generar vista previa dinámica (Sección 2 entera es dinámica)
-    let seccion2HTML = `<div class="pdf-section-title" style="color: #0284c7; border-bottom: 1px solid #0284c7; padding-bottom: 5px;">■ SECCIÓN 2: DIAGNÓSTICO Y FACTURACIÓN (TALLER)</div>`;
+    let seccion2HTML = `<div style="margin-bottom: 20px; border: 2px dashed #0284c7; padding: 15px; border-radius: 8px; background-color: #fafafa;">`;
+    seccion2HTML += `<div class="pdf-section-title" style="color: #0284c7; border-bottom: 1px solid #0284c7; padding-bottom: 5px; margin-bottom: 10px;">■ SECCIÓN 2: DIAGNÓSTICO Y FACTURACIÓN (TALLER)</div>`;
     seccion2HTML += `<div class="pdf-line"><strong>Unidad:</strong> 8090-${document.querySelector('input[name="unidad"]').value}</div>`;
     seccion2HTML += `<div class="pdf-line"><strong>Responsable:</strong> ${document.querySelector('input[name="responsable"]').value}</div>`;
     seccion2HTML += `<div class="pdf-line"><strong>Teléfono:</strong> ${document.querySelector('input[name="telefono"]').value}</div>`;
     seccion2HTML += `<div class="pdf-line" style="margin-bottom:15px;"><strong>Fecha Taller:</strong> ${document.querySelector('input[name="fecha"]').value}</div>`;
-    seccion2HTML += `<div class="pdf-line" style="margin-bottom:15px;"><strong>TOTAL (Sin IVA):</strong> <span style="font-weight:bold; color:#10b981;">$${formatearMoneda(total)}</span></div>`;
 
     const filas = container.children;
     for (let i = 0; i < filas.length; i++) {
@@ -702,10 +717,10 @@ function previsualizarFactura() {
         let pdf = fila.querySelector('input[name="pdf_cotizacion[]"]');
         let fotos = fila.querySelector(`input[name="fotos_evidencia_${i}[]"]`);
 
-        seccion2HTML += `<div style="margin-top:20px; padding:15px; border:2px dashed #0284c7; border-radius:8px; background:#fafafa;">`;
+        seccion2HTML += `<div style="margin-top:20px; padding-top:15px; border-top:1px dashed #0284c7;">`;
         seccion2HTML += `<h4 style="color:#0284c7; margin-bottom:10px;">Cotización ${i + 1}: ${t}</h4>`;
         seccion2HTML += `<div class="pdf-line"><strong>Mantenimiento:</strong> ${m}</div>`;
-        seccion2HTML += `<div class="pdf-line"><strong>Precio Cotizado:</strong> <span style="color:#10b981;">${p}</span></div>`;
+        seccion2HTML += `<div class="pdf-line"><strong>Precio Cotizado (Sin IVA):</strong> <span style="color:#10b981;">${p}</span></div>`;
         seccion2HTML += `<div class="pdf-line"><strong>Retro:</strong> <div class="texto-largo" style="margin-top:5px; padding:10px; background:#f9f9f9; border-left:3px solid #0284c7; color:#333;">${r}</div></div>`;
         seccion2HTML += `<div class="pdf-line"><strong>Diagnóstico:</strong> <div class="texto-largo" style="margin-top:5px; padding:10px; background:#f9f9f9; border-left:3px solid #0284c7; color:#333;">${d}</div></div>`;
         seccion2HTML += `<div class="pdf-line"><strong>Trabajo a Realizar:</strong> <div class="texto-largo" style="margin-top:5px; padding:10px; background:#f9f9f9; border-left:3px solid #0284c7; color:#333;">${tr}</div></div>`;
@@ -728,6 +743,8 @@ function previsualizarFactura() {
         }
         seccion2HTML += `</div>`;
     }
+
+    seccion2HTML += `</div>`; // Cerrar el div principal de la seccion 2
 
     // Injectar en el PDF modal
     let wrapper = document.getElementById('prev-pdf-sec2-wrapper');
@@ -759,6 +776,13 @@ function previsualizarFactura() {
             document.getElementById('prev-rep-depto').innerText = r.departamento;
             document.getElementById('prev-rep-km').innerText = r.kilometraje;
             document.getElementById('prev-rep-falla').innerText = r.falla;
+            
+            if (r.firma_chofer && document.getElementById('prev-rep-firma-container')) {
+                document.getElementById('prev-rep-firma-container').style.display = 'block';
+                document.getElementById('prev-rep-firma-img').src = r.firma_chofer;
+            } else if (document.getElementById('prev-rep-firma-container')) {
+                document.getElementById('prev-rep-firma-container').style.display = 'none';
+            }
         }
     } else {
         if (document.getElementById('pdf-seccion-reporte')) document.getElementById('pdf-seccion-reporte').style.display = 'none';
@@ -919,11 +943,11 @@ function generarHtmlDetalles(f, modo, precioBonito) {
         let numDoc50 = c.numero_doc50;
         let pdfDoc50 = c.pdf_doc50;
         if (rolUsuario !== 'proveedores' && (numDoc50 || pdfDoc50)) {
-            let tituloSec5 = multiCot ? `&#9632; SECCI&Oacute;N 5: DOCUMENTO CONTABLE ${i + 1} Y ARCHIVADO` : '&#9632; SECCI&Oacute;N 5: DOCUMENTO CONTABLE Y ARCHIVADO';
+            let tituloSec5 = multiCot ? `&#9632; SECCI&Oacute;N 5: N&Uacute;MERO DE DOCUMENTO CONTABLE ${i + 1} Y ARCHIVADO` : '&#9632; SECCI&Oacute;N 5: N&Uacute;MERO DE DOCUMENTO CONTABLE Y ARCHIVADO';
             sec5Html = `
-            <div style="margin-top:20px; padding:15px; background:#0b1c30; border:2px dashed #ef4444; border-radius:8px;">
-                <div style="color: #ef4444; font-weight: bold; font-size:1.1em; margin-bottom:10px;">${tituloSec5}</div>
-                <div class="modal-info-line" style="font-size:16px;"><strong>N&uacute;mero de Documento:</strong> <span style="color:#ef4444; font-weight:bold;">${numDoc50 || 'Pendiente'}</span></div>
+            <div style="margin-top:20px; padding:15px; background:#0b1c30; border:2px dashed #eab308; border-radius:8px;">
+                <div style="color: #eab308; font-weight: bold; font-size:1.1em; margin-bottom:10px;">${tituloSec5}</div>
+                <div class="modal-info-line" style="font-size:16px;"><strong>N&uacute;mero de Documento:</strong> <span style="color:#eab308; font-weight:bold;">${numDoc50 || 'Pendiente'}</span></div>
                 <div style="margin-top:15px;">
                     ${pdfDoc50 ? `<button type="button" class="btn-success-modal" style="background:#ef4444; border:none; padding:10px 20px; border-radius:8px; color:#ffffff; font-weight:bold; cursor:pointer;" onclick="abrirVisorPDF('/static/facturas_archivos/${pdfDoc50}')">&#128196; Ver Documento Contable</button>` : ''}
                 </div>
@@ -962,7 +986,10 @@ function abrirRevisionAdmin(idFactura) {
                     <input type="text" class="input-cotizacion-admin-multi" placeholder="Escriba el número aquí..." oninput="validarOrden()" style="width: 100%; padding: 10px; background: #0b1c30; color: white; border: 1px solid #1f395a; border-radius: 8px; margin-bottom:10px;">
                     
                     <label style="color:#0ea5e9; font-weight:600; margin-bottom:5px; display:block;">Subir PDF de Orden de Pedido:</label>
-                    <input type="file" class="input-pdf-admin-multi" accept=".pdf" onchange="validarOrden()" style="width: 100%; padding: 10px; background: #0b1c30; color: white; border: 1px solid #1f395a; border-radius: 8px;">
+                    <input type="file" class="input-pdf-admin-multi" accept=".pdf" onchange="previsualizarPDFOrden(this, ${idx})" style="width: 100%; padding: 10px; background: #0b1c30; color: white; border: 1px solid #1f395a; border-radius: 8px;">
+                    <div id="preview-pdf-orden-${idx}" style="margin-top:10px; display:none;">
+                        <iframe id="iframe-pdf-orden-${idx}" width="100%" height="400px" style="border:1px solid #1f395a; border-radius:8px; background:#fff;"></iframe>
+                    </div>
                 </div>
             `;
         });
@@ -971,6 +998,20 @@ function abrirRevisionAdmin(idFactura) {
 
     validarOrden();
     document.getElementById('modal-revision-admin').style.display = 'flex';
+}
+
+function previsualizarPDFOrden(input, idx) {
+    let previewDiv = document.getElementById(`preview-pdf-orden-${idx}`);
+    let iframe = document.getElementById(`iframe-pdf-orden-${idx}`);
+    if (input.files && input.files[0] && input.files[0].type === "application/pdf") {
+        let url = URL.createObjectURL(input.files[0]);
+        iframe.src = url;
+        previewDiv.style.display = 'block';
+    } else {
+        iframe.src = '';
+        previewDiv.style.display = 'none';
+    }
+    validarOrden();
 }
 
 function validarOrden() {

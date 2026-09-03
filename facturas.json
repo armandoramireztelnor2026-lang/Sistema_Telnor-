@@ -1,42 +1,6 @@
 {
     "facturas": [
         {
-            "id": "20260828112228",
-            "proveedor": "Autopartes y Motores B.C.",
-            "unidad": "8090-1133",
-            "responsable": "Luis Ramirez",
-            "telefono": "6634041184",
-            "titulo": "Cambio balatas",
-            "retro": "[TICKET:REP-20260828104523]\r\nREPORTE ORIGINAL DEL CHOFER: HEUP",
-            "diagnostico": "HEUP",
-            "trabajo_realizar": "HEUP",
-            "mantenimiento": "Preventivo",
-            "precio": 4850.0,
-            "fecha": "2026-08-28",
-            "numero_orden": "89182",
-            "compania": "Telnor",
-            "aprobado_admin": true,
-            "aprobado_corp": true,
-            "timestamp": "2026-08-28T11:22:28.454878",
-            "estado_custom": "",
-            "fotos_cotizacion": [
-                "fotos_cotizacion_20260828112228_CONSTANCIA_SSP_2200607.pdf"
-            ],
-            "fotos_evidencia": [
-                "fotos_evidencia_20260828112228_mantenimiento_3.jpg"
-            ],
-            "codigo_liberacion": "94045853",
-            "entregado": "S\u00ed",
-            "numero_cotizacion_asignacion": "290000012871",
-            "pdf_cotizacion_asignacion": "Cotizacion_20260828112228_Meta_1.1.2._Diferencias_auditoria_y_control_interno_y_externo.pdf",
-            "factura_folio": "78760",
-            "factura_pdf": "FACTURA_FINAL_20260828112228_CAMO_clave_de_recuperacion.pdf",
-            "validacion_fiscal": "Aprobada",
-            "numero_doc50": "5000001231",
-            "pdf_doc50": "doc50_20260828112228_CARTA_COMPROMISO_2026_2027_CBTIS116.pdf",
-            "estado": "Archivado"
-        },
-        {
             "id": "20260830211120",
             "proveedor": "Autopartes y Motores B.C.",
             "unidad": "8090-1133",
@@ -105,7 +69,8 @@
                     "numero_cotizacion_asignacion": "29000000121",
                     "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260901203135_0_2200607_RamirezCardenasLuisArmando_Meta_1.1.4._Contexto_de_la_Auditoria_de_TI_e_Innovacion.pdf",
                     "factura_folio": "1242",
-                    "factura_pdf": "FACTURA_FINAL_20260901203135_0_Etapa1_ProyectoFinal_De_la_Cruz_Yael_Garnica_Alexis_Ramirez_Armando.docx.pdf"
+                    "factura_pdf": "FACTURA_FINAL_20260901203135_0_Etapa1_ProyectoFinal_De_la_Cruz_Yael_Garnica_Alexis_Ramirez_Armando.docx.pdf",
+                    "numero_doc50": "2314122312"
                 },
                 {
                     "id_cotizacion": "2",
@@ -123,14 +88,88 @@
                     "numero_cotizacion_asignacion": "29000001231",
                     "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260901203135_1_KARDEX_2026-2_2200607.pdf",
                     "factura_folio": "09098",
-                    "factura_pdf": "FACTURA_FINAL_20260901203135_1_KARDEX_2026-2_2200607.pdf"
+                    "factura_pdf": "FACTURA_FINAL_20260901203135_1_KARDEX_2026-2_2200607.pdf",
+                    "numero_doc50": "21444121212"
                 }
             ],
             "numero_cotizacion_asignacion": "29000000121",
             "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260901203135_0_2200607_RamirezCardenasLuisArmando_Meta_1.1.4._Contexto_de_la_Auditoria_de_TI_e_Innovacion.pdf",
             "validacion_fiscal": "Aprobada",
             "factura_folio": "1242",
-            "factura_pdf": "FACTURA_FINAL_20260901203135_0_Etapa1_ProyectoFinal_De_la_Cruz_Yael_Garnica_Alexis_Ramirez_Armando.docx.pdf"
+            "factura_pdf": "FACTURA_FINAL_20260901203135_0_Etapa1_ProyectoFinal_De_la_Cruz_Yael_Garnica_Alexis_Ramirez_Armando.docx.pdf",
+            "numero_doc50": "2314122312",
+            "estado": "Archivado"
+        },
+        {
+            "id": "20260902205604",
+            "proveedor": "Autopartes y Motores B.C.",
+            "unidad": "8090-1107",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "n (+1 m\u00e1s)",
+            "retro": "[TICKET:REP-20260902205324]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 8060.0,
+            "fecha": "2026-09-02",
+            "numero_orden": "91828921",
+            "compania": "RUMN",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-09-02T20:56:04.764982",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "92775324",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 4600.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20260902205324]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1788407764741_0_factura_1.png"
+                    ],
+                    "pdf_cotizacion": "1788407764741_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.3._Normas_y_estandares_aplicables_a_auditoria.pdf",
+                    "numero_orden": "91828921",
+                    "numero_cotizacion_asignacion": "4200018281",
+                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260902205604_0_Meta1.3_Luis_Ramirez.pdf",
+                    "factura_folio": "123123123",
+                    "factura_pdf": "FACTURA_FINAL_20260902205604_0_Meta0_DeLaCruz_Jeremy_Garnica_Alexis_Ramirez_Armando.pdf",
+                    "numero_doc50": "502984923432"
+                },
+                {
+                    "id_cotizacion": "2",
+                    "precio": 3460.0,
+                    "titulo": "n",
+                    "mantenimiento": "Correctivo",
+                    "retro": "n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1788407764741_1_factura_1.png"
+                    ],
+                    "pdf_cotizacion": "1788407764741_1_KARDEX_2026-2_2200607.pdf",
+                    "numero_orden": "81726121",
+                    "numero_cotizacion_asignacion": "29000012314",
+                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260902205604_1_Meta0_DeLaCruz_Jeremy_Garnica_Alexis_Ramirez_Armando.pdf",
+                    "factura_folio": "123123123123",
+                    "factura_pdf": "FACTURA_FINAL_20260902205604_1_Factura_8090-1231_2026-08-25.pdf",
+                    "numero_doc50": "504234234322"
+                }
+            ],
+            "numero_cotizacion_asignacion": "4200018281",
+            "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260902205604_0_Meta1.3_Luis_Ramirez.pdf",
+            "factura_folio": "123123123",
+            "factura_pdf": "FACTURA_FINAL_20260902205604_0_Meta0_DeLaCruz_Jeremy_Garnica_Alexis_Ramirez_Armando.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "502984923432",
+            "estado": "Archivado"
         }
     ]
 }

@@ -39,6 +39,13 @@ function previsualizarFactura() {
             }
             
             document.getElementById('prev-rep-falla').innerText = r.falla;
+            
+            if (r.firma_chofer && document.getElementById('prev-rep-firma-container')) {
+                document.getElementById('prev-rep-firma-container').style.display = 'block';
+                document.getElementById('prev-rep-firma-img').src = r.firma_chofer;
+            } else if (document.getElementById('prev-rep-firma-container')) {
+                document.getElementById('prev-rep-firma-container').style.display = 'none';
+            }
         }
     } else {
         if(document.getElementById('pdf-seccion-reporte')) document.getElementById('pdf-seccion-reporte').style.display = 'none';
@@ -89,6 +96,13 @@ function generarPDFSilencioso(idFactura) {
             }
             
             document.getElementById('prev-rep-falla').innerText = r.falla;
+
+            if (r.firma_chofer && document.getElementById('prev-rep-firma-container')) {
+                document.getElementById('prev-rep-firma-container').style.display = 'block';
+                document.getElementById('prev-rep-firma-img').src = r.firma_chofer;
+            } else if (document.getElementById('prev-rep-firma-container')) {
+                document.getElementById('prev-rep-firma-container').style.display = 'none';
+            }
         }
     } else if(document.getElementById('pdf-seccion-reporte')) {
         document.getElementById('pdf-seccion-reporte').style.display = 'none';

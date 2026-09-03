@@ -175,6 +175,23 @@ function cambiarVistaProv(vista) {
     }
 }
 
+function cambiarVistaCorp(vista) {
+    if (document.getElementById('vista-cotizaciones-corp')) {
+        document.getElementById('vista-cotizaciones-corp').style.display = 'none';
+    }
+    if (document.getElementById('vista-archivo-corp')) {
+        document.getElementById('vista-archivo-corp').style.display = 'none';
+    }
+
+    if (vista === 'cotizaciones') {
+        if (document.getElementById('vista-cotizaciones-corp')) document.getElementById('vista-cotizaciones-corp').style.display = 'block';
+    } else if (vista === 'archivo') {
+        if (document.getElementById('vista-archivo-corp')) document.getElementById('vista-archivo-corp').style.display = 'block';
+    }
+    
+    if (typeof cargarFacturas === 'function') cargarFacturas();
+}
+
 function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
 
 function filtrarTabla(inputId, tbodyId) {
@@ -535,4 +552,5 @@ function descargarPDF() {
 document.addEventListener("DOMContentLoaded", function () {
     if (document.getElementById('vista-pendientes')) { cambiarVistaAdmin('facturas'); }
     if (document.getElementById('vista-reportes-prov')) { cambiarVistaProv('facturas'); }
+    if (document.getElementById('vista-cotizaciones-corp')) { cambiarVistaCorp('cotizaciones'); }
 });
