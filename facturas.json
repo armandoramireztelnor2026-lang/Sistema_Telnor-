@@ -184,9 +184,9 @@
             "mantenimiento": "Preventivo",
             "precio": 10001.0,
             "fecha": "2026-09-03",
-            "numero_orden": "",
+            "numero_orden": "9819281",
             "compania": "RUMN",
-            "aprobado_admin": false,
+            "aprobado_admin": true,
             "aprobado_corp": true,
             "timestamp": "2026-09-03T22:36:25.103373",
             "estado_custom": "",
@@ -206,9 +206,14 @@
                     "fotos_evidencia": [
                         "evidencia_1788500185082_0_Value_Chain_Analysis_Whiteboard_in_Blue_Black_and_White_Bold_Corporate_Style.png"
                     ],
-                    "pdf_cotizacion": "1788500185082_0_Actividad_1.1.3._Normas_y_estandares_aplicables_a_auditoria.png"
+                    "pdf_cotizacion": "1788500185082_0_Actividad_1.1.3._Normas_y_estandares_aplicables_a_auditoria.png",
+                    "numero_orden": "9819281",
+                    "numero_cotizacion_asignacion": "23131312232",
+                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260903223625_0_Unidad-I-Fundamentos-de-la-Comercializacion-de-Tecnologias_F.pdf"
                 }
-            ]
+            ],
+            "numero_cotizacion_asignacion": "23131312232",
+            "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260903223625_0_Unidad-I-Fundamentos-de-la-Comercializacion-de-Tecnologias_F.pdf"
         }
     ]
 }

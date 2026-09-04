@@ -93,6 +93,10 @@ async function cargarFacturas() {
 
                 let precioFormatArch = parseFloat(f.precio_estimado || f.precio || 0).toLocaleString('en-US');
 
+                let apAdmin = f.aprobado_admin !== undefined ? f.aprobado_admin : (f.estado === 'Confirmada');
+                let apCorp = f.aprobado_corp !== undefined ? f.aprobado_corp : (f.estado === 'Confirmada');
+                let confirmadaTotal = (apAdmin && apCorp);
+
                 if (f.estado === 'Cancelado_Cotizacion_Cara') {
                     if (tbodyArchivoCancelado && rolUsuario === 'administracion') {
                         let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0; width:100%; background:#0284c7; border:none; color:white;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>`;
@@ -103,7 +107,7 @@ async function cargarFacturas() {
                     return; // skip active trays
                 }
 
-                if (f.estado === 'Archivado' || (rolUsuario === 'proveedores' && f.validacion_fiscal === 'Aprobada')) {
+                if (f.estado === 'Archivado' || (rolUsuario === 'proveedores' && f.validacion_fiscal === 'Aprobada') || (rolUsuario === 'corporativos' && confirmadaTotal)) {
                     if (f.estado === 'Archivado' && tbodyArchivo && rolUsuario === 'administracion') {
                         let btnVerExp = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
                             <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; color:white; margin:0; width:100%;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>
@@ -120,29 +124,26 @@ async function cargarFacturas() {
                             <button class="btn-danger-sm" style="width:100%; background:#ef4444; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar</button>
                         </div>`;
                         let idReporteAsociado = obtenerIdReporte(f) || 'N/A';
-                        tbodyArchivo.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idReporteAsociado}</span></td><td><strong>${f.numero_doc50}</strong></td><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.unidad}</td><td><strong>${f.proveedor}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
+                        tbodyArchivo.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idReporteAsociado}</span></td><td><strong>${f.numero_doc50 || 'Pendiente'}</strong></td><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio || 'Pendiente'}</span></td><td>${f.unidad}</td><td><strong>${f.proveedor}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
                         countArchivo++;
                     }
 
                     if (tbodyArchivoProv && rolUsuario === 'proveedores' && f.proveedor === nombreProveedorActual) {
                         let idRepArchProv = obtenerIdReporte(f) || 'S/T';
                         let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                        tbodyArchivoProv.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepArchProv}</span></td><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.unidad}</td><td><strong>${tituloCompleto}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
+                        tbodyArchivoProv.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepArchProv}</span></td><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio || 'Pendiente'}</span></td><td>${f.unidad}</td><td><strong>${tituloCompleto}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
                         countArchivoProv++;
                     }
 
                     if (tbodyArchivoCorp && rolUsuario === 'corporativos') {
                         let idRepArchCorp = obtenerIdReporte(f) || 'S/T';
                         let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                        tbodyArchivoCorp.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepArchCorp}</span></td><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.unidad}</td><td><strong>${f.proveedor}</strong></td><td><strong>${tituloCompleto}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
+                        tbodyArchivoCorp.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepArchCorp}</span></td><td><span style="color:#10b981; font-weight:bold;">${f.factura_folio || 'Pendiente'}</span></td><td>${f.unidad}</td><td><strong>${f.proveedor}</strong></td><td><strong>${tituloCompleto}</strong></td><td>$${precioFormatArch} MXN</td><td>${btnVerExp}</td></tr>`;
                         countArchivoCorp++;
                     }
                     return; // Skip rendering in active trays
                 }
 
-                let apAdmin = f.aprobado_admin !== undefined ? f.aprobado_admin : (f.estado === 'Confirmada');
-                let apCorp = f.aprobado_corp !== undefined ? f.aprobado_corp : (f.estado === 'Confirmada');
-                let confirmadaTotal = (apAdmin && apCorp);
                 let badgeColor, textoEstado;
 
                 if (f.estado_custom && f.estado_custom !== "") { textoEstado = f.estado_custom; badgeColor = confirmadaTotal ? '#2d6a4f' : '#b45309'; }

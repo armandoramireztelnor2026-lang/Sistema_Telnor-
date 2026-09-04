@@ -4,30 +4,34 @@
      ========================================================= -->
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Portal Proveedores</title>
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
+
 <body>
     <input type="hidden" id="rol-actual" value="proveedores">
     <input type="hidden" id="nombre-proveedor-actual" value="{{ usuario.datos_perfil.nombre_proveedor }}">
     <div class="dashboard-container">
-        
+
         <aside class="sidebar">
-            <img src="{% if usuario.datos_perfil.foto_ruta %}/static/logos_proveedores/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/112641/40916c?text=Logo{% endif %}" alt="Logo" class="profile-pic" onclick="abrirMiPerfil()">
+            <img src="{% if usuario.datos_perfil.foto_ruta %}/static/logos_proveedores/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/112641/40916c?text=Logo{% endif %}"
+                alt="Logo" class="profile-pic" onclick="abrirMiPerfil()">
             <div class="sidebar-name">{{ usuario.datos_perfil.nombre_proveedor }}</div>
             <div class="sidebar-sub">Encargado: {{ usuario.datos_perfil.encargado }}</div>
             <div class="sidebar-badge">PROVEEDOR</div>
-            
+
             <nav class="nav-menu">
                 <button class="btn-sidebar" onclick="cambiarVistaProv('reportes')">Tickets de Trabajo</button>
                 <button class="btn-sidebar" onclick="cambiarVistaProv('facturas')">Cotizaciones</button>
                 <button class="btn-sidebar" onclick="cambiarVistaProv('facturas_finales')">Facturas</button>
                 <button class="btn-sidebar" onclick="cambiarVistaProv('archivo')">Archivo Histórico</button>
             </nav>
-            <div class="btn-logout-container"><a href="/logout" class="btn-logout" onclick="return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
+            <div class="btn-logout-container"><a href="/logout" class="btn-logout"
+                    onclick="return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
         </aside>
 
         <main class="main-content">
@@ -40,7 +44,16 @@
                     <div class="table-responsive">
                         <table>
                             <thead>
-                                <tr><th>Ticket</th><th>Fecha</th><th>Unidad</th><th>Título</th><th>Precio s/IVA (Indiv.)</th><th>Precio s/IVA (Total)</th><th>Estado</th><th>Acciones / Orden</th></tr>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Fecha</th>
+                                    <th>Unidad</th>
+                                    <th>Título</th>
+                                    <th>Precio s/IVA (Indiv.)</th>
+                                    <th>Precio s/IVA (Total)</th>
+                                    <th>Estado</th>
+                                    <th>Acciones / Orden</th>
+                                </tr>
                             </thead>
                             <tbody id="tabla-facturas"></tbody>
                         </table>
@@ -56,7 +69,14 @@
                     <div class="table-responsive">
                         <table>
                             <thead>
-                                <tr><th>Ticket</th><th>Fecha</th><th>Unidad</th><th>Falla / Servicio</th><th>Mantenimiento</th><th>Acciones</th></tr>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Fecha</th>
+                                    <th>Unidad</th>
+                                    <th>Falla / Servicio</th>
+                                    <th>Mantenimiento</th>
+                                    <th>Acciones</th>
+                                </tr>
                             </thead>
                             <tbody id="tabla-reportes-prov"></tbody>
                         </table>
@@ -72,24 +92,44 @@
                     <div class="table-responsive">
                         <table>
                             <thead>
-                                <tr><th>Ticket</th><th>Folio Fiscal</th><th>Fecha</th><th>Unidad</th><th>Título</th><th>Precio s/IVA (Indiv.)</th><th>Precio s/IVA (Total)</th><th>Estado</th><th>Acciones</th></tr>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Folio Fiscal</th>
+                                    <th>Fecha</th>
+                                    <th>Unidad</th>
+                                    <th>Título</th>
+                                    <th>Precio s/IVA (Indiv.)</th>
+                                    <th>Precio s/IVA (Total)</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
                             </thead>
                             <tbody id="tabla-facturas-finales"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        
+
             <div id="vista-archivo" style="display: none;">
                 <div class="top-bar">
                     <h2>Archivo Histórico</h2>
                 </div>
                 <div class="admin-container">
-                    <input type="text" id="buscador-archivo-prov" class="buscador-pildora" placeholder="Buscar ticket en el archivo..." onkeyup="filtrarTabla('buscador-archivo-prov', 'tabla-archivo-prov')" style="margin-bottom: 20px; width: 100%; max-width: 400px; padding: 12px; border-radius: 20px; border: 1px solid #1f395a; background: #0b1c30; color: white;">
+                    <input type="text" id="buscador-archivo-prov" class="buscador-pildora"
+                        placeholder="Buscar ticket en el archivo..."
+                        onkeyup="filtrarTabla('buscador-archivo-prov', 'tabla-archivo-prov')"
+                        style="margin-bottom: 20px; width: 100%; max-width: 400px; padding: 12px; border-radius: 20px; border: 1px solid #1f395a; background: #0b1c30; color: white;">
                     <div class="table-responsive">
                         <table>
                             <thead>
-                                <tr><th>Ticket</th><th>Folio Oficial</th><th>Unidad</th><th>Título</th><th>Precio s/IVA</th><th>Acciones</th></tr>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Folio Oficial</th>
+                                    <th>Unidad</th>
+                                    <th>Título</th>
+                                    <th>Precio s/IVA</th>
+                                    <th>Acciones</th>
+                                </tr>
                             </thead>
                             <tbody id="tabla-archivo-prov"></tbody>
                         </table>
@@ -105,19 +145,23 @@
             <button class="btn-close-modal" onclick="cerrarModal('modal-ver-reporte-prov')">×</button>
             <h3 class="modal-header">Detalles del Ticket de Trabajo</h3>
             <div id="contenido-reporte-prov"></div>
-            
+
             <div class="modal-actions" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
-                <button class="btn-info" style="width: 100%; background-color: #0284c7; padding: 12px; font-size: 15px;" onclick="imprimirReporteTaller()">📄 Ver Documento de Ticket / Imprimir</button>
-                <button class="btn-success-modal" style="width: 100%; background-color: #f59e0b; padding: 12px; font-size: 15px;" onclick="iniciarFacturaDesdeReporte()">Crear Cotización para este Ticket</button>
+                <button class="btn-info" style="width: 100%; background-color: #0284c7; padding: 12px; font-size: 15px;"
+                    onclick="imprimirReporteTaller()">📄 Ver Documento de Ticket / Imprimir</button>
+                <button class="btn-success-modal"
+                    style="width: 100%; background-color: #f59e0b; padding: 12px; font-size: 15px;"
+                    onclick="iniciarFacturaDesdeReporte()">Crear Cotización para este Ticket</button>
             </div>
         </div>
     </div>
 
     <div id="modal-pdf-orden-trabajo" class="modal-overlay" style="display: none;">
         <div class="pdf-modal-box">
-            <button class="btn-close-modal" onclick="cerrarModal('modal-pdf-orden-trabajo')" style="color: #112641;">×</button>
+            <button class="btn-close-modal" onclick="cerrarModal('modal-pdf-orden-trabajo')"
+                style="color: #112641;">×</button>
             <h3 style="color: #112641; margin-bottom: 20px;">Ticket de Trabajo Oficial</h3>
-            
+
             <div id="pdf-orden-contenido" class="pdf-document">
                 <div class="pdf-header-doc">
                     <h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2>
@@ -126,7 +170,7 @@
                 <div id="pdf-orden-cuerpo"></div>
                 <div class="pdf-footer">Documento generado el: <span id="pdf-orden-fecha"></span></div>
             </div>
-            
+
             <div class="modal-actions" style="max-width: 750px; margin-top: 20px;">
                 <button class="btn-danger" onclick="volverAReporteProv()">Volver</button>
                 <button class="btn-success-modal" onclick="descargarPDFOrden()">Descargar PDF / Imprimir</button>
@@ -139,31 +183,42 @@
             <button class="btn-close-modal" onclick="cerrarModal('modal-nueva-factura')">×</button>
             <h3 class="modal-header">Crear Nueva Cotización</h3>
             <form id="form-nueva-factura" onsubmit="event.preventDefault(); previsualizarFactura();">
-                
+
                 <input type="hidden" name="numero_reporte" id="hidden_numero_reporte">
-                <div id="etiqueta-reporte-vinculado" style="display:none; background:#1b4332; color:white; padding:10px; border-radius:8px; margin-bottom:15px; font-weight:bold; font-size: 0.9em;">
-                    ✅ Cotización vinculada al Ticket de Trabajo: <span id="span-ticket-vinculado" style="color: #f59e0b;"></span>
+                <div id="etiqueta-reporte-vinculado"
+                    style="display:none; background:#1b4332; color:white; padding:10px; border-radius:8px; margin-bottom:15px; font-weight:bold; font-size: 0.9em;">
+                    ✅ Cotización vinculada al Ticket de Trabajo: <span id="span-ticket-vinculado"
+                        style="color: #f59e0b;"></span>
                 </div>
 
                 <div class="form-grid">
                     <div class="input-group">
                         <label>Número de Unidad</label>
-                        <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text" name="unidad" id="input_nueva_unidad" maxlength="4" required oninput="validarNumeros(this)"></div>
+                        <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text"
+                                name="unidad" id="input_nueva_unidad" maxlength="4" required
+                                oninput="validarNumeros(this)"></div>
                     </div>
-                    <div class="input-group"><label>Responsable en Turno</label><input type="text" name="responsable" required oninput="validarLetras(this)"></div>
-                    <div class="input-group"><label>Teléfono</label><input type="text" name="telefono" maxlength="15" required oninput="validarNumeros(this)"></div>
+                    <div class="input-group"><label>Responsable en Turno</label><input type="text" name="responsable"
+                            required oninput="validarLetras(this)"></div>
+                    <div class="input-group"><label>Teléfono</label><input type="text" name="telefono" maxlength="15"
+                            required oninput="validarNumeros(this)"></div>
                     <div class="input-group"><label>Fecha</label><input type="date" name="fecha" required></div>
-                    
-                    <div id="cotizaciones-dinamicas-container" style="grid-column: 1 / -1; background: #0b1c30; padding: 15px; border-radius: 8px; border: 1px solid #1f395a;">
-                        <h4 style="color:#0ea5e9; margin-bottom:15px; font-size:16px;">Paquete de Cotizaciones del Ticket</h4>
+
+                    <div id="cotizaciones-dinamicas-container"
+                        style="grid-column: 1 / -1; background: #0b1c30; padding: 15px; border-radius: 8px; border: 1px solid #1f395a;">
+                        <h4 style="color:#0ea5e9; margin-bottom:15px; font-size:16px;">Paquete de Cotizaciones del
+                            Ticket</h4>
                         <div id="lista-cotizaciones">
                             <!-- Inyectado por JS -->
                         </div>
-                        <button type="button" class="btn-info" onclick="agregarCotizacionFila()" style="background:#0ea5e9; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; width:auto; display:inline-block; margin-top:10px;">+ Añadir Otra Cotización al Ticket</button>
+                        <button type="button" class="btn-info" onclick="agregarCotizacionFila()"
+                            style="background:#0ea5e9; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; width:auto; display:inline-block; margin-top:10px;">+
+                            Añadir Otra Cotización al Ticket</button>
                     </div>
                 </div>
 
-                <div class="modal-actions"><button class="btn-success-modal" type="submit" style="width: 100%;">Revisar y Continuar</button></div>
+                <div class="modal-actions"><button class="btn-success-modal" type="submit" style="width: 100%;">Revisar
+                        y Continuar</button></div>
             </form>
         </div>
     </div>
@@ -171,42 +226,68 @@
     <div id="modal-previsualizacion-factura" class="modal-overlay">
         <div class="pdf-modal-box">
             <h3 style="color: #112641; margin-bottom: 20px;">VISTA PREVIA DE LA COTIZACIÓN A REVISAR</h3>
-            
+
             <div id="hoja-factura-pdf" class="pdf-document">
-                <div class="pdf-header-doc"><h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2><p>REPORTE DE MANTENIMIENTO Y FACTURACIÓN</p></div>
-                
-                <div id="pdf-seccion-reporte" style="display:none; margin-bottom: 20px; border: 2px dashed #f59e0b; padding: 15px; border-radius: 8px; background-color: #fafafa;">
-                    <div class="pdf-section-title" style="color: #b45309; border-bottom: 1px solid #f59e0b; padding-bottom: 5px;">■ SECCIÓN 1: REPORTE DE INCIDENCIA (ORIGEN)</div>
+                <div class="pdf-header-doc">
+                    <h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2>
+                    <p>REPORTE DE MANTENIMIENTO Y FACTURACIÓN</p>
+                </div>
+
+                <div id="pdf-seccion-reporte"
+                    style="display:none; margin-bottom: 20px; border: 2px dashed #f59e0b; padding: 15px; border-radius: 8px; background-color: #fafafa;">
+                    <div class="pdf-section-title"
+                        style="color: #b45309; border-bottom: 1px solid #f59e0b; padding-bottom: 5px;">■ SECCIÓN 1:
+                        REPORTE DE INCIDENCIA (ORIGEN)</div>
                     <div style="display: flex; gap: 40px; margin-bottom: 10px;">
                         <div style="flex: 1;">
-                            <div class="pdf-line" style="color: #333;"><strong>Ticket No.:</strong> <span id="prev-rep-ticket" style="color:#b45309; font-weight:bold;"></span></div>
-                            <div class="pdf-line" style="color: #333;"><strong>Fecha de Reporte:</strong> <span id="prev-rep-fecha"></span></div>
-                            <div class="pdf-line" style="color: #333;"><strong>Unidad:</strong> <span id="prev-rep-unidad"></span></div>
-                            <div class="pdf-line" style="color: #333;"><strong>Marca y Modelo:</strong> <span id="prev-rep-marca"></span></div>
-                            <div class="pdf-line" style="color: #333;"><strong>Mantenimiento:</strong> <span id="prev-rep-mantenimiento"></span></div>
-                            <div class="pdf-line" style="color: #333;"><strong>Kilometraje:</strong> <span id="prev-rep-km"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Ticket No.:</strong> <span
+                                    id="prev-rep-ticket" style="color:#b45309; font-weight:bold;"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Fecha de Reporte:</strong> <span
+                                    id="prev-rep-fecha"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Unidad:</strong> <span
+                                    id="prev-rep-unidad"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Marca y Modelo:</strong> <span
+                                    id="prev-rep-marca"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Mantenimiento:</strong> <span
+                                    id="prev-rep-mantenimiento"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Kilometraje:</strong> <span
+                                    id="prev-rep-km"></span></div>
                             <!-- AQUI INYECTAMOS LA CIUDAD EN EL PDF -->
-                            <div class="pdf-line" style="color: #333;"><strong>Ciudad / Ubicación:</strong> <span id="prev-rep-ciudad" style="color:#0ea5e9; font-weight:bold;"></span></div>
-                            <div class="pdf-line" id="pdf-line-cotizacion" style="color: #333; display: none;"><strong>No. de Solicitud de Pedido:</strong> <span id="prev-rep-cotizacion"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Ciudad / Ubicación:</strong> <span
+                                    id="prev-rep-ciudad" style="color:#0ea5e9; font-weight:bold;"></span></div>
+                            <div class="pdf-line" id="pdf-line-cotizacion" style="color: #333; display: none;">
+                                <strong>No. de Solicitud de Pedido:</strong> <span id="prev-rep-cotizacion"></span>
+                            </div>
                         </div>
                         <div style="flex: 1;">
-                            <div class="pdf-line" style="color: #333;"><strong>Operador:</strong> <span id="prev-rep-empleado"></span></div>
-                            <div class="pdf-line" style="color: #333;"><strong>Departamento:</strong> <span id="prev-rep-depto"></span></div>
-                            <div class="pdf-line" style="color: #333;"><strong>Celular:</strong> <span id="prev-rep-celular"></span></div>
-                            <div class="pdf-line" style="color: #333;"><strong>Correo Electrónico:</strong> <span id="prev-rep-email"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Operador:</strong> <span
+                                    id="prev-rep-empleado"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Departamento:</strong> <span
+                                    id="prev-rep-depto"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Celular:</strong> <span
+                                    id="prev-rep-celular"></span></div>
+                            <div class="pdf-line" style="color: #333;"><strong>Correo Electrónico:</strong> <span
+                                    id="prev-rep-email"></span></div>
                         </div>
                     </div>
-                    <div class="pdf-line" style="color: #333; margin-top: 10px;"><strong>Falla Reportada:</strong> <div id="prev-rep-falla" class="texto-largo" style="margin-top: 5px; padding: 10px; background: #fff8e1; border-left: 3px solid #f59e0b; color: #333; font-style: italic;"></div></div>
+                    <div class="pdf-line" style="color: #333; margin-top: 10px;"><strong>Falla Reportada:</strong>
+                        <div id="prev-rep-falla" class="texto-largo"
+                            style="margin-top: 5px; padding: 10px; background: #fff8e1; border-left: 3px solid #f59e0b; color: #333; font-style: italic;">
+                        </div>
+                    </div>
                     <div id="prev-rep-firma-container" style="display: none; margin-top: 15px; text-align: center;">
-                        <div class="pdf-line" style="color: #333; margin-bottom: 5px;"><strong>Firma del Operador:</strong></div>
-                        <img id="prev-rep-firma-img" src="" alt="Firma del Chofer" style="width: 250px; height: auto; border-bottom: 2px solid #333; padding-bottom: 5px; display: inline-block;">
+                        <div class="pdf-line" style="color: #333; margin-bottom: 5px;"><strong>Firma del
+                                Operador:</strong></div>
+                        <img id="prev-rep-firma-img" src="" alt="Firma del Chofer"
+                            style="width: 250px; height: auto; border-bottom: 2px solid #333; padding-bottom: 5px; display: inline-block;">
                     </div>
                 </div>
 
                 <div id="pdf-cotizaciones-dinamicas"></div>
             </div>
             <div class="modal-actions" style="max-width: 750px; margin-top: 20px;">
-                <button class="btn-danger" onclick="volverAEditar()">Volver a Editar</button><button class="btn-success-modal" onclick="enviarFacturaDefinitiva()">Confirmar y Enviar Factura</button>
+                <button class="btn-danger" onclick="volverAEditar()">Volver a Editar</button><button
+                    class="btn-success-modal" onclick="enviarFacturaDefinitiva()">Confirmar y Enviar Factura</button>
             </div>
         </div>
     </div>
@@ -216,12 +297,14 @@
             <button class="btn-close-modal" onclick="cerrarModal('modal-detalles-general')">×</button>
             <h3 class="modal-header">Detalles de Cotización Emitida</h3>
             <div id="detalles-contenido"></div>
-            <div class="modal-actions"><button class="btn-success-modal" id="btn-descargar-pdf" style="width: 100%;">Descargar PDF Oficial</button></div>
+            <div class="modal-actions"><button class="btn-success-modal" id="btn-descargar-pdf"
+                    style="width: 100%;">Descargar PDF Oficial</button></div>
         </div>
     </div>
 
-    <div id="lightbox-modal" class="lightbox-overlay" onclick="cerrarLightbox(event)"><span class="lightbox-close" onclick="cerrarLightbox(event)">&times;</span><img id="lightbox-img" class="lightbox-content" src=""></div>
-    
+    <div id="lightbox-modal" class="lightbox-overlay" onclick="cerrarLightbox(event)"><span class="lightbox-close"
+            onclick="cerrarLightbox(event)">&times;</span><img id="lightbox-img" class="lightbox-content" src=""></div>
+
     <!-- NUEVO: MODAL PDF PERFIL PROVEEDOR -->
     <div id="modal-mi-perfil" class="modal-overlay">
         <div class="pdf-modal-box">
@@ -233,23 +316,32 @@
                     <p>PERFIL DE USUARIO - PROVEEDOR</p>
                 </div>
                 <div class="pdf-body">
-                    <img src="{% if usuario.datos_perfil.foto_ruta %}/static/logos_proveedores/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/ffffff/000000?text=Logo{% endif %}" class="pdf-photo-doc" onclick="abrirLightbox(this.src)">
+                    <img src="{% if usuario.datos_perfil.foto_ruta %}/static/logos_proveedores/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/ffffff/000000?text=Logo{% endif %}"
+                        class="pdf-photo-doc" onclick="abrirLightbox(this.src)">
                     <div class="pdf-details">
                         <div class="pdf-section-title">■ DATOS DE LA EMPRESA</div>
-                        <div class="pdf-line"><strong>Razón Social / Empresa:</strong> {{ usuario.datos_perfil.nombre_proveedor }}</div>
-                        <div class="pdf-line"><strong>Descripción:</strong> <span class="texto-largo">{{ usuario.datos_perfil.descripcion }}</span></div>
+                        <div class="pdf-line"><strong>Razón Social / Empresa:</strong> {{
+                            usuario.datos_perfil.nombre_proveedor }}</div>
+                        <div class="pdf-line"><strong>Descripción:</strong> <span class="texto-largo">{{
+                                usuario.datos_perfil.descripcion }}</span></div>
                         <div class="pdf-line"><strong>Usuario del Sistema:</strong> {{ usuario.usuario }}</div>
                         <br>
                         <div class="pdf-section-title">■ INFORMACIÓN DE CONTACTO</div>
-                        <div class="pdf-line"><strong>Encargado Principal:</strong> {{ usuario.datos_perfil.encargado }}</div>
+                        <div class="pdf-line"><strong>Encargado Principal:</strong> {{ usuario.datos_perfil.encargado }}
+                        </div>
                         <!-- NUEVA LÍNEA DE CIUDAD -->
-                        <div class="pdf-line"><strong>Ciudad Base:</strong> <span style="color:#0284c7; font-weight:bold;">{{ usuario.datos_perfil.ciudad | default('No especificada') }}</span></div>
+                        <div class="pdf-line"><strong>Ciudad Base:</strong> <span
+                                style="color:#0284c7; font-weight:bold;">{{ usuario.datos_perfil.ciudad | default('No
+                                especificada') }}</span></div>
                         <div class="pdf-line"><strong>Teléfono:</strong> {{ usuario.datos_perfil.telefono }}</div>
-                        <div class="pdf-line"><strong>Correo Electrónico:</strong> {{ usuario.datos_perfil.correo }}</div>
-                        <div class="pdf-line"><strong>Dirección:</strong> <span class="texto-largo">{{ usuario.datos_perfil.direccion }}</span></div>
+                        <div class="pdf-line"><strong>Correo Electrónico:</strong> {{ usuario.datos_perfil.correo }}
+                        </div>
+                        <div class="pdf-line"><strong>Dirección:</strong> <span class="texto-largo">{{
+                                usuario.datos_perfil.direccion }}</span></div>
                     </div>
                 </div>
-                <div class="pdf-footer">Documento extraído de la Base de Datos Central el: <span id="pdf-fecha"></span></div>
+                <div class="pdf-footer">Documento extraído de la Base de Datos Central el: <span id="pdf-fecha"></span>
+                </div>
             </div>
             <div class="modal-actions" style="max-width: 750px; margin-top: 20px;">
                 <button class="btn-danger" onclick="cerrarModal('modal-mi-perfil')">Cancelar</button>
@@ -258,12 +350,13 @@
         </div>
     </div>
 
-    <script src="/static/script.js?v=1788153941"></script>
-    
+    <script src="/static/script.js?v=1788549154"></script>
+
     <!-- Módulos de Facturación -->
-    <script src="/static/facturas_herramientas.js?v=1788503560"></script>
-    <script src="/static/facturas_archivos.js?v=1788503560"></script>
-    <script src="/static/facturas_pdf.js?v=1788503560"></script>
-    <script src="/static/facturas_principal.js?v=1788503560"></script>
+    <script src="/static/facturas_herramientas.js?v=1788550327"></script>
+    <script src="/static/facturas_archivos.js?v=1788550327"></script>
+    <script src="/static/facturas_pdf.js?v=1788550327"></script>
+    <script src="/static/facturas_principal.js?v=1788550327"></script>
 </body>
+
 </html>

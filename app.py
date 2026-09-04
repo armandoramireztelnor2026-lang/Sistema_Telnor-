@@ -15,12 +15,14 @@ from threading import Timer
 
 from rutas_facturas import facturas_bp
 from rutas_reportes import reportes_bp  
+from rutas_seccion_reportes import seccion_reportes_bp
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta_super_segura_2026"
 
 app.register_blueprint(facturas_bp)
 app.register_blueprint(reportes_bp)     
+app.register_blueprint(seccion_reportes_bp)     
 
 CARPETAS = {
     "temporal": "static/registros_confirmar",
