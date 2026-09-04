@@ -65,8 +65,22 @@
             <div id="revision-contenido-corp"></div>
             <input type="hidden" id="rev-id-corp">
             <div class="modal-actions" style="margin-top: 25px;">
-                <button class="btn-danger" onclick="rechazarFactura('rev-id-corp')">Rechazar Gasto</button>
+                <button class="btn-danger" onclick="abrirModalRechazoCorp('rev-id-corp')">Rechazar Gasto</button>
                 <button class="btn-success-modal" onclick="confirmarFacturaCorp()">Aprobar Gasto Financiero</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RECHAZO CORPORATIVO AVANZADO -->
+    <div id="modal-rechazo-corp-dinamico" class="modal-overlay">
+        <div class="modal-box large">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-rechazo-corp-dinamico')">×</button>
+            <h3 class="modal-header" style="color: #ef4444; border-bottom: 1px solid #334155; padding-bottom:10px;">Rechazar Gasto - Precios Recomendados</h3>
+            <div id="contenido-rechazo-corp"></div>
+            <input type="hidden" id="rechazo-corp-id">
+            <div class="modal-actions" style="margin-top: 25px;">
+                <button class="btn-info" style="background:#475569; border:none; padding:12px 20px; font-size:1em;" onclick="cerrarModal('modal-rechazo-corp-dinamico')">Cancelar</button>
+                <button class="btn-success-modal" id="btn-enviar-rechazo-corp" style="background:#ef4444; color:white; border:none;" onclick="enviarRechazoCorp()">Confirmar Rechazo</button>
             </div>
         </div>
     </div>
@@ -151,9 +165,9 @@
     <script src="/static/script.js"></script>
     
     <!-- Módulos de Facturación -->
-    <script src="/static/facturas_herramientas.js?v=1788463822"></script>
-    <script src="/static/facturas_archivos.js?v=1788463822"></script>
-    <script src="/static/facturas_pdf.js?v=1788463822"></script>
-    <script src="/static/facturas_principal.js?v=1788463822"></script>
+    <script src="/static/facturas_herramientas.js?v=1788503560"></script>
+    <script src="/static/facturas_archivos.js?v=1788503560"></script>
+    <script src="/static/facturas_pdf.js?v=1788503560"></script>
+    <script src="/static/facturas_principal.js?v=1788503560"></script>
 </body>
 </html>

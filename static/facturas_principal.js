@@ -1097,6 +1097,76 @@ function confirmarFacturaCorp() {
     });
 }
 
+function abrirModalRechazoCorp(inputId) {
+    let id_fac = document.getElementById(inputId).value;
+    const f = facturasGlobal.find(x => String(x.id) === String(id_fac)); 
+    if (!f) return;
+    
+    document.getElementById('modal-revision-corp').style.display = 'none'; 
+    document.getElementById('rechazo-corp-id').value = f.id;
+    
+    let html = `<div style="color: #94a3b8; margin-bottom:15px; font-size:14px;">Ingresa el precio recomendado para cada cotización (opcional) y el motivo general del rechazo.</div>`;
+    
+    f.cotizaciones.forEach((c, idx) => {
+        let precioActual = formatearMoneda(c.precio);
+        let titulo = c.titulo || 'Sin Título';
+        html += `
+        <div style="margin-bottom:15px; padding:15px; background:#1e293b; border:1px solid #334155; border-radius:8px;">
+            <div style="font-weight:bold; color:#e2e8f0; margin-bottom:5px;">Cotización ${idx + 1}: ${titulo}</div>
+            <div style="font-size:13px; color:#94a3b8; margin-bottom:10px;">Precio cotizado: <span style="font-weight:bold; color:#f59e0b;">${precioActual}</span></div>
+            <label style="display:block; font-size:13px; color:#cbd5e1; margin-bottom:5px;">Precio Recomendado ($):</label>
+            <input type="number" class="input-precio-rec-corp" data-idx="${idx}" placeholder="Ej. 1500" style="width:100%; padding:8px; background:#0f172a; color:white; border:1px solid #334155; border-radius:5px;">
+        </div>
+        `;
+    });
+    
+    html += `
+    <div style="margin-top:20px;">
+        <label style="display:block; font-size:14px; font-weight:bold; color:#e2e8f0; margin-bottom:5px;">Motivo General del Rechazo: <span style="color:#ef4444;">*</span></label>
+        <textarea id="rechazo-corp-motivo" rows="4" placeholder="Escribe aquí el motivo del rechazo y las observaciones generales..." style="width:100%; padding:10px; background:#0f172a; color:white; border:1px solid #334155; border-radius:5px;"></textarea>
+    </div>
+    `;
+    
+    document.getElementById('contenido-rechazo-corp').innerHTML = html;
+    document.getElementById('modal-rechazo-corp-dinamico').style.display = 'flex';
+}
+
+function enviarRechazoCorp() {
+    let id_fac = document.getElementById('rechazo-corp-id').value;
+    let motivo = document.getElementById('rechazo-corp-motivo').value.trim();
+    if (!motivo) { alert("Debes escribir el motivo general del rechazo."); return; }
+    
+    let preciosRec = [];
+    document.querySelectorAll('.input-precio-rec-corp').forEach(input => {
+        preciosRec.push({
+            idx: input.getAttribute('data-idx'),
+            precio_recomendado: input.value.trim()
+        });
+    });
+    
+    if (!confirm("¿Estás seguro de rechazar el gasto y enviar las recomendaciones? El ticket será eliminado de tu bandeja.")) return;
+    
+    mostrarLoaderDinamico("Procesando rechazo...", "Enviando notificaciones 📧");
+    
+    fetch('/api/facturas/rechazar_corp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id: id_fac,
+            motivo: motivo,
+            precios_recomendados: preciosRec
+        })
+    }).then(res => res.json()).then(data => {
+        ocultarLoaderDinamico();
+        alert(data.message);
+        document.getElementById('modal-rechazo-corp-dinamico').style.display = 'none';
+        cargarFacturas();
+    }).catch(err => {
+        ocultarLoaderDinamico();
+        console.error(err);
+    });
+}
+
 function abrirDetalles(idFactura) {
     const f = facturasGlobal.find(x => String(x.id) === String(idFactura)); if (!f) return;
     document.getElementById('detalles-contenido').innerHTML = generarHtmlDetalles(f, 'lectura', formatearMoneda(f.precio));

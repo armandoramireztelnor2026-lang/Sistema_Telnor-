@@ -304,6 +304,52 @@ def enviar_correo_factura_rechazada(correo_destino, nombre_proveedor, unidad, mo
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
 
+def enviar_correo_factura_rechazada_corp(correo_destino, nombre_proveedor, unidad, motivo, precios_recomendados):
+    if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    asunto = f"❌ RECHAZO CORPORATIVO: Unidad 8090-{unidad} (Requiere Ajuste de Precio)"
+    
+    precios_html = ""
+    if precios_recomendados and len(precios_recomendados) > 0:
+        precios_html = "<ul>"
+        for p in precios_recomendados:
+            precios_html += f"<li><strong>Cotización {int(p['idx']) + 1}:</strong> Se recomienda ajustar a ${p['precio_recomendado']} MXN</li>"
+        precios_html += "</ul>"
+    
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #dc2626; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">PRESUPUESTO MAYOR RECHAZADO</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre_proveedor}</strong>,</p>
+                <p>Se le notifica que el área de <strong>Corporativo / Gastos Mayores</strong> ha evaluado su cotización para la unidad <strong>8090-{unidad}</strong> y ha sido <strong>rechazada</strong> debido a observaciones en el costo.</p>
+                
+                <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                    <h4 style="margin: 0 0 10px 0; color: #991b1b;">Motivo del rechazo y observaciones generales:</h4>
+                    <p style="margin: 0; font-style: italic; color: #7f1d1d;">"{motivo}"</p>
+                </div>
+                
+                {f'''
+                <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                    <h4 style="margin: 0 0 10px 0; color: #b45309;">Precios Recomendados por Corporativo:</h4>
+                    {precios_html}
+                </div>
+                ''' if precios_html else ''}
+                
+                <p>El ticket original ha sido cancelado en el sistema. Por favor, <strong>ingrese de nuevo al Portal de Proveedores para crear una nueva cotización</strong> ajustando los precios según las recomendaciones anteriores.</p>
+                <br>
+                <p style="font-size: 0.9em; color: #6b7280;">Este es un mensaje automático del Sistema Telnor. Por favor, no responda a este correo.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_destino, asunto, cuerpo_html)
+
 def enviar_correo_ticket_rechazado(correo_destino, nombre_empleado, ticket, unidad, motivo):
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"

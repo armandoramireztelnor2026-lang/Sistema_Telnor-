@@ -170,6 +170,45 @@
             "validacion_fiscal": "Aprobada",
             "numero_doc50": "50923029323",
             "estado": "Archivado"
+        },
+        {
+            "id": "20260903223625",
+            "proveedor": "Autopartes y Motores B.C.",
+            "unidad": "8090-1231",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "n",
+            "retro": "[TICKET:REP-20260903125555]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 10001.0,
+            "fecha": "2026-09-03",
+            "numero_orden": "",
+            "compania": "RUMN",
+            "aprobado_admin": false,
+            "aprobado_corp": true,
+            "timestamp": "2026-09-03T22:36:25.103373",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "",
+            "entregado": "No",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 10001.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20260903125555]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1788500185082_0_Value_Chain_Analysis_Whiteboard_in_Blue_Black_and_White_Bold_Corporate_Style.png"
+                    ],
+                    "pdf_cotizacion": "1788500185082_0_Actividad_1.1.3._Normas_y_estandares_aplicables_a_auditoria.png"
+                }
+            ]
         }
     ]
 }

@@ -15,6 +15,7 @@ from notificaciones import (
     enviar_correo_nueva_factura_corp,
     enviar_correo_confirmacion_factura,
     enviar_correo_factura_rechazada,
+    enviar_correo_factura_rechazada_corp,
     enviar_correo_factura_fiscal_subida,
     enviar_correo_factura_fiscal_rechazada,
 )
@@ -412,6 +413,59 @@ def rechazar_factura():
             enviar_correo_factura_rechazada(correo_prov, proveedor_nombre, unidad_texto, motivo)
             
         return jsonify({"status": "success", "message": "Registro eliminado y proveedor notificado."})
+    return jsonify({"status": "error", "message": "Registro no encontrado."})
+
+@facturas_bp.route("/api/facturas/rechazar_corp", methods=["POST"])
+def rechazar_corp():
+    if "usuario" not in session or session["usuario"]["rol"] != "corporativos":
+        return jsonify({"status": "error", "message": "No autorizado"})
+        
+    factura_id = request.json.get("id")
+    motivo = request.json.get("motivo", "Motivo no especificado por Corporativo.")
+    precios_recomendados = request.json.get("precios_recomendados", [])
+    
+    data = leer_json("facturas.json")
+    nuevas_facturas = []
+    eliminada = False
+    factura_a_eliminar = None
+    
+    for f in data.get("facturas", []):
+        if f["id"] == factura_id:
+            eliminada = True
+            factura_a_eliminar = f
+            for cot in f.get("cotizaciones", []):
+                if cot.get("pdf_cotizacion"):
+                    ruta = os.path.join(CARPETA_FACTURAS, cot["pdf_cotizacion"])
+                    if os.path.exists(ruta): os.remove(ruta)
+                for foto in cot.get("fotos_evidencia", []):
+                    ruta = os.path.join(CARPETA_FACTURAS, foto)
+                    if os.path.exists(ruta): os.remove(ruta)
+            
+            for tipo in ["fotos_cotizacion", "fotos_evidencia"]:
+                for foto in f.get(tipo, []):
+                    ruta = os.path.join(CARPETA_FACTURAS, foto)
+                    if os.path.exists(ruta): os.remove(ruta)
+        else:
+            nuevas_facturas.append(f)
+            
+    if eliminada and factura_a_eliminar:
+        data["facturas"] = nuevas_facturas
+        escribir_json("facturas.json", data)
+        
+        proveedor_nombre = factura_a_eliminar.get('proveedor', '')
+        unidad_texto = str(factura_a_eliminar.get('unidad', '')).replace('8090-', '')
+        usuarios_data = leer_json('usuarios.json')
+        correo_prov = ""
+        
+        for u in usuarios_data.get('usuarios', []):
+            if u['rol'] == 'proveedores' and u['datos_perfil'].get('nombre_proveedor') == proveedor_nombre:
+                correo_prov = u['datos_perfil'].get('correo', '')
+                break
+                
+        if correo_prov:
+            enviar_correo_factura_rechazada_corp(correo_prov, proveedor_nombre, unidad_texto, motivo, precios_recomendados)
+            
+        return jsonify({"status": "success", "message": "Gasto rechazado. El ticket fue eliminado y el proveedor fue notificado con tus recomendaciones."})
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
 
