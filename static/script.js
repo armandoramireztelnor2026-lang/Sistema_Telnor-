@@ -189,7 +189,7 @@ function cambiarVistaCorp(vista) {
     } else if (vista === 'archivo') {
         if (document.getElementById('vista-archivo-corp')) document.getElementById('vista-archivo-corp').style.display = 'block';
     }
-    
+
     if (typeof cargarFacturas === 'function') cargarFacturas();
 }
 
