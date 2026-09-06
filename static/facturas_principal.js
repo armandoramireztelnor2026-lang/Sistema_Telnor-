@@ -943,7 +943,7 @@ function generarHtmlDetalles(f, modo, precioBonito) {
         let sec5Html = '';
         let numDoc50 = c.numero_doc50;
         let pdfDoc50 = c.pdf_doc50;
-        if (rolUsuario !== 'proveedores' && (numDoc50 || pdfDoc50)) {
+        if (numDoc50 || pdfDoc50) {
             let tituloSec5 = multiCot ? `&#9632; SECCI&Oacute;N 5: N&Uacute;MERO DE DOCUMENTO CONTABLE ${i + 1} Y ARCHIVADO` : '&#9632; SECCI&Oacute;N 5: N&Uacute;MERO DE DOCUMENTO CONTABLE Y ARCHIVADO';
             sec5Html = `
             <div style="margin-top:20px; padding:15px; background:#0b1c30; border:2px dashed #eab308; border-radius:8px;">

@@ -1544,3 +1544,24 @@ th {
 .btn-danger-modal:hover {
     background: #dc2626;
 }
+
+/* EFECTO DE HOVER Y SELECCION PARA TABLAS */
+tbody tr {
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+tbody tr:hover {
+    background-color: rgba(64, 145, 108, 0.15) !important;
+}
+tbody tr.selected-row {
+    background-color: rgba(64, 145, 108, 0.4) !important;
+}
+
+/* CLASE ACTIVA PARA BOTONES DEL MENU LATERAL */
+.btn-sidebar.active {
+    background: #40916c;
+    border-color: #40916c;
+    color: white;
+    font-weight: bold;
+    box-shadow: inset 4px 0 0 #f59e0b;
+}

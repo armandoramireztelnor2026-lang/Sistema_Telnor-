@@ -398,8 +398,11 @@ function cargarListaUsuarios(rolBuscado, idTabla) {
 
             if (rolBuscado === 'proveedores') {
                 tbody.innerHTML += `<tr><td>${img}</td><td><strong>${dp.nombre_proveedor}</strong></td><td style="color:#40916c">${u.usuario}</td><td>${dp.encargado}</td><td>${dp.responsable || 'N/A'}</td><td>${dp.telefono}</td><td>${dp.correo}</td><td>${dp.direccion}</td><td>${dp.codigo_postal}</td><td><div style="min-width: 400px; width: 400px; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4;">${dp.descripcion}</div></td><td>${btnAcciones}</td></tr>`;
+            } else if (rolBuscado === 'administracion') {
+                let subrolText = dp.subrol ? `<span style="color:#f59e0b; font-weight:bold;">${dp.subrol}</span>` : '<span style="color:#ef4444; font-weight:bold;">N/A</span>';
+                tbody.innerHTML += `<tr><td>${img}</td><td><strong>${dp.nombres} ${dp.apellido_paterno} ${dp.apellido_materno || ''}</strong><br><small style="color:#a3b1c6;">${dp.correo || ''}</small></td><td style="color:#40916c">${u.usuario}</td><td>${dp.num_empleado}</td><td><span style="color:#0ea5e9; font-weight:bold;">${ciudad}</span></td><td>${dp.area || 'N/A'}</td><td>${subrolText}</td><td>${btnAcciones}</td></tr>`;
             } else {
-                let areaYRol = dp.subrol ? `${dp.area} <br><small style="color:#f59e0b; font-weight:bold;">[${dp.subrol}]</small>` : dp.area;
+                let areaYRol = dp.subrol ? `${dp.area} <br><small style="color:#f59e0b; font-weight:bold;">[${dp.subrol}]</small>` : (dp.area || 'N/A');
                 tbody.innerHTML += `<tr><td>${img}</td><td><strong>${dp.nombres} ${dp.apellido_paterno} ${dp.apellido_materno || ''}</strong><br><small style="color:#a3b1c6;">${dp.correo || ''}</small></td><td style="color:#40916c">${u.usuario}</td><td>${dp.num_empleado}</td><td><span style="color:#0ea5e9; font-weight:bold;">${ciudad}</span></td><td>${areaYRol}</td><td>${btnAcciones}</td></tr>`;
             }
         });
@@ -448,7 +451,7 @@ function abrirModalEditar(usuarioId) {
     if (user.rol === 'proveedores') {
         camposHtml += `<div class="input-group full-width"><label>Empresa</label><input type="text" name="nombre_proveedor" value="${dp.nombre_proveedor}" required></div><div class="input-group"><label>Encargado</label><input type="text" name="encargado" value="${dp.encargado}" required></div><div class="input-group"><label>Responsable</label><input type="text" name="responsable" value="${dp.responsable || ''}"></div><div class="input-group"><label>Teléfono</label><input type="text" name="telefono" value="${dp.telefono}" required></div><div class="input-group"><label>Correo</label><input type="text" name="correo" value="${dp.correo}" required></div><div class="input-group"><label>C.P.</label><input type="text" name="codigo_postal" value="${dp.codigo_postal}" required></div><div class="input-group full-width"><label>Dirección</label><input type="text" name="direccion" value="${dp.direccion}" required></div><div class="input-group full-width"><label>Descripción</label><textarea name="descripcion" required style="width: 100%; min-height: 80px; padding: 12px 15px; border-radius: 8px; border: 1px solid #1f395a; background-color: #112641; color: white; font-family: 'Poppins', sans-serif; resize: vertical;">${dp.descripcion}</textarea></div>`;
     } else if (user.rol === 'administracion') {
-        camposHtml += `<div class="input-group full-width"><label>Nombre(s)</label><input type="text" name="nombres" value="${dp.nombres}" required></div><div class="input-group"><label>Apellido Paterno</label><input type="text" name="apellido_paterno" value="${dp.apellido_paterno}" required></div><div class="input-group"><label>Apellido Materno</label><input type="text" name="apellido_materno" value="${dp.apellido_materno || ''}"></div>${htmlCiudadCope}<div class="input-group"><label>Núm. Empleado</label><input type="text" name="num_empleado" value="${dp.num_empleado}" required></div><div class="input-group"><label>Área</label><input type="text" name="area" value="${dp.area}" required></div><div class="input-group"><label>Correo Alertas</label><input type="email" name="correo" value="${dp.correo || ''}" required></div><div class="input-group"><label>Puesto</label><select name="subrol" class="input-form" required><option value="Jefatura" ${dp.subrol === 'Jefatura' ? 'selected' : ''}>Jefatura</option><option value="Supervisor" ${dp.subrol === 'Supervisor' ? 'selected' : ''}>Supervisor</option></select></div>`;
+        camposHtml += `<div class="input-group full-width"><label>Nombre(s)</label><input type="text" name="nombres" value="${dp.nombres}" required></div><div class="input-group"><label>Apellido Paterno</label><input type="text" name="apellido_paterno" value="${dp.apellido_paterno}" required></div><div class="input-group"><label>Apellido Materno</label><input type="text" name="apellido_materno" value="${dp.apellido_materno || ''}"></div>${htmlCiudadCope}<div class="input-group"><label>Núm. Empleado</label><input type="text" name="num_empleado" value="${dp.num_empleado}" required></div><div class="input-group"><label>Área</label><input type="text" name="area" value="${dp.area}" required></div><div class="input-group"><label>Correo Alertas</label><input type="email" name="correo" value="${dp.correo || ''}" required></div><div class="input-group"><label>Puesto</label><select name="subrol" class="input-form" required><option value="Jefatura" ${dp.subrol === 'Jefatura' ? 'selected' : ''}>Jefatura</option><option value="Supervisor" ${dp.subrol === 'Supervisor' ? 'selected' : ''}>Supervisor</option><option value="Administrador" ${dp.subrol === 'Administrador' ? 'selected' : ''}>Administrador</option></select></div>`;
     } else if (user.rol === 'corporativos') {
         camposHtml += `<div class="input-group full-width"><label>Nombre(s)</label><input type="text" name="nombres" value="${dp.nombres}" required></div><div class="input-group"><label>Apellido Paterno</label><input type="text" name="apellido_paterno" value="${dp.apellido_paterno}" required></div><div class="input-group"><label>Apellido Materno</label><input type="text" name="apellido_materno" value="${dp.apellido_materno || ''}"></div>${htmlCiudadCope}<div class="input-group"><label>Núm. Empleado</label><input type="text" name="num_empleado" value="${dp.num_empleado}" required></div><div class="input-group"><label>Área</label><input type="text" name="area" value="${dp.area}" required></div><div class="input-group full-width"><label>Correo Electrónico</label><input type="email" name="correo" value="${dp.correo || ''}" required></div>`;
     }
@@ -554,4 +557,25 @@ document.addEventListener("DOMContentLoaded", function () {
     if (document.getElementById('vista-pendientes')) { cambiarVistaAdmin('facturas'); }
     if (document.getElementById('vista-reportes-prov')) { cambiarVistaProv('facturas'); }
     if (document.getElementById('vista-cotizaciones-corp')) { cambiarVistaCorp('cotizaciones'); }
+});
+// --- EFECTO DE SELECCION GLOBAL PARA FILAS DE TABLA ---
+document.addEventListener('click', function (e) {
+    let tr = e.target.closest('tbody tr');
+    if (!tr) return;
+    let tbody = tr.closest('tbody');
+    if (!tbody) return;
+    let rows = tbody.querySelectorAll('tr');
+    rows.forEach(r => r.classList.remove('selected-row'));
+    tr.classList.add('selected-row');
+});
+
+// --- MARCADOR ACTIVO EN MENU LATERAL ---
+document.addEventListener('click', function (e) {
+    let btn = e.target.closest('.btn-sidebar');
+    if (!btn) return;
+    let nav = btn.closest('.nav-menu') || btn.closest('.sidebar');
+    if (!nav) return;
+    let buttons = nav.querySelectorAll('.btn-sidebar');
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 });

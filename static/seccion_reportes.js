@@ -47,6 +47,7 @@ async function cargarSeccionReportes() {
             
             let numEco = f.unidad ? `8090-${f.unidad.replace('8090-', '')}` : pendienteHTML;
             let fechaTicket = f.fecha || reporteOrig.fecha || pendienteHTML;
+            let estado = 'N/A'; // Temporalmente N/A hasta que se programe
             let compania = f.compania || pendienteHTML;
             
             let departamento = f.departamento || f.area || reporteOrig.departamento || pendienteHTML;
@@ -84,6 +85,7 @@ async function cargarSeccionReportes() {
                     <td><strong>${ticket}</strong></td>
                     <td>${numEco}</td>
                     <td>${fechaTicket}</td>
+                    <td><span style="color:#a3b1c6; font-style:italic;">${estado}</span></td>
                     <td>${compania}</td>
                     <td>${departamento}</td>
                     <td>${cope}</td>

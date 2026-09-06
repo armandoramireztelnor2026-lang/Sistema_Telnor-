@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=1788653024">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .asignacion-zona {
@@ -373,6 +373,7 @@
                                     <th>Num. Empleado</th>
                                     <th>Ciudad</th>
                                     <th>Área</th>
+                                    <th>Nivel</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -429,6 +430,7 @@
                                     <th>TICKET</th>
                                     <th>NUM. ECO</th>
                                     <th>FECHA</th>
+                                    <th>ESTADO</th>
                                     <th>COMPAÑIA</th>
                                     <th>DEPARTAMENTO</th>
                                     <th>COPE/EDIFICIO</th>
@@ -448,7 +450,7 @@
                             <tbody id="tabla-seccion-reportes">
                                 <!-- Por ahora vacío, como solicitó el usuario -->
                                 <tr>
-                                    <td colspan="17" style="text-align: center; color: #a3b1c6; padding: 20px;">No
+                                    <td colspan="18" style="text-align: center; color: #a3b1c6; padding: 20px;">No
                                         hay información disponible por el momento.</td>
                                 </tr>
                             </tbody>
@@ -955,14 +957,14 @@
     <div id="lightbox-modal" class="lightbox-overlay" onclick="cerrarLightbox(event)"><span class="lightbox-close"
             onclick="cerrarLightbox(event)">&times;</span><img id="lightbox-img" class="lightbox-content" src=""></div>
 
-    <script src="/static/script.js?v=1788549154"></script>
+    <script src="/static/script.js?v=1788653024"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js?v=1788550327"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=1788550327"></script>
     <script src="/static/unidades.js?v=7"></script>
-    <script src="/static/facturas_principal.js?v=1788550327"></script>
-    <script src="/static/seccion_reportes.js?v=1788554727"></script>
+    <script src="/static/facturas_principal.js?v=1788652870"></script>
+    <script src="/static/seccion_reportes.js?v=1788649909"></script>
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">
         <div class="modal-box large">
