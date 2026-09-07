@@ -18,6 +18,7 @@ from notificaciones import (
     enviar_correo_factura_rechazada_corp,
     enviar_correo_factura_fiscal_subida,
     enviar_correo_factura_fiscal_rechazada,
+    enviar_correo_esperando_liberacion
 )
 
 facturas_bp = Blueprint("facturas_bp", __name__)
@@ -270,7 +271,18 @@ def listar_facturas():
     return jsonify({"facturas": facturas})
 
 
+
+def encontrar_admin_por_ciudad(ciudad):
+    accesos = leer_json("accesos.json")
+    for u in accesos.get("usuarios", []):
+        if u.get("rol") == "administracion":
+            dp = u.get("datos_perfil", {})
+            if dp.get("subrol") == "Administrador" and dp.get("ciudad") == ciudad:
+                return dp.get("correo"), f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()
+    return None, None
+
 @facturas_bp.route("/api/facturas/confirmar_admin", methods=["POST"])
+
 def confirmar_admin():
     factura_id = request.form.get("id")
     
@@ -762,6 +774,19 @@ def editar_seccion_especifica():
         factura["numero_orden"] = identificador
         factura["pdf_cotizacion_asignacion"] = filename
         
+        # ===== NUEVA LOGICA DE BLOQUEO PARA DOC 50 =====
+        correo_admin, nombre_admin = encontrar_admin_por_ciudad(factura.get("ciudad", factura.get("unidad")))
+        if correo_admin:
+            factura["liberado_admin"] = False
+            try:
+                from notificaciones import enviar_correo_esperando_liberacion
+                enviar_correo_esperando_liberacion(correo_admin, nombre_admin, factura.get("id_reporte", "N/A"), factura.get("unidad", ""), identificador, identificador)
+            except Exception as e:
+                print("Error al enviar correo: ", e)
+        else:
+            factura["liberado_admin"] = True
+        # ===============================================
+
         # Sincronizar con reportes.json
         reportes_data = leer_json("reportes.json")
         for r in reportes_data.get("reportes", []):
@@ -840,3 +865,24 @@ def eliminar_silencioso():
 
         return jsonify({"status": "success"})
     return jsonify({"status": "error", "message": "Factura no encontrada"})
+
+
+@facturas_bp.route("/api/facturas/liberar_doc50", methods=["POST"])
+def liberar_doc50():
+    if "usuario" not in session or session["usuario"]["rol"] != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"})
+    
+    # Validar que sea Administrador
+    subrol = session["usuario"]["datos_perfil"].get("subrol")
+    if subrol != "Administrador":
+        return jsonify({"status": "error", "message": "Permiso denegado. Sólo Administradores pueden liberar tickets."})
+
+    factura_id = request.json.get("id")
+    data = leer_json("facturas.json")
+    for f in data.get("facturas", []):
+        if str(f["id"]) == str(factura_id):
+            f["liberado_admin"] = True
+            escribir_json("facturas.json", data)
+            return jsonify({"status": "success", "message": "Ticket liberado correctamente para captura de Doc Contable."})
+            
+    return jsonify({"status": "error", "message": "Factura no encontrada."})

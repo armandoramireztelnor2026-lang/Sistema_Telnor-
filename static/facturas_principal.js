@@ -220,6 +220,64 @@ async function cargarFacturas() {
                 let idRepForTable = obtenerIdReporte(f) || 'S/T';
                 let tdTicket = `<td><span style="color:#0ea5e9; font-weight:bold;">${idRepForTable}</span></td>`;
 
+                
+                // ==========================================
+                // LÓGICA INDEPENDIENTE PARA DOC CONTABLES
+                // ==========================================
+                let valFiscalX = f.validacion_fiscal || 'Pendiente';
+                let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+                
+                if (tbodyDocContables && rolUsuario === 'administracion') {
+                    let showInDoc = false;
+                    
+                    // Mostrar si está esperando liberación del Administrador
+                    if (subrolAct === 'Administrador' && f.liberado_admin === false) {
+                        showInDoc = true;
+                    }
+                    // O si ya llegó al final (Factura aprobada) para que la Jefatura suba el Doc 50
+                    else if (valFiscalX === 'Aprobada' && subrolAct !== 'Administrador') {
+                        showInDoc = true;
+                    }
+                    
+                    if (showInDoc) {
+                        let btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                            <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
+
+                        if (subrolAct === 'Administrador') {
+                            if (f.liberado_admin === false) {
+                                btnDoc += `<button class="btn-success" style="display:block; width:100%; margin:0; background-color: #f59e0b;" onclick="liberarDocContable('${f.id}')">✔️ Liberar Ticket</button>`;
+                            } else {
+                                btnDoc += `<button class="btn-info" disabled style="display:block; width:100%; margin:0; background-color:#475569; cursor:not-allowed;">Ticket Liberado</button>`;
+                            }
+                        } else {
+                            if (f.liberado_admin === false) {
+                                btnDoc += `<button class="btn-success" disabled style="display:block; width:100%; margin:0; background-color:#475569; cursor:not-allowed;">🔒 Esperando liberación</button>`;
+                            } else {
+                                btnDoc += `<button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalDocContable('${f.id}')">Ingresar Número de Doc. Contable</button>`;
+                            }
+                        }
+
+                        btnDoc += `<button class="btn-danger-sm" style="display:block; width:100%; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaDefinitiva('${f.id}')">Eliminar</button>
+                        </div>`;
+                        
+                        let ff = f.factura_folio || "Pendiente";
+                        let idRepTable = obtenerIdReporte(f) || 'S/T';
+                        let pFormat = f.precio ? parseFloat(f.precio).toLocaleString('en-US') : '0';
+                        
+                        tbodyDocContables.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepTable}</span></td><td><span style="color:#10b981; font-weight:bold;">${ff}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><small style="color:#a3b1c6;">$${pFormat}</small></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
+                        countDocContables++;
+                        
+                        if (subrolAct === 'Administrador') {
+                            return; // Skip rendering elsewhere for admin if it's already here
+                        }
+                    }
+                }
+                // ==========================================
+                
+                // ADMINISTRADOR HARD BLOCK: El Administrador SOLO ve tickets en tbodyDocContables (o Archivo).
+                // No debe ver tickets en facturas o facturas_finales.
+                if (subrolAct === 'Administrador') return;
+
                 if ((rolUsuario === 'proveedores' || rolUsuario === 'administracion') && entregadoTexto === 'Sí') {
                     if (tbodyFinales) {
                         let foliosArr = [];
@@ -242,15 +300,6 @@ async function cargarFacturas() {
 
                             if (valFiscal === 'Aprobada') {
                                 if (rolUsuario === 'administracion') {
-                                    if (tbodyDocContables) {
-                                        let btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
-                                            <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>
-                                            <button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalDocContable('${f.id}')">Ingresar Número de Doc. Contable</button>
-                                            <button class="btn-danger-sm" style="display:block; width:100%; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaDefinitiva('${f.id}')">Eliminar</button>
-                                        </div>`;
-                                        tbodyDocContables.innerHTML += `<tr>${tdTicket}<td><span style="color:#10b981; font-weight:bold;">${f.factura_folio}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td>${tdPrecioInd}<td><strong>$${precioBonito} MXN</strong></td><td>${btnDoc}</td></tr>`;
-                                        countDocContables++;
-                                    }
                                     return; // Ocultar de la bandeja Facturas de administracion
                                 }
                             }
@@ -1826,6 +1875,12 @@ function validarFacturaFiscalModal() {
 // --- FUNCIONES PARA DOCUMENTO CONTABLE Y ARCHIVO ---
 
 function abrirModalDocContable(idFactura) {
+    const fx = facturasGlobal.find(x => String(x.id) === String(idFactura));
+    if (fx && fx.liberado_admin === false) {
+        alert("🔒 Este ticket está bloqueado. Esperando revisión y liberación del Administrador.");
+        return;
+    }
+
     document.getElementById('hidden-doc-contable-id').value = idFactura;
 
     const f = facturasGlobal.find(x => String(x.id) === String(idFactura));
@@ -2356,3 +2411,29 @@ function abrirVisorArchivoLocal(previewId) {
     }
 }
 
+
+
+async function liberarDocContable(idFactura) {
+    if (!confirm("¿Estás seguro que deseas liberar este ticket? Una vez liberado, el Supervisor podrá subir el Documento Contable.")) return;
+    
+    try {
+        mostrarLoaderDinamico("Liberando ticket...", "Actualizando permisos");
+        let res = await fetch('/api/facturas/liberar_doc50', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: idFactura })
+        });
+        let data = await res.json();
+        ocultarLoaderDinamico();
+        alert(data.message);
+        if (data.status === 'success') {
+            if (typeof fetchFacturasGlobal === 'function') await fetchFacturasGlobal();
+            if (typeof renderTabla === 'function') renderTabla();
+            else if (typeof cargarFacturas === 'function') cargarFacturas();
+        }
+    } catch (e) {
+        console.error(e);
+        ocultarLoaderDinamico();
+        alert("Error al liberar el ticket.");
+    }
+}

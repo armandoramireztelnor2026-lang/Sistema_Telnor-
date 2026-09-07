@@ -554,7 +554,14 @@ function descargarPDF() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    if (document.getElementById('vista-pendientes')) { cambiarVistaAdmin('facturas'); }
+    if (document.getElementById('vista-pendientes')) { 
+        let subrol = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+        if (subrol === 'Administrador') {
+            cambiarVistaAdmin('documentos-contables');
+        } else {
+            cambiarVistaAdmin('facturas'); 
+        }
+    }
     if (document.getElementById('vista-reportes-prov')) { cambiarVistaProv('facturas'); }
     if (document.getElementById('vista-cotizaciones-corp')) { cambiarVistaCorp('cotizaciones'); }
 });

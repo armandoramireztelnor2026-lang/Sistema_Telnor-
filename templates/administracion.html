@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="/static/style.css?v=1788653024">
+    <link rel="stylesheet" href="/static/style.css?v=1788806395">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .asignacion-zona {
@@ -139,12 +139,13 @@
             <div class="sidebar-badge">NIVEL: {{ usuario.datos_perfil.subrol }}</div>
 
             <nav class="nav-menu">
+                {% if usuario.datos_perfil.subrol != 'Administrador' %}
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('reportes')">Bandeja de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('facturas')">Cotizaciones y Órdenes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('facturas_finales')">Facturas</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Documentos Contables</button>
-
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-prov')">Directorio Talleres</button>
+                {% endif %}
 
                 <!-- ESTOS MENÚS SOLO LOS VERÁ LA JEFATURA -->
                 {% if usuario.datos_perfil.subrol == 'Jefatura' %}
@@ -156,6 +157,10 @@
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de
                     Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
+                {% elif usuario.datos_perfil.subrol == 'Administrador' %}
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Liberar Doc. Contable</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo Histórico</button>
+                <!-- <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Reporte</button> -->
                 {% endif %}
 
             </nav>
@@ -957,13 +962,13 @@
     <div id="lightbox-modal" class="lightbox-overlay" onclick="cerrarLightbox(event)"><span class="lightbox-close"
             onclick="cerrarLightbox(event)">&times;</span><img id="lightbox-img" class="lightbox-content" src=""></div>
 
-    <script src="/static/script.js?v=1788653024"></script>
+    <script src="/static/script.js?v=1788806395"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js?v=1788550327"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=1788550327"></script>
     <script src="/static/unidades.js?v=7"></script>
-    <script src="/static/facturas_principal.js?v=1788652870"></script>
+    <script src="/static/facturas_principal.js?v=3207"></script>
     <script src="/static/seccion_reportes.js?v=1788649909"></script>
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">

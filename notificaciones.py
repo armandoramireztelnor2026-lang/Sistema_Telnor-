@@ -431,3 +431,31 @@ def enviar_correo_factura_fiscal_rechazada(correo_destino, proveedor, unidad, fo
     </html>
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
+def enviar_correo_esperando_liberacion(correo_destino, nombre_admin, ticket, unidad, num_orden, num_pedido):
+    if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    asunto = f"Revisión y Liberación Pendiente: Unidad 8090-{unidad} (Ticket: {ticket})"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #0b1c30; padding: 20px; text-align: center;">
+                <h2 style="color: #0ea5e9; margin: 0;">ACCIÓN REQUERIDA: LIBERACIÓN DE TICKET</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre_admin}</strong>,</p>
+                <p>Se le notifica que se han subido los datos de pedido para la unidad <strong>8090-{unidad}</strong> y está en espera de su revisión y liberación para continuar con el proceso (Subir Doc. Contable).</p>
+                <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
+                    <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Número de Orden:</strong> {num_orden}</li>
+                    <li style="margin-bottom: 8px;"><strong>Número de Pedido:</strong> {num_pedido}</li>
+                </ul>
+                <p>Por favor ingrese al sistema, diríjase a <strong>Liberar Doc. Contable</strong>, revise los documentos adjuntos y libere el ticket.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_destino, asunto, cuerpo_html)
