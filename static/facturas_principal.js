@@ -257,8 +257,7 @@ async function cargarFacturas() {
                             }
                         }
 
-                        btnDoc += `<button class="btn-danger-sm" style="display:block; width:100%; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaDefinitiva('${f.id}')">Eliminar</button>
-                        </div>`;
+                        btnDoc += `</div>`;
                         
                         let ff = f.factura_folio || "Pendiente";
                         let idRepTable = obtenerIdReporte(f) || 'S/T';

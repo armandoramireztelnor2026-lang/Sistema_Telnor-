@@ -968,7 +968,7 @@
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=1788550327"></script>
     <script src="/static/unidades.js?v=7"></script>
-    <script src="/static/facturas_principal.js?v=3207"></script>
+    <script src="/static/facturas_principal.js?v=9112"></script>
     <script src="/static/seccion_reportes.js?v=1788649909"></script>
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">
@@ -1073,6 +1073,19 @@
         </div>
     </div>
 
+    <script>
+        // FORZAR VISTA POR DEFECTO SIN DEPENDER DE script.js
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                var subrol = "{{ usuario.datos_perfil.subrol }}";
+                if (subrol === 'Administrador') {
+                    if (typeof cambiarVistaAdmin === 'function') {
+                        cambiarVistaAdmin('documentos-contables');
+                    }
+                }
+            }, 100); 
+        });
+    </script>
 </body>
 
 </html>
