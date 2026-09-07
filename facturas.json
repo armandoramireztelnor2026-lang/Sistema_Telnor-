@@ -21,8 +21,8 @@
             "estado_custom": "",
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
-            "codigo_liberacion": "",
-            "entregado": "No",
+            "codigo_liberacion": "40073592",
+            "entregado": "S\u00ed",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
@@ -38,7 +38,9 @@
                     "pdf_cotizacion": "1788808624953_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.6._Marco_legal_aplicable_para_la_auditoria_de_TI_e_Innovacion_1.pdf",
                     "numero_orden": "12123123",
                     "numero_cotizacion_asignacion": "29000121",
-                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260907121704_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.6._Marco_legal_aplicable_para_la_auditoria_de_TI_e_Innovacion.pdf"
+                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260907121704_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.6._Marco_legal_aplicable_para_la_auditoria_de_TI_e_Innovacion.pdf",
+                    "factura_folio": "82721",
+                    "factura_pdf": "FACTURA_FINAL_20260907121704_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.6._Marco_legal_aplicable_para_la_auditoria_de_TI_e_Innovacion.pdf"
                 },
                 {
                     "id_cotizacion": "2",
@@ -54,12 +56,17 @@
                     "pdf_cotizacion": "1788808624953_1_Meta_1.3._Analisis_del_Modulo_1_Informacion_general_sobre_los_conceptos_de_la_nube.pdf",
                     "numero_orden": "1231231211",
                     "numero_cotizacion_asignacion": "29081123131",
-                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260907121704_1_M1.3_Ramirez_Armando_CadenaValor.pdf"
+                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260907121704_1_M1.3_Ramirez_Armando_CadenaValor.pdf",
+                    "factura_folio": "23312",
+                    "factura_pdf": "FACTURA_FINAL_20260907121704_1_2200607_RamirezCardenasLuisArmando_Actividad_1.1.5._Gobierno_de_TI.pdf"
                 }
             ],
             "numero_cotizacion_asignacion": "29000121",
             "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260907121704_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.6._Marco_legal_aplicable_para_la_auditoria_de_TI_e_Innovacion.pdf",
-            "liberado_admin": false
+            "liberado_admin": false,
+            "factura_folio": "82721",
+            "factura_pdf": "FACTURA_FINAL_20260907121704_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.6._Marco_legal_aplicable_para_la_auditoria_de_TI_e_Innovacion.pdf",
+            "validacion_fiscal": "Aprobada"
         }
     ]
 }
