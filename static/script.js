@@ -123,7 +123,7 @@ function procesarRegistro(rol) {
 }
 
 function cambiarVistaAdmin(vista) {
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades'];
+    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';
@@ -236,30 +236,58 @@ function abrirModalDetalles(identificador) {
     const user = pendientesGlobal.find(u => u.correo === identificador || u.num_empleado === identificador);
     if (!user) return;
 
-    let html = `<img src="/static/registros_confirmar/${user.foto_ruta}" class="modal-photo" onerror="this.src='https://via.placeholder.com/100/112641/40916c?text=Foto'">
-                <div class="form-grid" style="grid-template-columns: 1fr 1fr; text-align: left; margin-bottom: 20px;">`;
-
+    let isProv = user.rol === 'proveedores';
+    let nombrePrincipal = isProv ? user.nombre_proveedor : `${user.nombres} ${user.apellido_paterno} ${user.apellido_materno || ''}`;
+    let rolLabel = isProv ? 'TALLER / PROVEEDOR' : `EMPLEADO: ${user.rol.toUpperCase()} ${user.subrol ? '(' + user.subrol + ')' : ''}`;
+    let borderRadius = isProv ? '15px' : '50%';
     let ciudadCopeTexto = user.ciudad ? `${user.ciudad} / ${user.cope || 'N/A'}` : 'No especificada';
 
-    if (user.rol === 'proveedores') {
+    let html = `
+        <style>
+            .hover-zoom:hover { transform: scale(1.05); cursor: pointer; }
+            .info-card-modern {
+                background: rgba(255,255,255,0.05);
+                padding: 15px;
+                border-radius: 8px;
+                border-left: 4px solid #0ea5e9;
+                transition: background 0.2s;
+            }
+            .info-card-modern:hover { background: rgba(255,255,255,0.1); }
+            .info-label { font-size: 0.8em; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
+            .info-value { color: #f1f5f9; font-size: 1.05em; word-wrap: break-word; }
+        </style>
+        
+        <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; padding: 25px 20px; border-radius: 10px; text-align: center; margin-bottom: 25px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <a href="/static/registros_confirmar/${user.foto_ruta}" target="_blank" title="Haz clic para ver la imagen en tamaño completo">
+                <img src="/static/registros_confirmar/${user.foto_ruta}" 
+                     style="width: 140px; height: 140px; object-fit: contain; border-radius: ${borderRadius}; border: 3px solid #40916c; box-shadow: 0 8px 20px rgba(0,0,0,0.4); background: white; transition: transform 0.3s;"
+                     class="hover-zoom"
+                     onerror="this.src='https://via.placeholder.com/150/112641/40916c?text=Logo/Foto'">
+            </a>
+            <h3 style="color: #f8fafc; margin-top: 15px; font-size: 1.4em; font-weight: 600; letter-spacing: 0.5px;">${nombrePrincipal}</h3>
+            <div style="margin-top: 10px;">
+                <span style="background: rgba(14, 165, 233, 0.2); padding: 6px 15px; border-radius: 20px; color: #38bdf8; font-size: 0.85em; font-weight: bold; border: 1px solid rgba(14, 165, 233, 0.3);">${rolLabel}</span>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; margin-bottom: 20px;">
+    `;
+
+    if (isProv) {
         html += `
-            <div class="modal-info-line full-width"><strong style="color:#40916c;">Razón Social / Empresa:</strong> ${user.nombre_proveedor}</div>
-            <div class="modal-info-line"><strong>Encargado Principal:</strong> ${user.encargado}</div>
-            <div class="modal-info-line"><strong>Resp. en Turno:</strong> ${user.responsable || 'No especificado'}</div>
-            <div class="modal-info-line"><strong>Teléfono:</strong> ${user.telefono}</div>
-            <div class="modal-info-line"><strong>Correo:</strong> ${user.correo}</div>
-            <div class="modal-info-line full-width"><strong>Dirección:</strong> ${user.direccion}</div>
-            <div class="modal-info-line"><strong>Código Postal:</strong> ${user.codigo_postal || 'No especificado'}</div>
-            <div class="modal-info-line full-width"><strong>Giro / Descripción:</strong> <div class="texto-largo" style="margin-top:5px; padding:10px; background:#1b4332; border-radius:5px;">${user.descripcion || 'Sin descripción'}</div></div>
+            <div class="info-card-modern"><div class="info-label">👤 Encargado Principal</div><div class="info-value">${user.encargado}</div></div>
+            <div class="info-card-modern"><div class="info-label">🤝 Resp. en Turno</div><div class="info-value">${user.responsable || 'N/A'}</div></div>
+            <div class="info-card-modern"><div class="info-label">📞 Teléfono</div><div class="info-value">${user.telefono}</div></div>
+            <div class="info-card-modern"><div class="info-label">📧 Correo</div><div class="info-value">${user.correo}</div></div>
+            <div class="info-card-modern" style="grid-column: span 2;"><div class="info-label">📍 Dirección Completa</div><div class="info-value">${user.direccion} <span style="color:#94a3b8; font-size:0.9em;">(C.P. ${user.codigo_postal || 'N/A'})</span></div></div>
+            <div class="info-card-modern" style="grid-column: span 2; border-left-color: #40916c;"><div class="info-label">🏢 Giro / Descripción</div><div class="info-value" style="font-size: 0.95em; line-height: 1.5; color: #cbd5e1;">${user.descripcion || 'Sin descripción'}</div></div>
         `;
     } else {
         html += `
-            <div class="modal-info-line full-width"><strong style="color:#0284c7;">Nombre Completo:</strong> ${user.nombres} ${user.apellido_paterno} ${user.apellido_materno || ''}</div>
-            <div class="modal-info-line"><strong>Num. Empleado:</strong> ${user.num_empleado}</div>
-            <div class="modal-info-line"><strong>Ubicación Base:</strong> <span style="color:#0ea5e9; font-weight:bold;">${ciudadCopeTexto}</span></div>
-            <div class="modal-info-line"><strong>Área:</strong> ${user.area}</div>
-            <div class="modal-info-line"><strong>Correo Alertas:</strong> ${user.correo || 'N/A'}</div>
-            <div class="modal-info-line"><strong>Rol Solicitado:</strong> <span style="text-transform: capitalize;">${user.rol}</span> ${user.subrol ? '<strong style="color:#f59e0b">(' + user.subrol + ')</strong>' : ''}</div>
+            <div class="info-card-modern"><div class="info-label">🆔 Num. Empleado</div><div class="info-value">${user.num_empleado}</div></div>
+            <div class="info-card-modern"><div class="info-label">💼 Área</div><div class="info-value">${user.area}</div></div>
+            <div class="info-card-modern"><div class="info-label">📍 Ubicación Base / COPE</div><div class="info-value" style="color:#38bdf8; font-weight:bold;">${ciudadCopeTexto}</div></div>
+            <div class="info-card-modern"><div class="info-label">📧 Correo Alertas</div><div class="info-value">${user.correo || 'N/A'}</div></div>
         `;
     }
 
@@ -508,7 +536,12 @@ function cargarAccesos() {
                     nombreCompleto = `${user.datos_perfil.nombres} ${user.datos_perfil.apellido_paterno}`;
                 }
 
-                let rolYNombre = `<span style="text-transform: capitalize; font-weight:bold; color:#0284c7;">${user.rol}</span><br><small style="color:#a3b1c6;">${nombreCompleto}</small>`;
+                let rolTexto = user.rol;
+                if (user.rol === 'administracion' && user.datos_perfil.subrol) {
+                    rolTexto = `Administración (${user.datos_perfil.subrol})`;
+                }
+
+                let rolYNombre = `<span style="text-transform: capitalize; font-weight:bold; color:#0284c7;">${rolTexto}</span><br><small style="color:#a3b1c6;">${nombreCompleto}</small>`;
 
                 let passHtml = `
                     <div style="display:flex; align-items:center; gap:10px;">

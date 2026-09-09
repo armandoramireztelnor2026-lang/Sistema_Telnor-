@@ -70,6 +70,24 @@
                 "subrol": "Administrador",
                 "foto_ruta": "temp_20260905162600_administrador.jpg"
             }
+        },
+        {
+            "usuario": "Luigi_Estrada -RUMN-2026-admin",
+            "password": "LPqHLMh0",
+            "rol": "administracion",
+            "datos_perfil": {
+                "rol": "administracion",
+                "cope": "LIBERTAD",
+                "apellido_paterno": "Estrada ",
+                "apellido_materno": "Villa",
+                "nombres": "Luigi",
+                "ciudad": "Tijuana",
+                "num_empleado": "8172612",
+                "area": "Automotriz",
+                "correo": "luisquinto664@gmail.com",
+                "subrol": "Supervisor",
+                "foto_ruta": "temp_20260909110514_supervisor.jpg"
+            }
         }
     ]
 }

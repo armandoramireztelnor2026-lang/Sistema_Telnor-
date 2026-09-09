@@ -24,20 +24,47 @@ async function cargarSeccionReportes() {
         }
 
         const facturas = data.facturas || [];
+        const reportes = window.reportesGlobal || [];
         const tbody = document.getElementById('tabla-seccion-reportes');
         if (!tbody) return;
 
         tbody.innerHTML = '';
 
-        if (facturas.length === 0) {
+        let asignadosIds = new Set();
+        facturas.forEach(f => {
+            let t = typeof obtenerIdReporte === 'function' ? obtenerIdReporte(f) : (f.id_reporte || f.id || 'S/T');
+            if (t) asignadosIds.add(String(t));
+        });
+
+        let listaCombinada = [...facturas];
+
+        reportes.forEach(r => {
+            if (!asignadosIds.has(String(r.id))) {
+                listaCombinada.push({
+                    is_unassigned: true,
+                    id_reporte: r.id,
+                    fecha: r.fecha,
+                    unidad: r.unidad,
+                    compania: r.compania || 'TELNOR',
+                    departamento: r.departamento,
+                    cope: r.cope,
+                    ciudad: r.ciudad,
+                    retro: r.falla,
+                    timestamp: r.timestamp,
+                    estado_custom: 'Bandeja de Reportes'
+                });
+            }
+        });
+
+        if (listaCombinada.length === 0) {
             tbody.innerHTML = `<tr><td colspan="16" style="text-align: center; color: #a3b1c6; padding: 20px;">No hay información disponible por el momento.</td></tr>`;
             return;
         }
 
         // Ordenamos del más reciente al más antiguo
-        facturas.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        listaCombinada.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-        facturas.forEach(f => {
+        listaCombinada.forEach(f => {
             let ticket = typeof obtenerIdReporte === 'function' ? obtenerIdReporte(f) : (f.id_reporte || f.id || 'S/T');
             
             // Buscar el reporte original
@@ -80,12 +107,31 @@ async function cargarSeccionReportes() {
             let numContable = f.numero_doc50 || pendienteHTML;
             let comentarios = f.comentarios || pendienteHTML;
 
+            let nombreSup = f.responsable || pendienteHTML;
+            let fechaEntrada = f.fecha || pendienteHTML;
+            let fechaSalida = f.fecha_cierre || pendienteHTML;
+            let tiempoTaller = pendienteHTML;
+            if (fechaEntrada !== pendienteHTML && fechaSalida !== pendienteHTML) {
+                let f1 = new Date(f.fecha);
+                let f2 = new Date(f.fecha_cierre);
+                if (!isNaN(f1) && !isNaN(f2)) {
+                    let diffDays = Math.ceil(Math.abs(f2 - f1) / (1000 * 60 * 60 * 24));
+                    tiempoTaller = diffDays + ' día(s)';
+                }
+            }
+
+            let isOperando = f.is_unassigned ? true : (f.entregado === 'Sí');
+            let statusUnidad = isOperando 
+                ? '<span style="background:#10b981; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">Operando</span>' 
+                : '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">No Operando</span>';
+
             tbody.innerHTML += `
                 <tr>
                     <td><strong>${ticket}</strong></td>
                     <td>${numEco}</td>
                     <td>${fechaTicket}</td>
                     <td><span style="color:#a3b1c6; font-style:italic;">${estado}</span></td>
+                    <td>${statusUnidad}</td>
                     <td>${compania}</td>
                     <td>${departamento}</td>
                     <td>${cope}</td>
@@ -93,6 +139,10 @@ async function cargarSeccionReportes() {
                     <td><div style="max-width:200px; white-space:normal; font-size:0.9em; word-wrap: break-word;">${retro}</div></td>
                     <td><strong>$${costo}</strong></td>
                     <td>${proveedor}</td>
+                    <td>${nombreSup}</td>
+                    <td>${fechaEntrada}</td>
+                    <td>${tiempoTaller}</td>
+                    <td>${fechaSalida}</td>
                     <td>${numPedido}</td>
                     <td>${btnPdfPedido}</td>
                     <td>${numOrden}</td>

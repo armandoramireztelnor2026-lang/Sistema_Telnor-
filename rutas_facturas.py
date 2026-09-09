@@ -737,6 +737,7 @@ def doc50():
                         f['numero_doc50'] = nums_doc50[i]
 
             f['estado'] = 'Archivado'
+            f['fecha_cierre'] = datetime.datetime.now().strftime('%Y-%m-%d')
             escribir_json('facturas.json', data)
             return jsonify({'status': 'success', 'message': 'Documentos Contables subidos. El proceso ha concluido para todas las cotizaciones.'})
 

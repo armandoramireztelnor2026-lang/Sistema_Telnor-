@@ -139,28 +139,35 @@
             <div class="sidebar-badge">NIVEL: {{ usuario.datos_perfil.subrol }}</div>
 
             <nav class="nav-menu">
-                {% if usuario.datos_perfil.subrol != 'Administrador' %}
+                <!-- ========== JEFATURA ========== -->
+                {% if usuario.datos_perfil.subrol == 'Jefatura' %}
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('pendientes')">Nuevos Registros</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('accesos')">Accesos (Credenciales)</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('panel-control')">Panel de Control</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
+                {% endif %}
+
+                <!-- ========== SUPERVISOR ========== -->
+                {% if usuario.datos_perfil.subrol == 'Supervisor' %}
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('reportes')">Bandeja de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('facturas')">Cotizaciones y Órdenes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('facturas_finales')">Facturas</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Documentos Contables</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-prov')">Directorio Talleres</button>
-                {% endif %}
-
-                <!-- ESTOS MENÚS SOLO LOS VERÁ LA JEFATURA -->
-                {% if usuario.datos_perfil.subrol == 'Jefatura' %}
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-corp')">Lista de Corporativos</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-admin')">Lista Automotriz</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('unidades')">Unidades</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('pendientes')">Nuevos Registros</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('accesos')">Accesos (Credenciales)</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de
-                    Reportes</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
-                {% elif usuario.datos_perfil.subrol == 'Administrador' %}
+                {% endif %}
+
+                <!-- ========== ADMINISTRADOR ========== -->
+                {% if usuario.datos_perfil.subrol == 'Administrador' %}
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Liberar Doc. Contable</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo Histórico</button>
-                <!-- <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Reporte</button> -->
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
                 {% endif %}
 
             </nav>
@@ -169,7 +176,7 @@
         </aside>
 
         <main class="main-content">
-            
+
             <div id="vista-unidades" style="display: none;">
                 <div class="top-bar">
                     <h2>Directorio de Unidades</h2>
@@ -178,9 +185,12 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
                         <div class="buscador-wrapper-div" style="max-width: 500px; margin:0; flex:1;">
                             <span class="buscador-icono">&#x1F50D;</span>
-                            <input type="text" id="search-unidades" placeholder="Buscar por Unidad, Marca o Modelo..." class="buscador-pildora" onkeyup="filtrarTabla('search-unidades', 'tbody-unidades')">
+                            <input type="text" id="search-unidades" placeholder="Buscar por Unidad, Marca o Modelo..."
+                                class="buscador-pildora" onkeyup="filtrarTabla('search-unidades', 'tbody-unidades')">
                         </div>
-                        <button onclick="abrirModalUnidad('agregar')" class="btn-info" style="margin-left:15px; padding:10px 20px; background:#10b981; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">+ Agregar Unidad</button>
+                        <button onclick="abrirModalUnidad('agregar')" class="btn-info"
+                            style="margin-left:15px; padding:10px 20px; background:#10b981; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">+
+                            Agregar Unidad</button>
                     </div>
                     <div class="table-responsive">
                         <table>
@@ -193,13 +203,15 @@
                                 </tr>
                             </thead>
                             <tbody id="tbody-unidades">
-                                <tr><td colspan="3" style="text-align:center;">Cargando unidades...</td></tr>
+                                <tr>
+                                    <td colspan="3" style="text-align:center;">Cargando unidades...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            
+
             <div id="vista-facturas">
 
                 <div class="top-bar">
@@ -298,8 +310,8 @@
                 </div>
             </div>
 
-            <!-- VISTAS PROTEGIDAS PARA JEFATURA -->
-            {% if usuario.datos_perfil.subrol == 'Jefatura' %}
+            <!-- VISTAS PROTEGIDAS PARA JEFATURA Y SUPERVISOR -->
+            {% if usuario.datos_perfil.subrol != 'Administrador' %}
             <div id="vista-pendientes" style="display: none;">
                 <div class="top-bar">
                     <h2>Solicitudes de Registro Pendientes</h2>
@@ -417,6 +429,66 @@
                 </div>
             </div>
 
+            <div id="vista-panel-control" style="display: none;">
+                <div class="top-bar">
+                    <h2>Panel de Control</h2>
+                </div>
+                <div class="admin-container">
+                    <div
+                        style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                        <h3 style="color: #0f172a; margin-bottom: 15px; font-size: 1.3em;">🛠️ Jefatura (Control Total)
+                        </h3>
+                        <ul style="list-style-type: disc; padding-left: 20px; color: #475569; line-height: 1.6;">
+                            <li><strong>Gestión de Usuarios y Entidades:</strong> Control integral de Proveedores
+                                (Talleres), Corporativos y personal Administrativo (Altas, Bajas y Edición).</li>
+                            <li><strong>Gestión del Parque Vehicular:</strong> Alta, baja y administración completa de
+                                las Unidades y Códigos de Operación (COPE).</li>
+                            <li><strong>Aprobación y Asignación de Órdenes:</strong> Revisión de cotizaciones de los
+                                talleres. Aprobación y captura de Número de Orden y PDF de pedido para iniciar el
+                                trabajo.</li>
+                            <li><strong>Control de Accesos:</strong> Administración de las credenciales, contraseñas y
+                                permisos de acceso para todos los usuarios del sistema.</li>
+                            <li><strong>Generación de Reportes:</strong> Acceso exclusivo a la sección de reportes
+                                avanzados para generar analíticas e historiales de gastos.</li>
+                            <li><strong>Cierre Contable (Doc 50):</strong> Carga final del Documento 50 para el cierre
+                                definitivo de un servicio, una vez que el Administrador haya liberado el ticket.</li>
+                        </ul>
+                    </div>
+
+                    <div
+                        style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                        <h3 style="color: #0f172a; margin-bottom: 15px; font-size: 1.3em;">👤 Supervisor (Apoyo
+                            Operativo)</h3>
+                        <ul style="list-style-type: disc; padding-left: 20px; color: #475569; line-height: 1.6;">
+                            <li><strong>Revisión Operativa de Cotizaciones:</strong> Acceso a la bandeja principal de
+                                cotizaciones para evaluar presupuestos recibidos por los talleres.</li>
+                            <li><strong>Asignación de Órdenes:</strong> Facultad para autorizar cotizaciones, enviarlas
+                                a corrección o denegarlas, subiendo la Orden de Compra y su respectivo PDF.</li>
+                            <li><strong>Validación de Entrega (PIN Chofer):</strong> Encargado de introducir el PIN de
+                                seguridad que confirma la recepción satisfactoria de la unidad vehicular por parte del
+                                chofer de la empresa.</li>
+                            <li><strong>Cierre Contable (Doc 50):</strong> Facultad para subir el Número del Documento
+                                50 al final del flujo del ticket, condicionado a la previa liberación del Administrador.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div
+                        style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <h3 style="color: #0f172a; margin-bottom: 15px; font-size: 1.3em;">🛡️ Administrador (Validación
+                            y Auditoría)</h3>
+                        <ul style="list-style-type: disc; padding-left: 20px; color: #475569; line-height: 1.6;">
+                            <li><strong>Liberación de Tickets (Desbloqueo):</strong> Recibe notificaciones y revisa los
+                                tickets inmediatamente después de que Jefatura/Supervisor asignan una Orden. Concede la
+                                "Liberación del Ticket" para que el proceso contable no se detenga.</li>
+                            <li><strong>Auditoría de Documentos:</strong> Acceso al Archivo Histórico para consultar,
+                                descargar y auditar todas las Facturas Finales, Órdenes de Compra y Documentos 50 del
+                                sistema en un repositorio seguro.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div id="vista-seccion-reportes" style="display: none;">
                 <div class="top-bar">
                     <h2>Sección de Reportes</h2>
@@ -436,6 +508,7 @@
                                     <th>NUM. ECO</th>
                                     <th>FECHA</th>
                                     <th>ESTADO</th>
+                                    <th>STATUS UNIDAD</th>
                                     <th>COMPAÑIA</th>
                                     <th>DEPARTAMENTO</th>
                                     <th>COPE/EDIFICIO</th>
@@ -443,6 +516,10 @@
                                     <th>RETRO (PROBLEMA)</th>
                                     <th>COSTO (TOTAL)</th>
                                     <th>PROVEEDOR/TALLER</th>
+                                    <th>NOMBRE/SUPERVISOR</th>
+                                    <th>FECHA DE ENTRADA</th>
+                                    <th>TIEMPO EN TALLER</th>
+                                    <th>FECHA DE SALIDA</th>
                                     <th>NUM. PEDIDO</th>
                                     <th>PDF NUM. PEDIDO</th>
                                     <th>NUM. DE ORDEN</th>
@@ -538,35 +615,39 @@
                 </div>
                 <div class="admin-container">
                     <div style="display:flex; gap:10px; margin-bottom: 20px;">
-                        <button id="btn-tab-archivo-normal" class="btn-info" style="flex:1; font-weight:bold; background:#0ea5e9; border:none;" onclick="switchTabArchivo('normal')">Tickets Finalizados</button>
-                        <button id="btn-tab-archivo-cancelado" class="btn-info" style="flex:1; font-weight:bold; background:#475569; border:none;" onclick="switchTabArchivo('cancelado')">Tickets Cancelados (Cotización Cara)</button>
+                        <button id="btn-tab-archivo-normal" class="btn-info"
+                            style="flex:1; font-weight:bold; background:#0ea5e9; border:none;"
+                            onclick="switchTabArchivo('normal')">Tickets Finalizados</button>
+                        <button id="btn-tab-archivo-cancelado" class="btn-info"
+                            style="flex:1; font-weight:bold; background:#475569; border:none;"
+                            onclick="switchTabArchivo('cancelado')">Tickets Cancelados (Cotización Cara)</button>
                     </div>
-                    
+
                     <div id="contenedor-archivo-normal">
                         <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
-                        <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-archivo" class="buscador-pildora"
-                            placeholder="Buscar por folio, unidad, doc contable..."
-                            onkeyup="filtrarTabla('buscador-archivo', 'tabla-archivo')">
-                    </div>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Ticket</th>
-                                    <th>Doc. Contable</th>
-                                    <th>Folio Fiscal</th>
-                                    <th>Unidad</th>
-                                    <th>Proveedor</th>
-                                    <th>Total Aprobado</th>
-                                    <th>Expediente Completo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-archivo"></tbody>
-                        </table>
-                    </div>
+                            <span class="buscador-icono">&#x1F50D;</span>
+                            <input type="text" id="buscador-archivo" class="buscador-pildora"
+                                placeholder="Buscar por folio, unidad, doc contable..."
+                                onkeyup="filtrarTabla('buscador-archivo', 'tabla-archivo')">
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Ticket</th>
+                                        <th>Doc. Contable</th>
+                                        <th>Folio Fiscal</th>
+                                        <th>Unidad</th>
+                                        <th>Proveedor</th>
+                                        <th>Total Aprobado</th>
+                                        <th>Expediente Completo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-archivo"></tbody>
+                            </table>
+                        </div>
                     </div> <!-- fin contenedor normal -->
-                    
+
                     <div id="contenedor-archivo-cancelado" style="display:none;">
                         <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                             <span class="buscador-icono">&#x1F50D;</span>
@@ -601,16 +682,20 @@
         <div class="modal-box">
             <button class="btn-close-modal" onclick="cerrarModal('modal-confirmar-cancelacion')">×</button>
             <h3 class="modal-header" style="color: #ef4444;">⚠️ Confirmar Cancelación</h3>
-            <p style="margin-top:15px; font-size:1.1em; color:#e0e6ed;">¿Estás seguro de <strong>CANCELAR</strong> este ticket por ser una cotización cara?</p>
-            <p style="margin-top:10px; color:#a3b1c6;">El ticket se detendrá por completo y se enviará directamente a la pestaña de "Tickets Cancelados" en el Archivo General.</p>
-            
+            <p style="margin-top:15px; font-size:1.1em; color:#e0e6ed;">¿Estás seguro de <strong>CANCELAR</strong> este
+                ticket por ser una cotización cara?</p>
+            <p style="margin-top:10px; color:#a3b1c6;">El ticket se detendrá por completo y se enviará directamente a la
+                pestaña de "Tickets Cancelados" en el Archivo General.</p>
+
             <div class="modal-actions" style="margin-top:25px;">
-                <button class="btn-info" onclick="cerrarModal('modal-confirmar-cancelacion')" style="background:#475569; border:none; flex:1;">Volver atrás</button>
-                <button class="btn-danger-modal" onclick="ejecutarCancelacionTicket()" style="background:#ef4444; border:none; flex:1;">Sí, Cancelar Ticket</button>
+                <button class="btn-info" onclick="cerrarModal('modal-confirmar-cancelacion')"
+                    style="background:#475569; border:none; flex:1;">Volver atrás</button>
+                <button class="btn-danger-modal" onclick="ejecutarCancelacionTicket()"
+                    style="background:#ef4444; border:none; flex:1;">Sí, Cancelar Ticket</button>
             </div>
         </div>
     </div>
-    
+
     <div id="modal-asignar-reporte" class="modal-overlay">
         <div class="modal-box large">
             <button class="btn-close-modal" onclick="cerrarModal('modal-asignar-reporte')">×</button>
@@ -724,11 +809,15 @@
             <button class="btn-close-modal" onclick="cerrarModal('modal-revision-admin')">×</button>
             <h3 class="modal-header">Asignación de Orden Administrativa</h3>
             <div id="revision-contenido-admin"></div>
-            <div id="revision-inputs-admin-container" style="margin-top: 20px; background: #081422; padding: 15px; border-radius: 8px; border: 1px dashed #40916c;"></div>
+            <div id="revision-inputs-admin-container"
+                style="margin-top: 20px; background: #081422; padding: 15px; border-radius: 8px; border: 1px dashed #40916c;">
+            </div>
             <input type="hidden" id="rev-id-admin">
             <div class="modal-actions"><button class="btn-success-modal" id="btn-confirmar-admin"
                     onclick="confirmarFacturaAdmin()" disabled style="width:100%;">Confirmar Factura</button>
-                    <button class="btn-danger-modal" id="btn-cancelar-cotizacion" onclick="cancelarTicketAdmin()">Cancelar Ticket (Cotización Cara)</button></div>
+                <button class="btn-danger-modal" id="btn-cancelar-cotizacion" onclick="cancelarTicketAdmin()">Cancelar
+                    Ticket (Cotización Cara)</button>
+            </div>
         </div>
     </div>
 
@@ -787,71 +876,101 @@
                 <input type="hidden" name="id_factura" id="edit_id_factura">
                 <div class="form-grid">
                     <!-- CAMPOS COMPARTIDOS O ESPECÍFICOS -->
-                    <div class="input-group" data-seccion="1 2"><label>Fecha</label><input type="date" name="fecha" id="edit_fecha" required></div>
-                    <div class="input-group" data-seccion="1"><label>Kilometraje</label><input type="text" name="kilometraje" id="edit_kilometraje" oninput="validarNumeros(this)"></div>
-                    
+                    <div class="input-group" data-seccion="1 2"><label>Fecha</label><input type="date" name="fecha"
+                            id="edit_fecha" required></div>
+                    <div class="input-group" data-seccion="1"><label>Kilometraje</label><input type="text"
+                            name="kilometraje" id="edit_kilometraje" oninput="validarNumeros(this)"></div>
+
                     <div class="input-group" data-seccion="1 2"><label>No. Económico (Unidad)</label>
-                        <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text" name="unidad" id="edit_unidad" maxlength="4" required oninput="validarNumeros(this)"></div>
+                        <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text"
+                                name="unidad" id="edit_unidad" maxlength="4" required oninput="validarNumeros(this)">
+                        </div>
                     </div>
-                    
-                    <div class="input-group" data-seccion="1"><label>Marca</label><input type="text" name="marca" id="edit_marca"></div>
-                    <div class="input-group" data-seccion="1"><label>Modelo</label><input type="text" name="modelo" id="edit_modelo"></div>
-                    
-                    <div class="input-group" data-seccion="1 2"><label>Celular / Teléfono</label><input type="text" name="telefono" id="edit_telefono" maxlength="15" required oninput="validarNumeros(this)"></div>
-                    <div class="input-group" data-seccion="1 2"><label id="label_edit_responsable">Nombre del Empleado (Completo)</label><input type="text" name="responsable" id="edit_responsable" required oninput="validarLetras(this)"></div>
-                    
-                    <div class="input-group" data-seccion="1"><label>Email (Opcional)</label><input type="email" name="email" id="edit_email"></div>
-                    <div class="input-group" data-seccion="1"><label>Ciudad / Municipio Base</label><input type="text" name="ciudad" id="edit_ciudad"></div>
-                    <div class="input-group" data-seccion="1"><label>COPE / Edificio</label><input type="text" name="cope" id="edit_cope"></div>
-                    <div class="input-group" data-seccion="1"><label>Departamento</label><input type="text" name="departamento" id="edit_departamento"></div>
-                    
+
+                    <div class="input-group" data-seccion="1"><label>Marca</label><input type="text" name="marca"
+                            id="edit_marca"></div>
+                    <div class="input-group" data-seccion="1"><label>Modelo</label><input type="text" name="modelo"
+                            id="edit_modelo"></div>
+
+                    <div class="input-group" data-seccion="1 2"><label>Celular / Teléfono</label><input type="text"
+                            name="telefono" id="edit_telefono" maxlength="15" required oninput="validarNumeros(this)">
+                    </div>
+                    <div class="input-group" data-seccion="1 2"><label id="label_edit_responsable">Nombre del Empleado
+                            (Completo)</label><input type="text" name="responsable" id="edit_responsable" required
+                            oninput="validarLetras(this)"></div>
+
+                    <div class="input-group" data-seccion="1"><label>Email (Opcional)</label><input type="email"
+                            name="email" id="edit_email"></div>
+                    <div class="input-group" data-seccion="1"><label>Ciudad / Municipio Base</label><input type="text"
+                            name="ciudad" id="edit_ciudad"></div>
+                    <div class="input-group" data-seccion="1"><label>COPE / Edificio</label><input type="text"
+                            name="cope" id="edit_cope"></div>
+                    <div class="input-group" data-seccion="1"><label>Departamento</label><input type="text"
+                            name="departamento" id="edit_departamento"></div>
+
                     <div class="input-group full-width" data-seccion="1 2"><label>Tipo de Mantenimiento</label>
                         <select name="mantenimiento" id="edit_mantenimiento" class="input-form" required>
                             <option value="Preventivo">Preventivo</option>
                             <option value="Correctivo">Correctivo</option>
                         </select>
                     </div>
-                    
-                    <div class="input-group full-width" data-seccion="2"><label id="label_edit_titulo">Título del Reporte</label><input type="text" name="titulo" id="edit_titulo" required></div>
-                    <div class="input-group full-width" data-seccion="1 2"><label id="label_edit_retro">Descripción Detallada del Problema (Retro)</label>
-                        <textarea name="retro" id="edit_retro" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
+
+                    <div class="input-group full-width" data-seccion="2"><label id="label_edit_titulo">Título del
+                            Reporte</label><input type="text" name="titulo" id="edit_titulo" required></div>
+                    <div class="input-group full-width" data-seccion="1 2"><label id="label_edit_retro">Descripción
+                            Detallada del Problema (Retro)</label>
+                        <textarea name="retro" id="edit_retro" required
+                            style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
                     </div>
-                    
+
                     <div class="input-group full-width" data-seccion="1" id="container-firma" style="display:none;">
                         <label>Firma del Operador (Solo Lectura)</label>
-                        <div style="background:#0b1c30; border:1px solid #1f395a; border-radius:8px; padding:10px; text-align:center;">
-                            <img id="img-firma-operador" src="" style="max-height: 100px; max-width:100%; object-fit:contain; filter: invert(1);">
+                        <div
+                            style="background:#0b1c30; border:1px solid #1f395a; border-radius:8px; padding:10px; text-align:center;">
+                            <img id="img-firma-operador" src=""
+                                style="max-height: 100px; max-width:100%; object-fit:contain; filter: invert(1);">
                         </div>
                     </div>
 
                     <!-- GENERAL (NO RESTRINGIDO) -->
-                    <div class="input-group" data-seccion="3"><label>Núm. Orden (Opcional)</label><input type="text" name="numero_orden" id="edit_numero_orden"></div>
+                    <div class="input-group" data-seccion="3"><label>Núm. Orden (Opcional)</label><input type="text"
+                            name="numero_orden" id="edit_numero_orden"></div>
 
                     <!-- EXCLUSIVOS DE SECCIÓN 2 (TALLER) -->
-                    <div class="input-group" data-seccion="2"><label>Precio (Sin IVA) MXN</label><input type="text" name="precio" id="edit_precio" required onblur="formatearEnInput(this)" onfocus="limpiarInput(this)"></div>
+                    <div class="input-group" data-seccion="2"><label>Precio (Sin IVA) MXN</label><input type="text"
+                            name="precio" id="edit_precio" required onblur="formatearEnInput(this)"
+                            onfocus="limpiarInput(this)"></div>
                     <div class="input-group full-width" data-seccion="2"><label>Diagnóstico de Mecánico</label>
-                        <textarea name="diagnostico" id="edit_diagnostico" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
+                        <textarea name="diagnostico" id="edit_diagnostico" required
+                            style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
                     </div>
-                    <div class="input-group full-width" data-seccion="2"><label>Descripción del Trabajo a Realizar</label>
-                        <textarea name="trabajo_realizar" id="edit_trabajo_realizar" required style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
+                    <div class="input-group full-width" data-seccion="2"><label>Descripción del Trabajo a
+                            Realizar</label>
+                        <textarea name="trabajo_realizar" id="edit_trabajo_realizar" required
+                            style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
                     </div>
-                    
+
                     <div class="input-group full-width" data-seccion="2">
                         <h4 style="color:#0284c7; margin-bottom:5px;">Subir Cotización (Fotos/PDF)</h4>
-                        <div id="edit-preview-cotizacion-guardadas" class="preview-container" style="margin-bottom:15px;"></div>
+                        <div id="edit-preview-cotizacion-guardadas" class="preview-container"
+                            style="margin-bottom:15px;"></div>
                         <label style="color:#0284c7;">Añadir NUEVAS Cotizaciones</label>
-                        <input type="file" id="edit_fotos_cotizacion_nuevas" name="fotos_cotizacion_nuevas" multiple accept="image/*,.pdf" style="padding:5px;">
+                        <input type="file" id="edit_fotos_cotizacion_nuevas" name="fotos_cotizacion_nuevas" multiple
+                            accept="image/*,.pdf" style="padding:5px;">
                         <div id="edit-preview-cotizacion-nuevas" class="preview-container"></div>
                     </div>
                     <div class="input-group full-width" data-seccion="2">
                         <h4 style="color:#40916c; margin-bottom:5px;">Subir Evidencias (Fotos)</h4>
-                        <div id="edit-preview-evidencia-guardadas" class="preview-container" style="margin-bottom:15px;"></div>
+                        <div id="edit-preview-evidencia-guardadas" class="preview-container"
+                            style="margin-bottom:15px;"></div>
                         <label style="color:#40916c;">Añadir NUEVAS Evidencias</label>
-                        <input type="file" id="edit_fotos_evidencia_nuevas" name="fotos_evidencia_nuevas" multiple accept="image/*" style="padding:5px;">
+                        <input type="file" id="edit_fotos_evidencia_nuevas" name="fotos_evidencia_nuevas" multiple
+                            accept="image/*" style="padding:5px;">
                         <div id="edit-preview-evidencia-nuevas" class="preview-container"></div>
                     </div>
                 </div>
-                <div class="modal-actions"><button class="btn-success-modal" type="submit" style="width: 100%; background:#f59e0b;">Actualizar Factura y Guardar Cambios</button></div>
+                <div class="modal-actions"><button class="btn-success-modal" type="submit"
+                        style="width: 100%; background:#f59e0b;">Actualizar Factura y Guardar Cambios</button></div>
             </form>
         </div>
     </div>
@@ -962,26 +1081,28 @@
     <div id="lightbox-modal" class="lightbox-overlay" onclick="cerrarLightbox(event)"><span class="lightbox-close"
             onclick="cerrarLightbox(event)">&times;</span><img id="lightbox-img" class="lightbox-content" src=""></div>
 
-    <script src="/static/script.js?v=1788806395"></script>
+    <script src="/static/script.js?v=39197"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js?v=1788550327"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=1788550327"></script>
     <script src="/static/unidades.js?v=7"></script>
-    <script src="/static/facturas_principal.js?v=9112"></script>
-    <script src="/static/seccion_reportes.js?v=1788649909"></script>
+    <script src="/static/facturas_principal.js?v=83609"></script>
+    <script src="/static/seccion_reportes.js?v=82446"></script>
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">
         <div class="modal-box large">
             <button class="btn-close-modal" onclick="cerrarModal('modal-doc-contable')">×</button>
             <h3 class="modal-header">Ingresar Número de Documento Contable</h3>
             <p style="color: #a3b1c6; margin-bottom: 20px; font-size: 0.9em;">
-                Escribe el número de identificación para cada cotización. Esto cerrará el ciclo y moverá el ticket al Archivo Histórico.
+                Escribe el número de identificación para cada cotización. Esto cerrará el ciclo y moverá el ticket al
+                Archivo Histórico.
             </p>
             <form id="form-doc-contable">
                 <input type="hidden" id="hidden-doc-contable-id">
                 <div id="doc-contable-container"></div>
-                <button type="button" class="btn-success-modal" style="margin-top:20px;" onclick="subirDocContable()">Guardar Números y Archivar Ticket</button>
+                <button type="button" class="btn-success-modal" style="margin-top:20px;"
+                    onclick="subirDocContable()">Guardar Números y Archivar Ticket</button>
             </form>
         </div>
     </div>
@@ -995,10 +1116,11 @@
             <form id="form-editar-seccion" onsubmit="event.preventDefault(); guardarEdicionSeccion();">
                 <input type="hidden" id="edit-sec-id-factura">
                 <input type="hidden" id="edit-sec-tipo">
-                
-                <label id="label-edit-sec-numero" style="color: #e0e6ed; font-weight: 600; display: block; margin-bottom: 8px;">Nuevo Número:</label>
-                <input type="text" id="edit-sec-numero" required 
-                       style="width: 100%; padding: 12px; background: #0b1c30; border: 1px solid #1f395a; border-radius: 8px; color: white; margin-bottom: 20px;">
+
+                <label id="label-edit-sec-numero"
+                    style="color: #e0e6ed; font-weight: 600; display: block; margin-bottom: 8px;">Nuevo Número:</label>
+                <input type="text" id="edit-sec-numero" required
+                    style="width: 100%; padding: 12px; background: #0b1c30; border: 1px solid #1f395a; border-radius: 8px; color: white; margin-bottom: 20px;">
 
                 <label class="file-upload" style="margin-bottom: 20px;">
                     <input type="file" id="edit-sec-pdf" accept="application/pdf" required>
@@ -1007,30 +1129,34 @@
                 </label>
                 <div id="preview-edit-sec-container" style="display:none; margin-bottom:20px; width:100%;"></div>
 
-                
+
                 <div id="current-file-container" style="margin-bottom: 20px; display: none;">
                     <strong style="color: #0ea5e9;">Dato/Archivo Actual:</strong>
                     <div style="margin-top: 5px; margin-bottom: 10px; font-size: 15px;">
-                        <strong>Número Registrado:</strong> <span id="current-file-number" style="color:#f59e0b; font-weight:bold;"></span>
+                        <strong>Número Registrado:</strong> <span id="current-file-number"
+                            style="color:#f59e0b; font-weight:bold;"></span>
                     </div>
                     <div style="margin-top: 5px;">
-                        <button type="button" id="btn-view-current-file" class="btn-info" style="font-size:0.9em; padding:8px 12px; background:#40916c; border:none; cursor:pointer;" >📄 Ver Archivo Guardado</button>
+                        <button type="button" id="btn-view-current-file" class="btn-info"
+                            style="font-size:0.9em; padding:8px 12px; background:#40916c; border:none; cursor:pointer;">📄
+                            Ver Archivo Guardado</button>
                     </div>
                 </div>
                 <div class="modal-actions" style="display: flex; gap: 15px;">
-                    <button type="button" class="btn-danger" style="flex:1;" onclick="cerrarModal('modal-editar-seccion')">Cancelar</button>
+                    <button type="button" class="btn-danger" style="flex:1;"
+                        onclick="cerrarModal('modal-editar-seccion')">Cancelar</button>
                     <button type="submit" class="btn-success-modal" style="flex:1;">Guardar Cambios</button>
                 </div>
             </form>
         </div>
     </div>
-    
+
     <script>
-        document.getElementById('edit-sec-pdf').addEventListener('change', function(e) {
+        document.getElementById('edit-sec-pdf').addEventListener('change', function (e) {
             let file = e.target.files[0];
             let n = file ? file.name : "Ningún archivo seleccionado";
             document.getElementById('nombre-edit-sec-pdf').textContent = n;
-            
+
             let previewContainer = document.getElementById('preview-edit-sec-container');
             if (file && file.type === 'application/pdf') {
                 previewContainer.style.display = 'block';
@@ -1044,30 +1170,36 @@
 
     <!-- MODAL UNIDAD -->
     <div id="modal-unidad" class="modal-overlay" style="display:none; z-index:2000;">
-        <div class="modal-box" style="max-width:400px; padding:20px; border-radius:10px; background:#0b1c30; border:1px solid #1f395a;">
+        <div class="modal-box"
+            style="max-width:400px; padding:20px; border-radius:10px; background:#0b1c30; border:1px solid #1f395a;">
             <h2 id="modal-unidad-title" style="color:#0ea5e9; margin-top:0;">Agregar Unidad</h2>
             <form id="form-unidad" onsubmit="event.preventDefault(); guardarUnidad();">
                 <input type="hidden" id="unidad-modo" value="agregar">
                 <input type="hidden" id="unidad-old-numero" value="">
-                
+
                 <div style="margin-bottom:15px;">
                     <label style="display:block; color:white; margin-bottom:5px;">No. Económico</label>
-                    <input type="text" id="unidad-numero" required style="width:100%; padding:10px; border-radius:5px; border:1px solid #1f395a; background:#111; color:white;">
+                    <input type="text" id="unidad-numero" required
+                        style="width:100%; padding:10px; border-radius:5px; border:1px solid #1f395a; background:#111; color:white;">
                 </div>
-                
+
                 <div style="margin-bottom:15px;">
                     <label style="display:block; color:white; margin-bottom:5px;">Marca</label>
-                    <input type="text" id="unidad-marca" style="width:100%; padding:10px; border-radius:5px; border:1px solid #1f395a; background:#111; color:white;">
+                    <input type="text" id="unidad-marca"
+                        style="width:100%; padding:10px; border-radius:5px; border:1px solid #1f395a; background:#111; color:white;">
                 </div>
-                
+
                 <div style="margin-bottom:15px;">
                     <label style="display:block; color:white; margin-bottom:5px;">Modelo</label>
-                    <input type="text" id="unidad-modelo" style="width:100%; padding:10px; border-radius:5px; border:1px solid #1f395a; background:#111; color:white;">
+                    <input type="text" id="unidad-modelo"
+                        style="width:100%; padding:10px; border-radius:5px; border:1px solid #1f395a; background:#111; color:white;">
                 </div>
-                
+
                 <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-                    <button type="button" onclick="document.getElementById('modal-unidad').style.display='none'" style="padding:10px 15px; border:none; border-radius:5px; background:#475569; color:white; cursor:pointer;">Cancelar</button>
-                    <button type="submit" id="btn-unidad-submit" style="padding:10px 15px; border:none; border-radius:5px; background:#10b981; color:white; cursor:pointer; font-weight:bold;">Guardar</button>
+                    <button type="button" onclick="document.getElementById('modal-unidad').style.display='none'"
+                        style="padding:10px 15px; border:none; border-radius:5px; background:#475569; color:white; cursor:pointer;">Cancelar</button>
+                    <button type="submit" id="btn-unidad-submit"
+                        style="padding:10px 15px; border:none; border-radius:5px; background:#10b981; color:white; cursor:pointer; font-weight:bold;">Guardar</button>
                 </div>
             </form>
         </div>
@@ -1075,15 +1207,15 @@
 
     <script>
         // FORZAR VISTA POR DEFECTO SIN DEPENDER DE script.js
-        document.addEventListener("DOMContentLoaded", function() {
-            setTimeout(function() {
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(function () {
                 var subrol = "{{ usuario.datos_perfil.subrol }}";
                 if (subrol === 'Administrador') {
                     if (typeof cambiarVistaAdmin === 'function') {
                         cambiarVistaAdmin('documentos-contables');
                     }
                 }
-            }, 100); 
+            }, 100);
         });
     </script>
 </body>

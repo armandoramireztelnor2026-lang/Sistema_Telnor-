@@ -220,16 +220,16 @@ async function cargarFacturas() {
                 let idRepForTable = obtenerIdReporte(f) || 'S/T';
                 let tdTicket = `<td><span style="color:#0ea5e9; font-weight:bold;">${idRepForTable}</span></td>`;
 
-                
+
                 // ==========================================
                 // LÓGICA INDEPENDIENTE PARA DOC CONTABLES
                 // ==========================================
                 let valFiscalX = f.validacion_fiscal || 'Pendiente';
                 let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
-                
+
                 if (tbodyDocContables && rolUsuario === 'administracion') {
                     let showInDoc = false;
-                    
+
                     // Mostrar si está esperando liberación del Administrador
                     if (subrolAct === 'Administrador' && f.liberado_admin === false) {
                         showInDoc = true;
@@ -238,7 +238,7 @@ async function cargarFacturas() {
                     else if (valFiscalX === 'Aprobada' && subrolAct !== 'Administrador') {
                         showInDoc = true;
                     }
-                    
+
                     if (showInDoc) {
                         let btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
                             <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
@@ -258,21 +258,21 @@ async function cargarFacturas() {
                         }
 
                         btnDoc += `</div>`;
-                        
+
                         let ff = f.factura_folio || "Pendiente";
                         let idRepTable = obtenerIdReporte(f) || 'S/T';
                         let pFormat = f.precio ? parseFloat(f.precio).toLocaleString('en-US') : '0';
-                        
+
                         tbodyDocContables.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepTable}</span></td><td><span style="color:#10b981; font-weight:bold;">${ff}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><small style="color:#a3b1c6;">$${pFormat}</small></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
                         countDocContables++;
-                        
+
                         if (subrolAct === 'Administrador') {
                             return; // Skip rendering elsewhere for admin if it's already here
                         }
                     }
                 }
                 // ==========================================
-                
+
                 // ADMINISTRADOR HARD BLOCK: El Administrador SOLO ve tickets en tbodyDocContables (o Archivo).
                 // No debe ver tickets en facturas o facturas_finales.
                 if (subrolAct === 'Administrador') return;
@@ -1148,14 +1148,14 @@ function confirmarFacturaCorp() {
 
 function abrirModalRechazoCorp(inputId) {
     let id_fac = document.getElementById(inputId).value;
-    const f = facturasGlobal.find(x => String(x.id) === String(id_fac)); 
+    const f = facturasGlobal.find(x => String(x.id) === String(id_fac));
     if (!f) return;
-    
-    document.getElementById('modal-revision-corp').style.display = 'none'; 
+
+    document.getElementById('modal-revision-corp').style.display = 'none';
     document.getElementById('rechazo-corp-id').value = f.id;
-    
+
     let html = `<div style="color: #94a3b8; margin-bottom:15px; font-size:14px;">Ingresa el precio recomendado para cada cotización (opcional) y el motivo general del rechazo.</div>`;
-    
+
     f.cotizaciones.forEach((c, idx) => {
         let precioActual = formatearMoneda(c.precio);
         let titulo = c.titulo || 'Sin Título';
@@ -1168,14 +1168,14 @@ function abrirModalRechazoCorp(inputId) {
         </div>
         `;
     });
-    
+
     html += `
     <div style="margin-top:20px;">
         <label style="display:block; font-size:14px; font-weight:bold; color:#e2e8f0; margin-bottom:5px;">Motivo General del Rechazo: <span style="color:#ef4444;">*</span></label>
         <textarea id="rechazo-corp-motivo" rows="4" placeholder="Escribe aquí el motivo del rechazo y las observaciones generales..." style="width:100%; padding:10px; background:#0f172a; color:white; border:1px solid #334155; border-radius:5px;"></textarea>
     </div>
     `;
-    
+
     document.getElementById('contenido-rechazo-corp').innerHTML = html;
     document.getElementById('modal-rechazo-corp-dinamico').style.display = 'flex';
 }
@@ -1184,7 +1184,7 @@ function enviarRechazoCorp() {
     let id_fac = document.getElementById('rechazo-corp-id').value;
     let motivo = document.getElementById('rechazo-corp-motivo').value.trim();
     if (!motivo) { alert("Debes escribir el motivo general del rechazo."); return; }
-    
+
     let preciosRec = [];
     document.querySelectorAll('.input-precio-rec-corp').forEach(input => {
         preciosRec.push({
@@ -1192,11 +1192,11 @@ function enviarRechazoCorp() {
             precio_recomendado: input.value.trim()
         });
     });
-    
+
     if (!confirm("¿Estás seguro de rechazar el gasto y enviar las recomendaciones? El ticket será eliminado de tu bandeja.")) return;
-    
+
     mostrarLoaderDinamico("Procesando rechazo...", "Enviando notificaciones 📧");
-    
+
     fetch('/api/facturas/rechazar_corp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1335,7 +1335,7 @@ function generarPDFSilencioso(idFactura) {
             let numOrd = c.numero_orden;
             let numCot = c.numero_cotizacion_asignacion;
             let pdfOrd = c.pdf_orden || c.pdf_cotizacion_asignacion;
-            
+
             if (numOrd || pdfOrd) {
                 hasAdminData = true;
                 let tituloAdmin = multiCot ? `ORDEN DE PEDIDO ${idx + 1}` : 'ORDEN DE PEDIDO';
@@ -1366,7 +1366,7 @@ function generarPDFSilencioso(idFactura) {
             let fFolio = c.factura_folio;
             let pdfFiscal = c.pdf_fiscal || c.factura_pdf;
             let xmlFile = c.xml_file;
-            
+
             if (fFolio || pdfFiscal) {
                 hasFiscalData = true;
                 let tituloFiscal = multiCot ? `FACTURA FISCAL ${idx + 1}` : 'FACTURA FISCAL';
@@ -1396,7 +1396,7 @@ function generarPDFSilencioso(idFactura) {
         cots.forEach((c, idx) => {
             let numDoc50 = c.numero_doc50;
             let pdfDoc50 = c.pdf_doc50;
-            
+
             if (numDoc50) {
                 hasDoc50Data = true;
                 let tituloDoc = multiCot ? `DOCUMENTO CONTABLE ${idx + 1}` : 'DOCUMENTO CONTABLE';
@@ -2307,7 +2307,7 @@ function previsualizarArchivoCotizacion(input, previewId) {
         previewDiv.style.display = 'none';
     };
     previewDiv.appendChild(btnEliminar);
-    
+
     // Auto-open if it's a PDF to ensure they see it immediately
     if (isPdf) {
         setTimeout(() => abrirVisorArchivoLocal(previewId), 100);
@@ -2414,7 +2414,7 @@ function abrirVisorArchivoLocal(previewId) {
 
 async function liberarDocContable(idFactura) {
     if (!confirm("¿Estás seguro que deseas liberar este ticket? Una vez liberado, el Supervisor podrá subir el Documento Contable.")) return;
-    
+
     try {
         mostrarLoaderDinamico("Liberando ticket...", "Actualizando permisos");
         let res = await fetch('/api/facturas/liberar_doc50', {

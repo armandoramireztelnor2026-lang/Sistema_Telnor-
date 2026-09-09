@@ -18,8 +18,8 @@ def obtener_lista_seccion_reportes():
         return jsonify({"status": "error", "message": "No autenticado"}), 401
     
     usuario = session["usuario"]
-    # Jefatura puede ver esto (el rol es administracion, subrol Jefatura)
-    if usuario.get("rol") != "administracion" or usuario.get("datos_perfil", {}).get("subrol") != "Jefatura":
+    # Todos en administracion pueden ver esto
+    if usuario.get("rol") != "administracion":
         return jsonify({"status": "error", "message": "No autorizado"}), 403
 
     facturas_data = leer_json('facturas.json')
