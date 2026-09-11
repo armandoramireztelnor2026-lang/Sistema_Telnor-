@@ -1,3 +1,46 @@
 {
-    "facturas": []
+    "facturas": [
+        {
+            "id": "20260911103709",
+            "proveedor": "Autopartes y Motores B.C.",
+            "unidad": "8090-1133",
+            "responsable": "Luis Ramirez",
+            "telefono": "6634041184",
+            "titulo": "n",
+            "retro": "[TICKET:REP-20260910111050]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 4600.0,
+            "fecha": "2026-09-11",
+            "numero_orden": "",
+            "compania": "RUMN",
+            "aprobado_admin": false,
+            "aprobado_corp": true,
+            "timestamp": "2026-09-11T10:37:09.027724",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "",
+            "entregado": "No",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 4600.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20260910111050]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1789148229003_0_Meta_1.2_Mercados_y_Fuerzas_Competitivas_1.png"
+                    ],
+                    "pdf_cotizacion": "1789148229003_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.6._Marco_legal_aplicable_para_la_auditoria_de_TI_e_Innovacion_1.pdf"
+                }
+            ],
+            "comentarios": "Hola esto es una prueba",
+            "autor_comentario": "Jesus  Ramirez",
+            "eliminado_por": ""
+        }
+    ]
 }

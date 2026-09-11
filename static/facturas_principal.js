@@ -1575,7 +1575,12 @@ function abrirAsignacionReporte(idReporte) {
 
         listaProveedoresParaAsignar = (data.usuarios || []).filter(u => {
             if (u.rol !== 'proveedores') return false;
-            if (subrolActual === 'Supervisor' && u.datos_perfil.ciudad !== miCiudad) return false;
+            if (subrolActual === 'Supervisor') {
+                let provCiudad = u.datos_perfil.ciudad;
+                // Si el proveedor tiene ciudad registrada y no coincide, lo ocultamos.
+                // Si no tiene ciudad (es global/nuevo), lo mostramos por defecto.
+                if (provCiudad && provCiudad !== miCiudad) return false;
+            }
             return true;
         });
         // ---------------------------------------------------------
@@ -2387,7 +2392,7 @@ function abrirVisorArchivoLocal(previewId) {
             modal.style.cssText = 'display:none; z-index:2000;';
             modal.innerHTML = `
                 <div class="pdf-modal-box" style="width:95%; max-width:900px; height:90vh; padding:15px; display:flex; flex-direction:column;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <h3 style="color:#112641; margin:0;">Vista Previa del Documento</h3>
                         <button onclick="document.getElementById('modal-visor-archivo-local').style.display='none'" 
                             style="background:#ef4444; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">✕ Cerrar</button>

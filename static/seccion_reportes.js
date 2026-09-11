@@ -78,7 +78,36 @@ async function cargarSeccionReportes() {
 
             let numEco = f.unidad ? `8090-${f.unidad.replace('8090-', '')}` : pendienteHTML;
             let fechaTicket = f.fecha || reporteOrig.fecha || pendienteHTML;
-            let estado = 'N/A'; // Temporalmente N/A hasta que se programe
+
+            // Determinar el Estado según las reglas de negocio
+            let estado = 'N/A';
+            if (f.is_unassigned) {
+                estado = "Pendiente de Asignación";
+            } else if (f.entregado === 'Sí') {
+                estado = "Entregado";
+            } else if (f.estado === 'Cancelado_Cotizacion_Cara') {
+                estado = "Incosteable";
+            } else {
+                let apAdmin = f.aprobado_admin !== undefined ? f.aprobado_admin : (f.estado === 'Confirmada');
+                let apCorp = f.aprobado_corp !== undefined ? f.aprobado_corp : (f.estado === 'Confirmada');
+                let confirmadaTotal = (apAdmin && apCorp);
+
+                if (confirmadaTotal) {
+                    estado = "En taller";
+                } else {
+                    let tieneCotizacion = f.cotizaciones && f.cotizaciones.length > 0;
+                    if (!tieneCotizacion) {
+                        estado = "En diagnostico";
+                    } else {
+                        if (!apAdmin) {
+                            estado = "Revisión de Cotización";
+                        } else if (!apCorp) {
+                            estado = "En autorizacion";
+                        }
+                    }
+                }
+            }
+
             let compania = f.compania || pendienteHTML;
 
             let departamento = f.departamento || f.area || reporteOrig.departamento || pendienteHTML;
@@ -118,10 +147,10 @@ async function cargarSeccionReportes() {
             // Fix encoding for passing string to JS
             let commentSafe = f.comentarios ? f.comentarios.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, "") : "";
             let autorSafe = f.autor_comentario ? f.autor_comentario.replace(/'/g, "\\'").replace(/"/g, "&quot;") : "";
-            
+
             let btnText = hasComment ? "💬 Ver/Actualizar Comentario" : "💬 Añadir Comentario";
             let btnComentarios = `<button onclick="abrirModalComentarios('${realId}', ${is_unass}, '${commentSafe}', '${autorSafe}')" style="background:${btnColor}; color:white; border:none; padding:5px 10px; border-radius:12px; font-size:0.85em; cursor:pointer;">${btnText}</button>`;
-            
+
             if (f.eliminado_por && !hasComment) {
                 btnComentarios = `<div style="max-width:150px; white-space:normal; font-size:0.85em; font-weight:600; word-wrap:break-word; margin-bottom:5px; color:#f87171;">Comentario eliminado por: ${f.eliminado_por}</div>` + btnComentarios;
             } else if (hasComment) {
@@ -153,7 +182,7 @@ async function cargarSeccionReportes() {
                     <td><strong>${ticket}</strong></td>
                     <td>${numEco}</td>
                     <td>${fechaTicket}</td>
-                    <td><span style="color:#a3b1c6; font-style:italic;">${estado}</span></td>
+                    <td><span style="background:#0ea5e9; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">${estado}</span></td>
                     <td>${statusUnidad}</td>
                     <td>${compania}</td>
                     <td>${departamento}</td>
@@ -189,18 +218,18 @@ async function cargarSeccionReportes() {
 function abrirModalComentarios(id, is_unassigned, comentarioActual, autorActual) {
     document.getElementById('comentario-ticket-id').value = id;
     document.getElementById('comentario-is-unassigned').value = is_unassigned;
-    
+
     // Replace html entities back for textarea
     let decoded = comentarioActual.replace(/&quot;/g, '"');
     document.getElementById('comentario-texto').value = decoded;
-    
+
     let autorDiv = document.getElementById('comentario-autor');
     if (autorActual && autorActual.trim() !== '') {
         autorDiv.innerText = "Última actualización por: " + autorActual.replace(/&quot;/g, '"');
     } else {
         autorDiv.innerText = "";
     }
-    
+
     document.getElementById('modal-comentarios').style.display = 'flex';
 }
 
@@ -208,7 +237,7 @@ async function guardarComentario(action = "save") {
     if (action === "save") {
         if (!confirm('¿Estás seguro de guardar los cambios en este comentario?')) return;
     }
-    
+
     const id = document.getElementById('comentario-ticket-id').value;
     const is_unassigned = document.getElementById('comentario-is-unassigned').value === 'true';
     const comentario = document.getElementById('comentario-texto').value.trim();

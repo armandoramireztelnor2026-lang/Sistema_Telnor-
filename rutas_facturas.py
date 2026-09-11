@@ -246,8 +246,8 @@ def listar_facturas():
                 mi_ciudad = session["usuario"]["datos_perfil"].get("ciudad", "")
                 usuarios_data = leer_json("usuarios.json")
                 
-                # Primero, buscamos cómo se llaman todos los proveedores de la misma ciudad
-                proveedores_locales = [u["datos_perfil"]["nombre_proveedor"] for u in usuarios_data.get("usuarios", []) if u["rol"] == "proveedores" and u["datos_perfil"].get("ciudad") == mi_ciudad]
+                # Primero, buscamos cómo se llaman todos los proveedores de la misma ciudad (o los que son globales/sin ciudad)
+                proveedores_locales = [u["datos_perfil"]["nombre_proveedor"] for u in usuarios_data.get("usuarios", []) if u["rol"] == "proveedores" and (u["datos_perfil"].get("ciudad") == mi_ciudad or not u["datos_perfil"].get("ciudad"))]
                 
                 # Luego, solo le mostramos al Supervisor las facturas que vengan de esos proveedores locales
                 facturas = [f for f in facturas if f.get("proveedor") in proveedores_locales]

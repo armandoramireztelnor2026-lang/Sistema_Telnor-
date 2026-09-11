@@ -420,7 +420,7 @@ table {
 
 th,
 td {
-    border-bottom: 1px solid #1f395a;
+    border: 1px solid #1f395a;
     padding: 15px;
     text-align: left;
     color: #e0e6ed;
@@ -431,7 +431,6 @@ th {
     background-color: #1b4332;
     color: #ffffff;
     font-weight: 600;
-    border: none;
 }
 
 .mini-profile-pic {
