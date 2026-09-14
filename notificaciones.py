@@ -459,3 +459,45 @@ def enviar_correo_esperando_liberacion(correo_destino, nombre_admin, ticket, uni
     </html>
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
+
+
+def enviar_correo_notificacion_corp_documentos(lista_corps, proveedor, unidad, precio, ticket, supervisor_nombre):
+    """Envía correo a corporativos solicitando la liberación de documentos para cotizaciones mayores a $10,001."""
+    precio_fmt = f"{float(precio):,.2f}"
+    asunto = f"Autorización Requerida: Cotización Mayor - Unidad 8090-{unidad} (${precio_fmt} MXN)"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #7c3aed, #4f46e5); padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">AUTORIZACIÓN REQUERIDA</h2>
+                <p style="color: #e0e7ff; margin: 5px 0 0 0; font-size: 0.95em;">Cotización que excede el límite de $10,001 MXN</p>
+            </div>
+            <div style="padding: 20px;">
+                <p>Estimado(a) miembro de <strong>Corporativos</strong>,</p>
+                <p>El Supervisor <strong>{supervisor_nombre}</strong> le solicita su autorización para liberar los documentos de la siguiente cotización que supera el monto permitido:</p>
+                <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
+                    <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Taller/Proveedor:</strong> {proveedor}</li>
+                    <li style="margin-bottom: 8px;"><strong>Monto Total:</strong> <span style="color: #dc2626; font-weight: bold; font-size: 1.1em;">${precio_fmt} MXN</span></li>
+                </ul>
+                <p style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b; color: #92400e;">
+                    <strong>Acción requerida:</strong> Por favor ingrese al sistema, revise la cotización y apruebe o rechace el gasto desde su panel de <strong>Corporativos</strong>.
+                </p>
+            </div>
+            <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 0.85em; color: #6b7280;">
+                Sistema Telnor - Gestión Automotriz
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    enviados = 0
+    for corp in lista_corps:
+        correo = corp.get("correo")
+        if correo and correo.strip():
+            exito, _ = disparar_correo(correo, asunto, cuerpo_html)
+            if exito:
+                enviados += 1
+    return enviados

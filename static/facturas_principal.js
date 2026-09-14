@@ -181,13 +181,13 @@ async function cargarFacturas() {
                     if (!apCorp) btnAccion = `<button class="btn-success" onclick="abrirRevisionCorp('${f.id}')">Revisar Gasto Mayor</button>`;
                     else btnAccion = `<button class="btn-info" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
                 } else {
-                    btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
-                        <span style="font-size:0.9em; font-weight:bold; color:#a3b1c6;">${f.numero_orden ? 'Orden Oficial: <span style="color:#f59e0b;">' + f.numero_orden + '</span>' : 'En revisión...'}</span>
-                        <button class="btn-info" style="font-size:0.8em; padding:6px 10px;" onclick="abrirDetalles('${f.id}')">Ver Detalles (PDF)</button>`;
+                    btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; align-items:stretch; width:100%;">
+                        <span style="font-size:0.9em; font-weight:bold; color:#a3b1c6; margin-bottom: 2px;">${f.numero_orden ? 'Orden Oficial: <span style="color:#f59e0b;">' + f.numero_orden + '</span>' : 'En revisión...'}</span>
+                        <button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box;" onclick="abrirDetalles('${f.id}')">Ver Detalles (PDF)</button>`;
 
                     if (confirmadaTotal && entregadoTexto !== 'Sí') {
                         if (!f.codigo_liberacion) {
-                            btnAccion += `<button class="btn-success-modal" style="font-size:0.8em; padding:8px 10px; background:#10b981; border:none; margin-top:5px; width:100%;" onclick="marcarUnidadLista('${f.id}')">✔️ Marcar Unidad Lista</button>`;
+                            btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; background:#10b981; border:none;" onclick="marcarUnidadLista('${f.id}')">✔️ Marcar Unidad Lista</button>`;
                         } else {
                             btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px;">⌛ Esperando al chofer... (PIN enviado)</span>`;
                         }
@@ -1046,6 +1046,31 @@ function abrirRevisionAdmin(idFactura) {
     }
 
     validarOrden();
+
+    // Mostrar botón de notificación a corporativos solo si precio >= 10001
+    let btnNotifCorp = document.getElementById('btn-notificar-corp');
+    if (btnNotifCorp) {
+        let precioTotal = parseFloat(f.precio) || 0;
+        if (precioTotal >= 10001) {
+            btnNotifCorp.style.display = 'block';
+            btnNotifCorp.style.display = 'block';
+            if (f.notificado_corp) {
+                let fecha = f.fecha_notificacion_corp ? f.fecha_notificacion_corp.split(' ')[0] : 'Ya enviada';
+                btnNotifCorp.innerHTML = `✅ Re-enviar Notif. a Corporativos <small>(${fecha})</small>`;
+                btnNotifCorp.style.background = '#4f46e5';
+                btnNotifCorp.style.cursor = 'pointer';
+                btnNotifCorp.disabled = false;
+            } else {
+                btnNotifCorp.textContent = '📩 Enviar Notificación a Corporativos';
+                btnNotifCorp.style.background = 'linear-gradient(135deg, #7c3aed, #4f46e5)';
+                btnNotifCorp.style.cursor = 'pointer';
+                btnNotifCorp.disabled = false;
+            }
+        } else {
+            btnNotifCorp.style.display = 'none';
+        }
+    }
+
     document.getElementById('modal-revision-admin').style.display = 'flex';
 }
 
@@ -1120,6 +1145,42 @@ function confirmarFacturaAdmin() {
     }).catch(err => {
         ocultarLoaderDinamico();
         console.error(err);
+    });
+}
+
+function notificarCorporativos() {
+    let idFac = document.getElementById('rev-id-admin').value;
+    if (!idFac) return;
+    if (!confirm('¿Desea enviar (o re-enviar) la notificación por correo a TODOS los miembros de Corporativos?')) return;
+
+    let btn = document.getElementById('btn-notificar-corp');
+    let textoOriginal = btn.innerHTML;
+    btn.textContent = 'Enviando correos...';
+    btn.disabled = true;
+
+    fetch('/api/facturas/notificar_corp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: idFac })
+    }).then(res => res.json()).then(data => {
+        alert(data.message);
+        if (data.status === 'success') {
+            btn.innerHTML = '✅ Notificación enviada';
+            setTimeout(() => {
+                btn.innerHTML = '✅ Re-enviar Notif. a Corporativos <small>(Hoy)</small>';
+                btn.disabled = false;
+                btn.style.background = '#4f46e5';
+            }, 2000);
+            cargarFacturas(); // Recargar facturas para actualizar la bandera notificado_corp
+        } else {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        }
+    }).catch(err => {
+        console.error(err);
+        alert('Error de red al enviar la notificación.');
+        btn.textContent = textoOriginal;
+        btn.disabled = false;
     });
 }
 

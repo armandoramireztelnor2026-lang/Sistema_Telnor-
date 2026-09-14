@@ -18,7 +18,8 @@ from notificaciones import (
     enviar_correo_factura_rechazada_corp,
     enviar_correo_factura_fiscal_subida,
     enviar_correo_factura_fiscal_rechazada,
-    enviar_correo_esperando_liberacion
+    enviar_correo_esperando_liberacion,
+    enviar_correo_notificacion_corp_documentos
 )
 
 facturas_bp = Blueprint("facturas_bp", __name__)
@@ -887,3 +888,61 @@ def liberar_doc50():
             return jsonify({"status": "success", "message": "Ticket liberado correctamente para captura de Doc Contable."})
             
     return jsonify({"status": "error", "message": "Factura no encontrada."})
+
+
+@facturas_bp.route('/api/facturas/notificar_corp', methods=['POST'])
+def notificar_corporativos():
+    """Envía notificación por correo a Corporativos para que autoricen una cotización cara (>$10,001)."""
+    if "usuario" not in session or session["usuario"]["rol"] != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    data = request.json
+    factura_id = data.get("id")
+    if not factura_id:
+        return jsonify({"status": "error", "message": "ID de factura requerido"}), 400
+
+    facturas_data = leer_json('facturas.json')
+    factura = None
+    for f in facturas_data.get("facturas", []):
+        if str(f["id"]) == str(factura_id):
+            factura = f
+            break
+
+    if not factura:
+        return jsonify({"status": "error", "message": "Factura no encontrada"}), 404
+
+    precio = float(factura.get("precio", 0))
+    if precio < 10001:
+        return jsonify({"status": "error", "message": "Esta cotización no requiere autorización de Corporativos (monto menor a $10,001)."})
+
+    # Obtener lista de correos de corporativos
+    usuarios_data = leer_json('usuarios.json')
+    corps_data = []
+    for u in usuarios_data.get('usuarios', []):
+        if u.get('rol') == 'corporativos':
+            correo = u.get('correo') or u.get('datos_perfil', {}).get('correo', '')
+            nombre = f"{u.get('datos_perfil', {}).get('nombres', '')} {u.get('datos_perfil', {}).get('apellido_paterno', '')}".strip()
+            if correo:
+                corps_data.append({"correo": correo, "nombre": nombre})
+
+    if not corps_data:
+        return jsonify({"status": "error", "message": "No hay usuarios de Corporativos registrados con correo."})
+
+    # Datos del supervisor que envía la notificación
+    supervisor = session["usuario"]
+    supervisor_nombre = f"{supervisor.get('datos_perfil', {}).get('nombres', '')} {supervisor.get('datos_perfil', {}).get('apellido_paterno', '')}".strip() or "Supervisor"
+
+    proveedor = factura.get("proveedor", "N/A")
+    unidad = factura.get("unidad", "N/A").replace("8090-", "")
+    ticket = factura.get("id_reporte", "N/A")
+
+    enviados = enviar_correo_notificacion_corp_documentos(corps_data, proveedor, unidad, precio, ticket, supervisor_nombre)
+
+    if enviados > 0:
+        # Marcar en la factura que ya se notificó
+        factura["notificado_corp"] = True
+        factura["fecha_notificacion_corp"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        escribir_json('facturas.json', facturas_data)
+        return jsonify({"status": "success", "message": f"Notificación enviada exitosamente a {enviados} usuario(s) de Corporativos."})
+    else:
+        return jsonify({"status": "error", "message": "No se pudo enviar la notificación. Verifique los correos de Corporativos."})

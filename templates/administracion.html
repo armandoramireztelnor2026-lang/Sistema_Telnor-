@@ -171,6 +171,9 @@
                 {% endif %}
 
             </nav>
+            <div style="color: #64748b; font-size: 0.8em; text-align: center; margin-bottom: 10px;">
+                Perfil Actual: <strong>{{ usuario.datos_perfil.subrol }}</strong>
+            </div>
             <div class="btn-logout-container"><a href="/logout" class="btn-logout"
                     onclick="return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
         </aside>
@@ -488,6 +491,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             <div id="vista-seccion-reportes" style="display: none;">
                 <div class="top-bar">
@@ -540,7 +544,7 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
+
 
             <!-- ESTA VISTA LA VEN AMBOS, PERO SUPERVISOR LA VERÁ FILTRADA -->
             <div id="vista-lista-prov" style="display: none;">
@@ -817,6 +821,7 @@
                     onclick="confirmarFacturaAdmin()" disabled style="width:100%;">Confirmar Factura</button>
                 <button class="btn-danger-modal" id="btn-cancelar-cotizacion" onclick="cancelarTicketAdmin()">Cancelar
                     Ticket (Cotización Cara)</button>
+                <button class="btn-success-modal" id="btn-notificar-corp" onclick="notificarCorporativos()" style="display:none; width:100%; background: linear-gradient(135deg, #7c3aed, #4f46e5); border: none;">📩 Enviar Notificación a Corporativos</button>
             </div>
         </div>
     </div>

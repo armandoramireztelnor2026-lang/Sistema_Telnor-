@@ -13,15 +13,15 @@
             "mantenimiento": "Preventivo",
             "precio": 4600.0,
             "fecha": "2026-09-11",
-            "numero_orden": "",
+            "numero_orden": "17821312",
             "compania": "RUMN",
-            "aprobado_admin": false,
+            "aprobado_admin": true,
             "aprobado_corp": true,
             "timestamp": "2026-09-11T10:37:09.027724",
             "estado_custom": "",
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
-            "codigo_liberacion": "",
+            "codigo_liberacion": "54733282",
             "entregado": "No",
             "cotizaciones": [
                 {
@@ -35,12 +35,17 @@
                     "fotos_evidencia": [
                         "evidencia_1789148229003_0_Meta_1.2_Mercados_y_Fuerzas_Competitivas_1.png"
                     ],
-                    "pdf_cotizacion": "1789148229003_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.6._Marco_legal_aplicable_para_la_auditoria_de_TI_e_Innovacion_1.pdf"
+                    "pdf_cotizacion": "1789148229003_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.6._Marco_legal_aplicable_para_la_auditoria_de_TI_e_Innovacion_1.pdf",
+                    "numero_orden": "17821312",
+                    "numero_cotizacion_asignacion": "123123123131",
+                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260911103709_0_expediente_historico_alumno_2200607_L0X7Bz13349762131514027395.pdf"
                 }
             ],
             "comentarios": "Hola esto es una prueba",
             "autor_comentario": "Jesus  Ramirez",
-            "eliminado_por": ""
+            "eliminado_por": "",
+            "numero_cotizacion_asignacion": "123123123131",
+            "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260911103709_0_expediente_historico_alumno_2200607_L0X7Bz13349762131514027395.pdf"
         }
     ]
 }
