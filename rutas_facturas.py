@@ -34,7 +34,29 @@ def escribir_json(archivo, data):
 
 def procesar_liberacion_si_aplica(f):
     if f.get("aprobado_admin") and f.get("aprobado_corp"):
-        return "\n✅ Orden aprobada. El taller ha sido autorizado para iniciar la reparación."
+        # Se ha aprobado por completo la orden.
+        # Bloquear para que el administrador libere, y enviar correo
+        if "liberado_admin" not in f: # Solo notificar si no se ha configurado aún
+            correo_admin, nombre_admin = encontrar_admin_por_ciudad(f.get("ciudad", f.get("unidad", "")))
+            if correo_admin:
+                f["liberado_admin"] = False
+                try:
+                    from notificaciones import enviar_correo_esperando_liberacion
+                    num_orden = f.get("numero_orden") or f.get("numero_cotizacion_asignacion", "N/A")
+                    enviar_correo_esperando_liberacion(
+                        correo_admin, 
+                        nombre_admin, 
+                        f.get("id_reporte", "N/A"), 
+                        f.get("unidad", ""), 
+                        num_orden, 
+                        num_orden
+                    )
+                except Exception as e:
+                    print("Error al enviar correo de liberación admin: ", e)
+            else:
+                f["liberado_admin"] = True
+                
+        return "\n✅ Orden aprobada. Se notificó al Administrador para su validación (Doc 50)."
     return ""
 
 
@@ -274,13 +296,16 @@ def listar_facturas():
 
 
 def encontrar_admin_por_ciudad(ciudad):
-    accesos = leer_json("accesos.json")
-    for u in accesos.get("usuarios", []):
+    usuarios = leer_json("usuarios.json")
+    admin_fallback = None
+    for u in usuarios.get("usuarios", []):
         if u.get("rol") == "administracion":
             dp = u.get("datos_perfil", {})
-            if dp.get("subrol") == "Administrador" and dp.get("ciudad") == ciudad:
-                return dp.get("correo"), f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()
-    return None, None
+            if dp.get("subrol") == "Administrador":
+                admin_fallback = (dp.get("correo"), f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip())
+                if dp.get("ciudad") == ciudad:
+                    return admin_fallback
+    return admin_fallback or (None, None)
 
 @facturas_bp.route("/api/facturas/confirmar_admin", methods=["POST"])
 

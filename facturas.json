@@ -22,7 +22,7 @@
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
             "codigo_liberacion": "54733282",
-            "entregado": "No",
+            "entregado": "Sí",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
@@ -38,14 +38,84 @@
                     "pdf_cotizacion": "1789148229003_0_2200607_RamirezCardenasLuisArmando_Actividad_1.1.6._Marco_legal_aplicable_para_la_auditoria_de_TI_e_Innovacion_1.pdf",
                     "numero_orden": "17821312",
                     "numero_cotizacion_asignacion": "123123123131",
-                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260911103709_0_expediente_historico_alumno_2200607_L0X7Bz13349762131514027395.pdf"
+                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260911103709_0_expediente_historico_alumno_2200607_L0X7Bz13349762131514027395.pdf",
+                    "factura_folio": "21231",
+                    "factura_pdf": "FACTURA_FINAL_20260911103709_0_Meta_1.4._Analisis_financiero_del_Modulo_2_Economia_de_la_nube_1.pdf",
+                    "numero_doc50": "50923029323"
                 }
             ],
-            "comentarios": "Hola esto es una prueba",
-            "autor_comentario": "Jesus  Ramirez",
+            "comentarios": "Hola esto es una prueba...",
+            "autor_comentario": "Manuel Cabrera",
             "eliminado_por": "",
             "numero_cotizacion_asignacion": "123123123131",
-            "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260911103709_0_expediente_historico_alumno_2200607_L0X7Bz13349762131514027395.pdf"
+            "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260911103709_0_expediente_historico_alumno_2200607_L0X7Bz13349762131514027395.pdf",
+            "factura_folio": "21231",
+            "factura_pdf": "FACTURA_FINAL_20260911103709_0_Meta_1.4._Analisis_financiero_del_Modulo_2_Economia_de_la_nube_1.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "50923029323",
+            "estado": "Archivado",
+            "fecha_cierre": "2026-09-14"
+        },
+        {
+            "id": "20260914134318",
+            "proveedor": "Autopartes y Motores B.C.",
+            "unidad": "8090-0713",
+            "responsable": "Luis Ramirez",
+            "telefono": "6634041184",
+            "titulo": "Cambio de balatas (+1 más)",
+            "retro": "[TICKET:REP-20260914133937]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 4600.0,
+            "fecha": "2026-09-14",
+            "numero_orden": "298101010",
+            "compania": "Telnor",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-09-14T13:43:18.483351",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "",
+            "entregado": "No",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 4500.0,
+                    "titulo": "Cambio de balatas",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20260914133937]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1789418598462_0_administrador.jpg"
+                    ],
+                    "pdf_cotizacion": "1789418598462_0_Meta_1.4._Analisis_financiero_del_Modulo_2_Economia_de_la_nube_1.pdf",
+                    "numero_orden": "298101010",
+                    "numero_cotizacion_asignacion": "2981092012",
+                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260914134318_0_2200607_RamirezCardenasLuisArmando_Actividad_1.2._Areas_de_accion_de_la_auditoria_1.pdf"
+                },
+                {
+                    "id_cotizacion": "2",
+                    "precio": 100.0,
+                    "titulo": "v",
+                    "mantenimiento": "Preventivo",
+                    "retro": "n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1789418598462_1_subjefe_3.jpg"
+                    ],
+                    "pdf_cotizacion": "1789418598462_1_expediente_historico_alumno_2200607_L0X7Bz13349762131514027395.pdf",
+                    "numero_orden": "2981919",
+                    "numero_cotizacion_asignacion": "298171817",
+                    "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260914134318_1_Meta_1.4._Analisis_financiero_del_Modulo_2_Economia_de_la_nube_1.pdf"
+                }
+            ],
+            "numero_cotizacion_asignacion": "2981092012",
+            "pdf_cotizacion_asignacion": "Cotizacion_Orden_20260914134318_0_2200607_RamirezCardenasLuisArmando_Actividad_1.2._Areas_de_accion_de_la_auditoria_1.pdf",
+            "liberado_admin": false
         }
     ]
 }
