@@ -265,7 +265,7 @@ async function cargarFacturas() {
                         } else {
                             ffStr = f.factura_folio || "Pendiente";
                         }
-                        
+
                         let indStrLocal = '';
                         if (f.cotizaciones && f.cotizaciones.length > 1) {
                             indStrLocal = f.cotizaciones.map((c, i) => `Cot ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
@@ -2524,22 +2524,22 @@ function enviarRecordatorioCorp() {
     }
 
     if (!confirm('¿Deseas enviar un recordatorio a Corporativos para que envíen la información correspondiente del Documento Contable (50) de este ticket?')) return;
-    
+
     mostrarLoaderDinamico("Enviando recordatorio...", "Conectando con el servidor");
-    
+
     fetch('/api/facturas/recordatorio_doc_contable_corp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: idFactura })
     })
-    .then(res => res.json())
-    .then(data => {
-        ocultarLoaderDinamico();
-        alert(data.message);
-    })
-    .catch(err => {
-        ocultarLoaderDinamico();
-        console.error(err);
-        alert('Error al conectar con el servidor.');
-    });
+        .then(res => res.json())
+        .then(data => {
+            ocultarLoaderDinamico();
+            alert(data.message);
+        })
+        .catch(err => {
+            ocultarLoaderDinamico();
+            console.error(err);
+            alert('Error al conectar con el servidor.');
+        });
 }

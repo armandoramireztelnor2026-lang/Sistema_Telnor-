@@ -144,6 +144,7 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'unidades') cargarUnidades();
     if (vista === 'seccion-reportes' && typeof cargarSeccionReportes === 'function') cargarSeccionReportes();
 
+    if (vista === 'panel-control' && typeof cargarPanelControl === 'function') cargarPanelControl();
     if (vista === 'reportes' && typeof cargarReportesAdmin === 'function') cargarReportesAdmin();
     if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'documentos_contables') && typeof cargarFacturas === 'function') cargarFacturas();
 }

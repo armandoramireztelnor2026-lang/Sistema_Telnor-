@@ -18,6 +18,7 @@
     <div class="dashboard-container">
 
         <aside class="sidebar">
+            <button title="Ayuda" onclick="document.getElementById('modal-ayuda').style.display='flex'" style="position: absolute; top: 15px; left: 15px; background: #3b82f6; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; font-size: 20px;">?</button>
             <img src="{% if usuario.datos_perfil.foto_ruta %}/static/logos_proveedores/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/112641/40916c?text=Logo{% endif %}"
                 alt="Logo" class="profile-pic" onclick="abrirMiPerfil()">
             <div class="sidebar-name">{{ usuario.datos_perfil.nombre_proveedor }}</div>
@@ -38,7 +39,6 @@
             <div id="vista-facturas">
                 <div class="top-bar">
                     <h2>Cotizaciones</h2>
-                    <button class="btn-action" onclick="abrirModalNuevaFactura()">+ Nueva Cotización Libre</button>
                 </div>
                 <div class="admin-container">
                     <div class="table-responsive">
@@ -350,7 +350,73 @@
         </div>
     </div>
 
-    <script src="/static/script.js?v=1788806395"></script>
+    <!-- MODAL DE AYUDA (MANUAL) -->
+    <div id="modal-ayuda" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.85); z-index:9999; justify-content:center; align-items:center;">
+        <div class="modal-content" style="background:#1e293b; padding:0; border-radius:12px; width:950px; max-width:95vw; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,0.6); overflow:hidden;">
+            <!-- Header -->
+            <div style="background:#f59e0b; padding:20px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color:white; margin:0; font-size:1.4em;">📖 Manual del Sistema - Portal Taller/Proveedor</h3>
+                <button onclick="document.getElementById('modal-ayuda').style.display='none'" style="background:none; border:none; color:white; font-size:1.8em; cursor:pointer; padding:0; line-height:1;">&times;</button>
+            </div>
+            <!-- Body -->
+            <div style="padding:25px; overflow-y:auto; color:#e2e8f0; line-height:1.6;">
+                
+                <h4 style="color:#f59e0b; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:0;">💡 ¿Qué puedo hacer como Taller Proveedor?</h4>
+                <p>Eres el <strong>Eslabón Operativo Principal</strong> en el ciclo de mantenimiento. A través de este portal oficial, recibirás en tiempo real las notificaciones sobre los vehículos de la empresa que han presentado daños o que requieren servicios preventivos. Tu responsabilidad técnica consiste en diagnosticar físicamente la unidad, generar los presupuestos (cotizaciones) de refacciones y mano de obra a través del sistema, y esperar la autorización formal de la administración central. Una vez que recibas la Orden de Compra aprobada, podrás realizar el trabajo físico. Al concluir, el conductor de la empresa acudirá a recoger el vehículo e ingresará su PIN de seguridad en tu portal. Tras esa validación, tu último paso será subir tu Factura Fiscal (PDF y XML) para iniciar el trámite de pago.</p>
+
+                <h4 style="color:#a3b1c6; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:30px;">🔘 Explicación Detallada de tu Menú Lateral</h4>
+                <div style="display:grid; grid-template-columns: 1fr; gap:15px; margin-top:15px;">
+                    
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+        <strong style="color:white;">Tickets de Trabajo:</strong>
+        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+    </div>
+    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Esta es tu <strong>Bandeja de Entrada Inicial</strong>. Cada vez que la administración determine que un vehículo debe ir a tu taller, aparecerá un nuevo registro aquí. Al abrir el ticket, podrás leer las observaciones de la falla que reportó el conductor. Desde esta misma pantalla, una vez que inspecciones la unidad en tu taller, debes hacer clic en "Crear Cotización" para estructurar tu presupuesto de reparación, desglosando cada refacción requerida y el costo de tu mano de obra.</p>
+    </div>
+</div>
+
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+        <strong style="color:white;">Cotizaciones:</strong>
+        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+    </div>
+    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Tu <strong>Bandeja de Seguimiento y Autorización</strong>. Todos los presupuestos que elabores y envíes se guardarán aquí. En esta sección es crucial que <strong>esperes pacientemente</strong>. La administración y los supervisores evaluarán tus costos. Si el presupuesto es aceptado, la administración subirá un documento llamado "Orden de Compra". Solamente cuando veas el indicador verde de "Orden Aprobada" en esta sección, estarás formalmente autorizado para comprar las refacciones y comenzar a desarmar el vehículo.</p>
+    </div>
+</div>
+
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+        <strong style="color:white;">Facturas:</strong>
+        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+    </div>
+    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Tu <strong>Bandeja de Cobranza</strong>. Cuando hayas terminado de reparar el automóvil y se lo entregues al conductor de la empresa, dicho conductor deberá teclear su PIN de seguridad confidencial en el sistema para confirmar la recepción satisfactoria de la unidad. Automáticamente, el ticket se moverá a esta sección. Aquí es donde debes cargar obligatoriamente tus archivos fiscales finales (el PDF de tu factura y el archivo XML). Sin estos archivos, el departamento de contabilidad de la empresa no podrá proceder con tu pago.</p>
+    </div>
+</div>
+
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+        <strong style="color:white;">Archivo Histórico:</strong>
+        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+    </div>
+    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Tu <strong>Carpeta Virtual de Respaldo</strong>. Esta sección almacena indefinidamente el historial completo de todos los servicios de reparación que le has realizado a los vehículos de la empresa y que ya fueron cobrados y cerrados contablemente. Si en un futuro necesitas aclarar garantías o revisar cuánto cobraste por una reparación pasada, puedes buscar la información aquí utilizando la fecha, las placas o el número económico del vehículo.</p>
+    </div>
+</div>
+
+                </div>
+            </div>
+            <!-- Footer -->
+            <div style="background:#0f172a; padding:20px; text-align:right; border-top:1px solid #334155;">
+                <button onclick="document.getElementById('modal-ayuda').style.display='none'" style="background:#f59e0b; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">Entendido, cerrar manual</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js?v=48565"></script>
 
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js?v=1788550327"></script>

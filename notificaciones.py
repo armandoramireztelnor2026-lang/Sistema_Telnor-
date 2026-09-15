@@ -539,3 +539,74 @@ def enviar_correo_recordatorio_doc_contable(lista_corps, ticket, unidad, proveed
         """
         disparar_correo(corp['correo'], asunto, cuerpo_html)
     return True, "Enviado"
+
+# =========================================================
+# CORREOS PARA PANEL DE CONTROL - GESTIÓN DE PERSONAL
+# =========================================================
+
+def enviar_correo_ciudad_asignada(correo, nombre, ciudad, asignado_por):
+    asunto = f"📋 Nueva Ciudad Asignada: {ciudad}"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #10b981; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">CIUDAD ASIGNADA</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre}</strong>,</p>
+                <p>Se le notifica que <strong>{asignado_por}</strong> (Jefatura) le ha <strong>asignado</strong> la ciudad <strong style="color: #10b981;">{ciudad}</strong> a su perfil en el Sistema Automotriz.</p>
+                <p>A partir de ahora, usted recibirá y podrá gestionar tickets correspondientes a esa ciudad adicional.</p>
+                <p style="color: #64748b; font-size: 0.9em;">Si tiene alguna duda, contacte a su Jefatura directa.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    disparar_correo(correo, asunto, cuerpo_html)
+
+def enviar_correo_ciudad_removida(correo, nombre, ciudad, removido_por):
+    asunto = f"⚠️ Ciudad Removida de su Perfil: {ciudad}"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #f59e0b; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">CIUDAD REMOVIDA</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre}</strong>,</p>
+                <p>Se le notifica que <strong>{removido_por}</strong> (Jefatura) ha <strong>removido</strong> la ciudad <strong style="color: #ef4444;">{ciudad}</strong> de su perfil en el Sistema Automotriz.</p>
+                <p>Ya no recibirá ni gestionará tickets de esa ciudad.</p>
+                <p style="color: #64748b; font-size: 0.9em;">Si tiene alguna duda, contacte a su Jefatura directa.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    disparar_correo(correo, asunto, cuerpo_html)
+
+def enviar_correo_cambio_subrol(correo, nombre, nuevo_subrol, modificado_por):
+    asunto = f"🔄 Cambio de Puesto/Rol a: {nuevo_subrol}"
+    
+    color_banner = "#3b82f6" if nuevo_subrol == "Administrador" else "#10b981"
+    
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: {color_banner}; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">CAMBIO DE ROL</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre}</strong>,</p>
+                <p>Se le notifica que <strong>{modificado_por}</strong> (Jefatura) ha actualizado su perfil en el Sistema Automotriz.</p>
+                <p>A partir de ahora, su puesto/subrol es: <strong style="color: {color_banner}; font-size: 1.2em;">{nuevo_subrol}</strong>.</p>
+                <p>La próxima vez que inicie sesión, su menú y sus permisos se ajustarán automáticamente a sus nuevas funciones operativas.</p>
+                <p style="color: #64748b; font-size: 0.9em;">Si tiene alguna duda, contacte a su Jefatura directa.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    disparar_correo(correo, asunto, cuerpo_html)

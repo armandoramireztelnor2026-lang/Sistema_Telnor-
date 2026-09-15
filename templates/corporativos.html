@@ -14,6 +14,7 @@
     <div class="dashboard-container">
         <!-- BARRA LATERAL -->
         <aside class="sidebar">
+            <button title="Ayuda" onclick="document.getElementById('modal-ayuda').style.display='flex'" style="position: absolute; top: 15px; left: 15px; background: #3b82f6; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; font-size: 20px;">?</button>
             <img src="{% if usuario.datos_perfil.foto_ruta %}/static/foto_corporativos/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/112641/40916c?text=Corp{% endif %}" alt="Foto Corp" class="profile-pic" onclick="abrirMiPerfil()">
             <div class="sidebar-name">{{ usuario.datos_perfil.nombres }}</div>
             <div class="sidebar-sub">Ciudad: {{ usuario.datos_perfil.ciudad | default('No especificada') }}</div>
@@ -162,12 +163,58 @@
         </div>
     </div>
 
-    <script src="/static/script.js?v=1788806395"></script>
+    <script src="/static/script.js?v=48565"></script>
     
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js?v=1788550327"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=1788550327"></script>
     <script src="/static/facturas_principal.js?v=1788652870"></script>
+
+    <!-- MODAL DE AYUDA (MANUAL) -->
+    <div id="modal-ayuda" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.85); z-index:9999; justify-content:center; align-items:center;">
+        <div class="modal-content" style="background:#1e293b; padding:0; border-radius:12px; width:950px; max-width:95vw; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,0.6); overflow:hidden;">
+            <!-- Header -->
+            <div style="background:#0284c7; padding:20px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color:white; margin:0; font-size:1.4em;">📖 Manual del Sistema - Dirección Corporativa</h3>
+                <button onclick="document.getElementById('modal-ayuda').style.display='none'" style="background:none; border:none; color:white; font-size:1.8em; cursor:pointer; padding:0; line-height:1;">&times;</button>
+            </div>
+            <!-- Body -->
+            <div style="padding:25px; overflow-y:auto; color:#e2e8f0; line-height:1.6;">
+                
+                <h4 style="color:#38bdf8; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:0;">💡 ¿Qué puedo hacer como Directivo Corporativo?</h4>
+                <p>Tu rol principal en el sistema es fungir como el <strong>Filtro de Autorización Financiera y Supervisión Ejecutiva</strong>. A diferencia del personal operativo, en este perfil no levantarás reportes técnicos de fallas vehiculares ni asignarás qué taller mecánico reparará un automóvil. Tu objetivo estratégico es revisar, auditar y controlar los presupuestos de mantenimiento vehicular excepcionales; es decir, aquellos cuya cotización exceda el límite económico preestablecido (ej. <strong>$10,000 MXN</strong>). El sistema está programado para pausar automáticamente cualquier ticket que rebase este umbral y enviarlo directamente a tu bandeja, garantizando que ninguna suma elevada de dinero sea aprobada sin tu visto bueno financiero y gerencial.</p>
+
+                <h4 style="color:#a3b1c6; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:30px;">🔘 Explicación Detallada de tu Menú Lateral</h4>
+                <div style="display:grid; grid-template-columns: 1fr; gap:15px; margin-top:15px;">
+                    
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+        <strong style="color:white;">Cotizaciones:</strong>
+        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+    </div>
+    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Esta es tu <strong>Bandeja de Autorizaciones Financieras de Alto Nivel</strong>. Aquí aterrizan de manera automatizada todas las cotizaciones "Mayores". Al abrir los detalles de un servicio en esta bandeja, el sistema te desglosará todas las refacciones, el costo de la mano de obra, y el nombre del proveedor. A partir de esa información, tendrás dos opciones de impacto inmediato: hacer clic en "Aprobar Gasto Financiero" (lo cual desbloquea el ticket y permite a la administración expedir la orden de compra para que el taller inicie a trabajar), o hacer clic en "Rechazar Gasto" (el sistema abrirá un recuadro exigiendo que expliques el motivo del rechazo, lo cual regresará el ticket a la administración para que busquen una alternativa más económica o cancelen el servicio).</p>
+    </div>
+</div>
+
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+        <strong style="color:white;">Archivo Histórico:</strong>
+        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+    </div>
+    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Es tu <strong>Repositorio Gerencial de Auditoría</strong>. Funciona como una biblioteca virtual inalterable. Puedes usar la barra de búsqueda avanzada para introducir cualquier número de folio fiscal, el número económico de un vehículo, o el nombre de un taller proveedor. Al hacerlo, podrás revisar la radiografía completa de todos los servicios que se han pagado históricamente, consultando los costos totales que tú o la administración autorizaron previamente en el sistema. Es la herramienta definitiva para rastrear en qué se está invirtiendo el capital de la empresa a lo largo del tiempo.</p>
+    </div>
+</div>
+
+                </div>
+            </div>
+            <!-- Footer -->
+            <div style="background:#0f172a; padding:20px; text-align:right; border-top:1px solid #334155;">
+                <button onclick="document.getElementById('modal-ayuda').style.display='none'" style="background:#0284c7; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">Entendido, cerrar manual</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
