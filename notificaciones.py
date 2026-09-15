@@ -501,3 +501,41 @@ def enviar_correo_notificacion_corp_documentos(lista_corps, proveedor, unidad, p
             if exito:
                 enviados += 1
     return enviados
+
+def enviar_correo_recordatorio_doc_contable(lista_corps, ticket, unidad, proveedor, orden, pedido, factura, supervisor, ciudad):
+    if not lista_corps:
+        return False, "No hay correos"
+
+    asunto = f"⚠️ Acción Requerida: Falta Documento Contable (50) para Unidad 8090-{unidad}"
+    for corp in lista_corps:
+        cuerpo_html = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+            <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+                <div style="background-color: #ef4444; padding: 20px; text-align: center;">
+                    <h2 style="color: #ffffff; margin: 0;">ACCIÓN REQUERIDA</h2>
+                </div>
+                <div style="padding: 20px;">
+                    <p>Hola <strong>{corp['nombre']}</strong>,</p>
+                    <p>Se le notifica a través del Sistema Automotriz que el siguiente servicio ya ha avanzado en su proceso, pero nos encontramos detenidos ya que <strong>no se ha recibido la información correspondiente al Documento Contable (50)</strong>.</p>
+                    
+                    <h3 style="color: #1f2937; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">Detalles del Servicio:</h3>
+                    <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
+                        <li style="margin-bottom: 8px;"><strong>Folio (Ticket):</strong> {ticket}</li>
+                        <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                        <li style="margin-bottom: 8px;"><strong>Taller:</strong> {proveedor}</li>
+                        <li style="margin-bottom: 8px;"><strong>Solicitante (Supervisor):</strong> {supervisor}</li>
+                        <li style="margin-bottom: 8px;"><strong>Ciudad:</strong> {ciudad}</li>
+                        <li style="margin-bottom: 8px;"><strong>No(s). de Factura:</strong><br> {factura}</li>
+                        <li style="margin-bottom: 8px;"><strong>No(s). de Orden:</strong><br> {orden}</li>
+                        <li style="margin-bottom: 8px;"><strong>No(s). de Pedido:</strong><br> {pedido}</li>
+                    </ul>
+                    
+                    <p>Requerimos de su apoyo para generar o proporcionar los números contables correspondientes a este ticket lo antes posible.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        disparar_correo(corp['correo'], asunto, cuerpo_html)
+    return True, "Enviado"

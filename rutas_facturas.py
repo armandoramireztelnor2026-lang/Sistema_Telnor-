@@ -19,7 +19,8 @@ from notificaciones import (
     enviar_correo_factura_fiscal_subida,
     enviar_correo_factura_fiscal_rechazada,
     enviar_correo_esperando_liberacion,
-    enviar_correo_notificacion_corp_documentos
+    enviar_correo_notificacion_corp_documentos,
+    enviar_correo_recordatorio_doc_contable
 )
 
 facturas_bp = Blueprint("facturas_bp", __name__)
@@ -971,3 +972,70 @@ def notificar_corporativos():
         return jsonify({"status": "success", "message": f"Notificación enviada exitosamente a {enviados} usuario(s) de Corporativos."})
     else:
         return jsonify({"status": "error", "message": "No se pudo enviar la notificación. Verifique los correos de Corporativos."})
+
+@facturas_bp.route('/api/facturas/recordatorio_doc_contable_corp', methods=['POST'])
+def recordatorio_doc_contable_corp():
+    id_factura = request.json.get('id')
+    if not id_factura:
+        return jsonify({"status": "error", "message": "Falta el ID del ticket."})
+
+    # Obtener detalles del ticket
+    data = leer_json("facturas.json")
+    factura = next((f for f in data.get("facturas", []) if str(f.get("id")) == str(id_factura)), None)
+    if not factura:
+        return jsonify({"status": "error", "message": "No se encontró el ticket."})
+
+    ticket = factura.get("id", "N/A")
+    unidad = factura.get("unidad", "S/N")
+    proveedor = factura.get("proveedor", "N/A")
+    
+    supervisor_actual = session.get('usuario', {})
+    datos_perfil = supervisor_actual.get('datos_perfil', {})
+    nombre_supervisor = f"{datos_perfil.get('nombres', '')} {datos_perfil.get('apellido_paterno', '')}".strip() or "N/A"
+    ciudad_supervisor = datos_perfil.get('ciudad', 'N/A')
+    edificio_supervisor = datos_perfil.get('edificio', 'N/A')
+
+    ordenes = []
+    pedidos = []
+    facturas_folios = []
+    cotizaciones = factura.get("cotizaciones", [])
+    if cotizaciones:
+        for idx, c in enumerate(cotizaciones):
+            o = c.get("numero_orden") or "N/A"
+            p = c.get("numero_cotizacion_asignacion") or "N/A"
+            f_fol = c.get("factura_folio") or "N/A"
+            ordenes.append(f"&nbsp;&nbsp;• Cotización {idx+1}: {o}")
+            pedidos.append(f"&nbsp;&nbsp;• Cotización {idx+1}: {p}")
+            facturas_folios.append(f"&nbsp;&nbsp;• Cotización {idx+1}: {f_fol}")
+        orden = "<br>".join(ordenes)
+        pedido = "<br>".join(pedidos)
+        factura_str = "<br>".join(facturas_folios)
+    else:
+        o = factura.get("numero_orden") or "N/A"
+        p = factura.get("numero_cotizacion_asignacion") or "N/A"
+        f_fol = factura.get("factura_folio") or "N/A"
+        orden = f"&nbsp;&nbsp;• {o}"
+        pedido = f"&nbsp;&nbsp;• {p}"
+        factura_str = f"&nbsp;&nbsp;• {f_fol}"
+
+    # Obtener lista de correos de corporativos
+    usuarios_data = leer_json('usuarios.json')
+    corps_data = []
+    for u in usuarios_data.get('usuarios', []):
+        if u.get('rol') == 'corporativos':
+            correo = u.get('correo') or u.get('datos_perfil', {}).get('correo', '')
+            nombre = f"{u.get('datos_perfil', {}).get('nombres', '')} {u.get('datos_perfil', {}).get('apellido_paterno', '')}".strip()
+            if correo:
+                corps_data.append({"correo": correo, "nombre": nombre})
+
+    if not corps_data:
+        return jsonify({"status": "error", "message": "No hay usuarios de Corporativos registrados con correo."})
+
+    exito, msj = enviar_correo_recordatorio_doc_contable(
+        corps_data, ticket, unidad, proveedor, orden, pedido, factura_str, 
+        nombre_supervisor, ciudad_supervisor
+    )
+    if exito:
+        return jsonify({"status": "success", "message": "Recordatorio enviado a Corporativos exitosamente."})
+    else:
+        return jsonify({"status": "error", "message": f"No se pudo enviar: {msj}"})

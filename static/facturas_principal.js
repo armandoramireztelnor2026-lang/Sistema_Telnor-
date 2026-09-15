@@ -259,11 +259,24 @@ async function cargarFacturas() {
 
                         btnDoc += `</div>`;
 
-                        let ff = f.factura_folio || "Pendiente";
+                        let ffStr = '';
+                        if (f.cotizaciones && f.cotizaciones.length > 1) {
+                            ffStr = f.cotizaciones.map((c, i) => `Cot ${i + 1}: ${c.factura_folio || 'Pendiente'}`).join('<br>');
+                        } else {
+                            ffStr = f.factura_folio || "Pendiente";
+                        }
+                        
+                        let indStrLocal = '';
+                        if (f.cotizaciones && f.cotizaciones.length > 1) {
+                            indStrLocal = f.cotizaciones.map((c, i) => `Cot ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
+                        } else {
+                            indStrLocal = `$${parseFloat(f.precio || 0).toLocaleString('en-US')}`;
+                        }
+
                         let idRepTable = obtenerIdReporte(f) || 'S/T';
                         let pFormat = f.precio ? parseFloat(f.precio).toLocaleString('en-US') : '0';
 
-                        tbodyDocContables.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepTable}</span></td><td><span style="color:#10b981; font-weight:bold;">${ff}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><small style="color:#a3b1c6;">$${pFormat}</small></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
+                        tbodyDocContables.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepTable}</span></td><td><span style="color:#10b981; font-weight:bold;">${ffStr}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><small style="color:#a3b1c6;">${indStrLocal}</small></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
                         countDocContables++;
 
                         if (subrolAct === 'Administrador') {
@@ -2501,4 +2514,32 @@ async function liberarDocContable(idFactura) {
         ocultarLoaderDinamico();
         alert("Error al liberar el ticket.");
     }
+}
+
+function enviarRecordatorioCorp() {
+    let idFactura = document.getElementById('hidden-doc-contable-id').value;
+    if (!idFactura) {
+        alert("Error: No se pudo identificar el ticket actual.");
+        return;
+    }
+
+    if (!confirm('¿Deseas enviar un recordatorio a Corporativos para que envíen la información correspondiente del Documento Contable (50) de este ticket?')) return;
+    
+    mostrarLoaderDinamico("Enviando recordatorio...", "Conectando con el servidor");
+    
+    fetch('/api/facturas/recordatorio_doc_contable_corp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: idFactura })
+    })
+    .then(res => res.json())
+    .then(data => {
+        ocultarLoaderDinamico();
+        alert(data.message);
+    })
+    .catch(err => {
+        ocultarLoaderDinamico();
+        console.error(err);
+        alert('Error al conectar con el servidor.');
+    });
 }
