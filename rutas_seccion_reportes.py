@@ -22,13 +22,42 @@ def obtener_lista_seccion_reportes():
     if usuario.get("rol") != "administracion":
         return jsonify({"status": "error", "message": "No autorizado"}), 403
 
+    reportes_data = leer_json('reportes.json')
     facturas_data = leer_json('facturas.json')
+    
+    todos_reportes = reportes_data.get("reportes", [])
     todas_facturas = facturas_data.get("facturas", [])
     
-    # Podemos procesar la data si es necesario, o enviarla cruda
+    # Set of report IDs that have a corresponding factura
+    facturas_ids = set()
+    import re
+    for f in todas_facturas:
+        r_id = f.get("id_reporte") or f.get("numero_reporte")
+        if not r_id:
+            retro = f.get("retro", "")
+            if "[TICKET:" in retro:
+                match = re.search(r"\[TICKET:(.*?)\]", retro)
+                if match:
+                    r_id = match.group(1).strip()
+        if r_id:
+            facturas_ids.add(str(r_id))
+            
+    # Solo agregamos reportes que no tengan una factura ya creada
+    reportes_no_asignados = [r for r in todos_reportes if str(r.get("id")) not in facturas_ids]
+    
+    # Marcamos de donde vienen por si acaso
+    for r in reportes_no_asignados:
+        r['origen'] = 'reportes'
+        r['is_unassigned'] = True
+    for f in todas_facturas:
+        f['origen'] = 'facturas'
+        f['is_unassigned'] = False
+        
+    todos_combinados = reportes_no_asignados + todas_facturas
+    
     return jsonify({
         "status": "success",
-        "facturas": todas_facturas
+        "facturas": todos_combinados
     })
 
 def guardar_json(archivo, datos):

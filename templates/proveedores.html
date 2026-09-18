@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Portal Proveedores</title>
-    <link rel="stylesheet" href="/static/style.css?v=69423">
+    <link rel="stylesheet" href="/static/style.css?v=51050">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
@@ -36,7 +36,7 @@
         </aside>
 
         <main class="main-content">
-            <div id="vista-facturas">
+            <div id="vista-facturas" style="display: none;">
                 <div class="top-bar">
                     <h2>Cotizaciones</h2>
                 </div>
@@ -416,13 +416,20 @@
         </div>
     </div>
 
-    <script src="/static/script.js?v=48565"></script>
+    <script src="/static/script.js?v=250914"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(() => {
+            if (typeof cambiarVistaProv === 'function') cambiarVistaProv('reportes');
+        }, 100);
+    });
+    </script>
 
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js?v=1788550327"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=1788550327"></script>
-    <script src="/static/facturas_principal.js?v=42319"></script>
+    <script src="/static/facturas_principal.js?v=74024"></script>
 </body>
 
 </html>

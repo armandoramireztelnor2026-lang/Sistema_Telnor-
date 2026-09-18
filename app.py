@@ -34,21 +34,7 @@ CARPETAS = {
     "facturas": "static/facturas_archivos" 
 }
 
-USUARIOS_PRUEBA = [
-    {
-        "usuario": "admin_universal", 
-        "password": "password123", 
-        "rol": "administracion", 
-        "datos_perfil": {
-            "nombres": "Admin", 
-            "apellido_paterno": "Universal", 
-            "area": "Dirección General",
-            "subrol": "Jefatura",
-            "ciudad": "Mexicali",
-            "foto_ruta": "imagen_universal.jpg"
-        }
-    }
-]
+USUARIOS_PRUEBA = []
 
 def leer_json(archivo):
     if not os.path.exists(archivo): return {}

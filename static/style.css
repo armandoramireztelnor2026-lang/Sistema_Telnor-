@@ -1565,3 +1565,36 @@ tbody tr.selected-row {
     font-weight: bold;
     box-shadow: inset 4px 0 0 #f59e0b;
 }
+
+/* Estilos para barras de búsqueda (Buscador Píldora) */
+.buscador-wrapper-div {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.buscador-icono {
+    position: absolute;
+    left: 15px;
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+.buscador-pildora {
+    width: 100%;
+    padding: 12px 20px 12px 45px; /* Espacio para el icono a la izquierda */
+    border-radius: 50px;
+    border: 1px solid #1f395a;
+    background-color: #0b1c30;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.buscador-pildora:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
