@@ -115,15 +115,7 @@ function generarPDFSilencioso(idFactura) {
     const contCotizacion = document.getElementById('prev-cotizaciones-container'); const contEvidencia = document.getElementById('prev-evidencias-container');
     contCotizacion.innerHTML = ''; contEvidencia.innerHTML = ''; 
     f.fotos_cotizacion.forEach(foto => { let ruta = `/static/facturas_archivos/${foto}`; if(foto.endsWith('.pdf')) { contCotizacion.innerHTML += `<div class="pdf-image-container"><div style="font-size:40px; color:#ef4444; margin-bottom:10px;">📄</div><p class="pdf-anexo-label">Cotización PDF: ${foto}</p></div>`; } else { contCotizacion.innerHTML += `<div class="pdf-image-container"><img src="${ruta}" class="pdf-anexo-img"><p class="pdf-anexo-label">Cotización: ${foto}</p></div>`; } });
-    f.fotos_evidencia.forEach(foto => { 
-        let ruta = `/static/facturas_archivos/${foto}`; 
-        const esVideo = foto.match(/\.(mp4|webm|ogg|mov)$/i);
-        if(esVideo) {
-            contEvidencia.innerHTML += `<div class="pdf-image-container"><div style="font-size:40px; color:#40916c; margin-bottom:10px;">🎥</div><p class="pdf-anexo-label">Video de Evidencia: ${foto}</p></div>`;
-        } else {
-            contEvidencia.innerHTML += `<div class="pdf-image-container"><img src="${ruta}" class="pdf-anexo-img"><p class="pdf-anexo-label">Evidencia: ${foto}</p></div>`; 
-        }
-    });
+    f.fotos_evidencia.forEach(foto => { let ruta = `/static/facturas_archivos/${foto}`; contEvidencia.innerHTML += `<div class="pdf-image-container"><img src="${ruta}" class="pdf-anexo-img"><p class="pdf-anexo-label">Evidencia: ${foto}</p></div>`; });
 
     const overlay = document.createElement('div'); overlay.style.position = 'fixed'; overlay.style.top = '0'; overlay.style.left = '0'; overlay.style.width = '100vw'; overlay.style.height = '100vh'; overlay.style.backgroundColor = 'rgba(11, 28, 48, 0.95)'; overlay.style.zIndex = '999999'; overlay.style.display = 'flex'; overlay.style.flexDirection = 'column'; overlay.style.alignItems = 'center'; overlay.style.overflowY = 'auto'; overlay.style.padding = '40px 0';
     const titleText = document.createElement('h2'); titleText.innerText = "Vista Previa del Documento Oficial"; titleText.style.color = '#40916c'; titleText.style.marginBottom = '20px'; titleText.style.fontFamily = "'Poppins', sans-serif"; overlay.appendChild(titleText);

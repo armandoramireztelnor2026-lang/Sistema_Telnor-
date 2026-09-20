@@ -855,8 +855,7 @@ th {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-.preview-item img,
-.preview-item video {
+.preview-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;

@@ -187,13 +187,14 @@ function renderizarTablaReportes(lista) {
             // If multiple, normally only ONE is approved. Let's just sum all for now, or just the main `f.precio`.
             
             // Num Pedido
-            let pNum = cot ? (cot.numero_cotizacion_asignacion || cot.numero_cotizacion) : (f.numero_cotizacion_asignacion || f.numero_cotizacion);
-            if (pNum && pNum.trim() !== '') {
-                htmlNumPedido += `<div style="${bStyle}">${label}<span style="color:#0ea5e9; font-weight:bold;">${pNum}</span></div>`;
-            } else {
-                htmlNumPedido += `<div style="${bStyle}">${label}<span style="color:#9ca3af; font-style:italic;">No reg.</span></div>`;
-                pendientesOC++;
-            }
+            let nPedido = cot ? (cot.numero_cotizacion_asignacion || pendienteHTML) : (f.numero_cotizacion_asignacion || pendienteHTML);
+            htmlNumPedido += `<div style="${bStyle}">${label}${nPedido}</div>`;
+            if(nPedido === pendienteHTML) pendientesOC++;
+
+            // PDF Pedido
+            let pPedido = cot ? (cot.pdf_cotizacion_asignacion || cot.pdf_cotizacion) : (f.pdf_cotizacion_asignacion || f.pdf_cotizacion);
+            let btnP = pPedido ? `<button class="btn-info" style="padding:4px 8px; font-size:0.8em; margin:0;" onclick="abrirVisorPDF('/static/facturas_archivos/${pPedido}')">📄 Ver PDF</button>` : pendienteHTML;
+            htmlBtnPdfPedido += `<div style="${bStyle}">${label}${btnP}</div>`;
 
             // Num Orden
             let nOrden = cot ? (cot.numero_orden || pendienteHTML) : (f.numero_orden || pendienteHTML);
@@ -225,7 +226,7 @@ function renderizarTablaReportes(lista) {
         let commentSafe = f.comentarios ? f.comentarios.replace(/'/g, "\\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, "") : "";
         let autorSafe = f.autor_comentario ? f.autor_comentario.replace(/'/g, "\\\'").replace(/"/g, "&quot;") : "";
         let btnText = hasComment ? "💬 Ver/Actualizar Comentario" : "💬 Añadir Comentario";
-        let btnComentarios = `<button onclick="abrirModalComentarios('${f.id}', ${is_unass}, '${commentSafe}', '${autorSafe}')" style="background:${btnColor}; color:white; border:none; padding:5px 10px; border-radius:12px; font-size:0.85em; cursor:pointer;">${btnText}</button>`;
+        let btnComentarios = `<button onclick="abrirModalComentarios('${ticket}', ${is_unass}, '${commentSafe}', '${autorSafe}')" style="background:${btnColor}; color:white; border:none; padding:5px 10px; border-radius:12px; font-size:0.85em; cursor:pointer;">${btnText}</button>`;
 
         if (f.eliminado_por && !hasComment) {
             btnComentarios = `<div style="max-width:150px; white-space:normal; font-size:0.85em; font-weight:600; word-wrap:break-word; margin-bottom:5px; color:#f87171;">Comentario eliminado por: ${f.eliminado_por}</div>` + btnComentarios;
@@ -260,6 +261,7 @@ function renderizarTablaReportes(lista) {
                 <td style="vertical-align:top; padding-top:15px;">${tiempoTaller}</td>
                 <td style="vertical-align:top; padding-top:15px;">${fechaSalida}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumPedido}</td>
+                <td style="vertical-align:top; padding-top:15px;">${htmlBtnPdfPedido}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumOrden}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumFactura}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlBtnPdfFactura}</td>
@@ -601,13 +603,6 @@ async function guardarComentario(action = "save") {
                     r.comentarios = finalComment;
                     r.autor_comentario = finalAuthor;
                     r.eliminado_por = finalDeletedBy;
-                }
-            } else if (!is_unassigned && window.facturasGlobal) {
-                let f = window.facturasGlobal.find(x => String(x.id) === String(id));
-                if (f) {
-                    f.comentarios = finalComment;
-                    f.autor_comentario = finalAuthor;
-                    f.eliminado_por = finalDeletedBy;
                 }
             }
             if (action === "delete") {

@@ -218,7 +218,7 @@ function procesarRegistro(rol) {
 }
 
 function cambiarVistaAdmin(vista) {
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k'];
+    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';
@@ -692,7 +692,18 @@ function descargarPDF() {
     }
 }
 
-// El cambio de vista inicial ahora se maneja desde los templates HTML (administracion.html, proveedores.html, etc)
+document.addEventListener("DOMContentLoaded", function () {
+    if (document.getElementById('vista-pendientes')) { 
+        let subrol = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+        if (subrol === 'Administrador') {
+            cambiarVistaAdmin('documentos-contables');
+        } else {
+            cambiarVistaAdmin('facturas'); 
+        }
+    }
+    if (document.getElementById('vista-reportes-prov')) { cambiarVistaProv('facturas'); }
+    if (document.getElementById('vista-cotizaciones-corp')) { cambiarVistaCorp('cotizaciones'); }
+});
 // --- EFECTO DE SELECCION GLOBAL PARA FILAS DE TABLA ---
 document.addEventListener('click', function (e) {
     let tr = e.target.closest('tbody tr');
