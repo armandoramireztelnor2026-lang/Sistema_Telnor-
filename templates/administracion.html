@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="/static/style.css?v=51050">
+    <link rel="stylesheet" href="/static/style.css?v=51052">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .asignacion-zona {
@@ -130,7 +130,8 @@
     <input type="hidden" id="ciudad-actual" value="{{ usuario.datos_perfil.ciudad }}">
     <div class="dashboard-container">
         <aside class="sidebar">
-            <button title="Ayuda" onclick="document.getElementById('modal-ayuda').style.display='flex'" style="position: absolute; top: 15px; left: 15px; background: #3b82f6; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; font-size: 20px;">?</button>
+            <button title="Ayuda" onclick="document.getElementById('modal-ayuda').style.display='flex'"
+                style="position: absolute; top: 15px; left: 15px; background: #3b82f6; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; font-size: 20px;">?</button>
             <img src="{% if usuario.datos_perfil.foto_ruta %}/static/foto_administracion/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/112641/40916c?text=Admin{% endif %}"
                 alt="Foto Admin" class="profile-pic" onclick="abrirMiPerfil()">
             <div class="sidebar-name">{{ usuario.datos_perfil.nombres }} {{ usuario.datos_perfil.apellido_paterno }}
@@ -154,7 +155,8 @@
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('reportes')">Bandeja de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('facturas')">Cotizaciones y Órdenes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('facturas_finales')">Facturas</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Documentos Contables</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Documentos
+                    Contables</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-prov')">Directorio Talleres</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-corp')">Lista de Corporativos</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-admin')">Lista Automotriz</button>
@@ -166,7 +168,9 @@
 
                 <!-- ========== ADMINISTRADOR ========== -->
                 {% if usuario.datos_perfil.subrol == 'Administrador' %}
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Liberar Doc. Contable</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Liberar Doc.
+                    Contable</button>
+                <button class="btn-sidebar" onclick="verCotizacionesMas10000()">Cotizaciones +10000</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
                 {% endif %}
@@ -209,6 +213,39 @@
                             <tbody id="tbody-unidades">
                                 <tr>
                                     <td colspan="3" style="text-align:center;">Cargando unidades...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISTA COTIZACIONES +10000 (ADMINISTRADOR) -->
+            <div id="vista-cotizaciones-10k" style="display: none;">
+                <div class="top-bar">
+                    <h2>Cotizaciones mayores a $10,000 MXN</h2>
+                </div>
+                <div class="admin-container">
+                    <p style="color: #cbd5e1; margin-bottom: 15px;">
+                        Bandeja de revisión exclusiva para el Administrador. Aquí se aprueban, rechazan o desvían las cotizaciones mayores a $10,000 MXN antes de pasar a Corporativos.
+                    </p>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Fecha</th>
+                                    <th>Proveedor</th>
+                                    <th>Unidad</th>
+                                    <th>Título de Trabajo</th>
+                                    <th>Precio (Total)</th>
+                                    <th>Precios Indiv.</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-cotizaciones-10k">
+                                <tr>
+                                    <td colspan="7" style="text-align:center;">Cargando cotizaciones...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -445,41 +482,73 @@
 
                     <!-- DESCRIPCIÓN DE ROLES (COLAPSABLE) -->
                     <div style="margin-top:30px;">
-                        <button onclick="document.getElementById('roles-info').style.display = document.getElementById('roles-info').style.display === 'none' ? 'block' : 'none';"
+                        <button
+                            onclick="document.getElementById('roles-info').style.display = document.getElementById('roles-info').style.display === 'none' ? 'block' : 'none';"
                             style="background:#1e293b; color:#a3b1c6; border:1px solid #334155; border-radius:8px; padding:10px 20px; cursor:pointer; width:100%; text-align:left; font-weight:bold; font-size:0.95em;">
                             📖 Ver Descripción de Roles y Permisos ▾
                         </button>
                         <div id="roles-info" style="display:none; margin-top:15px;">
-                            <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
-                                <h3 style="color: #0f172a; margin-bottom: 15px; font-size: 1.3em;">🛠️ Jefatura (Control Total)</h3>
-                                <ul style="list-style-type: disc; padding-left: 20px; color: #475569; line-height: 1.6;">
-                                    <li><strong>Panel de Control:</strong> Acceso exclusivo. Gestión de personal (asignación/remoción de ciudades y cambio de roles entre Supervisores y Administradores).</li>
-                                    <li><strong>Directorio y Entidades:</strong> Gestión completa de Unidades (Alta/Baja), Directorio de Talleres, Lista de Corporativos y Lista Automotriz.</li>
-                                    <li><strong>Operación de Tickets (Cotizaciones y Órdenes):</strong> Acceso a la bandeja de reportes, revisión de cotizaciones, aprobación/rechazo y asignación de Números de Orden con PDF.</li>
-                                    <li><strong>Gestión Contable:</strong> Revisión de Facturas Finales (XML/PDF) y carga del Documento 50 para el cierre del servicio.</li>
-                                    <li><strong>Control de Accesos:</strong> Administración de credenciales y contraseñas de todos los usuarios.</li>
-                                    <li><strong>Auditoría:</strong> Acceso total a la Sección de Reportes (Analíticas) y al Archivo General histórico.</li>
+                            <div
+                                style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                                <h3 style="color: #0f172a; margin-bottom: 15px; font-size: 1.3em;">🛠️ Jefatura (Control
+                                    Total)</h3>
+                                <ul
+                                    style="list-style-type: disc; padding-left: 20px; color: #475569; line-height: 1.6;">
+                                    <li><strong>Panel de Control:</strong> Acceso exclusivo. Gestión de personal
+                                        (asignación/remoción de ciudades y cambio de roles entre Supervisores y
+                                        Administradores).</li>
+                                    <li><strong>Directorio y Entidades:</strong> Gestión completa de Unidades
+                                        (Alta/Baja), Directorio de Talleres, Lista de Corporativos y Lista Automotriz.
+                                    </li>
+                                    <li><strong>Operación de Tickets (Cotizaciones y Órdenes):</strong> Acceso a la
+                                        bandeja de reportes, revisión de cotizaciones, aprobación/rechazo y asignación
+                                        de Números de Orden con PDF.</li>
+                                    <li><strong>Gestión Contable:</strong> Revisión de Facturas Finales (XML/PDF) y
+                                        carga del Documento 50 para el cierre del servicio.</li>
+                                    <li><strong>Control de Accesos:</strong> Administración de credenciales y
+                                        contraseñas de todos los usuarios.</li>
+                                    <li><strong>Auditoría:</strong> Acceso total a la Sección de Reportes (Analíticas) y
+                                        al Archivo General histórico.</li>
                                 </ul>
                             </div>
-                            <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
-                                <h3 style="color: #0f172a; margin-bottom: 15px; font-size: 1.3em;">👤 Supervisor (Apoyo Operativo)</h3>
-                                <ul style="list-style-type: disc; padding-left: 20px; color: #475569; line-height: 1.6;">
-                                    <li><strong>Operación de Tickets (Cotizaciones y Órdenes):</strong> Acceso idéntico a Jefatura para revisar reportes, aprobar/denegar cotizaciones y subir Órdenes de Compra.</li>
-                                    <li><strong>Validación Física:</strong> Ingreso del PIN de seguridad del chofer para confirmar la entrega satisfactoria de la unidad.</li>
-                                    <li><strong>Gestión Contable:</strong> Revisión de Facturas Finales y captura del Número de Documento 50.</li>
-                                    <li><strong>Mantenimiento de Catálogos:</strong> Acceso a la gestión de Unidades, Directorio de Talleres, Corporativos y Lista Automotriz.</li>
-                                    <li><strong>Control de Accesos:</strong> Gestión operativa de credenciales de talleres y corporativos.</li>
-                                    <li><strong>Auditoría:</strong> Acceso a la Sección de Reportes y Archivo General.</li>
+                            <div
+                                style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                                <h3 style="color: #0f172a; margin-bottom: 15px; font-size: 1.3em;">👤 Supervisor (Apoyo
+                                    Operativo)</h3>
+                                <ul
+                                    style="list-style-type: disc; padding-left: 20px; color: #475569; line-height: 1.6;">
+                                    <li><strong>Operación de Tickets (Cotizaciones y Órdenes):</strong> Acceso idéntico
+                                        a Jefatura para revisar reportes, aprobar/denegar cotizaciones y subir Órdenes
+                                        de Compra.</li>
+                                    <li><strong>Validación Física:</strong> Ingreso del PIN de seguridad del chofer para
+                                        confirmar la entrega satisfactoria de la unidad.</li>
+                                    <li><strong>Gestión Contable:</strong> Revisión de Facturas Finales y captura del
+                                        Número de Documento 50.</li>
+                                    <li><strong>Mantenimiento de Catálogos:</strong> Acceso a la gestión de Unidades,
+                                        Directorio de Talleres, Corporativos y Lista Automotriz.</li>
+                                    <li><strong>Control de Accesos:</strong> Gestión operativa de credenciales de
+                                        talleres y corporativos.</li>
+                                    <li><strong>Auditoría:</strong> Acceso a la Sección de Reportes y Archivo General.
+                                    </li>
                                     <li><em>* Nota: No tiene acceso al Panel de Control de Personal.</em></li>
                                 </ul>
                             </div>
-                            <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                                <h3 style="color: #0f172a; margin-bottom: 15px; font-size: 1.3em;">🛡️ Administrador (Validación y Auditoría)</h3>
-                                <ul style="list-style-type: disc; padding-left: 20px; color: #475569; line-height: 1.6;">
-                                    <li><strong>Liberación de Doc. Contables:</strong> Interviene en la etapa final. Revisa los tickets ya procesados y otorga la "Liberación del Ticket" para permitir a la Jefatura/Supervisor subir el Doc 50.</li>
-                                    <li><strong>Auditoría Analítica:</strong> Acceso a la Sección de Reportes para exportar Excel y visualizar métricas de gastos y desempeño operativo.</li>
-                                    <li><strong>Auditoría Documental:</strong> Acceso al Archivo General para consultar y auditar Facturas Finales, Órdenes de Compra y Documentos 50.</li>
-                                    <li><em>* Nota: El Administrador no aprueba cotizaciones, no genera órdenes, ni gestiona unidades o credenciales. Su rol es puramente de liberación contable y auditoría.</em></li>
+                            <div
+                                style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                                <h3 style="color: #0f172a; margin-bottom: 15px; font-size: 1.3em;">🛡️ Administrador
+                                    (Validación y Auditoría)</h3>
+                                <ul
+                                    style="list-style-type: disc; padding-left: 20px; color: #475569; line-height: 1.6;">
+                                    <li><strong>Liberación de Doc. Contables:</strong> Interviene en la etapa final.
+                                        Revisa los tickets ya procesados y otorga la "Liberación del Ticket" para
+                                        permitir a la Jefatura/Supervisor subir el Doc 50.</li>
+                                    <li><strong>Auditoría Analítica:</strong> Acceso a la Sección de Reportes para
+                                        exportar Excel y visualizar métricas de gastos y desempeño operativo.</li>
+                                    <li><strong>Auditoría Documental:</strong> Acceso al Archivo General para consultar
+                                        y auditar Facturas Finales, Órdenes de Compra y Documentos 50.</li>
+                                    <li><em>* Nota: El Administrador no aprueba cotizaciones, no genera órdenes, ni
+                                            gestiona unidades o credenciales. Su rol es puramente de liberación contable
+                                            y auditoría.</em></li>
                                 </ul>
                             </div>
                         </div>
@@ -488,43 +557,61 @@
             </div>
             {% endif %}
 
-            
+
             <div id="vista-seccion-reportes" style="display: none;">
                 <div class="top-bar" style="display:flex; justify-content:space-between; align-items:center;">
                     <h2>Sección de Reportes Analíticos</h2>
                     <div style="display:flex; gap:10px;">
-                        <button class="btn-primary" onclick="exportarExcel()" style="background:#10b981; border:none; padding:8px 15px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">📊 Exportar a Excel</button>
-                        <button class="btn-primary" onclick="imprimirSeleccion()" style="background:#3b82f6; border:none; padding:8px 15px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">🖨️ Imprimir Selección</button>
+                        <button class="btn-primary" onclick="exportarExcel()"
+                            style="background:#10b981; border:none; padding:8px 15px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">📊
+                            Exportar a Excel</button>
+                        <button class="btn-primary" onclick="imprimirSeleccion()"
+                            style="background:#3b82f6; border:none; padding:8px 15px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">🖨️
+                            Imprimir Selección</button>
                     </div>
                 </div>
-                
+
                 <div class="admin-container">
-                    
+
                     <!-- KPI DASHBOARD -->
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px;">
-                        <div style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid #334155; text-align:center;">
+                    <div
+                        style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px;">
+                        <div
+                            style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid #334155; text-align:center;">
                             <h4 style="margin:0; color:#94a3b8; font-size:0.9em;">Tickets Pendientes Doc 50</h4>
-                            <div id="kpi-pendientes-doc50" style="font-size:1.5em; font-weight:bold; color:#f59e0b; margin-top:5px;">0</div>
+                            <div id="kpi-pendientes-doc50"
+                                style="font-size:1.5em; font-weight:bold; color:#f59e0b; margin-top:5px;">0</div>
                         </div>
-                        <div style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid #334155; text-align:center;">
+                        <div
+                            style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid #334155; text-align:center;">
                             <h4 style="margin:0; color:#94a3b8; font-size:0.9em;">Tickets Pendientes OC</h4>
-                            <div id="kpi-pendientes-oc" style="font-size:1.5em; font-weight:bold; color:#ef4444; margin-top:5px;">0</div>
+                            <div id="kpi-pendientes-oc"
+                                style="font-size:1.5em; font-weight:bold; color:#ef4444; margin-top:5px;">0</div>
                         </div>
-                        <div style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid #3b82f6; text-align:center; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='#0f172a'" onclick="mostrarTop10()">
+                        <div style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid #3b82f6; text-align:center; cursor:pointer; transition:all 0.3s;"
+                            onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='#0f172a'"
+                            onclick="mostrarTop10()">
                             <h4 style="margin:0; color:#60a5fa; font-size:0.9em;">🏆 Top 10 Tiempos en Taller</h4>
                             <div style="font-size:1em; color:white; margin-top:8px;">Ver Ranking</div>
                         </div>
                     </div>
 
                     <!-- ADVANCED FILTERS -->
-                    <div style="background:#1e293b; padding:15px; border-radius:8px; border:1px solid #334155; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:15px; align-items:flex-end;">
+                    <div
+                        style="background:#1e293b; padding:15px; border-radius:8px; border:1px solid #334155; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:15px; align-items:flex-end;">
                         <div style="flex:1; min-width:150px;">
-                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Buscar Texto</label>
-                            <input type="text" id="filtro-texto-reportes" placeholder="Num. Eco, Ticket, etc..." style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;" onkeyup="aplicarFiltrosReportes()">
+                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Buscar
+                                Texto</label>
+                            <input type="text" id="filtro-texto-reportes" placeholder="Num. Eco, Ticket, etc..."
+                                style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
+                                onkeyup="aplicarFiltrosReportes()">
                         </div>
                         <div style="flex:1; min-width:150px;">
-                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Estado del Ticket</label>
-                            <select id="filtro-estado-reportes" style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;" onchange="aplicarFiltrosReportes()">
+                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Estado del
+                                Ticket</label>
+                            <select id="filtro-estado-reportes"
+                                style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
+                                onchange="aplicarFiltrosReportes()">
                                 <option value="">Todos</option>
                                 <option value="Pendiente de Cotizacion">Pendiente de Cotización</option>
                                 <option value="Esperando Aprobacion">Esperando Aprobación</option>
@@ -536,15 +623,22 @@
                             </select>
                         </div>
                         <div style="flex:1; min-width:150px;">
-                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Proveedor</label>
-                            <input type="text" id="filtro-proveedor-reportes" placeholder="Taller..." style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;" onkeyup="aplicarFiltrosReportes()">
+                            <label
+                                style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Proveedor</label>
+                            <input type="text" id="filtro-proveedor-reportes" placeholder="Taller..."
+                                style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
+                                onkeyup="aplicarFiltrosReportes()">
                         </div>
                         <div style="flex:1; min-width:150px;">
-                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Ciudad Base</label>
-                            <input type="text" id="filtro-ciudad-reportes" placeholder="Ciudad..." style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;" onkeyup="aplicarFiltrosReportes()">
+                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Ciudad
+                                Base</label>
+                            <input type="text" id="filtro-ciudad-reportes" placeholder="Ciudad..."
+                                style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
+                                onkeyup="aplicarFiltrosReportes()">
                         </div>
                         <div>
-                            <button onclick="limpiarFiltrosReportes()" style="background:#475569; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; height:35px;">Limpiar</button>
+                            <button onclick="limpiarFiltrosReportes()"
+                                style="background:#475569; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; height:35px;">Limpiar</button>
                         </div>
                     </div>
 
@@ -552,7 +646,8 @@
                         <table style="min-width: 1500px; white-space: nowrap;" id="tabla-exportable-reportes">
                             <thead>
                                 <tr>
-                                    <th><input type="checkbox" id="chk-all-reportes" onclick="toggleAllReportes(this)"></th>
+                                    <th><input type="checkbox" id="chk-all-reportes" onclick="toggleAllReportes(this)">
+                                    </th>
                                     <th>TICKET</th>
                                     <th>NUM. ECO</th>
                                     <th>FECHA</th>
@@ -570,7 +665,6 @@
                                     <th>TIEMPO EN TALLER</th>
                                     <th>FECHA DE SALIDA</th>
                                     <th>NUM. PEDIDO</th>
-                                    <th>PDF NUM. PEDIDO</th>
                                     <th>NUM. DE ORDEN</th>
                                     <th>NUM. FACTURA</th>
                                     <th>PDF FACTURA</th>
@@ -580,7 +674,8 @@
                             </thead>
                             <tbody id="tabla-seccion-reportes">
                                 <tr>
-                                    <td colspan="24" style="text-align: center; color: #a3b1c6; padding: 20px;">Cargando base de datos...</td>
+                                    <td colspan="24" style="text-align: center; color: #a3b1c6; padding: 20px;">Cargando
+                                        base de datos...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -589,11 +684,16 @@
             </div>
 
             <!-- MODAL TOP 10 -->
-            <div id="modal-top10" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.85); z-index:9999; justify-content:center; align-items:center;">
-                <div class="modal-content" style="background:#1e293b; padding:0; border-radius:12px; width:600px; max-width:90vw; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,0.6); overflow:hidden;">
-                    <div style="background:#3b82f6; padding:20px; display:flex; justify-content:space-between; align-items:center;">
-                        <h3 style="color:white; margin:0; font-size:1.2em;">🏆 Top 10: Unidades con más tiempo en Taller</h3>
-                        <button onclick="document.getElementById('modal-top10').style.display='none'" style="background:none; border:none; color:white; font-size:1.8em; cursor:pointer; padding:0; line-height:1;">&times;</button>
+            <div id="modal-top10" class="modal-overlay"
+                style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.85); z-index:9999; justify-content:center; align-items:center;">
+                <div class="modal-content"
+                    style="background:#1e293b; padding:0; border-radius:12px; width:600px; max-width:90vw; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,0.6); overflow:hidden;">
+                    <div
+                        style="background:#3b82f6; padding:20px; display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="color:white; margin:0; font-size:1.2em;">🏆 Top 10: Unidades con más tiempo en Taller
+                        </h3>
+                        <button onclick="document.getElementById('modal-top10').style.display='none'"
+                            style="background:none; border:none; color:white; font-size:1.8em; cursor:pointer; padding:0; line-height:1;">&times;</button>
                     </div>
                     <div style="padding:20px; overflow-y:auto; max-height:60vh;">
                         <ul id="lista-top10" style="list-style:none; padding:0; margin:0; color:#e2e8f0;">
@@ -879,7 +979,6 @@
                     onclick="confirmarFacturaAdmin()" disabled style="width:100%;">Confirmar Factura</button>
                 <button class="btn-danger-modal" id="btn-cancelar-cotizacion" onclick="cancelarTicketAdmin()">Cancelar
                     Ticket (Cotización Cara)</button>
-                <button class="btn-success-modal" id="btn-notificar-corp" onclick="notificarCorporativos()" style="display:none; width:100%; background: linear-gradient(135deg, #7c3aed, #4f46e5); border: none;">📩 Enviar Notificación a Corporativos</button>
             </div>
         </div>
     </div>
@@ -931,112 +1030,6 @@
     </div>
 
 
-    <div id="modal-editar-admin" class="modal-overlay">
-        <div class="modal-box large">
-            <button class="btn-close-modal" onclick="cerrarModal('modal-editar-admin')">×</button>
-            <h3 class="modal-header">Edición Maestra de Factura</h3>
-            <form id="form-editar-admin" onsubmit="event.preventDefault(); actualizarFacturaAdmin();">
-                <input type="hidden" name="id_factura" id="edit_id_factura">
-                <div class="form-grid">
-                    <!-- CAMPOS COMPARTIDOS O ESPECÍFICOS -->
-                    <div class="input-group" data-seccion="1 2"><label>Fecha</label><input type="date" name="fecha"
-                            id="edit_fecha" required></div>
-                    <div class="input-group" data-seccion="1"><label>Kilometraje</label><input type="text"
-                            name="kilometraje" id="edit_kilometraje" oninput="validarNumeros(this)"></div>
-
-                    <div class="input-group" data-seccion="1 2"><label>No. Económico (Unidad)</label>
-                        <div class="input-unidad-group"><span class="input-unidad-prefix">8090-</span><input type="text"
-                                name="unidad" id="edit_unidad" maxlength="4" required oninput="validarNumeros(this)">
-                        </div>
-                    </div>
-
-                    <div class="input-group" data-seccion="1"><label>Marca</label><input type="text" name="marca"
-                            id="edit_marca"></div>
-                    <div class="input-group" data-seccion="1"><label>Modelo</label><input type="text" name="modelo"
-                            id="edit_modelo"></div>
-
-                    <div class="input-group" data-seccion="1 2"><label>Celular / Teléfono</label><input type="text"
-                            name="telefono" id="edit_telefono" maxlength="15" required oninput="validarNumeros(this)">
-                    </div>
-                    <div class="input-group" data-seccion="1 2"><label id="label_edit_responsable">Nombre del Empleado
-                            (Completo)</label><input type="text" name="responsable" id="edit_responsable" required
-                            oninput="validarLetras(this)"></div>
-
-                    <div class="input-group" data-seccion="1"><label>Email (Opcional)</label><input type="email"
-                            name="email" id="edit_email"></div>
-                    <div class="input-group" data-seccion="1"><label>Ciudad / Municipio Base</label><input type="text"
-                            name="ciudad" id="edit_ciudad"></div>
-                    <div class="input-group" data-seccion="1"><label>COPE / Edificio</label><input type="text"
-                            name="cope" id="edit_cope"></div>
-                    <div class="input-group" data-seccion="1"><label>Departamento</label><input type="text"
-                            name="departamento" id="edit_departamento"></div>
-
-                    <div class="input-group full-width" data-seccion="1 2"><label>Tipo de Mantenimiento</label>
-                        <select name="mantenimiento" id="edit_mantenimiento" class="input-form" required>
-                            <option value="Preventivo">Preventivo</option>
-                            <option value="Correctivo">Correctivo</option>
-                        </select>
-                    </div>
-
-                    <div class="input-group full-width" data-seccion="2"><label id="label_edit_titulo">Título del
-                            Reporte</label><input type="text" name="titulo" id="edit_titulo" required></div>
-                    <div class="input-group full-width" data-seccion="1 2"><label id="label_edit_retro">Descripción
-                            Detallada del Problema (Retro)</label>
-                        <textarea name="retro" id="edit_retro" required
-                            style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
-                    </div>
-
-                    <div class="input-group full-width" data-seccion="1" id="container-firma" style="display:none;">
-                        <label>Firma del Operador (Solo Lectura)</label>
-                        <div
-                            style="background:#0b1c30; border:1px solid #1f395a; border-radius:8px; padding:10px; text-align:center;">
-                            <img id="img-firma-operador" src=""
-                                style="max-height: 100px; max-width:100%; object-fit:contain; filter: invert(1);">
-                        </div>
-                    </div>
-
-                    <!-- GENERAL (NO RESTRINGIDO) -->
-                    <div class="input-group" data-seccion="3"><label>Núm. Orden (Opcional)</label><input type="text"
-                            name="numero_orden" id="edit_numero_orden"></div>
-
-                    <!-- EXCLUSIVOS DE SECCIÓN 2 (TALLER) -->
-                    <div class="input-group" data-seccion="2"><label>Precio (Sin IVA) MXN</label><input type="text"
-                            name="precio" id="edit_precio" required onblur="formatearEnInput(this)"
-                            onfocus="limpiarInput(this)"></div>
-                    <div class="input-group full-width" data-seccion="2"><label>Diagnóstico de Mecánico</label>
-                        <textarea name="diagnostico" id="edit_diagnostico" required
-                            style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
-                    </div>
-                    <div class="input-group full-width" data-seccion="2"><label>Descripción del Trabajo a
-                            Realizar</label>
-                        <textarea name="trabajo_realizar" id="edit_trabajo_realizar" required
-                            style="width: 100%; padding: 12px 15px; background: #0b1c30; color: #ffffff; border: 1px solid #1f395a; border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 80px;"></textarea>
-                    </div>
-
-                    <div class="input-group full-width" data-seccion="2">
-                        <h4 style="color:#0284c7; margin-bottom:5px;">Subir Cotización (Fotos/PDF)</h4>
-                        <div id="edit-preview-cotizacion-guardadas" class="preview-container"
-                            style="margin-bottom:15px;"></div>
-                        <label style="color:#0284c7;">Añadir NUEVAS Cotizaciones</label>
-                        <input type="file" id="edit_fotos_cotizacion_nuevas" name="fotos_cotizacion_nuevas" multiple
-                            accept="image/*,.pdf" style="padding:5px;">
-                        <div id="edit-preview-cotizacion-nuevas" class="preview-container"></div>
-                    </div>
-                    <div class="input-group full-width" data-seccion="2">
-                        <h4 style="color:#40916c; margin-bottom:5px;">Subir Evidencias (Fotos)</h4>
-                        <div id="edit-preview-evidencia-guardadas" class="preview-container"
-                            style="margin-bottom:15px;"></div>
-                        <label style="color:#40916c;">Añadir NUEVAS Evidencias</label>
-                        <input type="file" id="edit_fotos_evidencia_nuevas" name="fotos_evidencia_nuevas" multiple
-                            accept="image/*" style="padding:5px;">
-                        <div id="edit-preview-evidencia-nuevas" class="preview-container"></div>
-                    </div>
-                </div>
-                <div class="modal-actions"><button class="btn-success-modal" type="submit"
-                        style="width: 100%; background:#f59e0b;">Actualizar Factura y Guardar Cambios</button></div>
-            </form>
-        </div>
-    </div>
 
     <!-- CUADRO: MOTIVO DE RECHAZO / ELIMINACIÓN -->
     <div id="modal-motivo-rechazo" class="modal-overlay">
@@ -1150,8 +1143,8 @@
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=1788550327"></script>
     <script src="/static/unidades.js?v=7"></script>
-    <script src="/static/facturas_principal.js?v=74024"></script>
-    <script src="/static/seccion_reportes.js?v=1007"></script>
+    <script src="/static/facturas_principal.js?v=10"></script>
+    <script src="/static/seccion_reportes.js"></script>
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">
         <div class="modal-box large">
@@ -1164,76 +1157,13 @@
             <form id="form-doc-contable">
                 <input type="hidden" id="hidden-doc-contable-id">
                 <div id="doc-contable-container"></div>
-                <div style="display:flex; gap:10px; margin-top:20px; flex-wrap: wrap;">
-                    <button type="button" class="btn-success-modal" style="margin:0; flex:1;"
+                <div style="margin-top:20px;">
+                    <button type="button" class="btn-success-modal" style="width:100%;"
                         onclick="subirDocContable()">Guardar Números y Archivar Ticket</button>
-                    <button type="button" class="btn-info" style="margin:0; flex:1; background-color:#3b82f6; border:none; padding:12px; border-radius:8px; font-weight:bold;"
-                        onclick="enviarRecordatorioCorp()">Enviar Recordatorio</button>
                 </div>
             </form>
         </div>
     </div>
-    <div id="modal-editar-seccion" class="modal-overlay" style="display: none;">
-        <div class="modal-box">
-            <button class="btn-close-modal" onclick="cerrarModal('modal-editar-seccion')">×</button>
-            <h3 class="modal-header" id="header-editar-seccion">Editar Sección</h3>
-            <p style="color: #a3b1c6; margin-bottom: 20px; font-size: 0.9em;">
-                Actualiza el número de identificación y sube un nuevo archivo PDF. El archivo anterior será reemplazado.
-            </p>
-            <form id="form-editar-seccion" onsubmit="event.preventDefault(); guardarEdicionSeccion();">
-                <input type="hidden" id="edit-sec-id-factura">
-                <input type="hidden" id="edit-sec-tipo">
-
-                <label id="label-edit-sec-numero"
-                    style="color: #e0e6ed; font-weight: 600; display: block; margin-bottom: 8px;">Nuevo Número:</label>
-                <input type="text" id="edit-sec-numero" required
-                    style="width: 100%; padding: 12px; background: #0b1c30; border: 1px solid #1f395a; border-radius: 8px; color: white; margin-bottom: 20px;">
-
-                <label class="file-upload" style="margin-bottom: 20px;">
-                    <input type="file" id="edit-sec-pdf" accept="application/pdf" required>
-                    <span class="file-label">📄 Seleccionar Nuevo PDF</span>
-                    <span class="file-sub" id="nombre-edit-sec-pdf">Ningún archivo seleccionado</span>
-                </label>
-                <div id="preview-edit-sec-container" style="display:none; margin-bottom:20px; width:100%;"></div>
-
-
-                <div id="current-file-container" style="margin-bottom: 20px; display: none;">
-                    <strong style="color: #0ea5e9;">Dato/Archivo Actual:</strong>
-                    <div style="margin-top: 5px; margin-bottom: 10px; font-size: 15px;">
-                        <strong>Número Registrado:</strong> <span id="current-file-number"
-                            style="color:#f59e0b; font-weight:bold;"></span>
-                    </div>
-                    <div style="margin-top: 5px;">
-                        <button type="button" id="btn-view-current-file" class="btn-info"
-                            style="font-size:0.9em; padding:8px 12px; background:#40916c; border:none; cursor:pointer;">📄
-                            Ver Archivo Guardado</button>
-                    </div>
-                </div>
-                <div class="modal-actions" style="display: flex; gap: 15px;">
-                    <button type="button" class="btn-danger" style="flex:1;"
-                        onclick="cerrarModal('modal-editar-seccion')">Cancelar</button>
-                    <button type="submit" class="btn-success-modal" style="flex:1;">Guardar Cambios</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        document.getElementById('edit-sec-pdf').addEventListener('change', function (e) {
-            let file = e.target.files[0];
-            let n = file ? file.name : "Ningún archivo seleccionado";
-            document.getElementById('nombre-edit-sec-pdf').textContent = n;
-
-            let previewContainer = document.getElementById('preview-edit-sec-container');
-            if (file && file.type === 'application/pdf') {
-                previewContainer.style.display = 'block';
-                previewContainer.innerHTML = `<iframe src="${URL.createObjectURL(file)}" style="width:100%; height:200px; border:1px solid #1f395a; border-radius:5px;"></iframe>`;
-            } else {
-                previewContainer.style.display = 'none';
-                previewContainer.innerHTML = '';
-            }
-        });
-    </script>
 
     <!-- MODAL UNIDAD -->
     <div id="modal-unidad" class="modal-overlay" style="display:none; z-index:2000;">
@@ -1285,257 +1215,430 @@
             }, 100);
         });
     </script>
-<!-- Modal Comentarios -->
-<div id="modal-comentarios" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:9999; justify-content:center; align-items:center;">
-    <div class="modal-content" style="background:#1e293b; padding:25px; border-radius:12px; width:450px; box-shadow:0 15px 35px rgba(0,0,0,0.5); text-align:center; position:relative;">
-        <h3 style="color:#38bdf8; margin-top:0; margin-bottom:20px;">💬 Comentarios del Ticket</h3>
-        <p style="color:#94a3b8; font-size:0.9em; margin-bottom:15px;">Escribe un comentario o nota para este reporte.</p>
-        
-        <input type="hidden" id="comentario-ticket-id">
-        <input type="hidden" id="comentario-is-unassigned">
-        
-        <textarea id="comentario-texto" rows="5" style="width:100%; box-sizing:border-box; background:#0f172a; color:#e2e8f0; border:1px solid #334155; border-radius:8px; padding:10px; font-family:inherit; resize:vertical; margin-bottom:20px;" placeholder="Escribe aquí..."></textarea>
-        <div id="comentario-autor" style="text-align:right; font-size:0.8em; color:#94a3b8; margin-top:-10px; margin-bottom:15px; min-height:16px;"></div>
-        
-        <div style="display:flex; justify-content:space-between; gap:10px;">
-            <button class="btn-danger" onclick="eliminarComentario()" style="flex:1; background:#ef4444; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;">🗑️ Eliminar</button>
-            <button class="btn-secondary" onclick="document.getElementById('modal-comentarios').style.display='none'" style="flex:1; background:#475569; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;">Cancelar</button>
-            <button class="btn-success" onclick="guardarComentario()" style="flex:2; background:#10b981; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;">💾 Guardar</button>
-        </div>
-    </div>
-</div>
+    <!-- Modal Comentarios -->
+    <div id="modal-comentarios" class="modal-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:9999; justify-content:center; align-items:center;">
+        <div class="modal-content"
+            style="background:#1e293b; padding:25px; border-radius:12px; width:450px; box-shadow:0 15px 35px rgba(0,0,0,0.5); text-align:center; position:relative;">
+            <h3 style="color:#38bdf8; margin-top:0; margin-bottom:20px;">💬 Comentarios del Ticket</h3>
+            <p style="color:#94a3b8; font-size:0.9em; margin-bottom:15px;">Escribe un comentario o nota para este
+                reporte.</p>
 
-<!-- MODAL DE AYUDA (MANUAL) -->
-<div id="modal-ayuda" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.85); z-index:9999; justify-content:center; align-items:center;">
-    <div class="modal-content" style="background:#1e293b; padding:0; border-radius:12px; width:950px; max-width:95vw; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,0.6); overflow:hidden;">
-        <!-- Header -->
-        <div style="background:#3b82f6; padding:20px; display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="color:white; margin:0; font-size:1.4em;">📖 Manual del Sistema - Administración Automotriz</h3>
-            <button onclick="document.getElementById('modal-ayuda').style.display='none'" style="background:none; border:none; color:white; font-size:1.8em; cursor:pointer; padding:0; line-height:1;">&times;</button>
-        </div>
-        <!-- Body -->
-        <div style="padding:25px; overflow-y:auto; color:#e2e8f0; line-height:1.6;">
-            
-            {% if usuario.datos_perfil.subrol == 'Jefatura' %}
-            <h4 style="color:#f59e0b; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:0;">💡 ¿Qué puedo hacer como Jefatura?</h4>
-            <p>Tienes el <strong>Control Total y Administrativo</strong> del sistema. Tu responsabilidad principal recae en la correcta gestión y configuración del entorno de trabajo para el resto del equipo. Tienes la autoridad exclusiva para gestionar al personal, administrar sus accesos, modificar el padrón de vehículos, y supervisar mediante reportes estadísticos todo el desempeño financiero y operativo de las reparaciones a nivel regional.</p>
-            {% elif usuario.datos_perfil.subrol == 'Supervisor' %}
-            <h4 style="color:#10b981; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:0;">💡 ¿Qué puedo hacer como Supervisor?</h4>
-            <p>Eres el pilar del <strong>Apoyo Operativo</strong> de la empresa. Tu día a día consiste en monitorear los reportes de falla que genera el personal, canalizarlos hacia los talleres mecánicos correspondientes, y llevar todo el seguimiento de la reparación. Tienes la facultad de revisar los presupuestos enviados por los talleres, exigir correcciones, y emitir la Orden de Compra oficial para que el vehículo sea reparado. Además, eres responsable de validar la correcta entrega de las unidades mediante la solicitud del PIN de seguridad.</p>
-            {% else %}
-            <h4 style="color:#38bdf8; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:0;">💡 ¿Qué puedo hacer como Administrador?</h4>
-            <p>Tu rol se centra estrictamente en la <strong>Validación Contable y Auditoría</strong>. Eres el puente entre la operación y las finanzas de la empresa. No tienes interacción con los mecánicos ni emites órdenes de compra. Tu función vital ocurre al final de cada servicio: auditar los tickets terminados y otorgar una "Liberación del Ticket", la cual actúa como un candado de seguridad que, al abrirse, permite a los Supervisores y a la Jefatura proceder con el cierre fiscal final (Doc 50).</p>
-            {% endif %}
+            <input type="hidden" id="comentario-ticket-id">
+            <input type="hidden" id="comentario-is-unassigned">
 
-            <h4 style="color:#a3b1c6; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:30px;">🔘 Explicación Detallada de tu Menú Lateral</h4>
-            <div style="display:grid; grid-template-columns: 1fr; gap:15px; margin-top:15px;">
-                
-                <!-- BOTONES EXCLUSIVOS JEFATURA -->
-                {% if usuario.datos_perfil.subrol == 'Jefatura' %}
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Nuevos Registros:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Esta es tu sala de espera de aprobaciones. Cuando un empleado nuevo (ya sea de corporativo o un taller) intenta registrarse en el sistema, su cuenta se retiene aquí. Tú debes revisar sus datos y decidir si se le autoriza el acceso a la plataforma o si se rechaza su solicitud por inconsistencias.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Accesos (Credenciales):</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Un módulo vital de ciberseguridad. Desde aquí puedes buscar a cualquier usuario registrado en la empresa y cambiar su contraseña de manera inmediata. Es esencial para actuar en caso de que alguien pierda su acceso o cuando se requiera bloquear temporalmente a un usuario sospechoso.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Panel de Control:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">La herramienta administrativa más poderosa a tu disposición. Aquí puedes ver a toda la plantilla de la empresa. Te permite transferir a tus Supervisores a trabajar a otras ciudades del estado, removerles jurisdicciones, e incluso cambiar sus rangos promoviendo a un Administrador a Supervisor y viceversa según las necesidades de la empresa.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Sección de Reportes:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Tu centro de inteligencia analítica. Permite filtrar y extraer grandes volúmenes de datos sobre reparaciones pasadas. Puedes aplicar filtros por fechas, ciudades y estados de ticket para descargar reportes consolidados en Excel que ayudarán a la dirección a tomar decisiones financieras informadas.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Archivo General:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Es la bóveda inmutable de la empresa. Contiene absolutamente todos los tickets que ya fueron pagados y cerrados. Al ingresar aquí, puedes descargar los PDF, XML y fotografías de cualquier trabajo realizado en el pasado para enfrentar auditorías fiscales internas y externas.</p>
-    </div>
-</div>
-                {% endif %}
+            <textarea id="comentario-texto" rows="5"
+                style="width:100%; box-sizing:border-box; background:#0f172a; color:#e2e8f0; border:1px solid #334155; border-radius:8px; padding:10px; font-family:inherit; resize:vertical; margin-bottom:20px;"
+                placeholder="Escribe aquí..."></textarea>
+            <div id="comentario-autor"
+                style="text-align:right; font-size:0.8em; color:#94a3b8; margin-top:-10px; margin-bottom:15px; min-height:16px;">
+            </div>
 
-                <!-- BOTONES EXCLUSIVOS SUPERVISOR -->
-                {% if usuario.datos_perfil.subrol == 'Supervisor' %}
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Bandeja de Reportes:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Aquí inicia el flujo operativo. En esta bandeja caen en tiempo real todas las fallas reportadas por el personal corporativo que maneja los vehículos. Tu labor aquí es leer el reporte, entender el problema de la unidad y asignar el ticket al taller mecánico más adecuado de tu ciudad para que inicie la revisión técnica.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Cotizaciones y Órdenes:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">El módulo de toma de decisiones financieras. Una vez que el taller revisa la unidad, te enviará aquí su presupuesto. Tú deberás analizar si los costos de refacciones y mano de obra son justos. Si estás de acuerdo, lo aprobarás adjuntando un documento PDF de "Orden de Compra" oficial, lo cual es la luz verde para que el taller comience a desarmar y reparar la unidad.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Facturas:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">La bandeja de cierre y cobro. Cuando el taller finaliza la reparación mecánica, el ticket se traslada aquí. En esta sección podrás revisar los archivos de facturación electrónica emitidos por el taller (PDF y XML) y serás el encargado de solicitarle el PIN numérico de seguridad al empleado de la empresa para confirmar formalmente que recibió su vehículo reparado.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Documentos Contables:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Este es el último paso del proceso antes del archivo histórico. Una vez que el perfil Administrador audita y "libera" tu ticket terminado, esta bandeja se habilita para ti. Aquí debes capturar manualmente el folio de cierre contable interno para dar por concluido el ciclo de pago.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Directorio Talleres:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Agenda digital de proveedores externos. Te muestra la lista completa de talleres registrados, sus encargados, ubicaciones exactas y correos electrónicos para mantener una comunicación fluida y constante con ellos.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Lista de Corporativos:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Directorio interno de los empleados y ejecutivos de la empresa que manejan los vehículos. Útil para ubicar a qué departamento pertenece cada conductor y poder contactarlos en caso de dudas sobre las fallas que reportan.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Lista Automotriz:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Listado de tus propios compañeros de la división administrativa. Muestra a los Supervisores, Jefaturas y Administradores activos, así como las jurisdicciones y ciudades que cada uno tiene asignadas.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Unidades:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Módulo de control del parque vehicular. Te permite registrar nuevos automóviles recién comprados por la empresa, dar de baja aquellos que hayan sido siniestrados o vendidos, y actualizar los datos vitales como Marca, Modelo y Año de las unidades actuales.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Accesos (Credenciales):</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Herramienta de soporte técnico de primer nivel. Te permite intervenir y cambiar contraseñas de manera instantánea si un empleado corporativo o un taller proveedor olvida sus credenciales y requiere entrar al sistema urgentemente.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Sección de Reportes:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Módulo avanzado que te permite generar tablas consolidando los datos operativos. Muy útil para preparar juntas trimestrales, ya que puedes descargar hojas de Excel con las métricas precisas sobre cantidad de fallas, tiempos de respuesta y totales gastados.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Archivo General:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Es tu carpeta de consultas históricas. Todos los mantenimientos que ya concluyeron y se pagaron se resguardan aquí de forma perpetua. Si la empresa te solicita auditar un servicio hecho hace meses, puedes usar el buscador para encontrarlo y extraer todos sus documentos PDF y facturas asociadas.</p>
-    </div>
-</div>
-                {% endif %}
-
-                <!-- BOTONES EXCLUSIVOS ADMINISTRADOR -->
-                {% if usuario.datos_perfil.subrol == 'Administrador' %}
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Liberar Doc. Contable:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Esta es tu bandeja crítica de operaciones diarias. Aquí se forman todos los reportes de mantenimiento que los Supervisores ya dieron por terminados y validados físicamente. Tu misión es inspeccionar superficialmente el ticket y aplicar el botón de "Desbloqueo". Esta acción retira el candado de seguridad y habilita el ticket para que el personal operativo pueda ingresar el folio contable definitivo en su propio sistema.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Sección de Reportes:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Herramienta estadística diseñada para tus labores de auditoría. Te permite procesar fechas y extraer en un documento de Microsoft Excel una vista limpia y ordenada con la sumatoria de todos los gastos que ha desembolsado la empresa por concepto de mantenimiento vehicular.</p>
-    </div>
-</div>
-                <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
-    <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
-        <strong style="color:white;">Archivo General:</strong>
-        <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
-    </div>
-    <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
-        <p style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">Tu gran bóveda de auditoría permanente. Todos los registros y servicios que ya están pagados y cerrados quedan cristalizados aquí. Esta sección te permite buscar cualquier reparación antigua y descargar en un par de clics la factura XML y las órdenes de compra para responder a requerimientos fiscales del área de contabilidad de la empresa.</p>
-    </div>
-</div>
-                {% endif %}
-
+            <div style="display:flex; justify-content:space-between; gap:10px;">
+                <button class="btn-danger" onclick="eliminarComentario()"
+                    style="flex:1; background:#ef4444; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;">🗑️
+                    Eliminar</button>
+                <button class="btn-secondary"
+                    onclick="document.getElementById('modal-comentarios').style.display='none'"
+                    style="flex:1; background:#475569; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;">Cancelar</button>
+                <button class="btn-success" onclick="guardarComentario()"
+                    style="flex:2; background:#10b981; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;">💾
+                    Guardar</button>
             </div>
         </div>
-        <!-- Footer -->
-        <div style="background:#0f172a; padding:20px; text-align:right; border-top:1px solid #334155;">
-            <button onclick="document.getElementById('modal-ayuda').style.display='none'" style="background:#3b82f6; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">Entendido, cerrar manual</button>
+    </div>
+
+    <!-- MODAL RECHAZAR +10K -->
+    <div id="modal-rechazar-10k" class="modal-overlay">
+        <div class="modal-box">
+            <button class="btn-close-modal" onclick="document.getElementById('modal-rechazar-10k').style.display='none'">✖</button>
+            <h3 class="modal-header">Rechazar Cotización (Sugerir Precios)</h3>
+            <p>Se enviará un correo al Supervisor indicando que la cotización fue rechazada y solicitando nuevos precios.</p>
+            <input type="hidden" id="hidden-rechazar-10k-id">
+            <textarea id="mensaje-rechazo-10k" rows="4" style="width:100%; border-radius:5px; padding:10px; margin-top:10px;" placeholder="Escribe tu mensaje y los precios sugeridos..."></textarea>
+            <button class="btn-danger" style="margin-top:15px; width:100%;" onclick="confirmarAccion10k('rechazar')">Rechazar Cotización</button>
         </div>
     </div>
-</div>
 
-<script src="/static/panel_control.js?v=1"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    setTimeout(() => {
-        {% if usuario.datos_perfil.subrol == 'Jefatura' %}
-            if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('panel-control');
-        {% elif usuario.datos_perfil.subrol == 'Supervisor' %}
-            if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('reportes');
-        {% elif usuario.datos_perfil.subrol == 'Administrador' %}
-            if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('documentos-contables');
-        {% endif %}
-    }, 100);
-});
-</script>
+    <!-- MODAL ENVIAR A COTIZACIONES CARAS +10K -->
+    <div id="modal-caras-10k" class="modal-overlay">
+        <div class="modal-box">
+            <button class="btn-close-modal" onclick="document.getElementById('modal-caras-10k').style.display='none'">✖</button>
+            <h3 class="modal-header">Mandar a Cotizaciones Caras</h3>
+            <p>Se enviará esta cotización al proceso de "Cotizaciones Caras" y se notificará al Supervisor por correo.</p>
+            <input type="hidden" id="hidden-caras-10k-id">
+            <textarea id="mensaje-caras-10k" rows="4" style="width:100%; border-radius:5px; padding:10px; margin-top:10px;" placeholder="Mensaje opcional para el supervisor..."></textarea>
+            <button class="btn-warning" style="margin-top:15px; width:100%; background-color:#8b5cf6;" onclick="confirmarAccion10k('caras')">Mandar a Cotizaciones Caras</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE AYUDA (MANUAL) -->
+    <div id="modal-ayuda" class="modal-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.85); z-index:9999; justify-content:center; align-items:center;">
+        <div class="modal-content"
+            style="background:#1e293b; padding:0; border-radius:12px; width:950px; max-width:95vw; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 20px 40px rgba(0,0,0,0.6); overflow:hidden;">
+            <!-- Header -->
+            <div
+                style="background:#3b82f6; padding:20px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color:white; margin:0; font-size:1.4em;">📖 Manual del Sistema - Administración Automotriz
+                </h3>
+                <button onclick="document.getElementById('modal-ayuda').style.display='none'"
+                    style="background:none; border:none; color:white; font-size:1.8em; cursor:pointer; padding:0; line-height:1;">&times;</button>
+            </div>
+            <!-- Body -->
+            <div style="padding:25px; overflow-y:auto; color:#e2e8f0; line-height:1.6;">
+
+                {% if usuario.datos_perfil.subrol == 'Jefatura' %}
+                <h4 style="color:#f59e0b; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:0;">💡 ¿Qué
+                    puedo hacer como Jefatura?</h4>
+                <p>Tienes el <strong>Control Total y Administrativo</strong> del sistema. Tu responsabilidad principal
+                    recae en la correcta gestión y configuración del entorno de trabajo para el resto del equipo. Tienes
+                    la autoridad exclusiva para gestionar al personal, administrar sus accesos, modificar el padrón de
+                    vehículos, y supervisar mediante reportes estadísticos todo el desempeño financiero y operativo de
+                    las reparaciones a nivel regional.</p>
+                {% elif usuario.datos_perfil.subrol == 'Supervisor' %}
+                <h4 style="color:#10b981; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:0;">💡 ¿Qué
+                    puedo hacer como Supervisor?</h4>
+                <p>Eres el pilar del <strong>Apoyo Operativo</strong> de la empresa. Tu día a día consiste en monitorear
+                    los reportes de falla que genera el personal, canalizarlos hacia los talleres mecánicos
+                    correspondientes, y llevar todo el seguimiento de la reparación. Tienes la facultad de revisar los
+                    presupuestos enviados por los talleres, exigir correcciones, y emitir la Orden de Compra oficial
+                    para que el vehículo sea reparado. Además, eres responsable de validar la correcta entrega de las
+                    unidades mediante la solicitud del PIN de seguridad.</p>
+                {% else %}
+                <h4 style="color:#38bdf8; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:0;">💡 ¿Qué
+                    puedo hacer como Administrador?</h4>
+                <p>Tu rol se centra estrictamente en la <strong>Validación Contable y Auditoría</strong>. Eres el puente
+                    entre la operación y las finanzas de la empresa. No tienes interacción con los mecánicos ni emites
+                    órdenes de compra. Tu función vital ocurre al final de cada servicio: auditar los tickets terminados
+                    y otorgar una "Liberación del Ticket", la cual actúa como un candado de seguridad que, al abrirse,
+                    permite a los Supervisores y a la Jefatura proceder con el cierre fiscal final (Doc 50).</p>
+                {% endif %}
+
+                <h4 style="color:#a3b1c6; border-bottom:1px solid #334155; padding-bottom:10px; margin-top:30px;">🔘
+                    Explicación Detallada de tu Menú Lateral</h4>
+                <div style="display:grid; grid-template-columns: 1fr; gap:15px; margin-top:15px;">
+
+                    <!-- BOTONES EXCLUSIVOS JEFATURA -->
+                    {% if usuario.datos_perfil.subrol == 'Jefatura' %}
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Nuevos Registros:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Esta es tu sala de espera de aprobaciones. Cuando un empleado nuevo (ya sea de
+                                corporativo o un taller) intenta registrarse en el sistema, su cuenta se retiene aquí.
+                                Tú debes revisar sus datos y decidir si se le autoriza el acceso a la plataforma o si se
+                                rechaza su solicitud por inconsistencias.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Accesos (Credenciales):</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Un módulo vital de ciberseguridad. Desde aquí puedes buscar a cualquier usuario
+                                registrado en la empresa y cambiar su contraseña de manera inmediata. Es esencial para
+                                actuar en caso de que alguien pierda su acceso o cuando se requiera bloquear
+                                temporalmente a un usuario sospechoso.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Panel de Control:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                La herramienta administrativa más poderosa a tu disposición. Aquí puedes ver a toda la
+                                plantilla de la empresa. Te permite transferir a tus Supervisores a trabajar a otras
+                                ciudades del estado, removerles jurisdicciones, e incluso cambiar sus rangos promoviendo
+                                a un Administrador a Supervisor y viceversa según las necesidades de la empresa.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Sección de Reportes:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Tu centro de inteligencia analítica. Permite filtrar y extraer grandes volúmenes de
+                                datos sobre reparaciones pasadas. Puedes aplicar filtros por fechas, ciudades y estados
+                                de ticket para descargar reportes consolidados en Excel que ayudarán a la dirección a
+                                tomar decisiones financieras informadas.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Archivo General:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Es la bóveda inmutable de la empresa. Contiene absolutamente todos los tickets que ya
+                                fueron pagados y cerrados. Al ingresar aquí, puedes descargar los PDF, XML y fotografías
+                                de cualquier trabajo realizado en el pasado para enfrentar auditorías fiscales internas
+                                y externas.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- BOTONES EXCLUSIVOS SUPERVISOR -->
+                    {% if usuario.datos_perfil.subrol == 'Supervisor' %}
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Bandeja de Reportes:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Aquí inicia el flujo operativo. En esta bandeja caen en tiempo real todas las fallas
+                                reportadas por el personal corporativo que maneja los vehículos. Tu labor aquí es leer
+                                el reporte, entender el problema de la unidad y asignar el ticket al taller mecánico más
+                                adecuado de tu ciudad para que inicie la revisión técnica.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Cotizaciones y Órdenes:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                El módulo de toma de decisiones financieras. Una vez que el taller revisa la unidad, te
+                                enviará aquí su presupuesto. Tú deberás analizar si los costos de refacciones y mano de
+                                obra son justos. Si estás de acuerdo, lo aprobarás adjuntando un documento PDF de "Orden
+                                de Compra" oficial, lo cual es la luz verde para que el taller comience a desarmar y
+                                reparar la unidad.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Facturas:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                La bandeja de cierre y cobro. Cuando el taller finaliza la reparación mecánica, el
+                                ticket se traslada aquí. En esta sección podrás revisar los archivos de facturación
+                                electrónica emitidos por el taller (PDF y XML) y serás el encargado de solicitarle el
+                                PIN numérico de seguridad al empleado de la empresa para confirmar formalmente que
+                                recibió su vehículo reparado.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Documentos Contables:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Este es el último paso del proceso antes del archivo histórico. Una vez que el perfil
+                                Administrador audita y "libera" tu ticket terminado, esta bandeja se habilita para ti.
+                                Aquí debes capturar manualmente el folio de cierre contable interno para dar por
+                                concluido el ciclo de pago.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Directorio Talleres:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Agenda digital de proveedores externos. Te muestra la lista completa de talleres
+                                registrados, sus encargados, ubicaciones exactas y correos electrónicos para mantener
+                                una comunicación fluida y constante con ellos.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Lista de Corporativos:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Directorio interno de los empleados y ejecutivos de la empresa que manejan los
+                                vehículos. Útil para ubicar a qué departamento pertenece cada conductor y poder
+                                contactarlos en caso de dudas sobre las fallas que reportan.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Lista Automotriz:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Listado de tus propios compañeros de la división administrativa. Muestra a los
+                                Supervisores, Jefaturas y Administradores activos, así como las jurisdicciones y
+                                ciudades que cada uno tiene asignadas.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Unidades:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Módulo de control del parque vehicular. Te permite registrar nuevos automóviles recién
+                                comprados por la empresa, dar de baja aquellos que hayan sido siniestrados o vendidos, y
+                                actualizar los datos vitales como Marca, Modelo y Año de las unidades actuales.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Accesos (Credenciales):</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Herramienta de soporte técnico de primer nivel. Te permite intervenir y cambiar
+                                contraseñas de manera instantánea si un empleado corporativo o un taller proveedor
+                                olvida sus credenciales y requiere entrar al sistema urgentemente.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Sección de Reportes:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Módulo avanzado que te permite generar tablas consolidando los datos operativos. Muy
+                                útil para preparar juntas trimestrales, ya que puedes descargar hojas de Excel con las
+                                métricas precisas sobre cantidad de fallas, tiempos de respuesta y totales gastados.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Archivo General:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Es tu carpeta de consultas históricas. Todos los mantenimientos que ya concluyeron y se
+                                pagaron se resguardan aquí de forma perpetua. Si la empresa te solicita auditar un
+                                servicio hecho hace meses, puedes usar el buscador para encontrarlo y extraer todos sus
+                                documentos PDF y facturas asociadas.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- BOTONES EXCLUSIVOS ADMINISTRADOR -->
+                    {% if usuario.datos_perfil.subrol == 'Administrador' %}
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Liberar Doc. Contable:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Esta es tu bandeja crítica de operaciones diarias. Aquí se forman todos los reportes de
+                                mantenimiento que los Supervisores ya dieron por terminados y validados físicamente. Tu
+                                misión es inspeccionar superficialmente el ticket y aplicar el botón de "Desbloqueo".
+                                Esta acción retira el candado de seguridad y habilita el ticket para que el personal
+                                operativo pueda ingresar el folio contable definitivo en su propio sistema.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Sección de Reportes:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Herramienta estadística diseñada para tus labores de auditoría. Te permite procesar
+                                fechas y extraer en un documento de Microsoft Excel una vista limpia y ordenada con la
+                                sumatoria de todos los gastos que ha desembolsado la empresa por concepto de
+                                mantenimiento vehicular.</p>
+                        </div>
+                    </div>
+                    <div style="background:#0f172a; border-radius:8px; border:1px solid #334155; overflow:hidden;">
+                        <div style="padding:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;"
+                            onclick="var p = this.nextElementSibling; if(p.style.maxHeight !== '0px' && p.style.maxHeight !== ''){p.style.maxHeight='0px'; this.querySelector('span').innerHTML='▼';}else{p.style.maxHeight=p.scrollHeight+'px'; this.querySelector('span').innerHTML='▲';}">
+                            <strong style="color:white;">Archivo General:</strong>
+                            <span style="color:#a3b1c6; font-size:0.8em;">▼</span>
+                        </div>
+                        <div style="max-height:0px; overflow:hidden; transition:max-height 0.3s ease-out;">
+                            <p
+                                style="margin:0; padding:15px; font-size:0.95em; border-top:1px solid #334155; color:#e2e8f0; background:#1e293b;">
+                                Tu gran bóveda de auditoría permanente. Todos los registros y servicios que ya están
+                                pagados y cerrados quedan cristalizados aquí. Esta sección te permite buscar cualquier
+                                reparación antigua y descargar en un par de clics la factura XML y las órdenes de compra
+                                para responder a requerimientos fiscales del área de contabilidad de la empresa.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+            <!-- Footer -->
+            <div style="background:#0f172a; padding:20px; text-align:right; border-top:1px solid #334155;">
+                <button onclick="document.getElementById('modal-ayuda').style.display='none'"
+                    style="background:#3b82f6; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">Entendido,
+                    cerrar manual</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/panel_control.js?v=1"></script>
+    <script src="/static/cotizaciones_10k.js?v=9"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(() => {
+                {% if usuario.datos_perfil.subrol == 'Jefatura' %}
+                if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('panel-control');
+                {% elif usuario.datos_perfil.subrol == 'Supervisor' %}
+                if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('reportes');
+                {% elif usuario.datos_perfil.subrol == 'Administrador' %}
+                if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('documentos-contables');
+                {% endif %}
+            }, 100);
+        });
+    </script>
 </body>
 
 </html>

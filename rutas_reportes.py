@@ -97,8 +97,9 @@ def lista_reportes():
         subrol = session['usuario']['datos_perfil'].get('subrol', '')
         if subrol == 'Supervisor':
             mi_ciudad = session['usuario']['datos_perfil'].get('ciudad', '')
-            # Solo dejamos los reportes que coincidan con la ciudad del Supervisor
-            data['reportes'] = [r for r in data.get('reportes', []) if r.get('ciudad') == mi_ciudad]
+            mis_ciudades = [mi_ciudad] + session['usuario']['datos_perfil'].get('ciudades_asignadas', [])
+            # Solo dejamos los reportes que coincidan con alguna de las ciudades del Supervisor
+            data['reportes'] = [r for r in data.get('reportes', []) if r.get('ciudad') in mis_ciudades]
             
     return jsonify(data)
 
@@ -165,6 +166,8 @@ def eliminar_reporte():
             enviar_correo_ticket_rechazado(correo_chofer, reporte_a_eliminar.get('empleado', 'Operador'), reporte_a_eliminar.get('id'), reporte_a_eliminar.get('unidad'), motivo)
         
         return jsonify({"status": "success", "message": "Reporte eliminado y usuario notificado."})
+        
+    return jsonify({"status": "error", "message": "Registro no encontrado."})
 
 
 @reportes_bp.route("/api/unidades", methods=["GET"])

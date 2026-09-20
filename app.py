@@ -197,9 +197,7 @@ def renovar_password():
 
 @app.route('/api/eliminar_usuario', methods=['POST'])
 def eliminar_usuario():
-    if session.get('usuario', {}).get('datos_perfil', {}).get('subrol') == 'Supervisor':
-        return jsonify({"status": "error", "message": "Acceso denegado. Solo Jefatura puede eliminar cuentas."})
-        
+
     usuario_id = request.json.get('usuario')
     usuarios_data = leer_json('usuarios.json')
     nuevos_usuarios = []
@@ -222,9 +220,7 @@ def eliminar_usuario():
 
 @app.route('/api/editar_usuario', methods=['POST'])
 def editar_usuario():
-    if session.get('usuario', {}).get('datos_perfil', {}).get('subrol') == 'Supervisor':
-        return jsonify({"status": "error", "message": "Acceso denegado. Solo Jefatura puede editar cuentas de usuario."})
-        
+
     usuario_id = request.form.get('usuario_id')
     usuarios_data = leer_json('usuarios.json')
     for u in usuarios_data.get('usuarios', []):

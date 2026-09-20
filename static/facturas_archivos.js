@@ -27,7 +27,9 @@ function renderizarMiniaturas(inputId, previewContainerId, dataTransferObj) {
     const input = document.getElementById(inputId); const container = document.getElementById(previewContainerId); input.files = dataTransferObj.files; container.innerHTML = ''; 
     Array.from(dataTransferObj.files).forEach((file, index) => {
         const div = document.createElement('div'); div.className = 'preview-item';
-        if (file.type.startsWith('image/')) { div.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="preview" onclick="abrirLightbox('${URL.createObjectURL(file)}')" style="cursor:zoom-in;"><button type="button" class="preview-remove" onclick="removerArchivo('${inputId}', '${previewContainerId}', ${index})">×</button>`; } 
+        const isVideo = (file.type && file.type.startsWith('video/')) || (file.name && file.name.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i));
+        if (file.type && file.type.startsWith('image/')) { div.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="preview" onclick="abrirLightbox('${URL.createObjectURL(file)}')" style="cursor:zoom-in;"><button type="button" class="preview-remove" onclick="removerArchivo('${inputId}', '${previewContainerId}', ${index})">×</button>`; } 
+        else if (isVideo) { div.innerHTML = `<video src="${URL.createObjectURL(file)}#t=0.001" preload="metadata" onclick="abrirVisorVideo('${URL.createObjectURL(file)}')" style="cursor:pointer; width:100%; height:100%; object-fit:cover;"></video><button type="button" class="preview-remove" onclick="removerArchivo('${inputId}', '${previewContainerId}', ${index})">×</button>`; }
         else { div.innerHTML = `<div class="file-icon" title="${file.name}">📄</div><button type="button" class="preview-remove" onclick="removerArchivo('${inputId}', '${previewContainerId}', ${index})">×</button>`; }
         container.appendChild(div);
     });
@@ -43,7 +45,13 @@ function renderizarImagenesGuardadas() {
     const contCot = document.getElementById('edit-preview-cotizacion-guardadas'); const contEvi = document.getElementById('edit-preview-evidencia-guardadas');
     contCot.innerHTML = ''; contEvi.innerHTML = '';
     imagenesGuardadasCotizacion.forEach((foto, i) => { let div = document.createElement('div'); div.className = 'preview-item'; if(foto.endsWith('.pdf')) div.innerHTML = `<div class="file-icon">📄</div><button type="button" class="preview-remove" onclick="quitarImagenGuardada('cotizacion', ${i})">×</button>`; else div.innerHTML = `<img src="/static/facturas_archivos/${foto}"><button type="button" class="preview-remove" onclick="quitarImagenGuardada('cotizacion', ${i})">×</button>`; contCot.appendChild(div); });
-    imagenesGuardadasEvidencia.forEach((foto, i) => { let div = document.createElement('div'); div.className = 'preview-item'; div.innerHTML = `<img src="/static/facturas_archivos/${foto}"><button type="button" class="preview-remove" onclick="quitarImagenGuardada('evidencia', ${i})">×</button>`; contEvi.appendChild(div); });
+    imagenesGuardadasEvidencia.forEach((foto, i) => { 
+        let div = document.createElement('div'); div.className = 'preview-item'; 
+        const esVideo = foto.match(/\.(mp4|webm|ogg|mov)$/i);
+        if(esVideo) div.innerHTML = `<video src="/static/facturas_archivos/${foto}#t=0.001" preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video><button type="button" class="preview-remove" onclick="quitarImagenGuardada('evidencia', ${i})">×</button>`; 
+        else div.innerHTML = `<img src="/static/facturas_archivos/${foto}"><button type="button" class="preview-remove" onclick="quitarImagenGuardada('evidencia', ${i})">×</button>`; 
+        contEvi.appendChild(div); 
+    });
 }
 
 function quitarImagenGuardada(tipo, index) { if(tipo === 'cotizacion') imagenesGuardadasCotizacion.splice(index, 1); else imagenesGuardadasEvidencia.splice(index, 1); renderizarImagenesGuardadas(); }
@@ -52,8 +60,14 @@ function renderizarMiniaturasEdicion(inputId, previewContainerId, dataTransferOb
     const input = document.getElementById(inputId); const container = document.getElementById(previewContainerId); input.files = dataTransferObj.files; container.innerHTML = ''; 
     Array.from(dataTransferObj.files).forEach((file, index) => {
         const div = document.createElement('div'); div.className = 'preview-item';
-        if (file.type.startsWith('image/')) div.innerHTML = `<img src="${URL.createObjectURL(file)}"><button type="button" class="preview-remove" onclick="removerArchivoEdicion('${inputId}', '${previewContainerId}', ${index})">×</button>`;
-        else div.innerHTML = `<div class="file-icon">📄</div><button type="button" class="preview-remove" onclick="removerArchivoEdicion('${inputId}', '${previewContainerId}', ${index})">×</button>`;
+        const isVideo = (file.type && file.type.startsWith('video/')) || (file.name && file.name.match(/\.(mp4|webm|ogg|mov|avi|mkv)$/i));
+        if (file.type && file.type.startsWith('image/')) {
+            div.innerHTML = `<img src="${URL.createObjectURL(file)}"><button type="button" class="preview-remove" onclick="removerArchivoEdicion('${inputId}', '${previewContainerId}', ${index})">×</button>`;
+        } else if (isVideo) {
+            div.innerHTML = `<video src="${URL.createObjectURL(file)}#t=0.001" preload="metadata" onclick="abrirVisorVideo('${URL.createObjectURL(file)}')" style="cursor:pointer;"></video><button type="button" class="preview-remove" onclick="removerArchivoEdicion('${inputId}', '${previewContainerId}', ${index})">×</button>`;
+        } else {
+            div.innerHTML = `<div class="file-icon">📄</div><button type="button" class="preview-remove" onclick="removerArchivoEdicion('${inputId}', '${previewContainerId}', ${index})">×</button>`;
+        }
         container.appendChild(div);
     });
 }
