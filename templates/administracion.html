@@ -166,6 +166,7 @@
 
                 <!-- ========== ADMINISTRADOR ========== -->
                 {% if usuario.datos_perfil.subrol == 'Administrador' %}
+                <button class="btn-sidebar" onclick="verCotizacionesMas10000()">Cotizaciones +10000</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Liberar Doc. Contable</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
@@ -734,6 +735,37 @@
                     </div> <!-- fin contenedor cancelado -->
                 </div>
             </div>
+
+            <div id="vista-cotizaciones-10k" style="display: none;">
+                <div class="top-bar">
+                    <h2>Cotizaciones Mayores a $10,000</h2>
+                </div>
+                <div class="admin-container">
+                    <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
+                        <span class="buscador-icono">&#x1F50D;</span>
+                        <input type="text" id="buscador-cotizaciones-10k" class="buscador-pildora"
+                            placeholder="Buscar por ticket, unidad, proveedor..."
+                            onkeyup="filtrarTabla('buscador-cotizaciones-10k', 'tabla-cotizaciones-10k')">
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Fecha</th>
+                                    <th>Proveedor</th>
+                                    <th>Unidad</th>
+                                    <th>Título</th>
+                                    <th>Precio Total</th>
+                                    <th>Cotizaciones (Desglose)</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-cotizaciones-10k"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -750,9 +782,9 @@
                 pestaña de "Tickets Cancelados" en el Archivo General.</p>
 
             <div class="modal-actions" style="margin-top:25px;">
-                <button class="btn-info" onclick="cerrarModal('modal-confirmar-cancelacion')"
+                <button class="btn-info" onclick="cerrarModal('modal-confirmar-cancelacion'); cancelacion10kActiva=false;"
                     style="background:#475569; border:none; flex:1;">Volver atrás</button>
-                <button class="btn-danger-modal" onclick="ejecutarCancelacionTicket()"
+                <button class="btn-danger-modal" onclick="(typeof cancelacion10kActiva !== 'undefined' && cancelacion10kActiva) ? ejecutarCancelacionTicket10k() : ejecutarCancelacionTicket(); cancelacion10kActiva=false;"
                     style="background:#ef4444; border:none; flex:1;">Sí, Cancelar Ticket</button>
             </div>
         </div>
@@ -1059,6 +1091,15 @@
         </div>
     </div>
 
+    <!-- MODAL RECHAZAR COTIZACIÓN >$10K -->
+    <div id="modal-rechazar-10k" class="modal-overlay" style="z-index: 9999999;">
+        <div class="modal-box large">
+            <button class="btn-close-modal" onclick="document.getElementById('modal-rechazar-10k').style.display='none'">×</button>
+            <h3 class="modal-header">Rechazar Cotización (Sugerir Precios)</h3>
+            <div id="contenido-rechazo-10k-dinamico"></div>
+        </div>
+    </div>
+
     <div id="modal-detalles-general" class="modal-overlay">
         <div class="modal-box large">
             <button class="btn-close-modal" onclick="cerrarModal('modal-detalles-general')">×</button>
@@ -1152,6 +1193,7 @@
     <script src="/static/unidades.js?v=7"></script>
     <script src="/static/facturas_principal.js?v=74024"></script>
     <script src="/static/seccion_reportes.js?v=1007"></script>
+    <script src="/static/cotizaciones_10k.js"></script>
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">
         <div class="modal-box large">
