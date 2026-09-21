@@ -173,20 +173,19 @@ async function cargarFacturas() {
                 if (f.estado_custom && f.estado_custom !== "") { textoEstado = f.estado_custom; badgeColor = confirmadaTotal ? '#2d6a4f' : '#b45309'; }
                 else if (confirmadaTotal) { badgeColor = '#2d6a4f'; textoEstado = 'Aprobada (Con Orden)'; }
                 else { 
-                    badgeColor = '#b45309'; 
+                    badgeColor = '#b45309';
                     if (precioParaAp >= 10001) {
-                        if (f.aprobado_admin === true && !f.aprobado_admin_10k) {
-                            textoEstado = 'Pendiente: Admin y Corp';
+                        if (!f.aprobado_admin) {
+                            textoEstado = 'Pendiente: Supervisor';
+                        } else if (f.aprobado_admin === true && !f.aprobado_admin_10k) {
+                            textoEstado = 'Pendiente: Admin';
                         } else if (f.aprobado_admin_10k === true && !f.aprobado_corp) {
                             textoEstado = 'Pendiente: Corp';
                         } else {
-                            textoEstado = 'Pendiente: Admin y Corp';
+                            textoEstado = 'Pendiente: Corp';
                         }
                     } else {
-                        let p = []; 
-                        if (!apAdmin) p.push('Admin'); 
-                        if (!apCorp) p.push('Corp'); 
-                        textoEstado = 'Pendiente: ' + p.join(' y '); 
+                        textoEstado = 'Pendiente: Supervisor'; 
                     }
                 }
                 let estadoBadge = `<span style="background:${badgeColor}; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">${textoEstado}</span>`;
@@ -2319,7 +2318,10 @@ function enviarRechazoSuper() {
 
     if (!confirm("¿Estás 100% seguro de rechazar la cotización y enviar las recomendaciones? \n\nEl registro actual se ELIMINARÁ y se enviará un correo al taller para que suba uno nuevo.")) return;
 
-    mostrarLoaderDinamico("Procesando rechazo...", "Enviando notificaciones al taller 📧");
+    // Ocultar el modal de inmediato para que no se sigan viendo los inputs
+    document.getElementById('modal-rechazo-super').style.display = 'none';
+    
+    mostrarLoaderDinamico("Cancelando cotización...", "Notificando al taller 📧");
 
     fetch('/api/facturas/rechazar_super', {
         method: 'POST',
@@ -2332,7 +2334,6 @@ function enviarRechazoSuper() {
     }).then(res => res.json()).then(data => {
         ocultarLoaderDinamico();
         alert(data.message);
-        document.getElementById('modal-rechazo-super').style.display = 'none';
         cargarFacturas();
     }).catch(err => {
         ocultarLoaderDinamico();

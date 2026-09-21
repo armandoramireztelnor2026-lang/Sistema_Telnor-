@@ -16,6 +16,8 @@ from notificaciones import (
     enviar_correo_confirmacion_factura,
     enviar_correo_factura_rechazada,
     enviar_correo_factura_rechazada_corp,
+    enviar_correo_factura_rechazada_admin,
+    enviar_correo_factura_rechazada_super,
     enviar_correo_factura_fiscal_subida,
     enviar_correo_factura_fiscal_rechazada,
     enviar_correo_factura_fiscal_aprobada,
@@ -523,7 +525,19 @@ def aprobar_10k():
                             precios_recomendados
                         )
 
-                return jsonify({"status": "success", "message": "Cotización rechazada. El ticket se eliminó y se notificó al Supervisor con recomendaciones de precio."})
+                proveedor_nombre = f.get('proveedor', '')
+                unidad_texto = str(f.get('unidad', '')).replace('8090-', '')
+                correo_prov = ""
+
+                for u in usuarios_data.get('usuarios', []):
+                    if u['rol'] == 'proveedores' and u['datos_perfil'].get('nombre_proveedor') == proveedor_nombre:
+                        correo_prov = u['datos_perfil'].get('correo', '')
+                        break
+
+                if correo_prov:
+                    enviar_correo_factura_rechazada_admin(correo_prov, proveedor_nombre, unidad_texto, mensaje, precios_recomendados)
+
+                return jsonify({"status": "success", "message": "Cotización rechazada. El ticket se eliminó y se notificó al Taller y al Supervisor con recomendaciones de precio."})
 
             elif accion == "caras":
                 f["estado"] = "Cancelado_Cotizacion_Cara"
@@ -832,7 +846,7 @@ def rechazar_super():
                     break
 
             if correo_prov:
-                enviar_correo_factura_rechazada_corp(correo_prov, proveedor_nombre, unidad_texto, motivo, precios_recomendados)
+                enviar_correo_factura_rechazada_super(correo_prov, proveedor_nombre, unidad_texto, motivo, precios_recomendados)
 
             return jsonify({"status": "success", "message": "La cotización fue rechazada y eliminada. El taller recibió tus recomendaciones por correo."})
 
