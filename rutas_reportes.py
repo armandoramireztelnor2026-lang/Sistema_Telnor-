@@ -27,6 +27,20 @@ def escribir_json(archivo, data):
 
 @reportes_bp.route("/api/reportes/nuevo", methods=["POST"])
 def nuevo_reporte():
+    unidad_req = request.form.get("unidad")
+    
+    # 1. Check reportes.json (active unquoted/unassigned tickets)
+    reportes_data = leer_json("reportes.json")
+    for r in reportes_data.get("reportes", []):
+        if str(r.get("unidad")) == str(unidad_req):
+            return jsonify({"status": "error", "message": f"La unidad {unidad_req} ya tiene un reporte activo en proceso de asignación o cotización."})
+
+    # 2. Check facturas.json (tickets in taller not yet delivered/closed)
+    facturas_data = leer_json("facturas.json")
+    for f in facturas_data.get("facturas", []):
+        if str(f.get("unidad")) == str(unidad_req) and f.get("entregado") != "Sí" and f.get("estado") not in ["Cancelado_Cotizacion_Cara", "Rechazado", "Eliminado"]:
+            return jsonify({"status": "error", "message": f"La unidad {unidad_req} ya se encuentra en taller y aún no ha sido liberada por el supervisor."})
+
     nuevo_id = f"REP-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
     reporte = {
         "id": nuevo_id,
