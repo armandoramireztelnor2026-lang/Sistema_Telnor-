@@ -196,8 +196,17 @@ async function cargarFacturas() {
 
                     btnAccion += `</div>`;
                 } else if (rolUsuario === 'corporativos') {
-                    if (!apCorp) btnAccion = `<button class="btn-success" onclick="abrirRevisionCorp('${f.id}')">Revisar Gasto Mayor</button>`;
-                    else btnAccion = `<button class="btn-info" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
+                    btnAccion = `<div style="display:flex; flex-direction:column; gap:8px; width:100%;">`;
+
+                    if (!apCorp) {
+                        btnAccion += `<button class="btn-success" onclick="abrirRevisionCorp('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; transition:all 0.3s;">✅ Aprobar a Corporativos</button>`;
+                        btnAccion += `<button class="btn-danger" onclick="abrirModalRechazoCorpDinamico('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:white; transition:all 0.3s;">❌ Rechazar (Sugerir Precio)</button>`;
+                        btnAccion += `<button class="btn-danger-modal" onclick="abrirCancelacionCarp('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; transition:all 0.3s;">🚫 Cancelar Ticket (Cara)</button>`;
+                    } else {
+                        btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color:white; transition:all 0.3s;">📄 Ver Detalles</button>`;
+                    }
+
+                    btnAccion += `</div>`;
                 } else {
                     btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; align-items:stretch; width:100%;">
                         <span style="font-size:0.9em; font-weight:bold; color:#a3b1c6; margin-bottom: 2px;">${f.numero_orden ? 'Orden Oficial: <span style="color:#f59e0b;">' + f.numero_orden + '</span>' : 'En revisión...'}</span>
@@ -2227,6 +2236,51 @@ window.switchTabArchivo = function (tabName) {
         btnCancelado.style.background = '#ef4444'; // Rojo oscuro para cancelados
         contNormal.style.display = 'none';
         contCancelado.style.display = 'block';
+    }
+}
+
+function abrirModalRechazoCorpDinamico(idFactura) {
+    const f = facturasGlobal.find(x => String(x.id) === String(idFactura));
+    if (!f) return;
+
+    document.getElementById('rechazo-corp-id').value = f.id;
+
+    let html = `<div style="color: #94a3b8; margin-bottom:15px; font-size:14px;">Ingresa el precio recomendado para cada cotización (opcional) y el motivo general del rechazo.</div>`;
+
+    let cots = f.cotizaciones || [{ precio: f.precio }];
+    cots.forEach((c, idx) => {
+        let precioActual = typeof c.precio === 'number' ? c.precio.toLocaleString('en-US') : c.precio;
+        let titulo = c.titulo || 'Sin Título';
+        html += `
+        <div style="margin-bottom:15px; padding:15px; background:#1e293b; border:1px solid #334155; border-radius:8px;">
+            <div style="font-weight:bold; color:#e2e8f0; margin-bottom:5px;">Cotización ${idx + 1}: ${titulo}</div>
+            <div style="font-size:13px; color:#94a3b8; margin-bottom:10px;">Precio cotizado: <span style="font-weight:bold; color:#f59e0b;">$${precioActual} MXN</span></div>
+            <label style="display:block; font-size:13px; color:#cbd5e1; margin-bottom:5px;">Precio Recomendado ($):</label>
+            <input type="number" class="input-precio-rec-corp" data-idx="${idx}" placeholder="Ej. 1500" style="width:100%; padding:8px; background:#0f172a; color:white; border:1px solid #334155; border-radius:5px;">
+        </div>
+        `;
+    });
+
+    html += `
+    <div style="margin-top:20px;">
+        <label style="display:block; font-size:14px; font-weight:bold; color:#e2e8f0; margin-bottom:5px;">Motivo General del Rechazo: <span style="color:#ef4444;">*</span></label>
+        <textarea id="rechazo-corp-motivo" rows="4" placeholder="Escribe aquí el motivo del rechazo y las observaciones generales..." style="width:100%; padding:10px; background:#0f172a; color:white; border:1px solid #334155; border-radius:5px;"></textarea>
+    </div>
+    `;
+
+    let modalBox = document.querySelector('#modal-rechazo-corp-dinamico .modal-box');
+    modalBox.innerHTML = `<button class="btn-close-modal" onclick="document.getElementById('modal-rechazo-corp-dinamico').style.display='none'">×</button><h3 class="modal-header">Rechazar Cotización (Sugerir Precios)</h3><div id="contenido-rechazo-corp">${html}</div><div class="modal-actions" style="margin-top:20px;"><button class="btn-info" onclick="document.getElementById('modal-rechazo-corp-dinamico').style.display='none'" style="background:#475569; flex:1;">Cancelar</button><button class="btn-danger" onclick="enviarRechazoCorp()" style="flex:1;">Confirmar Rechazo</button></div>`;
+
+    document.getElementById('modal-rechazo-corp-dinamico').style.display = 'flex';
+}
+
+function abrirCancelacionCarp(idFactura) {
+    document.getElementById('rev-id-admin').value = idFactura;
+    let modal = document.getElementById('modal-confirmar-cancelacion');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        alert("El modal de cancelación no está disponible.");
     }
 };
 
