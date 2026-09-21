@@ -2268,9 +2268,7 @@ function abrirModalRechazoCorpDinamico(idFactura) {
     </div>
     `;
 
-    let modalBox = document.querySelector('#modal-rechazo-corp-dinamico .modal-box');
-    modalBox.innerHTML = `<button class="btn-close-modal" onclick="document.getElementById('modal-rechazo-corp-dinamico').style.display='none'">×</button><h3 class="modal-header">Rechazar Cotización (Sugerir Precios)</h3><div id="contenido-rechazo-corp">${html}</div><div class="modal-actions" style="margin-top:20px;"><button class="btn-info" onclick="document.getElementById('modal-rechazo-corp-dinamico').style.display='none'" style="background:#475569; flex:1;">Cancelar</button><button class="btn-danger" onclick="enviarRechazoCorp()" style="flex:1;">Confirmar Rechazo</button></div>`;
-
+    document.getElementById('contenido-rechazo-corp').innerHTML = html;
     document.getElementById('modal-rechazo-corp-dinamico').style.display = 'flex';
 }
 
