@@ -12,7 +12,7 @@ import string
 import datetime
 import webbrowser
 from threading import Timer
-
+from notificaciones import enviar_correo_taller_facturar
 from rutas_facturas import facturas_bp
 from rutas_reportes import reportes_bp  
 from rutas_seccion_reportes import seccion_reportes_bp
@@ -251,7 +251,7 @@ def editar_usuario():
 
 @app.route('/api/facturas/validar_codigo', methods=['POST'])
 def validar_codigo():
-    if 'usuario' not in session or session['usuario']['rol'] != 'administracion':
+    if 'usuario' not in session or session['usuario']['rol'] not in ['administracion', 'supervision']:
         return jsonify({"status": "error", "message": "No tienes permisos para liberar vehículos."})
     req_data = request.json
     id_factura = req_data.get('id_factura')
@@ -265,6 +265,18 @@ def validar_codigo():
             if str(codigo_real) == str(codigo_ingresado):
                 f['entregado'] = "Sí"
                 escribir_json('facturas.json', data)
+                
+                proveedor_nombre = f.get('proveedor', '')
+                usuarios_data = leer_json("usuarios.json")
+                correo_prov = ""
+                for u in usuarios_data.get("usuarios", []):
+                    if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == proveedor_nombre:
+                        correo_prov = u.get('datos_perfil', {}).get('correo', '')
+                        break
+                
+                if correo_prov:
+                    enviar_correo_taller_facturar(correo_prov, proveedor_nombre, f.get("id", "N/A"), f.get("unidad", "S/N"))
+                
                 return jsonify({"status": "success", "message": "Match perfecto."})
             else:
                 return jsonify({"status": "error", "message": "El código es incorrecto. Pide al chofer que revise su correo nuevamente."})

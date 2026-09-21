@@ -23,9 +23,12 @@ from notificaciones import (
     enviar_correo_recordatorio_doc_contable,
     enviar_correo_admin_revisa_10k,
     enviar_correo_admin_aprobado_a_corp,
+    enviar_correo_taller_aprobado,
+    enviar_correo_liberacion_supervisor,
     enviar_correo_admin_rechaza_supervisor,
     enviar_correo_admin_cancela_caras,
     enviar_correo_corp_rechaza_admin,
+    enviar_correo_corp_rechaza_supervisor,
     enviar_correo_corp_aprobado
 )
 
@@ -50,7 +53,7 @@ def procesar_liberacion_si_aplica(f):
     corp_ok = f.get("aprobado_corp", False)
 
     if admin_ok and corp_ok and "liberado_admin" not in f:
-        ciudad_real = obtener_ciudad_de_factura(f)
+        ciudad_real = f.get("ciudad", f.get("unidad"))
         correo_admin, nombre_admin = encontrar_admin_por_ciudad(ciudad_real)
 
         if correo_admin:
@@ -252,8 +255,6 @@ def nueva_factura():
     titulo_correo = f"Cotización: {titulo_global}"
     if admins_data:
         enviar_correo_nueva_factura(admins_data, proveedor, unidad_sola, precio_total, titulo=titulo_correo, cotizaciones=cotizaciones_array)
-    if necesita_corp and corps_data:
-        enviar_correo_nueva_factura_corp(corps_data, proveedor, unidad_sola, precio_total, titulo=titulo_correo)
 
     correo_proveedor = session["usuario"]["datos_perfil"].get("correo")
     if correo_proveedor and correo_proveedor.strip():
@@ -401,6 +402,24 @@ def confirmar_admin():
                         )
             else:
                 msg_base = "Órdenes asignadas y validadas por Administración."
+                
+                proveedor_nombre = f.get('proveedor', '')
+                usuarios_data = leer_json("usuarios.json")
+                correo_prov = ""
+                for u in usuarios_data.get("usuarios", []):
+                    if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == proveedor_nombre:
+                        correo_prov = u.get('datos_perfil', {}).get('correo', '')
+                        break
+                
+                if correo_prov:
+                    vehiculo_info = f.get("vehiculo", "Vehículo no especificado")
+                    enviar_correo_taller_aprobado(
+                        correo_prov, 
+                        proveedor_nombre, 
+                        f.get("id", "N/A"), 
+                        f.get("unidad", "S/N"),
+                        vehiculo_info
+                    )
 
             return jsonify({"status": "success", "message": msg_base})
             
@@ -428,20 +447,25 @@ def aprobar_10k():
                 corps = [u for u in usuarios_data.get("usuarios", [])
                         if u["rol"] == "corporativos"]
 
+                lista_corps_para_correo = []
                 for corp in corps:
                     correo = corp["datos_perfil"].get("correo")
-                    nombre = corp["datos_perfil"].get("nombres", "Corporativos")
                     if correo:
-                        num_orden = f.get("numero_orden", f.get("numero_cotizacion_asignacion", "N/A"))
-                        enviar_correo_admin_aprobado_a_corp(
-                            correo,
-                            nombre,
-                            f.get("id", "N/A"),
-                            f.get("unidad", "S/N"),
-                            f.get("proveedor", "Sin especificar"),
-                            precio_float,
-                            num_orden
-                        )
+                        lista_corps_para_correo.append({"correo": correo})
+                
+                admin_nombres = "Administrador"
+                if "usuario" in session and "datos_perfil" in session["usuario"]:
+                    admin_nombres = session["usuario"]["datos_perfil"].get("nombres", "Administrador")
+
+                if lista_corps_para_correo:
+                    enviar_correo_admin_aprobado_a_corp(
+                        lista_corps_para_correo,
+                        f.get("id", "N/A"),
+                        f.get("unidad", "S/N"),
+                        f.get("proveedor", "Sin especificar"),
+                        precio_float,
+                        admin_nombres
+                    )
 
                 return jsonify({"status": "success", "message": "Cotización aprobada. Enviada a Corporativos."})
 
@@ -457,8 +481,26 @@ def aprobar_10k():
                                 "precio": val
                             })
 
-                f["aprobado_admin_10k"] = False
-                f["estado_custom"] = "Rechazado por Administración"
+                # Delete quote instead of just updating status
+                nuevas_facturas = []
+                for f2 in data.get("facturas", []):
+                    if f2["id"] == factura_id:
+                        for cot in f2.get("cotizaciones", []):
+                            if cot.get("pdf_cotizacion"):
+                                ruta = os.path.join(CARPETA_FACTURAS, cot["pdf_cotizacion"])
+                                if os.path.exists(ruta): os.remove(ruta)
+                            for foto in cot.get("fotos_evidencia", []):
+                                ruta = os.path.join(CARPETA_FACTURAS, foto)
+                                if os.path.exists(ruta): os.remove(ruta)
+                        
+                        for tipo in ["fotos_cotizacion", "fotos_evidencia"]:
+                            for foto in f2.get(tipo, []):
+                                ruta = os.path.join(CARPETA_FACTURAS, foto)
+                                if os.path.exists(ruta): os.remove(ruta)
+                    else:
+                        nuevas_facturas.append(f2)
+                
+                data["facturas"] = nuevas_facturas
                 escribir_json("facturas.json", data)
 
                 usuarios_data = leer_json("usuarios.json")
@@ -469,20 +511,17 @@ def aprobar_10k():
                     correo = sup["datos_perfil"].get("correo")
                     nombre = sup["datos_perfil"].get("nombres", "Supervisor")
                     if correo:
-                        num_orden = f.get("numero_orden", f.get("numero_cotizacion_asignacion", "N/A"))
                         enviar_correo_admin_rechaza_supervisor(
                             correo,
                             nombre,
                             f.get("id", "N/A"),
                             f.get("unidad", "S/N"),
                             f.get("proveedor", "Sin especificar"),
-                            precio_float,
-                            num_orden,
                             mensaje,
                             precios_recomendados
                         )
 
-                return jsonify({"status": "success", "message": "Cotización rechazada. Se notificó al Supervisor con recomendaciones de precio."})
+                return jsonify({"status": "success", "message": "Cotización rechazada. El ticket se eliminó y se notificó al Supervisor con recomendaciones de precio."})
 
             elif accion == "caras":
                 f["estado"] = "Cancelado_Cotizacion_Cara"
@@ -496,15 +535,12 @@ def aprobar_10k():
                     correo = sup["datos_perfil"].get("correo")
                     nombre = sup["datos_perfil"].get("nombres", "Supervisor")
                     if correo:
-                        num_orden = f.get("numero_orden", f.get("numero_cotizacion_asignacion", "N/A"))
                         enviar_correo_admin_cancela_caras(
                             correo,
                             nombre,
                             f.get("id", "N/A"),
                             f.get("unidad", "S/N"),
-                            f.get("proveedor", "Sin especificar"),
-                            precio_float,
-                            num_orden
+                            mensaje
                         )
 
                 return jsonify({"status": "success", "message": "Cotización movida a Cotizaciones Caras."})
@@ -540,16 +576,31 @@ def confirmar_corp():
                 correo = sup["datos_perfil"].get("correo")
                 nombre = sup["datos_perfil"].get("nombres", "Supervisor")
                 if correo:
-                    num_orden = f.get("numero_orden", f.get("numero_cotizacion_asignacion", "N/A"))
                     enviar_correo_corp_aprobado(
                         correo,
                         nombre,
                         f.get("id", "N/A"),
                         f.get("unidad", "S/N"),
                         f.get("proveedor", "Sin especificar"),
-                        precio_float,
-                        num_orden
+                        precio_float
                     )
+            
+            proveedor_nombre = f.get('proveedor', '')
+            correo_prov = ""
+            for u in usuarios_data.get("usuarios", []):
+                if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == proveedor_nombre:
+                    correo_prov = u.get('datos_perfil', {}).get('correo', '')
+                    break
+            
+            if correo_prov:
+                vehiculo_info = f.get("vehiculo", "Vehículo no especificado")
+                enviar_correo_taller_aprobado(
+                    correo_prov, 
+                    proveedor_nombre, 
+                    f.get("id", "N/A"), 
+                    f.get("unidad", "S/N"),
+                    vehiculo_info
+                )
 
             mensaje_extra = procesar_liberacion_si_aplica(f)
             return jsonify({"status": "success", "message": "Autorización financiera aprobada. Se notificó al Supervisor." + mensaje_extra})
@@ -643,20 +694,38 @@ def rechazar_corp():
             precio_float = float(f.get("precio", 0))
 
             if precio_float >= 10001.0:
-                f["aprobado_corp"] = False
-                f["aprobado_admin_10k"] = False
-                f["estado_custom"] = "Rechazado por Corporativos"
+                # Delete quote instead of just updating status
+                nuevas_facturas = []
+                for f2 in data.get("facturas", []):
+                    if f2["id"] == factura_id:
+                        for cot in f2.get("cotizaciones", []):
+                            if cot.get("pdf_cotizacion"):
+                                ruta = os.path.join(CARPETA_FACTURAS, cot["pdf_cotizacion"])
+                                if os.path.exists(ruta): os.remove(ruta)
+                            for foto in cot.get("fotos_evidencia", []):
+                                ruta = os.path.join(CARPETA_FACTURAS, foto)
+                                if os.path.exists(ruta): os.remove(ruta)
+                        
+                        for tipo in ["fotos_cotizacion", "fotos_evidencia"]:
+                            for foto in f2.get(tipo, []):
+                                ruta = os.path.join(CARPETA_FACTURAS, foto)
+                                if os.path.exists(ruta): os.remove(ruta)
+                    else:
+                        nuevas_facturas.append(f2)
+                
+                data["facturas"] = nuevas_facturas
                 escribir_json("facturas.json", data)
 
                 usuarios_data = leer_json("usuarios.json")
                 admins_10k = [u for u in usuarios_data.get("usuarios", [])
                              if u["rol"] == "administracion" and u["datos_perfil"].get("subrol") == "Administrador"]
 
+                num_orden = f.get("numero_orden", f.get("numero_cotizacion_asignacion", "N/A"))
+                
                 for admin in admins_10k:
                     correo = admin["datos_perfil"].get("correo")
                     nombre = admin["datos_perfil"].get("nombres", "Administrador")
                     if correo:
-                        num_orden = f.get("numero_orden", f.get("numero_cotizacion_asignacion", "N/A"))
                         enviar_correo_corp_rechaza_admin(
                             correo,
                             nombre,
@@ -664,12 +733,28 @@ def rechazar_corp():
                             f.get("unidad", "S/N"),
                             f.get("proveedor", "Sin especificar"),
                             precio_float,
-                            num_orden,
+                            motivo,
+                            precios_recomendados
+                        )
+                        
+                supervisores = [u for u in usuarios_data.get("usuarios", [])
+                               if u["rol"] == "supervision"]
+
+                for sup in supervisores:
+                    correo = sup["datos_perfil"].get("correo")
+                    nombre = sup["datos_perfil"].get("nombres", "Supervisor")
+                    if correo:
+                        enviar_correo_corp_rechaza_supervisor(
+                            correo,
+                            nombre,
+                            f.get("id", "N/A"),
+                            f.get("unidad", "S/N"),
+                            f.get("proveedor", "Sin especificar"),
                             motivo,
                             precios_recomendados
                         )
 
-                return jsonify({"status": "success", "message": "Cotización rechazada. Se notificó al Administrador para renegociar con el Supervisor."})
+                return jsonify({"status": "success", "message": "Cotización rechazada. El ticket se eliminó y se notificó al Administrador y Supervisor."})
 
             else:
                 nuevas_facturas = []
@@ -791,6 +876,14 @@ def marcar_lista():
                         
             unidad_limpia = str(f.get('unidad', '')).replace('8090-', '')
             exito, msg_correo = enviar_correo_liberacion(correo_chofer, ticket_id or "N/A", unidad_limpia, codigo, nombre_chofer, telefono_chofer)
+            
+            usuarios_data = leer_json('usuarios.json')
+            supervisores = [u for u in usuarios_data.get('usuarios', []) if u['rol'] == 'supervision']
+            for sup in supervisores:
+                correo_sup = sup.get('datos_perfil', {}).get('correo')
+                nombre_sup = sup.get('datos_perfil', {}).get('nombres', 'Supervisor')
+                if correo_sup:
+                    enviar_correo_liberacion_supervisor(correo_sup, nombre_sup, ticket_id or "N/A", unidad_limpia, codigo, nombre_chofer)
             
             escribir_json('facturas.json', data)
             return jsonify({"status": "success", "message": "¡Unidad marcada como lista! El PIN ha sido enviado al chofer."})

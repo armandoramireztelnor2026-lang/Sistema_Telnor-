@@ -10,8 +10,21 @@ function validarNumeros(input) { input.value = input.value.replace(/[^0-9]/g, ''
 function validarLetras(input) { input.value = input.value.replace(/[^a-zA-Z\sñÑáéíóúÁÉÍÓÚ]/g, ''); }
 function validarDecimales(input) { input.value = input.value.replace(/[^0-9.]/g, ''); if ((input.value.match(/\./g) || []).length > 1) { input.value = input.value.substring(0, input.value.lastIndexOf('.')); } }
 
-function abrirLightbox(src) { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox-modal').style.display = 'flex'; }
-function cerrarLightbox(event) { if(event.target.id === 'lightbox-modal' || event.target.className === 'lightbox-close') { document.getElementById('lightbox-modal').style.display = 'none'; document.getElementById('lightbox-img').src = ''; } }
+function abrirLightbox(src) { 
+    let fLower = src.toLowerCase();
+    let esVideo = fLower.endsWith('.mp4') || fLower.endsWith('.mov') || fLower.endsWith('.webm') || fLower.endsWith('.avi');
+    let img = document.getElementById('lightbox-img');
+    let vid = document.getElementById('lightbox-vid');
+    if (esVideo) {
+        if (img) img.style.display = 'none';
+        if (vid) { vid.style.display = 'block'; vid.src = src; }
+    } else {
+        if (vid) { vid.style.display = 'none'; vid.src = ''; }
+        if (img) { img.style.display = 'block'; img.src = src; }
+    }
+    document.getElementById('lightbox-modal').style.display = 'flex'; 
+}
+function cerrarLightbox(event) { if(event.target.id === 'lightbox-modal' || event.target.className === 'lightbox-close') { document.getElementById('lightbox-modal').style.display = 'none'; let img = document.getElementById('lightbox-img'); if (img) img.src = ''; let vid = document.getElementById('lightbox-vid'); if (vid) { vid.pause(); vid.src = ''; } } }
 
 function mostrarLoaderDinamico(textoPrincipal, textoSecundario) {
     let loader = document.getElementById('loader-confirmacion');

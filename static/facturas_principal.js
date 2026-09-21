@@ -91,11 +91,15 @@ async function cargarFacturas() {
                     tituloCompleto = f.cotizaciones.map((c, i) => `Cot ${i + 1}: ${c.titulo || 'Sin Título'}`).join('<br>');
                 }
 
-                let precioFormatArch = parseFloat(f.precio_estimado || f.precio || 0).toLocaleString('en-US');
-
+                let precioParaAp = parseFloat(f.precio_estimado || f.precio || 0);
                 let apAdmin = f.aprobado_admin !== undefined ? f.aprobado_admin : (f.estado === 'Confirmada');
                 let apCorp = f.aprobado_corp !== undefined ? f.aprobado_corp : (f.estado === 'Confirmada');
-                let confirmadaTotal = (apAdmin && apCorp);
+                
+                let apAdminTotal = apAdmin;
+                if (precioParaAp >= 10001) {
+                    apAdminTotal = (f.aprobado_admin === true && f.aprobado_admin_10k === true);
+                }
+                let confirmadaTotal = (apAdminTotal && apCorp);
 
                 if (f.estado === 'Cancelado_Cotizacion_Cara') {
                     if (tbodyArchivoCancelado && rolUsuario === 'administracion') {
@@ -162,11 +166,29 @@ async function cargarFacturas() {
                     return; // Skip rendering in active trays
                 }
 
+
+
                 let badgeColor, textoEstado;
 
                 if (f.estado_custom && f.estado_custom !== "") { textoEstado = f.estado_custom; badgeColor = confirmadaTotal ? '#2d6a4f' : '#b45309'; }
                 else if (confirmadaTotal) { badgeColor = '#2d6a4f'; textoEstado = 'Aprobada (Con Orden)'; }
-                else { badgeColor = '#b45309'; let p = []; if (!apAdmin) p.push('Admin'); if (!apCorp) p.push('Corp'); textoEstado = 'Pendiente: ' + p.join(' y '); }
+                else { 
+                    badgeColor = '#b45309'; 
+                    if (precioParaAp >= 10001) {
+                        if (f.aprobado_admin === true && !f.aprobado_admin_10k) {
+                            textoEstado = 'Pendiente: Admin y Corp';
+                        } else if (f.aprobado_admin_10k === true && !f.aprobado_corp) {
+                            textoEstado = 'Pendiente: Corp';
+                        } else {
+                            textoEstado = 'Pendiente: Admin y Corp';
+                        }
+                    } else {
+                        let p = []; 
+                        if (!apAdmin) p.push('Admin'); 
+                        if (!apCorp) p.push('Corp'); 
+                        textoEstado = 'Pendiente: ' + p.join(' y '); 
+                    }
+                }
                 let estadoBadge = `<span style="background:${badgeColor}; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">${textoEstado}</span>`;
 
                 let entregadoTexto = f.entregado || 'No';
@@ -186,10 +208,10 @@ async function cargarFacturas() {
                         btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
                     }
 
-                    if (confirmadaTotal && entregadoTexto !== 'Sí') {
-                        btnAccion += `<button class="btn-info" onclick="abrirModalValidacion('${f.id}', '${f.unidad.replace('8090-', '')}')" style="background:#0284c7; width:100%; margin:0; border:none;">🔑 Validar PIN Chofer</button>`;
-                    } else if (!confirmadaTotal) {
+                    if (!confirmadaTotal) {
                         btnAccion += `<button disabled class="btn-info" style="background:#475569; color:#94a3b8; border:none; width:100%; margin:0; cursor:not-allowed;">🔒 Esperando Confirmación</button>`;
+                    } else if (confirmadaTotal && entregadoTexto !== 'Sí') {
+                        btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px; text-align:center;">⌛ Esperando entrega (PIN)</span>`;
                     }
 
                     btnAccion += `<div style="display:flex; gap:5px;"><button class="btn-danger-sm" style="flex:1; margin:0;" onclick="eliminarFacturaDefinitiva('${f.id}')">Eliminar</button></div>`;
@@ -199,9 +221,7 @@ async function cargarFacturas() {
                     btnAccion = `<div style="display:flex; flex-direction:column; gap:8px; width:100%;">`;
 
                     if (!apCorp) {
-                        btnAccion += `<button class="btn-success" onclick="abrirRevisionCorp('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; transition:all 0.3s;">✅ Aprobar a Corporativos</button>`;
-                        btnAccion += `<button class="btn-danger" onclick="abrirModalRechazoCorpDinamico('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:white; transition:all 0.3s;">❌ Rechazar (Sugerir Precio)</button>`;
-                        btnAccion += `<button class="btn-danger-modal" onclick="abrirCancelacionCarp('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; transition:all 0.3s;">🚫 Cancelar Ticket (Cara)</button>`;
+                        btnAccion += `<button class="btn-success" onclick="abrirRevisionCorp('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; transition:all 0.3s;">✅ Aprobar</button>`;
                     } else {
                         btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color:white; transition:all 0.3s;">📄 Ver Detalles</button>`;
                     }
@@ -214,9 +234,15 @@ async function cargarFacturas() {
 
                     if (confirmadaTotal && entregadoTexto !== 'Sí') {
                         if (!f.codigo_liberacion) {
-                            btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; background:#10b981; border:none;" onclick="marcarUnidadLista('${f.id}')">✔️ Marcar Unidad Lista</button>`;
+                            if (rolUsuario === 'proveedores') {
+                                btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; background:#10b981; border:none;" onclick="marcarUnidadLista('${f.id}')">✔️ Marcar Unidad Lista</button>`;
+                            }
                         } else {
-                            btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px;">⌛ Esperando al chofer... (PIN enviado)</span>`;
+                            if (rolUsuario === 'proveedores') {
+                                btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px;">⌛ Esperando al chofer... (PIN enviado)</span>`;
+                            } else if (rolUsuario === 'supervision') {
+                                btnAccion += `<button class="btn-info" onclick="abrirModalValidacion('${f.id}', '${f.unidad.replace('8090-', '')}')" style="background:#0284c7; width:100%; margin:0; border:none;">🔑 Validar PIN Chofer</button>`;
+                            }
                         }
                     } else if (confirmadaTotal && entregadoTexto === 'Sí') {
                         if (!f.factura_folio) {
@@ -820,15 +846,20 @@ function previsualizarFactura() {
 
         let numEvid = fotos.files ? fotos.files.length : 0;
         if (numEvid > 0) {
-            seccion2HTML += `<div class="pdf-line" style="margin-top:10px;"><strong>Fotos de Evidencia adjuntas:</strong></div>`;
+            seccion2HTML += `<div class="pdf-line" style="margin-top:10px;"><strong>Fotos/Videos de Evidencia adjuntos:</strong></div>`;
             seccion2HTML += `<div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:5px;">`;
             for (let j = 0; j < numEvid; j++) {
-                let url = URL.createObjectURL(fotos.files[j]);
-                seccion2HTML += `<img src="${url}" style="width:120px; height:120px; object-fit:cover; border-radius:8px; border:1px solid #0284c7;">`;
+                let file = fotos.files[j];
+                let url = URL.createObjectURL(file);
+                if (file.type.startsWith('video/')) {
+                    seccion2HTML += `<div style="width:120px; height:120px; border-radius:8px; border:1px solid #0284c7; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f3f4f6; overflow:hidden;"><div style="font-size:30px; margin-bottom:5px;">🎥</div><div style="font-size:10px; text-align:center; word-break:break-all; padding:0 5px; color:#374151; font-weight:bold;">Video: ${file.name}</div></div>`;
+                } else {
+                    seccion2HTML += `<img src="${url}" style="width:120px; height:120px; object-fit:cover; border-radius:8px; border:1px solid #0284c7;">`;
+                }
             }
             seccion2HTML += `</div>`;
         } else {
-            seccion2HTML += `<div class="pdf-line" style="margin-top:10px;"><strong>Fotos de Evidencia adjuntas:</strong> 0 fotos</div>`;
+            seccion2HTML += `<div class="pdf-line" style="margin-top:10px;"><strong>Fotos/Videos de Evidencia adjuntos:</strong> 0 archivos</div>`;
         }
         seccion2HTML += `</div>`;
     }
@@ -982,9 +1013,16 @@ function generarHtmlDetalles(f, modo, precioBonito) {
                 <div style="display:flex; flex-direction:column; gap:10px; padding:10px 0;">
                     ${c.pdf_cotizacion ? (c.pdf_cotizacion.endsWith('.pdf') ? `<iframe src="/static/facturas_archivos/${c.pdf_cotizacion}" width="100%" height="400px" style="border:1px solid #1f395a; border-radius:8px; background:#fff;"></iframe>` : `<img src="/static/facturas_archivos/${c.pdf_cotizacion}" style="max-width:100%; max-height:400px; border-radius:5px; border:2px solid #eab308; cursor:zoom-in; object-fit:contain;" onclick="abrirLightbox('/static/facturas_archivos/${c.pdf_cotizacion}')">`) : '<span style="color:#9ca3af; font-style:italic;">Sin archivo</span>'}
                 </div>
-                <strong>Evidencias Fotogr&aacute;ficas:</strong><br>
+                <strong>Evidencias (Fotos/Videos):</strong><br>
                 <div style="display:flex; gap:10px; overflow-x:auto; padding:10px 0;">
-                    ${(c.fotos_evidencia || []).map(foto => `<img src="/static/facturas_archivos/${foto}" style="height:70px; border-radius:5px; border:2px solid #eab308; cursor:zoom-in;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')">`).join('')}
+                    ${(c.fotos_evidencia || []).map(foto => {
+                        let fLower = foto.toLowerCase();
+                        if (fLower.endsWith('.mp4') || fLower.endsWith('.mov') || fLower.endsWith('.webm') || fLower.endsWith('.avi')) {
+                            return `<div style="height:70px; width:70px; border-radius:5px; border:2px solid #0284c7; background:#1b4332; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')" title="Ver Video"><div style="font-size:24px;">🎥</div><div style="font-size:9px; color:#fff;">Ver</div></div>`;
+                        } else {
+                            return `<img src="/static/facturas_archivos/${foto}" style="height:70px; border-radius:5px; border:2px solid #eab308; cursor:zoom-in; flex-shrink:0;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')">`;
+                        }
+                    }).join('')}
                     ${!(c.fotos_evidencia && c.fotos_evidencia.length > 0) ? '<span style="color:#9ca3af; font-style:italic;">Sin evidencias adjuntas.</span>' : ''}
                 </div>
             </div>
@@ -1081,30 +1119,6 @@ function abrirRevisionAdmin(idFactura) {
 
     validarOrden();
 
-    // Mostrar botón de notificación a corporativos solo si precio >= 10001
-    let btnNotifCorp = document.getElementById('btn-notificar-corp');
-    if (btnNotifCorp) {
-        let precioTotal = parseFloat(f.precio) || 0;
-        if (precioTotal >= 10001) {
-            btnNotifCorp.style.display = 'block';
-            btnNotifCorp.style.display = 'block';
-            if (f.notificado_corp) {
-                let fecha = f.fecha_notificacion_corp ? f.fecha_notificacion_corp.split(' ')[0] : 'Ya enviada';
-                btnNotifCorp.innerHTML = `✅ Re-enviar Notif. a Corporativos <small>(${fecha})</small>`;
-                btnNotifCorp.style.background = '#4f46e5';
-                btnNotifCorp.style.cursor = 'pointer';
-                btnNotifCorp.disabled = false;
-            } else {
-                btnNotifCorp.textContent = '📩 Enviar Notificación a Corporativos';
-                btnNotifCorp.style.background = 'linear-gradient(135deg, #7c3aed, #4f46e5)';
-                btnNotifCorp.style.cursor = 'pointer';
-                btnNotifCorp.disabled = false;
-            }
-        } else {
-            btnNotifCorp.style.display = 'none';
-        }
-    }
-
     document.getElementById('modal-revision-admin').style.display = 'flex';
 }
 
@@ -1173,42 +1187,6 @@ function confirmarFacturaAdmin() {
     }).catch(err => {
         ocultarLoaderDinamico();
         console.error(err);
-    });
-}
-
-function notificarCorporativos() {
-    let idFac = document.getElementById('rev-id-admin').value;
-    if (!idFac) return;
-    if (!confirm('¿Desea enviar (o re-enviar) la notificación por correo a TODOS los miembros de Corporativos?')) return;
-
-    let btn = document.getElementById('btn-notificar-corp');
-    let textoOriginal = btn.innerHTML;
-    btn.textContent = 'Enviando correos...';
-    btn.disabled = true;
-
-    fetch('/api/facturas/notificar_corp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: idFac })
-    }).then(res => res.json()).then(data => {
-        alert(data.message);
-        if (data.status === 'success') {
-            btn.innerHTML = '✅ Notificación enviada';
-            setTimeout(() => {
-                btn.innerHTML = '✅ Re-enviar Notif. a Corporativos <small>(Hoy)</small>';
-                btn.disabled = false;
-                btn.style.background = '#4f46e5';
-            }, 2000);
-            cargarFacturas(); // Recargar facturas para actualizar la bandera notificado_corp
-        } else {
-            btn.innerHTML = textoOriginal;
-            btn.disabled = false;
-        }
-    }).catch(err => {
-        console.error(err);
-        alert('Error de red al enviar la notificación.');
-        btn.textContent = textoOriginal;
-        btn.disabled = false;
     });
 }
 
@@ -1375,7 +1353,12 @@ function generarPDFSilencioso(idFactura) {
             let evHTML = '';
             if (c.fotos_evidencia && c.fotos_evidencia.length > 0) {
                 c.fotos_evidencia.forEach(foto => {
-                    evHTML += `<div class="pdf-image-container"><img src="/static/facturas_archivos/${foto}" class="pdf-anexo-img"><p class="pdf-anexo-label" style="word-break: break-all;">Evidencia: ${foto}</p></div>`;
+                    const fLower = foto.toLowerCase();
+                    if (fLower.endsWith('.mp4') || fLower.endsWith('.mov') || fLower.endsWith('.webm') || fLower.endsWith('.avi')) {
+                        evHTML += `<div class="pdf-image-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:120px; background:#f3f4f6; border:1px solid #d1d5db; border-radius:5px;"><div style="font-size:40px; margin-bottom:5px;">🎥</div><p class="pdf-anexo-label" style="word-break: break-all; font-weight:bold;">Video Adjunto: ${foto}</p></div>`;
+                    } else {
+                        evHTML += `<div class="pdf-image-container"><img src="/static/facturas_archivos/${foto}" class="pdf-anexo-img"><p class="pdf-anexo-label" style="word-break: break-all;">Evidencia: ${foto}</p></div>`;
+                    }
                 });
             } else {
                 evHTML = `<div style="color:#9ca3af; font-style:italic;">Sin evidencias</div>`;
@@ -1412,7 +1395,7 @@ function generarPDFSilencioso(idFactura) {
                 <div class="pdf-section-title" style="color: #0284c7;">■ DOCUMENTOS DE COTIZACIÓN</div>
                 <div style="display: flex; flex-direction: column; align-items: center; margin-top: 15px; margin-bottom: 15px;">${cotHTML}</div>
                 
-                <div class="pdf-section-title" style="color: #0284c7;">■ ANEXO FOTOGRÁFICO (EVIDENCIAS)</div>
+                <div class="pdf-section-title" style="color: #0284c7;">■ ANEXO (FOTOS Y VIDEOS)</div>
                 <div style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;">${evHTML}</div>
             </div>
             `;
@@ -2387,8 +2370,8 @@ function agregarCotizacionFila() {
                     <div id="preview-pdf-${idx}" style="margin-top:8px;"></div>
                 </div>
                 <div style="flex:1;">
-                    <label style="color:#40916c;">Fotos Evidencia (varias)</label>
-                    <input type="file" name="fotos_evidencia_${idx}[]" multiple accept="image/*" style="width:100%; padding:5px; background:white; color:black; border-radius:5px;" onchange="previsualizarFotosEvidencia(this, 'preview-ev-${idx}')">
+                    <label style="color:#40916c;">Fotos/Videos Evidencia (varios)</label>
+                    <input type="file" name="fotos_evidencia_${idx}[]" multiple accept="image/*,video/*" style="width:100%; padding:5px; background:white; color:black; border-radius:5px;" onchange="previsualizarFotosEvidencia(this, 'preview-ev-${idx}')">
                     <div id="preview-ev-${idx}" style="margin-top:8px; display:flex; flex-wrap:wrap; gap:5px;"></div>
                 </div>
             </div>
@@ -2472,18 +2455,55 @@ function previsualizarFotosEvidencia(input, previewId) {
         wrapper.style.position = 'relative';
         wrapper.style.display = 'inline-block';
 
-        const img = document.createElement('img');
-        img.src = url;
-        img.style.cssText = 'width:60px; height:60px; border-radius:4px; border:1px solid #40916c; cursor:pointer; object-fit:cover; display:block;';
-        img.title = file.name;
-        img.onclick = function () {
-            const lb = document.getElementById('lightbox-modal');
-            const lbImg = document.getElementById('lightbox-img');
-            if (lb && lbImg) {
-                lbImg.src = url;
-                lb.style.display = 'flex';
-            }
-        };
+        let mediaEl;
+        if (file.type.startsWith('video/')) {
+            mediaEl = document.createElement('video');
+            mediaEl.src = url;
+            mediaEl.style.cssText = 'width:60px; height:60px; border-radius:4px; border:1px solid #40916c; cursor:pointer; object-fit:cover; display:block;';
+            mediaEl.muted = true;
+            mediaEl.autoplay = true;
+            mediaEl.loop = true;
+            mediaEl.title = file.name;
+            mediaEl.onclick = function() {
+                const lb = document.getElementById('lightbox-modal');
+                const lbImg = document.getElementById('lightbox-img');
+                if (lb && lbImg) {
+                    lbImg.style.display = 'none';
+                    let vidEl = document.getElementById('lightbox-vid');
+                    if (!vidEl) {
+                        vidEl = document.createElement('video');
+                        vidEl.id = 'lightbox-vid';
+                        vidEl.className = 'lightbox-content';
+                        vidEl.controls = true;
+                        vidEl.style.cssText = 'max-width:90%; max-height:90%; display:block; margin:auto;';
+                        lbImg.parentNode.appendChild(vidEl);
+                    }
+                    vidEl.style.display = 'block';
+                    vidEl.src = url;
+                    vidEl.play();
+                    lb.style.display = 'flex';
+                }
+            };
+        } else {
+            mediaEl = document.createElement('img');
+            mediaEl.src = url;
+            mediaEl.style.cssText = 'width:60px; height:60px; border-radius:4px; border:1px solid #40916c; cursor:pointer; object-fit:cover; display:block;';
+            mediaEl.title = file.name;
+            mediaEl.onclick = function () {
+                const lb = document.getElementById('lightbox-modal');
+                const lbImg = document.getElementById('lightbox-img');
+                if (lb && lbImg) {
+                    let vidEl = document.getElementById('lightbox-vid');
+                    if (vidEl) {
+                        vidEl.pause();
+                        vidEl.style.display = 'none';
+                    }
+                    lbImg.style.display = 'block';
+                    lbImg.src = url;
+                    lb.style.display = 'flex';
+                }
+            };
+        }
 
         const btnEliminar = document.createElement('button');
         btnEliminar.type = 'button';
@@ -2502,7 +2522,7 @@ function previsualizarFotosEvidencia(input, previewId) {
             wrapper.remove();
         };
 
-        wrapper.appendChild(img);
+        wrapper.appendChild(mediaEl);
         wrapper.appendChild(btnEliminar);
         previewDiv.appendChild(wrapper);
     }

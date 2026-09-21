@@ -823,6 +823,51 @@ def enviar_correo_corp_rechaza_admin(correo_admin, nombre_admin, ticket, unidad,
     """
     return disparar_correo(correo_admin, asunto, cuerpo_html)
 
+def enviar_correo_corp_rechaza_supervisor(correo_supervisor, nombre_supervisor, ticket, unidad, proveedor, motivo, precios_recomendados):
+    """Notifica al Supervisor que Corporativos rechazó la cotización y recomienda nuevos precios."""
+    if not correo_supervisor or correo_supervisor.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    precios_html = ""
+    if precios_recomendados and len(precios_recomendados) > 0:
+        precios_html = "<div style='background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 15px 0; border-radius: 4px;'><strong style='color: #b45309;'>Precios Recomendados por Corporativo:</strong><ul style='margin: 10px 0 0 20px;'>"
+        for p in precios_recomendados:
+            precios_html += f"<li>Cotización {int(p.get('idx', 0)) + 1}: <strong style='color: #f59e0b;'>${p.get('precio_recomendado', 'N/A')} MXN</strong></li>"
+        precios_html += "</ul></div>"
+
+    asunto = f"❌ COTIZACIÓN RECHAZADA POR CORPORATIVOS - Requiere Corrección (Unidad 8090-{unidad})"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #ef4444; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">COTIZACIÓN RECHAZADA POR CORPORATIVOS</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre_supervisor}</strong>,</p>
+                <p>Corporativos ha <strong>rechazado</strong> la cotización que asignaste y solicita que corrijas los números de orden con base en los precios recomendados:</p>
+
+                <ul style="background-color: #fef2f2; padding: 15px 30px; border-radius: 8px; border: 1px solid #fecaca; list-style-type: none; margin-left: 0; margin-bottom: 15px;">
+                    <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Proveedor:</strong> {proveedor}</li>
+                </ul>
+
+                <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                    <strong style="color: #991b1b;">Motivo del Rechazo:</strong>
+                    <p style="margin: 10px 0 0 0; color: #7f1d1d; font-style: italic;">"{motivo}"</p>
+                </div>
+
+                {precios_html}
+
+                <p>Por favor contacta al taller para renegociar los precios. Tendrás que subir este reporte como una cotización nueva una vez acordado el ajuste.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_supervisor, asunto, cuerpo_html)
+
 def enviar_correo_corp_aprobado(correo_supervisor, nombre_supervisor, ticket, unidad, proveedor, precio):
     """Notifica al Supervisor que Corporativos aprobó la cotización."""
     if not correo_supervisor or correo_supervisor.strip() in ["", "No proporcionado"]:
@@ -851,6 +896,106 @@ def enviar_correo_corp_aprobado(correo_supervisor, nombre_supervisor, ticket, un
 
                 <p style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b; color: #92400e;">
                     <strong>Próximos pasos:</strong> Ingresa al sistema y marca la unidad como lista cuando esté disponible para el cliente.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_supervisor, asunto, cuerpo_html)
+
+def enviar_correo_taller_aprobado(correo_taller, nombre_taller, ticket, unidad, vehiculo_info):
+    """Notifica al Taller/Proveedor que su cotización fue aprobada y pueden iniciar el trabajo."""
+    if not correo_taller or correo_taller.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    asunto = f"🟢 LUZ VERDE - Autorización para Iniciar Trabajo (Unidad 8090-{unidad})"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #10b981; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">COTIZACIÓN APROBADA</h2>
+                <p style="color: #d1fae5; margin: 5px 0 0 0;">Puedes iniciar con el trabajo</p>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre_taller}</strong>,</p>
+                <p>Te informamos que tu cotización ha sido <strong>APROBADA</strong> por la administración financiera. 
+                <strong>Ya puedes empezar a trabajar en la unidad.</strong></p>
+
+                <ul style="background-color: #f0fdf4; padding: 15px 30px; border-radius: 8px; border: 1px solid #86efac; list-style-type: none; margin-left: 0;">
+                    <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Vehículo:</strong> {vehiculo_info}</li>
+                </ul>
+
+                <p style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b; color: #92400e;">
+                    <strong>NOTA IMPORTANTE:</strong> Cuando el arreglo o mantenimiento ya termine, por favor recuerda <strong>marcar la unidad como ya liberada</strong> en el sistema (botón de Entregar Material/Servicio).
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_taller, asunto, cuerpo_html)
+
+def enviar_correo_taller_facturar(correo_taller, nombre_taller, ticket, unidad):
+    """Notifica al Taller/Proveedor que el PIN fue validado y ya pueden subir la factura final."""
+    if not correo_taller or correo_taller.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    asunto = f"🟢 TRABAJO ENTREGADO - Sube tu Factura Fiscal (Unidad 8090-{unidad})"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #0284c7; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">UNIDAD ENTREGADA</h2>
+                <p style="color: #e0f2fe; margin: 5px 0 0 0;">El Código PIN ha sido validado exitosamente</p>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre_taller}</strong>,</p>
+                <p>Te confirmamos que el Supervisor/Chofer ha <strong>validado el código PIN de liberación</strong> para la unidad.</p>
+
+                <ul style="background-color: #f0f9ff; padding: 15px 30px; border-radius: 8px; border: 1px solid #bae6fd; list-style-type: none; margin-left: 0;">
+                    <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                </ul>
+
+                <p style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b; color: #92400e;">
+                    <strong>Próximo Paso:</strong> Ya puedes ingresar al sistema y subir tu <strong>Factura Fiscal Final (PDF/XML)</strong> correspondiente a este trabajo para programar el pago.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_taller, asunto, cuerpo_html)
+
+def enviar_correo_liberacion_supervisor(correo_supervisor, nombre_supervisor, ticket, unidad, codigo, nombre_chofer):
+    """Notifica al Supervisor el PIN de liberación generado para que pueda ayudar al chofer si es necesario."""
+    if not correo_supervisor or correo_supervisor.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    asunto = f"🔑 RESPALDO DE PIN - Unidad 8090-{unidad} (Ticket: {ticket})"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #f59e0b; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">RESPALDO DE PIN DE LIBERACIÓN</h2>
+                <p style="color: #fef3c7; margin: 5px 0 0 0;">Para tu conocimiento y validación</p>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre_supervisor}</strong>,</p>
+                <p>El taller acaba de marcar la unidad como lista y se ha generado el siguiente PIN de liberación para el operador <strong>{nombre_chofer}</strong>:</p>
+
+                <div style="background-color: #f3f4f6; text-align: center; padding: 15px; margin: 20px 0; border-radius: 8px; border: 2px dashed #9ca3af;">
+                    <span style="font-size: 32px; letter-spacing: 5px; font-weight: bold; color: #111827;">{codigo}</span>
+                </div>
+
+                <p style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b; color: #92400e;">
+                    <strong>Nota:</strong> Este correo es un respaldo para ti. Si el operador tiene problemas para ver su correo, puedes usar este PIN para validar y liberar la unidad en el sistema.
                 </p>
             </div>
         </div>

@@ -39,12 +39,15 @@ async function cargarCotizaciones10k() {
                 let indStr = cots.map((c, i) => `Cot ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
                 let tdPrecioInd = `<td><small style="color:#a3b1c6;">${indStr}</small></td>`;
 
-                let btnStyle = "width:100% !important; font-size:12px !important; font-weight:bold !important; padding:0 !important; margin-bottom:5px !important; border-radius:5px !important; box-sizing:border-box !important; height:36px !important; display:flex !important; align-items:center !important; justify-content:center !important; border:none !important; cursor:pointer !important; color:white !important;";
+                let btnStyle = "width:100% !important; height:38px !important; min-height:38px !important; max-height:38px !important; font-size:12px !important; font-weight:bold !important; padding:0 !important; margin:0 0 5px 0 !important; border-radius:5px !important; box-sizing:border-box !important; display:flex !important; align-items:center !important; justify-content:center !important; text-align:center !important; border:none !important; cursor:pointer !important; line-height:normal !important; color:white !important; transition: opacity 0.2s !important;";
 
-                let btnAprobar = `<button class="btn-success" style="${btnStyle}" onclick="accion10k('${f.id}', 'aprobar')">✔️ Aprobar a Corporativos</button>`;
-                let btnRechazar = `<button class="btn-danger" style="${btnStyle}" onclick="abrirModalRechazo10kDinamico('${f.id}')">✖ Rechazar (Sugerir Precios)</button>`;
-                let btnCaras = `<button class="btn-danger-modal" style="${btnStyle}" onclick="abrirCancelacion10k('${f.id}')">Cancelar Ticket (Cara)</button>`;
-                let acciones = `<div style="display:flex; flex-direction:column;">${btnAprobar}${btnRechazar}${btnCaras}</div>`;
+                let hoverStr = `onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'"`;
+
+                let btnVerDetalles = `<button style="${btnStyle} background:#0ea5e9 !important;" ${hoverStr} onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
+                let btnAprobar = `<button style="${btnStyle} background:#10b981 !important;" ${hoverStr} onclick="accion10k('${f.id}', 'aprobar')">✔️ Aprobar a Corporativos</button>`;
+                let btnRechazar = `<button style="${btnStyle} background:#ef4444 !important;" ${hoverStr} onclick="abrirModalRechazo10kDinamico('${f.id}')">✖ Rechazar (Sugerir Precios)</button>`;
+                let btnCaras = `<button style="${btnStyle} background:#b91c1c !important;" ${hoverStr} onclick="abrirCancelacion10k('${f.id}')">Cancelar Ticket (Cara)</button>`;
+                let acciones = `<div style="display:flex; flex-direction:column;">${btnVerDetalles}${btnAprobar}${btnRechazar}${btnCaras}</div>`;
 
                 tbody.innerHTML += `<tr><td><strong>${f.id}</strong></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${f.titulo}</td><td><strong>$${pFormat} MXN</strong></td>${tdPrecioInd}<td>${acciones}</td></tr>`;
             });
@@ -60,6 +63,7 @@ async function cargarCotizaciones10k() {
 function accion10k(id, accion) {
     if (accion === 'aprobar') {
         if (!confirm("¿Seguro que deseas APROBAR esta cotización? Pasará a Corporativos.")) return;
+        if (typeof mostrarLoaderDinamico === 'function') mostrarLoaderDinamico("Procesando...", "Enviando a Corporativos...");
         enviarDecision10k(id, accion, "");
     }
 }
@@ -67,8 +71,6 @@ function accion10k(id, accion) {
 function abrirModalRechazo10kDinamico(id) {
     const f = facturas10kGlobal.find(x => String(x.id) === String(id));
     if (!f) return;
-
-    document.getElementById('hidden-rechazar-10k-id').value = id;
 
     let html = `<div style="color: #94a3b8; margin-bottom:15px; font-size:14px;">Ingresa el precio recomendado para cada cotización (opcional) y el motivo general del rechazo.</div>`;
 
@@ -147,18 +149,20 @@ async function enviarDecision10k(id, accion, mensaje, preciosRec = []) {
 
         document.getElementById('modal-rechazar-10k').style.display = 'none';
 
-        if (typeof cerrarLoaderDinamico === 'function') cerrarLoaderDinamico();
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
 
-        if (data.status === 'success') {
-            alert(data.message);
-            cargarCotizaciones10k();
-            if (typeof cargarFacturas === 'function') cargarFacturas();
-        } else {
-            alert("Error: " + data.message);
-        }
+        setTimeout(() => {
+            if (data.status === 'success') {
+                alert(data.message);
+                cargarCotizaciones10k();
+                if (typeof cargarFacturas === 'function') cargarFacturas();
+            } else {
+                alert("Error: " + data.message);
+            }
+        }, 50);
     } catch (e) {
         console.error(e);
-        if (typeof cerrarLoaderDinamico === 'function') cerrarLoaderDinamico();
-        alert("Error de conexión al procesar la decisión.");
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
+        setTimeout(() => alert("Error de conexión al procesar la decisión."), 50);
     }
 }

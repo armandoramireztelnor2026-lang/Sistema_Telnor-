@@ -302,8 +302,11 @@
         </div>
     </div>
 
-    <div id="lightbox-modal" class="lightbox-overlay" onclick="cerrarLightbox(event)"><span class="lightbox-close"
-            onclick="cerrarLightbox(event)">&times;</span><img id="lightbox-img" class="lightbox-content" src=""></div>
+    <div id="lightbox-modal" class="lightbox-overlay" onclick="cerrarLightbox(event)">
+        <span class="lightbox-close" onclick="cerrarLightbox(event)">&times;</span>
+        <img id="lightbox-img" class="lightbox-content" src="">
+        <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
+    </div>
 
     <!-- NUEVO: MODAL PDF PERFIL PROVEEDOR -->
     <div id="modal-mi-perfil" class="modal-overlay">
@@ -426,10 +429,10 @@
     </script>
 
     <!-- Módulos de Facturación -->
-    <script src="/static/facturas_herramientas.js?v=1788550327"></script>
+    <script src="/static/facturas_herramientas.js?v=5"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
-    <script src="/static/facturas_pdf.js?v=1788550327"></script>
-    <script src="/static/facturas_principal.js?v=74024"></script>
+    <script src="/static/facturas_pdf.js?v=3"></script>
+    <script src="/static/facturas_principal.js?v=10"></script>
 </body>
 
 </html>
