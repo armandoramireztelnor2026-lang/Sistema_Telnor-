@@ -139,16 +139,6 @@ async function cargarFacturas() {
                     if (f.estado === 'Archivado' && tbodyArchivo && rolUsuario === 'administracion') {
                         let btnVerExp = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
                             <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; color:white; margin:0; width:100%;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>
-                            <div class="dropdown-container" style="position:relative;">
-                                <button class="btn-dropdown-toggle btn-info" style="font-size:0.8em; padding:8px 10px; background:#f59e0b; border:none; color:#111; margin:0; width:100%;" onclick="toggleDropdownFixed(event, this)">✏️ Editar Sección ▼</button>
-                                <div class="dropdown-menu-fixed">
-                                    <button onclick="abrirModalEditarAdmin('${f.id}', 1)">1. Reporte de Incidencia</button>
-                                    <button onclick="abrirModalEditarAdmin('${f.id}', 2)">2. Diagnóstico y Cotización</button>
-                                    <button onclick="abrirModalEdicionSeccion('${f.id}', 'orden')">3. Orden de Pedido</button>
-                                    <button onclick="abrirModalEdicionSeccion('${f.id}', 'factura')">4. Factura Fiscal</button>
-                                    <button onclick="abrirModalEdicionSeccion('${f.id}', 'doc_contable')">5. Documento Contable</button>
-                                </div>
-                            </div>
                             <button class="btn-danger-sm" style="width:100%; background:#ef4444; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar</button>
                         </div>`;
                         let idReporteAsociado = obtenerIdReporte(f) || 'N/A';
@@ -1064,22 +1054,17 @@ function abrirRevisionAdmin(idFactura) {
     if (container) {
         let inputsHtml = '';
         let cots = f.cotizaciones || [{ precio: f.precio }];
+
         cots.forEach((cot, idx) => {
             inputsHtml += `
                 <div class="cotizacion-admin-row" data-idx="${idx}" style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #1f395a;">
                     <h4 style="color:#0ea5e9; margin-bottom:10px;">Cotización ${idx + 1}: ${cot.titulo || 'Sin Título'} ($${formatearMoneda(cot.precio)})</h4>
-                    
+
                     <label style="color:#40916c; font-weight:bold; display:block; margin-bottom:5px;">Asignar Número de Orden</label>
                     <input type="text" class="input-num-orden-multi" placeholder="Escribe el número de orden..." oninput="validarOrden()" style="width: 100%; padding: 10px; border-radius: 8px; margin-bottom:10px;">
-                    
+
                     <label style="color:#40916c; font-weight:bold; display:block; margin-bottom:5px;">Solicitud de Pedido</label>
                     <input type="text" class="input-cotizacion-admin-multi" placeholder="Escriba el número aquí..." oninput="validarOrden()" style="width: 100%; padding: 10px; background: #0b1c30; color: white; border: 1px solid #1f395a; border-radius: 8px; margin-bottom:10px;">
-                    
-                    <label style="color:#0ea5e9; font-weight:600; margin-bottom:5px; display:block;">Subir PDF de Orden de Pedido:</label>
-                    <input type="file" class="input-pdf-admin-multi" accept=".pdf" onchange="previsualizarPDFOrden(this, ${idx})" style="width: 100%; padding: 10px; background: #0b1c30; color: white; border: 1px solid #1f395a; border-radius: 8px;">
-                    <div id="preview-pdf-orden-${idx}" style="margin-top:10px; display:none;">
-                        <iframe id="iframe-pdf-orden-${idx}" width="100%" height="400px" style="border:1px solid #1f395a; border-radius:8px; background:#fff;"></iframe>
-                    </div>
                 </div>
             `;
         });
@@ -1139,8 +1124,8 @@ function validarOrden() {
     rows.forEach(row => {
         let numOrd = row.querySelector('.input-num-orden-multi').value.trim();
         let numCot = row.querySelector('.input-cotizacion-admin-multi').value.trim();
-        let pdf = row.querySelector('.input-pdf-admin-multi').files[0];
-        if (numOrd.length === 0 || numCot.length === 0 || !pdf) {
+
+        if (numOrd.length === 0 || numCot.length === 0) {
             allValid = false;
         }
     });
@@ -1167,12 +1152,6 @@ function confirmarFacturaAdmin() {
     rows.forEach((row, idx) => {
         formData.append('numero_orden[]', row.querySelector('.input-num-orden-multi').value.trim());
         formData.append('numero_cotizacion[]', row.querySelector('.input-cotizacion-admin-multi').value.trim());
-        let pdf = row.querySelector('.input-pdf-admin-multi').files[0];
-        if (pdf) {
-            formData.append('pdf_orden[]', pdf);
-        } else {
-            formData.append('pdf_orden[]', new Blob([]), "vacio.pdf"); // Empty blob to keep arrays synced
-        }
     });
 
     fetch('/api/facturas/confirmar_admin', {
