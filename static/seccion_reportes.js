@@ -88,37 +88,58 @@ function renderizarTablaReportes(lista) {
 
         // Determinar el Estado
         let estado = 'N/A';
-        if (f.is_unassigned) {
-            estado = "Pendiente de Cotización";
-        } else if (f.entregado === 'Sí') {
-            estado = "Finalizado / Histórico";
-        } else if (f.estado === 'Cancelado_Cotizacion_Cara') {
-            estado = "Incosteable";
-        } else {
-            let apAdmin = f.aprobado_admin !== undefined ? f.aprobado_admin : (f.estado === 'Confirmada');
-            let apCorp = f.aprobado_corp !== undefined ? f.aprobado_corp : (f.estado === 'Confirmada');
-            let confirmadaTotal = (apAdmin && apCorp);
+        let tieneCotizacion = f.cotizaciones && f.cotizaciones.length > 0;
+        let isCara = f.precio && parseFloat(f.precio) > 10000;
+        let apSuper = f.aprobado_super !== undefined ? f.aprobado_super : false;
+        let apAdmin = f.aprobado_admin !== undefined ? f.aprobado_admin : false;
+        let apCorp = f.aprobado_corp !== undefined ? f.aprobado_corp : false;
 
-            if (confirmadaTotal) {
-                estado = "Esperando Reparación";
+        if (f.estado === 'Cancelado_Cotizacion_Cara') {
+            estado = "Incosteable";
+        } else if (f.estado === 'Archivado') {
+            estado = "Finalizado / Histórico";
+        } else if (f.is_unassigned) {
+            if (!f.asignado_a) {
+                estado = "Pendiente / Asig. Taller";
             } else {
-                let tieneCotizacion = f.cotizaciones && f.cotizaciones.length > 0;
-                if (!tieneCotizacion) {
-                    estado = "Pendiente de Cotización";
+                estado = "Pendiente de Cotización";
+            }
+        } else {
+            // Está en facturas.json
+            if (!tieneCotizacion || f.estado === 'Rechazado' || f.estado === 'Rechazada_Por_Cotizacion_Normal_U_Otra') {
+                estado = "Pendiente de Cotización";
+            } else {
+                if (f.estado === 'Confirmada') {
+                    if (!f.codigo_liberacion) {
+                        estado = "En Reparación (Taller)";
+                    } else if (f.entregado !== 'Sí') {
+                        estado = "Validación / Pin (Chofer)";
+                    } else {
+                        if (!f.factura_pdf || f.validacion_fiscal === 'Rechazada') {
+                            estado = "Esperando Facturación (Taller)";
+                        } else if (f.validacion_fiscal !== 'Aprobada') {
+                            estado = "Esperando Rev/Factura";
+                        } else if (!f.numero_doc50) {
+                            estado = "Esperando Num. Contable";
+                        } else {
+                            estado = "Finalizado / Histórico";
+                        }
+                    }
                 } else {
-                    if (!apAdmin || !apCorp) {
-                        estado = "Esperando Aprobación";
+                    if (isCara) {
+                        if (!apSuper) {
+                            estado = "Esperando / Aprob. Cotizacion";
+                        } else if (!apAdmin) {
+                            estado = "Esperando / Aprob. Cotizacion (Admin)";
+                        } else if (!apCorp) {
+                            estado = "Esperando / Aprob. Cotizacion (Corp)";
+                        } else {
+                            estado = "En Reparación (Taller)";
+                        }
+                    } else {
+                        estado = "Esperando / Aprob. Cotizacion";
                     }
                 }
-            }
-            if(f.estado === 'Confirmada' && f.entregado !== 'Sí') {
-                estado = "Validación y PIN";
-            }
-            if(f.factura_pdf && f.liberado !== 'Sí') {
-                estado = "Liberación Doc";
-            }
-            if(f.liberado === 'Sí' && !f.numero_doc50) {
-                estado = "Cierre Interno";
             }
         }
         
