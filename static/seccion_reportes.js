@@ -261,7 +261,6 @@ function renderizarTablaReportes(lista) {
                 <td style="vertical-align:top; padding-top:15px;">${tiempoTaller}</td>
                 <td style="vertical-align:top; padding-top:15px;">${fechaSalida}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumPedido}</td>
-                <td style="vertical-align:top; padding-top:15px;">${htmlBtnPdfPedido}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumOrden}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumFactura}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlBtnPdfFactura}</td>
