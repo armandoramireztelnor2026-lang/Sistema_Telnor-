@@ -911,8 +911,18 @@
                     onclick="confirmarFacturaAdmin()" disabled style="width:100%;">Confirmar Factura</button>
                 <button class="btn-danger-modal" id="btn-cancelar-cotizacion" onclick="cancelarTicketAdmin()">Cancelar
                     Ticket (Cotización Cara)</button>
-
+                <button class="btn-danger-modal" onclick="abrirRechazoSuper()" style="background:#b45309;">Rechazar y Sugerir Precios</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL RECHAZO SUPERVISOR -->
+    <div id="modal-rechazo-super" class="modal-overlay" style="display:none; z-index: 10000000;">
+        <div class="modal-box large">
+            <button class="btn-close-modal" onclick="document.getElementById('modal-rechazo-super').style.display='none'">×</button>
+            <h3 class="modal-header">Rechazar Cotización y Sugerir Precio</h3>
+            <input type="hidden" id="rechazo-super-id">
+            <div id="contenido-rechazo-super"></div>
         </div>
     </div>
 

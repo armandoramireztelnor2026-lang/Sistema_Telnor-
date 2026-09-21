@@ -54,6 +54,58 @@
             "comentarios": "Hola otra vez",
             "autor_comentario": "Jesus  Ramirez",
             "eliminado_por": ""
+        },
+        {
+            "id": "20260921131359",
+            "proveedor": "Autopartes y Motores B.C.",
+            "unidad": "8090-1231",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "n (+1 m\u00e1s)",
+            "retro": "[TICKET:REP-20260921123257]\r\nREPORTE ORIGINAL DEL CHOFER: bn",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 6723.0,
+            "fecha": "2026-09-21",
+            "numero_orden": "",
+            "compania": "RUMN",
+            "aprobado_admin": false,
+            "aprobado_corp": true,
+            "timestamp": "2026-09-21T13:13:59.964958",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "",
+            "entregado": "No",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 2123.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20260921123257]\r\nREPORTE ORIGINAL DEL CHOFER: bn",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1790021639848_0_Grabacion_de_pantalla_2026-03-27_224117.mp4"
+                    ],
+                    "pdf_cotizacion": "1790021639848_0_Meta_1.5_Analisis_del_Modulo_3_Infraestructura_global_de_AWS.pdf"
+                },
+                {
+                    "id_cotizacion": "2",
+                    "precio": 4600.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1790021639848_1_Credencial.jpeg"
+                    ],
+                    "pdf_cotizacion": "1790021639848_1_Meta_1.5_Analisis_del_Modulo_3_Infraestructura_global_de_AWS.pdf"
+                }
+            ]
         }
     ]
 }

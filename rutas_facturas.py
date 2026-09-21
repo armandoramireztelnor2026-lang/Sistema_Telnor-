@@ -242,7 +242,7 @@ def nueva_factura():
         if u["rol"] == "administracion":
             subrol = u["datos_perfil"].get("subrol", "Administración")
             ciudad_admin = u["datos_perfil"].get("ciudad", "")
-            if subrol == "Jefatura" or ciudad_admin == proveedor_ciudad:
+            if subrol == "Supervisor" and ciudad_admin == proveedor_ciudad:
                 correo = u["datos_perfil"].get("correo")
                 if correo:
                     nombre = f"{u['datos_perfil'].get('nombres', '')} {u['datos_perfil'].get('apellido_paterno', '')}".strip()
@@ -781,6 +781,60 @@ def rechazar_corp():
                     enviar_correo_factura_rechazada_corp(correo_prov, proveedor_nombre, unidad_texto, motivo, precios_recomendados)
 
                 return jsonify({"status": "success", "message": "Gasto rechazado. El ticket fue eliminado y el proveedor fue notificado con tus recomendaciones."})
+    return jsonify({"status": "error", "message": "Registro no encontrado."})
+
+@facturas_bp.route("/api/facturas/rechazar_super", methods=["POST"])
+def rechazar_super():
+    if "usuario" not in session or session["usuario"]["rol"] != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"})
+    
+    subrol = session["usuario"]["datos_perfil"].get("subrol", "")
+    if subrol != "Supervisor":
+        return jsonify({"status": "error", "message": "Solo el supervisor puede rechazar con recomendaciones."})
+
+    factura_id = request.json.get("id")
+    motivo = request.json.get("motivo", "Motivo no especificado por el Supervisor.")
+    precios_recomendados = request.json.get("precios_recomendados", [])
+
+    data = leer_json("facturas.json")
+
+    for f in data.get("facturas", []):
+        if f["id"] == factura_id:
+            nuevas_facturas = []
+            for f2 in data.get("facturas", []):
+                if f2["id"] == factura_id:
+                    for cot in f2.get("cotizaciones", []):
+                        if cot.get("pdf_cotizacion"):
+                            ruta = os.path.join(CARPETA_FACTURAS, cot["pdf_cotizacion"])
+                            if os.path.exists(ruta): os.remove(ruta)
+                        for foto in cot.get("fotos_evidencia", []):
+                            ruta = os.path.join(CARPETA_FACTURAS, foto)
+                            if os.path.exists(ruta): os.remove(ruta)
+                    
+                    for tipo in ["fotos_cotizacion", "fotos_evidencia"]:
+                        for foto in f2.get(tipo, []):
+                            ruta = os.path.join(CARPETA_FACTURAS, foto)
+                            if os.path.exists(ruta): os.remove(ruta)
+                else:
+                    nuevas_facturas.append(f2)
+            
+            data["facturas"] = nuevas_facturas
+            escribir_json("facturas.json", data)
+
+            proveedor_nombre = f.get('proveedor', '')
+            unidad_texto = str(f.get('unidad', '')).replace('8090-', '')
+            usuarios_data = leer_json('usuarios.json')
+            correo_prov = ""
+
+            for u in usuarios_data.get('usuarios', []):
+                if u['rol'] == 'proveedores' and u['datos_perfil'].get('nombre_proveedor') == proveedor_nombre:
+                    correo_prov = u['datos_perfil'].get('correo', '')
+                    break
+
+            if correo_prov:
+                enviar_correo_factura_rechazada_corp(correo_prov, proveedor_nombre, unidad_texto, motivo, precios_recomendados)
+
+            return jsonify({"status": "success", "message": "La cotización fue rechazada y eliminada. El taller recibió tus recomendaciones por correo."})
 
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
