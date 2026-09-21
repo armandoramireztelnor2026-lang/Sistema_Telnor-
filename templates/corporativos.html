@@ -90,6 +90,21 @@
         </div>
     </div>
 
+    <!-- MODAL CONFIRMAR CANCELACIÓN COTIZACIÓN CARA -->
+    <div id="modal-confirmar-cancelacion" class="modal-overlay" style="z-index: 9999999;">
+        <div class="modal-box">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-confirmar-cancelacion')">×</button>
+            <h3 class="modal-header" style="color: #ef4444;">⚠️ Confirmar Cancelación</h3>
+            <p style="margin-top:15px; font-size:1.1em; color:#e0e6ed;">¿Estás seguro de <strong>CANCELAR</strong> este ticket por ser una cotización cara?</p>
+            <p style="margin-top:10px; color:#a3b1c6;">El ticket se detendrá por completo y se enviará directamente a la pestaña de "Tickets Cancelados" en el Archivo General.</p>
+
+            <div class="modal-actions" style="margin-top:25px;">
+                <button class="btn-info" onclick="cerrarModal('modal-confirmar-cancelacion')" style="background:#475569; border:none; flex:1;">Volver atrás</button>
+                <button class="btn-danger-modal" onclick="ejecutarCancelacionTicket()" style="background:#ef4444; border:none; flex:1;">Sí, Cancelar Ticket</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL LECTURA DETALLES (UNIVERSAL) -->
     <div id="modal-detalles-general" class="modal-overlay">
         <div class="modal-box large">
