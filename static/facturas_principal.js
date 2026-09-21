@@ -994,7 +994,6 @@ function generarHtmlDetalles(f, modo, precioBonito) {
                 <div style="color: #9ca3af; font-weight: bold; font-size:1.1em; margin-bottom:10px;">${tituloSec3}</div>
                 <div class="modal-info-line" style="font-size:16px;"><strong>N&uacute;m. Orden de Trabajo:</strong> <span style="color:#9ca3af; font-weight:bold;">${numOrd || 'Pendiente'}</span></div>
                 ${numCot ? `<div class="modal-info-line" style="font-size:16px; margin-top:10px;"><strong>No. de Solicitud de Pedido:</strong> <span style="color:#9ca3af; font-weight:bold;">${numCot}</span></div>` : ''}
-                ${pdfOrd ? `<div style="margin-top:15px;"><button type="button" class="btn-success-modal" style="background:#000000; border:1px solid #374151; padding:10px 20px; border-radius:8px; color:#ffffff; font-weight:bold; cursor:pointer;" onclick="abrirVisorPDF('/static/facturas_archivos/${pdfOrd}')">&#128196; Ver Solicitud de Pedido / Orden</button></div>` : ''}
             </div>
             `;
         }
