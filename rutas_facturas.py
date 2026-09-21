@@ -19,6 +19,7 @@ from notificaciones import (
     enviar_correo_factura_fiscal_subida,
     enviar_correo_factura_fiscal_rechazada,
     enviar_correo_factura_fiscal_aprobada,
+    enviar_correo_doc50_proveedor,
     enviar_correo_esperando_liberacion,
     enviar_correo_notificacion_corp_documentos,
     enviar_correo_recordatorio_doc_contable,
@@ -1062,6 +1063,18 @@ def doc50():
             f['estado'] = 'Archivado'
             f['fecha_cierre'] = datetime.datetime.now().strftime('%Y-%m-%d')
             escribir_json('facturas.json', data)
+
+            proveedor_nombre = f.get('proveedor', '')
+            usuarios_data = leer_json("usuarios.json")
+            correo_prov = ""
+            for u in usuarios_data.get("usuarios", []):
+                if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == proveedor_nombre:
+                    correo_prov = u.get('datos_perfil', {}).get('correo', '')
+                    break
+            
+            if correo_prov:
+                enviar_correo_doc50_proveedor(correo_prov, proveedor_nombre, f.get("unidad", "S/N").replace("8090-", ""), f.get("id", "N/A"), nums_doc50[0] if nums_doc50 else "N/A")
+
             return jsonify({'status': 'success', 'message': 'Documentos Contables subidos. El proceso ha concluido para todas las cotizaciones.'})
 
     return jsonify({'status': 'error', 'message': 'Factura no encontrada.'})

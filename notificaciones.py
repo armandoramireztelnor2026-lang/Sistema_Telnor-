@@ -1035,3 +1035,36 @@ def enviar_correo_factura_fiscal_aprobada(correo_proveedor, nombre_proveedor, un
     </html>
     """
     return disparar_correo(correo_proveedor, asunto, cuerpo_html)
+
+def enviar_correo_doc50_proveedor(correo_proveedor, nombre_proveedor, unidad, ticket, num_doc50):
+    """Notifica al Taller/Proveedor que su ticket recibió el Número de Documento Contable 50."""
+    if not correo_proveedor or correo_proveedor.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    asunto = f"💰 TRÁMITE DE PAGO EN PROCESO (Doc 50) - Unidad 8090-{unidad} (Ticket: {ticket})"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #2563eb; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">PAGO EN PROCESO</h2>
+                <p style="color: #bfdbfe; margin: 5px 0 0 0;">Documento Contable 50 Asignado</p>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre_proveedor}</strong>,</p>
+                <p>Te informamos que el siguiente ticket ha concluido todas sus revisiones y <strong>el trámite de pago ya se encuentra en proceso.</strong></p>
+
+                <ul style="background-color: #eff6ff; padding: 15px 30px; border-radius: 8px; border: 1px solid #bfdbfe; list-style-type: none; margin-left: 0;">
+                    <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                </ul>
+
+                <p style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #16a34a; color: #166534;">
+                    <strong>¡Gracias por tu excelente servicio!</strong> El proceso interno ha concluido para este ticket.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_proveedor, asunto, cuerpo_html)

@@ -39,7 +39,6 @@ async function cargarSeccionReportes() {
             if (t.estado === 'Cancelado_Cotizacion_Cara') return false;
             if (t.estado === 'Rechazado') return false;
             if (t.estado === 'Eliminado') return false;
-            if (t.eliminado_por) return false;
 
             let tId = typeof obtenerIdReporte === 'function' ? obtenerIdReporte(t) : (t.id_reporte || t.id);
             if (!tId) return true;
@@ -149,10 +148,19 @@ function renderizarTablaReportes(lista) {
             }
         }
 
-        let isOperando = f.is_unassigned ? true : (f.entregado === 'Sí');
+        let isOperando = true;
+        if (f.is_unassigned) {
+            isOperando = !f.asignado_a;
+        } else {
+            isOperando = (f.entregado === 'Sí');
+        }
         let statusUnidad = isOperando
             ? '<span style="background:#10b981; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">Operando</span>'
             : '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">No Operando</span>';
+        let isLiberado = f.liberado_admin || f.estado === 'Archivado' || (f.numero_doc50 && f.numero_doc50 !== '');
+        let statusDocContable = isLiberado
+            ? '<span style="background:#10b981; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">Liberado</span>'
+            : '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">No Liberado</span>';
 
         // Variables for grouped data
         let htmlRetro = '';
@@ -226,7 +234,7 @@ function renderizarTablaReportes(lista) {
         let commentSafe = f.comentarios ? f.comentarios.replace(/'/g, "\\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, "") : "";
         let autorSafe = f.autor_comentario ? f.autor_comentario.replace(/'/g, "\\\'").replace(/"/g, "&quot;") : "";
         let btnText = hasComment ? "💬 Ver/Actualizar Comentario" : "💬 Añadir Comentario";
-        let btnComentarios = `<button onclick="abrirModalComentarios('${ticket}', ${is_unass}, '${commentSafe}', '${autorSafe}')" style="background:${btnColor}; color:white; border:none; padding:5px 10px; border-radius:12px; font-size:0.85em; cursor:pointer;">${btnText}</button>`;
+        let btnComentarios = `<button onclick="abrirModalComentarios('${f.id}', ${is_unass}, '${commentSafe}', '${autorSafe}')" style="background:${btnColor}; color:white; border:none; padding:5px 10px; border-radius:12px; font-size:0.85em; cursor:pointer;">${btnText}</button>`;
 
         if (f.eliminado_por && !hasComment) {
             btnComentarios = `<div style="max-width:150px; white-space:normal; font-size:0.85em; font-weight:600; word-wrap:break-word; margin-bottom:5px; color:#f87171;">Comentario eliminado por: ${f.eliminado_por}</div>` + btnComentarios;
@@ -264,6 +272,7 @@ function renderizarTablaReportes(lista) {
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumOrden}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumFactura}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlBtnPdfFactura}</td>
+                <td style="vertical-align:top; padding-top:15px;">${statusDocContable}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumContable}</td>
                 <td style="vertical-align:top; padding-top:15px;">${btnComentarios}</td>
             </tr>

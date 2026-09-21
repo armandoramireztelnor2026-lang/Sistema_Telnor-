@@ -1416,7 +1416,7 @@ function generarPDFSilencioso(idFactura) {
                     <div style="color: #374151; font-weight: bold; font-size:1.1em; margin-bottom:10px;">${tituloAdmin}</div>
                     <div class="pdf-line"><strong>N&uacute;m. Orden de Trabajo:</strong> <span>${numOrd || 'Pendiente'}</span></div>
                     ${numCot ? `<div class="pdf-line"><strong>No. de Solicitud de Pedido:</strong> <span>${numCot}</span></div>` : ''}
-                    <div class="pdf-line"><strong>PDF Orden de Pedido:</strong> <span style="word-break: break-all;">${pdfOrd || 'Sin documento'}</span></div>
+                    ${pdfOrd ? `<div class="pdf-line"><strong>PDF Orden de Pedido:</strong> <span style="word-break: break-all;">${pdfOrd}</span></div>` : ''}
                 </div>
                 `;
             }

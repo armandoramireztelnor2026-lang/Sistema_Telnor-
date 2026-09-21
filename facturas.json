@@ -39,14 +39,21 @@
                     "numero_orden": "1222111",
                     "numero_cotizacion_asignacion": "21131",
                     "factura_folio": "211312",
-                    "factura_pdf": "FACTURA_FINAL_20260920235642_0_M1.4._Equipo_10.pdf"
+                    "factura_pdf": "FACTURA_FINAL_20260920235642_0_M1.4._Equipo_10.pdf",
+                    "numero_doc50": "213331"
                 }
             ],
             "numero_cotizacion_asignacion": "21131",
             "aprobado_admin_10k": true,
             "factura_folio": "211312",
             "factura_pdf": "FACTURA_FINAL_20260920235642_0_M1.4._Equipo_10.pdf",
-            "validacion_fiscal": "Aprobada"
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "213331",
+            "estado": "Archivado",
+            "fecha_cierre": "2026-09-21",
+            "comentarios": "Hola otra vez",
+            "autor_comentario": "Jesus  Ramirez",
+            "eliminado_por": ""
         }
     ]
 }
