@@ -37,11 +37,16 @@
                     ],
                     "pdf_cotizacion": "1789973802005_0_Actividad_2.1._Auditoria_de_procesos.pdf",
                     "numero_orden": "1222111",
-                    "numero_cotizacion_asignacion": "21131"
+                    "numero_cotizacion_asignacion": "21131",
+                    "factura_folio": "211312",
+                    "factura_pdf": "FACTURA_FINAL_20260920235642_0_M1.4._Equipo_10.pdf"
                 }
             ],
             "numero_cotizacion_asignacion": "21131",
-            "aprobado_admin_10k": true
+            "aprobado_admin_10k": true,
+            "factura_folio": "211312",
+            "factura_pdf": "FACTURA_FINAL_20260920235642_0_M1.4._Equipo_10.pdf",
+            "validacion_fiscal": "Aprobada"
         }
     ]
 }

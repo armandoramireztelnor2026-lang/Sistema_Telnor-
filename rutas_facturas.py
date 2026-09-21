@@ -18,6 +18,7 @@ from notificaciones import (
     enviar_correo_factura_rechazada_corp,
     enviar_correo_factura_fiscal_subida,
     enviar_correo_factura_fiscal_rechazada,
+    enviar_correo_factura_fiscal_aprobada,
     enviar_correo_esperando_liberacion,
     enviar_correo_notificacion_corp_documentos,
     enviar_correo_recordatorio_doc_contable,
@@ -969,7 +970,19 @@ def validar_fiscal():
         if str(f['id']) == str(factura_id):
             f['validacion_fiscal'] = 'Aprobada'
             escribir_json('facturas.json', data)
-            return jsonify({"status": "success", "message": "Factura validada correctamente. Ahora puede ser editada si es necesario."})
+            
+            proveedor_nombre = f.get('proveedor', '')
+            usuarios_data = leer_json("usuarios.json")
+            correo_prov = ""
+            for u in usuarios_data.get("usuarios", []):
+                if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == proveedor_nombre:
+                    correo_prov = u.get('datos_perfil', {}).get('correo', '')
+                    break
+            
+            if correo_prov:
+                enviar_correo_factura_fiscal_aprobada(correo_prov, proveedor_nombre, f.get("unidad", "S/N").replace("8090-", ""), f.get("id", "N/A"))
+
+            return jsonify({"status": "success", "message": "Factura validada correctamente. Ya puedes ingresar el número de Documento Contable 50."})
     return jsonify({"status": "error", "message": "Factura no encontrada."})
 
 @facturas_bp.route('/api/facturas/rechazar_fiscal', methods=['POST'])
