@@ -1,11 +1,6 @@
 // cotizaciones_10k.js
 function verCotizacionesMas10000() {
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'reportes', 'dashboard', 'seccion-reportes', 'archivo', 'unidades', 'cotizaciones-10k'];
-    vistas.forEach(v => {
-        let el = document.getElementById('vista-' + v);
-        if (el) el.style.display = 'none';
-    });
-    document.getElementById('vista-cotizaciones-10k').style.display = 'block';
+    cambiarVistaAdmin('cotizaciones-10k');
     cargarCotizaciones10k();
 }
 
