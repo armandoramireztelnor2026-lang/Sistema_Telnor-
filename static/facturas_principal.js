@@ -210,7 +210,11 @@ async function cargarFacturas() {
                     if (!confirmadaTotal) {
                         btnAccion += `<button disabled class="btn-info" style="background:#475569; color:#94a3b8; border:none; width:100%; margin:0; cursor:not-allowed;">🔒 Esperando Confirmación</button>`;
                     } else if (confirmadaTotal && entregadoTexto !== 'Sí') {
-                        btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px; text-align:center;">⌛ Esperando entrega (PIN)</span>`;
+                        if (f.codigo_liberacion) {
+                            btnAccion += `<button class="btn-info" onclick="abrirModalValidacion('${f.id}', '${f.unidad.replace('8090-', '')}')" style="background:#0284c7; width:100%; margin:0; border:none;">🔑 Validar PIN Chofer</button>`;
+                        } else {
+                            btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px; text-align:center;">⌛ Esperando unidad lista...</span>`;
+                        }
                     }
 
                     btnAccion += `<div style="display:flex; gap:5px;"><button class="btn-danger-sm" style="flex:1; margin:0;" onclick="eliminarFacturaDefinitiva('${f.id}')">Eliminar</button></div>`;

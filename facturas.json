@@ -68,15 +68,15 @@
             "mantenimiento": "Preventivo",
             "precio": 4600.0,
             "fecha": "2026-09-21",
-            "numero_orden": "",
+            "numero_orden": "12111",
             "compania": "RUMN",
-            "aprobado_admin": false,
+            "aprobado_admin": true,
             "aprobado_corp": true,
             "timestamp": "2026-09-21T13:39:19.305704",
             "estado_custom": "",
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
-            "codigo_liberacion": "",
+            "codigo_liberacion": "87701150",
             "entregado": "No",
             "cotizaciones": [
                 {
@@ -90,9 +90,12 @@
                     "fotos_evidencia": [
                         "evidencia_1790023159285_0_Comprobante_de_Pago_1.jpeg"
                     ],
-                    "pdf_cotizacion": "1790023159285_0_Meta_1.5_Analisis_del_Modulo_3_Infraestructura_global_de_AWS.pdf"
+                    "pdf_cotizacion": "1790023159285_0_Meta_1.5_Analisis_del_Modulo_3_Infraestructura_global_de_AWS.pdf",
+                    "numero_orden": "12111",
+                    "numero_cotizacion_asignacion": "1111"
                 }
-            ]
+            ],
+            "numero_cotizacion_asignacion": "1111"
         }
     ]
 }

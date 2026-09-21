@@ -233,7 +233,7 @@ def editar_usuario():
 
 @app.route('/api/facturas/validar_codigo', methods=['POST'])
 def validar_codigo():
-    if 'usuario' not in session or session['usuario']['rol'] not in ['administracion', 'supervision']:
+    if 'usuario' not in session or session['usuario']['rol'] not in ['administracion']:
         return jsonify({"status": "error", "message": "No tienes permisos para liberar vehículos."})
     req_data = request.json
     id_factura = req_data.get('id_factura')

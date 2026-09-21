@@ -509,7 +509,7 @@ def aprobar_10k():
 
                 usuarios_data = leer_json("usuarios.json")
                 supervisores = [u for u in usuarios_data.get("usuarios", [])
-                               if u["rol"] == "supervision"]
+                               if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
 
                 for sup in supervisores:
                     correo = sup["datos_perfil"].get("correo")
@@ -545,7 +545,7 @@ def aprobar_10k():
 
                 usuarios_data = leer_json("usuarios.json")
                 supervisores = [u for u in usuarios_data.get("usuarios", [])
-                               if u["rol"] == "supervision"]
+                               if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
 
                 for sup in supervisores:
                     correo = sup["datos_perfil"].get("correo")
@@ -586,7 +586,7 @@ def confirmar_corp():
 
             usuarios_data = leer_json("usuarios.json")
             supervisores = [u for u in usuarios_data.get("usuarios", [])
-                           if u["rol"] == "supervision"]
+                           if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
 
             for sup in supervisores:
                 correo = sup["datos_perfil"].get("correo")
@@ -754,7 +754,7 @@ def rechazar_corp():
                         )
                         
                 supervisores = [u for u in usuarios_data.get("usuarios", [])
-                               if u["rol"] == "supervision"]
+                               if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
 
                 for sup in supervisores:
                     correo = sup["datos_perfil"].get("correo")
@@ -948,7 +948,7 @@ def marcar_lista():
             exito, msg_correo = enviar_correo_liberacion(correo_chofer, ticket_id or "N/A", unidad_limpia, codigo, nombre_chofer, telefono_chofer)
             
             usuarios_data = leer_json('usuarios.json')
-            supervisores = [u for u in usuarios_data.get('usuarios', []) if u['rol'] == 'supervision']
+            supervisores = [u for u in usuarios_data.get('usuarios', []) if u['rol'] == 'administracion' and u.get('datos_perfil', {}).get('subrol') == 'Supervisor']
             for sup in supervisores:
                 correo_sup = sup.get('datos_perfil', {}).get('correo')
                 nombre_sup = sup.get('datos_perfil', {}).get('nombres', 'Supervisor')

@@ -89,10 +89,17 @@ function renderizarTablaReportes(lista) {
         // Determinar el Estado
         let estado = 'N/A';
         let tieneCotizacion = f.cotizaciones && f.cotizaciones.length > 0;
-        let isCara = f.precio && parseFloat(f.precio) > 10000;
-        let apSuper = f.aprobado_super !== undefined ? f.aprobado_super : false;
-        let apAdmin = f.aprobado_admin !== undefined ? f.aprobado_admin : false;
-        let apCorp = f.aprobado_corp !== undefined ? f.aprobado_corp : false;
+        let isCara = f.precio && parseFloat(f.precio) >= 10001;
+        let apSuper = f.aprobado_admin === true;
+        let apAdmin = f.aprobado_admin_10k === true;
+        let apCorp = f.aprobado_corp === true;
+
+        let confirmadaTotal = false;
+        if (isCara) {
+            confirmadaTotal = (apSuper && apAdmin && apCorp);
+        } else {
+            confirmadaTotal = (apSuper && apCorp);
+        }
 
         if (f.estado === 'Cancelado_Cotizacion_Cara') {
             estado = "Incosteable";
@@ -109,7 +116,7 @@ function renderizarTablaReportes(lista) {
             if (!tieneCotizacion || f.estado === 'Rechazado' || f.estado === 'Rechazada_Por_Cotizacion_Normal_U_Otra') {
                 estado = "Pendiente de Cotización";
             } else {
-                if (f.estado === 'Confirmada') {
+                if (confirmadaTotal) {
                     if (!f.codigo_liberacion) {
                         estado = "En Reparación (Taller)";
                     } else if (f.entregado !== 'Sí') {
@@ -128,7 +135,7 @@ function renderizarTablaReportes(lista) {
                 } else {
                     if (isCara) {
                         if (!apSuper) {
-                            estado = "Esperando / Aprob. Cotizacion";
+                            estado = "Esperando / Aprob. Cotizacion (Supervisor)";
                         } else if (!apAdmin) {
                             estado = "Esperando / Aprob. Cotizacion (Admin)";
                         } else if (!apCorp) {
@@ -137,7 +144,7 @@ function renderizarTablaReportes(lista) {
                             estado = "En Reparación (Taller)";
                         }
                     } else {
-                        estado = "Esperando / Aprob. Cotizacion";
+                        estado = "Esperando / Aprob. Cotizacion (Supervisor)";
                     }
                 }
             }
