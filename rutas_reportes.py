@@ -86,15 +86,16 @@ def nuevo_reporte():
     
     # Solo notificar a los Admins de la MISMA ciudad, o a la Jefatura
     for u in usuarios_data.get("usuarios", []):
-        if u["rol"] == "administracion":
-            subrol = u["datos_perfil"].get("subrol", "Administración")
-            ciudad_admin = u["datos_perfil"].get("ciudad", "")
-            
-            if subrol == "Jefatura" or ciudad_admin == reporte["ciudad"]:
-                correo = u["datos_perfil"].get("correo")
-                if correo:
-                    nombre_completo = f"{u['datos_perfil'].get('nombres', '')} {u['datos_perfil'].get('apellido_paterno', '')}".strip()
-                    admins_data.append({"correo": correo, "nombre": nombre_completo, "puesto": subrol})
+            if u.get("rol") == "administracion":
+                subrol = u["datos_perfil"].get("subrol", "")
+                ciudad_admin = u["datos_perfil"].get("ciudad", "")
+                
+                # Solo enviar a Supervisores de esa ciudad
+                if subrol == "Supervisor" and ciudad_admin == reporte["ciudad"]:
+                    correo = u["datos_perfil"].get("correo")
+                    if correo:
+                        nombre_completo = f"{u['datos_perfil'].get('nombres', '')} {u['datos_perfil'].get('apellido_paterno', '')}".strip()
+                        admins_data.append({"correo": correo, "nombre": nombre_completo, "puesto": subrol})
 
     if admins_data:
         enviar_correo_nuevo_ticket(
