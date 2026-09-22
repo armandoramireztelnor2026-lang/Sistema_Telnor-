@@ -317,15 +317,13 @@ def listar_facturas():
 
 def encontrar_admin_por_ciudad(ciudad):
     usuarios = leer_json("usuarios.json")
-    admin_fallback = None
     for u in usuarios.get("usuarios", []):
         if u.get("rol") == "administracion":
             dp = u.get("datos_perfil", {})
             if dp.get("subrol") == "Administrador":
-                admin_fallback = (dp.get("correo"), f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip())
                 if dp.get("ciudad") == ciudad:
-                    return admin_fallback
-    return admin_fallback or (None, None)
+                    return (dp.get("correo"), f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip())
+    return (None, None)
 
 @facturas_bp.route("/api/facturas/confirmar_admin", methods=["POST"])
 
@@ -373,6 +371,11 @@ def confirmar_admin():
                     cot["pdf_cotizacion_asignacion"] = nombre_pdf
                     if i == 0: f["pdf_cotizacion_asignacion"] = nombre_pdf
 
+            # Primero validar si existe administrador para la ciudad
+            correo_admin, nombre_admin = encontrar_admin_por_ciudad(f.get("ciudad", f.get("unidad")))
+            if not correo_admin:
+                return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para la ciudad '{f.get('ciudad', f.get('unidad'))}'. Es obligatorio contar con un Administrador para liberar el documento contable. No se puede avanzar."})
+
             reportes_data = leer_json("reportes.json")
             for r in reportes_data.get("reportes", []):
                 if str(r.get("id")) == str(f.get("reporte_id", "")):
@@ -380,6 +383,16 @@ def confirmar_admin():
                     if f.get("pdf_cotizacion_asignacion"): r["pdf_cotizacion_asignacion"] = f["pdf_cotizacion_asignacion"]
                     escribir_json("reportes.json", reportes_data)
                     break
+            # ===== NUEVA LOGICA DE BLOQUEO PARA DOC 50 =====
+            correo_admin, nombre_admin = encontrar_admin_por_ciudad(f.get("ciudad", f.get("unidad")))
+            if correo_admin:
+                f["liberado_admin"] = False
+                try:
+                    from notificaciones import enviar_correo_esperando_liberacion
+                    enviar_correo_esperando_liberacion(correo_admin, nombre_admin, f.get("id_reporte", "N/A"), f.get("unidad", ""), nums_orden[0] if nums_orden else "N/A", nums_orden[0] if nums_orden else "N/A")
+                except Exception as e:
+                    print("Error al enviar correo: ", e)
+            # ===============================================
 
             escribir_json("facturas.json", data)
             precio_float = float(f.get("precio", 0))
@@ -1174,22 +1187,22 @@ def editar_seccion_especifica():
     pdf_antiguo = None
     
     if seccion == "orden":
+        correo_admin, nombre_admin = encontrar_admin_por_ciudad(factura.get("ciudad", factura.get("unidad")))
+        if not correo_admin:
+            return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para la ciudad '{factura.get('ciudad', factura.get('unidad'))}'. Es obligatorio contar con un Administrador. No se puede avanzar."})
+            
         pdf_antiguo = factura.get("pdf_cotizacion_asignacion")
         factura["numero_cotizacion_asignacion"] = identificador
         factura["numero_orden"] = identificador
         factura["pdf_cotizacion_asignacion"] = filename
         
         # ===== NUEVA LOGICA DE BLOQUEO PARA DOC 50 =====
-        correo_admin, nombre_admin = encontrar_admin_por_ciudad(factura.get("ciudad", factura.get("unidad")))
-        if correo_admin:
-            factura["liberado_admin"] = False
-            try:
-                from notificaciones import enviar_correo_esperando_liberacion
-                enviar_correo_esperando_liberacion(correo_admin, nombre_admin, factura.get("id_reporte", "N/A"), factura.get("unidad", ""), identificador, identificador)
-            except Exception as e:
-                print("Error al enviar correo: ", e)
-        else:
-            factura["liberado_admin"] = True
+        factura["liberado_admin"] = False
+        try:
+            from notificaciones import enviar_correo_esperando_liberacion
+            enviar_correo_esperando_liberacion(correo_admin, nombre_admin, factura.get("id_reporte", "N/A"), factura.get("unidad", ""), identificador, identificador)
+        except Exception as e:
+            print("Error al enviar correo: ", e)
         # ===============================================
 
         # Sincronizar con reportes.json
