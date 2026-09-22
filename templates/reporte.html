@@ -137,7 +137,7 @@
             </div>
             
             <button class="btn-success-modal" type="submit" id="btn-enviar-reporte" style="width: 100%; margin-top: 25px; padding: 15px; font-size: 16px;">Enviar Reporte al Sistema</button>
-            <button class="btn-success-modal" type="button" style="width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; background: #3b82f6; border-color: #2563eb;">Ver Estado Unidad</button>
+            <button class="btn-success-modal" type="button" onclick="abrirModalEstado()" style="width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; background: #3b82f6; border-color: #2563eb;">Ver Estado Unidad</button>
         </form>
     </div>
 
@@ -388,6 +388,73 @@
                 unidadInput.addEventListener('change', checkAutoFill);
             }
         });
+    </script>
+
+    <!-- Modal Estado Unidad -->
+    <div id="modal-estado-unidad" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999999; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+        <div style="background:linear-gradient(145deg, #0b1c30, #081422); padding:30px; border-radius:12px; border:1px solid #1f395a; max-width:400px; width:90%; text-align:center; position:relative; box-shadow:0 15px 35px rgba(0,0,0,0.5);">
+            <button onclick="document.getElementById('modal-estado-unidad').style.display='none'" style="position:absolute; top:10px; right:15px; background:none; border:none; color:#a3b1c6; font-size:24px; cursor:pointer;">&times;</button>
+            <h2 style="color:#f59e0b; margin-bottom:15px;">Ver Estado de Unidad</h2>
+            <p style="color:#a3b1c6; font-size:14px; margin-bottom:20px;">Ingresa los últimos 4 dígitos del número económico.</p>
+            <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:20px;">
+                <span style="color:white; font-weight:bold; font-size:18px;">8090 -</span>
+                <input type="text" id="input-estado-eco" maxlength="4" placeholder="Ej. 1133" style="padding:10px; border-radius:6px; border:1px solid #1f395a; background:#112641; color:white; width:100px; font-size:16px; text-align:center;">
+            </div>
+            <button id="btn-consultar-estado" onclick="consultarEstadoUnidad(this)" style="background:#3b82f6; color:white; border:none; padding:12px 20px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; font-size:16px; transition:0.3s;">Consultar Estado</button>
+            
+            <div id="resultado-estado" style="margin-top:20px; font-size:16px; font-weight:bold; display:none; padding:15px; border-radius:8px;"></div>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalEstado() {
+            document.getElementById('modal-estado-unidad').style.display = 'flex';
+            document.getElementById('resultado-estado').style.display = 'none';
+            document.getElementById('input-estado-eco').value = '';
+        }
+
+        async function consultarEstadoUnidad(btn) {
+            const eco = document.getElementById('input-estado-eco').value.trim();
+            if(eco.length !== 4) {
+                alert("Por favor ingresa los 4 dígitos de la unidad.");
+                return;
+            }
+            
+            btn.innerText = "Consultando...";
+            btn.disabled = true;
+            btn.style.opacity = "0.7";
+            
+            try {
+                const res = await fetch(`/api/estado_unidad/${eco}`);
+                const data = await res.json();
+                const divRes = document.getElementById('resultado-estado');
+                divRes.style.display = 'block';
+                
+                if(data.estado === "No se encuentra esa unidad en reporte") {
+                    divRes.style.background = "#1f2937";
+                    divRes.style.color = "#9ca3af";
+                    divRes.innerText = data.estado;
+                } else if(data.estado === "En Proceso de asignacion de taller") {
+                    divRes.style.background = "#f59e0b";
+                    divRes.style.color = "#fff";
+                    divRes.innerText = "Estado:\n" + data.estado;
+                } else if(data.estado === "En Taller") {
+                    divRes.style.background = "#3b82f6";
+                    divRes.style.color = "#fff";
+                    divRes.innerText = "Estado:\n" + data.estado;
+                } else if(data.estado === "Unidad Reparada") {
+                    divRes.style.background = "#10b981";
+                    divRes.style.color = "#fff";
+                    divRes.innerText = "Estado:\n" + data.estado;
+                }
+            } catch(err) {
+                alert("Error al consultar el estado.");
+            }
+            
+            btn.innerText = "Consultar Estado";
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
     </script>
 </body>
 </html>

@@ -559,6 +559,7 @@
                                     <th>FECHA</th>
                                     <th>ESTADO</th>
                                     <th>STATUS UNIDAD</th>
+                                    <th>SUPERVISOR</th>
                                     <th>COMPAÑIA</th>
                                     <th>DEPARTAMENTO</th>
                                     <th>COPE/EDIFICIO</th>
@@ -566,7 +567,6 @@
                                     <th>RETRO (PROBLEMA)</th>
                                     <th>COSTO (TOTAL)</th>
                                     <th>PROVEEDOR/TALLER</th>
-                                    <th>NOMBRE/SUPERVISOR</th>
                                     <th>FECHA DE ENTRADA</th>
                                     <th>TIEMPO EN TALLER</th>
                                     <th>FECHA DE SALIDA</th>
@@ -574,9 +574,11 @@
                                     <th>NUM. DE ORDEN</th>
                                     <th>NUM. FACTURA</th>
                                     <th>PDF FACTURA</th>
+                                    <th>ADMINISTRADOR</th>
                                     <th>STATUS DOC. CONTABLE</th>
                                     <th>NUM DOC. CONTABLE</th>
                                     <th>COMENTARIOS</th>
+                                    <th>JEFATURA</th>
                                 </tr>
                             </thead>
                             <tbody id="tabla-seccion-reportes">
@@ -1222,8 +1224,6 @@
                 <div style="display:flex; gap:10px; margin-top:20px; flex-wrap: wrap;">
                     <button type="button" class="btn-success-modal" style="margin:0; flex:1;"
                         onclick="subirDocContable()">Guardar Números y Archivar Ticket</button>
-                    <button type="button" class="btn-info" style="margin:0; flex:1; background-color:#3b82f6; border:none; padding:12px; border-radius:8px; font-weight:bold;"
-                        onclick="enviarRecordatorioCorp()">Enviar Recordatorio</button>
                 </div>
             </form>
         </div>

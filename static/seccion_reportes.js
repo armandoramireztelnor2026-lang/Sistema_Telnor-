@@ -159,7 +159,9 @@ function renderizarTablaReportes(lista) {
         let ciudad = f.ciudad || reporteOrig.ciudad || pendienteHTML;
 
         let proveedor = f.proveedor || pendienteHTML;
-        let nombreSup = f.responsable || pendienteHTML;
+        let nombreSup = f.supervisor_nombre || "No asignado";
+        let nombreAdmin = f.administrador_nombre || "No asignado";
+        let nombreJefatura = f.jefatura_nombre || "No asignado";
         let fechaEntrada = f.fecha || pendienteHTML;
         let fechaSalida = f.fecha_cierre || pendienteHTML;
         let tiempoTaller = pendienteHTML;
@@ -285,6 +287,7 @@ function renderizarTablaReportes(lista) {
                 <td style="vertical-align:top; padding-top:15px;">${fechaTicket}</td>
                 <td style="vertical-align:top; padding-top:15px;"><span style="background:#0ea5e9; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">${estado}</span></td>
                 <td style="vertical-align:top; padding-top:15px;">${statusUnidad}</td>
+                <td style="vertical-align:top; padding-top:15px;">${nombreSup}</td>
                 <td style="vertical-align:top; padding-top:15px;">${compania}</td>
                 <td style="vertical-align:top; padding-top:15px;">${departamento}</td>
                 <td style="vertical-align:top; padding-top:15px;">${cope}</td>
@@ -292,7 +295,6 @@ function renderizarTablaReportes(lista) {
                 <td style="vertical-align:top; padding-top:15px;"><div style="max-width:250px; white-space:normal; font-size:0.9em; word-wrap: break-word;">${htmlRetro}</div></td>
                 <td style="vertical-align:top; padding-top:15px;" data-costo="${ticketGasto}"><strong>${htmlCosto}</strong></td>
                 <td style="vertical-align:top; padding-top:15px;">${proveedor}</td>
-                <td style="vertical-align:top; padding-top:15px;">${nombreSup}</td>
                 <td style="vertical-align:top; padding-top:15px;">${fechaEntrada}</td>
                 <td style="vertical-align:top; padding-top:15px;">${tiempoTaller}</td>
                 <td style="vertical-align:top; padding-top:15px;">${fechaSalida}</td>
@@ -300,9 +302,11 @@ function renderizarTablaReportes(lista) {
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumOrden}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumFactura}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlBtnPdfFactura}</td>
+                <td style="vertical-align:top; padding-top:15px;">${nombreAdmin}</td>
                 <td style="vertical-align:top; padding-top:15px;">${statusDocContable}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumContable}</td>
                 <td style="vertical-align:top; padding-top:15px;">${btnComentarios}</td>
+                <td style="vertical-align:top; padding-top:15px;">${nombreJefatura}</td>
             </tr>
         `;
         tbody.innerHTML += rowHtml;
@@ -504,7 +508,7 @@ function imprimirSeleccion() {
     
     rows.forEach(tr => {
         // Extraemos el texto de las celdas relevantes
-        // td[1]=Ticket, td[2]=Eco, td[3]=Fecha, td[4]=Estado, td[9]=Ciudad, td[11]=Costo, td[12]=Proveedor
+        // td[1]=Ticket, td[2]=Eco, td[3]=Fecha, td[4]=Estado, td[10]=Ciudad, td[12]=Costo, td[13]=Proveedor
         let c = tr.cells;
         html += `
             <tr>
@@ -512,9 +516,9 @@ function imprimirSeleccion() {
                 <td>${c[2].innerText}</td>
                 <td>${c[3].innerText}</td>
                 <td class="estado">${c[4].innerText}</td>
-                <td>${c[9].innerText}</td>
-                <td>${c[11].innerText}</td>
+                <td>${c[10].innerText}</td>
                 <td>${c[12].innerText}</td>
+                <td>${c[13].innerText}</td>
             </tr>
         `;
     });

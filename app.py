@@ -96,6 +96,44 @@ def login():
             return jsonify({"status": "success", "redirect": f"/{rol_seleccionado}"})
     return jsonify({"status": "error", "message": "Usuario o contraseña incorrectos."})
 
+@app.route('/api/estado_unidad/<eco>', methods=['GET'])
+def estado_unidad(eco):
+    eco_full = f"8090-{eco}"
+    
+    # 1. Checar facturas.json primero (Unidades ya asignadas a taller)
+    facturas_data = leer_json('facturas.json')
+    todas_facturas = facturas_data.get('facturas', [])
+    facturas_report_ids = set()
+    
+    for f in todas_facturas:
+        r_id = f.get("id_reporte") or f.get("numero_reporte")
+        if not r_id:
+            retro = f.get("retro", "")
+            import re
+            match = re.search(r"\[TICKET:(.*?)\]", retro)
+            if match:
+                r_id = match.group(1).strip()
+        if r_id:
+            facturas_report_ids.add(str(r_id))
+            
+        # Si la unidad coincide y aun no ha sido entregada
+        if f.get('unidad') == eco_full and f.get('entregado', 'No') != 'Sí':
+            if f.get('codigo_liberacion'):
+                return jsonify({"status": "success", "estado": "Unidad Reparada"})
+            else:
+                return jsonify({"status": "success", "estado": "En Taller"})
+
+    # 2. Checar reportes.json (Unidades reportadas pero aun no asignadas)
+    reportes_data = leer_json('reportes.json')
+    for r in reportes_data.get('reportes', []):
+        if str(r.get('unidad')) == eco:
+            # Checar si este reporte ya fue procesado en una factura
+            if str(r.get('id')) not in facturas_report_ids:
+                return jsonify({"status": "success", "estado": "En Proceso de asignacion de taller"})
+
+    # 3. Si no esta activo en ningun lado o ya fue entregada
+    return jsonify({"status": "success", "estado": "No se encuentra esa unidad en reporte"})
+
 @app.route('/registro', methods=['POST'])
 def registro():
     rol = request.form.get('rol')
