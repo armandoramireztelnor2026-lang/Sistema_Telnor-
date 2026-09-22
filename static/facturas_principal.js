@@ -683,7 +683,8 @@ function eliminarFacturaSilenciosa(idFactura) {
         if (d.status === 'success') {
             alert("Registro eliminado exitosamente.");
             document.getElementById('modal-detalles-general').style.display = 'none';
-            cargarSistemaCompleto();
+            if (typeof cargarFacturas === 'function') cargarFacturas();
+            if (typeof cargarCotizaciones10k === 'function') cargarCotizaciones10k();
         } else {
             alert("Error: " + d.message);
         }
