@@ -28,18 +28,32 @@ def escribir_json(archivo, data):
 @reportes_bp.route("/api/reportes/nuevo", methods=["POST"])
 def nuevo_reporte():
     unidad_req = request.form.get("unidad")
+    eco_full = f"8090-{unidad_req}"
     
-    # 1. Check reportes.json (active unquoted/unassigned tickets)
+    # 1. Check facturas.json (tickets in taller not yet delivered/closed)
+    facturas_data = leer_json("facturas.json")
+    facturas_report_ids = set()
+    for f in facturas_data.get("facturas", []):
+        # Collect report IDs to know which reports have moved to facturas
+        r_id = f.get("id_reporte") or f.get("numero_reporte")
+        if not r_id:
+            retro = f.get("retro", "")
+            import re
+            match = re.search(r"\[TICKET:(.*?)\]", retro)
+            if match:
+                r_id = match.group(1).strip()
+        if r_id:
+            facturas_report_ids.add(str(r_id))
+            
+        if f.get("unidad") == eco_full and f.get("entregado") != "Sí" and f.get("estado") not in ["Cancelado_Cotizacion_Cara", "Rechazado", "Eliminado"]:
+            return jsonify({"status": "error", "message": f"La unidad {unidad_req} ya se encuentra en taller o activa."})
+
+    # 2. Check reportes.json (active unassigned tickets)
     reportes_data = leer_json("reportes.json")
     for r in reportes_data.get("reportes", []):
-        if str(r.get("unidad")) == str(unidad_req):
-            return jsonify({"status": "error", "message": f"La unidad {unidad_req} ya tiene un reporte activo en proceso de asignación o cotización."})
-
-    # 2. Check facturas.json (tickets in taller not yet delivered/closed)
-    facturas_data = leer_json("facturas.json")
-    for f in facturas_data.get("facturas", []):
-        if str(f.get("unidad")) == str(unidad_req) and f.get("entregado") != "Sí" and f.get("estado") not in ["Cancelado_Cotizacion_Cara", "Rechazado", "Eliminado"]:
-            return jsonify({"status": "error", "message": f"La unidad {unidad_req} ya se encuentra en taller y aún no ha sido liberada por el supervisor."})
+        if str(r.get("unidad")) == str(unidad_req) and r.get("estado") != "Eliminado":
+            if str(r.get("id")) not in facturas_report_ids:
+                return jsonify({"status": "error", "message": f"La unidad {unidad_req} ya tiene un reporte activo en proceso de asignación."})
 
     nuevo_id = f"REP-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
     reporte = {
@@ -187,7 +201,43 @@ def obtener_unidades():
         return jsonify({})
     with open("unidades.json", "r", encoding="utf-8") as f:
         data = json.load(f)
+        
+    # Inject flag to know if the unit is actively in the workshop/assigned
+    for num, info in data.items():
+        info["activa_en_taller"] = is_unidad_active(num)
+        
     return jsonify(data)
+
+def is_unidad_active(numero_unidad):
+    if not numero_unidad or len(str(numero_unidad)) < 4:
+        return False
+        
+    eco_4 = str(numero_unidad)[-4:]
+    eco_full = f"8090-{eco_4}"
+    
+    facturas_data = leer_json("facturas.json")
+    facturas_report_ids = set()
+    for f in facturas_data.get("facturas", []):
+        r_id = f.get("id_reporte") or f.get("numero_reporte")
+        if not r_id:
+            retro = f.get("retro", "")
+            import re
+            match = re.search(r"\[TICKET:(.*?)\]", retro)
+            if match:
+                r_id = match.group(1).strip()
+        if r_id:
+            facturas_report_ids.add(str(r_id))
+            
+        if f.get("unidad") == eco_full and f.get("entregado") != "Sí" and f.get("estado") not in ["Cancelado_Cotizacion_Cara", "Rechazado", "Eliminado"]:
+            return True
+
+    reportes_data = leer_json("reportes.json")
+    for r in reportes_data.get("reportes", []):
+        if str(r.get("unidad")) == eco_4 and r.get("estado") != "Eliminado":
+            if str(r.get("id")) not in facturas_report_ids:
+                return True
+                
+    return False
 
 @reportes_bp.route("/api/unidades/guardar", methods=["POST"])
 def guardar_unidad():
@@ -202,6 +252,10 @@ def guardar_unidad():
         
         if not numero:
             return jsonify({'status': 'error', 'message': 'El número económico es requerido.'})
+            
+        # Validar si la unidad esta activa
+        if modo == 'editar' and is_unidad_active(old_numero or numero):
+            return jsonify({'status': 'error', 'message': 'No puedes modificar esta unidad porque actualmente tiene un ticket activo en el taller o en asignación.'})
             
         archivo = "unidades.json"
         data = {}
@@ -240,6 +294,9 @@ def eliminar_unidad():
         
         if not os.path.exists(archivo):
             return jsonify({'status': 'error', 'message': 'Archivo no encontrado.'})
+            
+        if is_unidad_active(numero):
+            return jsonify({'status': 'error', 'message': 'No puedes eliminar esta unidad porque actualmente tiene un ticket activo en el taller o en asignación.'})
             
         with open(archivo, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -283,6 +340,9 @@ def toggle_estado_unidad():
     
     if not numero:
         return jsonify({"status": "error", "message": "Falta el numero de la unidad"})
+        
+    if is_unidad_active(numero):
+        return jsonify({"status": "error", "message": "No puedes desactivar/modificar esta unidad porque actualmente tiene un ticket activo en el taller o en asignación."})
         
     try:
         data = leer_json("unidades.json")

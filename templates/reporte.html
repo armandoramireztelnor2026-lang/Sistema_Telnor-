@@ -294,7 +294,8 @@
                     document.getElementById('cope-reporte').innerHTML = '<option value="" disabled selected>Primero seleccione una ciudad...</option>';
                     limpiarFirma(); // Limpiar firma tras enviar
                 } else {
-                    alert("❌ Hubo un error al enviar el reporte.");
+                    const errorMsg = data.message ? data.message : "Hubo un error al enviar el reporte.";
+                    alert("❌ " + errorMsg);
                 }
                 btn.innerText = "Enviar Reporte al Sistema";
                 btn.disabled = false;

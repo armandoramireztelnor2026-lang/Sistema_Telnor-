@@ -11,17 +11,21 @@ async function cargarUnidades() {
 
         let rows = '';
         for (const [idUnidad, info] of Object.entries(data)) {
+            let disabledAttr = info.activa_en_taller ? 'disabled' : '';
+            let styleOpacity = info.activa_en_taller ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
+            let tooltip = info.activa_en_taller ? 'title="Esta unidad tiene un ticket activo y no puede ser modificada"' : '';
+            
             rows += `
                 <tr>
                     <td style="font-weight:bold; color:#0ea5e9;">${idUnidad}</td>
                     <td>${info.Marca || 'N/A'}</td>
                     <td>${info.Modelo || 'N/A'}</td>
                     <td>
-                        <button onclick="abrirModalUnidad('editar', '${idUnidad}', '${info.Marca || ''}', '${info.Modelo || ''}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; margin-right:5px;">Editar</button>
-                        <button onclick="eliminarUnidad('${idUnidad}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; margin-right:5px;">Eliminar</button>
+                        <button ${disabledAttr} ${tooltip} onclick="abrirModalUnidad('editar', '${idUnidad}', '${info.Marca || ''}', '${info.Modelo || ''}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:5px; margin-right:5px; ${styleOpacity}">Editar</button>
+                        <button ${disabledAttr} ${tooltip} onclick="eliminarUnidad('${idUnidad}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:5px; margin-right:5px; ${styleOpacity}">Eliminar</button>
                         ${info.Estado === 'Inactiva' 
-                            ? `<button onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Activar</button>`
-                            : `<button onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#f59e0b; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Desactivar</button>`
+                            ? `<button ${disabledAttr} ${tooltip} onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; ${styleOpacity}">Activar</button>`
+                            : `<button ${disabledAttr} ${tooltip} onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#f59e0b; color:white; border:none; padding:5px 10px; border-radius:5px; ${styleOpacity}">Desactivar</button>`
                         }
                     </td>
                 </tr>
