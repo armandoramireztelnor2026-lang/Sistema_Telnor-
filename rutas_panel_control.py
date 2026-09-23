@@ -159,6 +159,21 @@ def quitar_ciudad():
             if ciudad not in ciudades:
                 return jsonify({"status": "error", "message": f"La ciudad '{ciudad}' no está asignada."})
 
+            # === REGLA: NO QUITAR CIUDAD SI HAY TICKETS ACTIVOS ===
+            reportes_data = leer_json("reportes.json")
+            for r in reportes_data.get("reportes", []):
+                if r.get("ciudad") == ciudad and r.get("estado") not in ["Eliminado", "Finalizado"]:
+                    return jsonify({"status": "error", "message": f"No se puede remover la ciudad porque hay reportes activos en {ciudad} (Ej. {r.get('id')}). Deben finalizarse primero."})
+
+            facturas_data = leer_json("facturas.json")
+            proveedores_ciudad = [usr["datos_perfil"]["nombre_proveedor"] for usr in usuarios_data.get("usuarios", []) if usr.get("rol") == "proveedores" and usr.get("datos_perfil", {}).get("ciudad") == ciudad]
+
+            for f in facturas_data.get("facturas", []):
+                if f.get("proveedor") in proveedores_ciudad and f.get("estado") not in ["Eliminado", "Finalizado", "Rechazado", "Cancelado_Cotizacion_Cara"]:
+                    t_id = f.get("id_reporte") or f.get("numero_reporte") or f.get("id")
+                    return jsonify({"status": "error", "message": f"No se puede remover la ciudad porque hay tickets activos en {ciudad} (Ej. Factura {t_id}). Deben finalizarse primero."})
+
+
             ciudades.remove(ciudad)
             dp['ciudades_asignadas'] = ciudades
             correo_destino = dp.get('correo', '')

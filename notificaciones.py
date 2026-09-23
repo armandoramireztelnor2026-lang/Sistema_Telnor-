@@ -48,7 +48,7 @@ def enviar_correo_liberacion(correo_destino, ticket, unidad, codigo, nombre_chof
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Aviso de Liberación: Unidad 8090-{unidad} (Ticket: {ticket})"
+    asunto = f"Notificación de Liberación de Unidad 8090-{unidad} - Folio {ticket}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -78,7 +78,7 @@ def enviar_correo_nueva_orden(correo_destino, nombre_proveedor, ticket, unidad, 
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Nueva Orden de Trabajo: Unidad 8090-{unidad} (Ticket: {ticket})"
+    asunto = f"Asignación de Orden de Trabajo - Unidad 8090-{unidad} (Folio {ticket})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -106,7 +106,7 @@ def enviar_correo_nueva_factura(lista_admins, proveedor, unidad, precio, titulo=
     if not lista_admins:
         return False, "No hay correos"
 
-    asunto = f"Revisión de Cotización: Proveedor {proveedor} (Unidad 8090-{unidad})"
+    asunto = f"Revisión Técnica de Cotización - {proveedor} (Unidad 8090-{unidad})"
     
     lista_html = ""
     adjuntos = []
@@ -164,7 +164,7 @@ def enviar_correo_nueva_factura_corp(lista_corps, proveedor, unidad, precio, tit
     if not lista_corps:
         return False, "No hay correos"
 
-    asunto = f"Autorización Financiera Requerida: {proveedor} (Unidad 8090-{unidad})"
+    asunto = f"Solicitud de Autorización Financiera - {proveedor} (Unidad 8090-{unidad})"
     for corp in lista_corps:
         cuerpo_html = f"""
         <html>
@@ -194,7 +194,7 @@ def enviar_correo_nuevo_ticket(lista_admins, ticket, unidad, ciudad, falla, empl
     if not lista_admins:
         return False, "No hay correos"
 
-    asunto = f"Nuevo Reporte de Incidencia: Unidad 8090-{unidad} ({ciudad})"
+    asunto = f"Registro de Nueva Incidencia - Unidad 8090-{unidad} ({ciudad})"
     for admin in lista_admins:
         cuerpo_html = f"""
         <html>
@@ -226,7 +226,7 @@ def enviar_correo_confirmacion_reporte(correo_destino, nombre_empleado, ticket, 
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"✅ Confirmación de Reporte Generado (Ticket: {ticket})"
+    asunto = f"✅ Confirmación de Registro de Incidencia - Folio {ticket}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -254,7 +254,7 @@ def enviar_correo_confirmacion_factura(correo_destino, nombre_proveedor, unidad,
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"✅ Confirmación de Cotización Enviada (Unidad 8090-{unidad})"
+    asunto = f"✅ Confirmación de Recepción de Cotización - Unidad 8090-{unidad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -281,7 +281,7 @@ def enviar_correo_factura_rechazada(correo_destino, nombre_proveedor, unidad, mo
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"❌ COTIZACIÓN / TRÁMITE RECHAZADO: Unidad 8090-{unidad}"
+    asunto = f"❌ Notificación de Rechazo de Trámite - Unidad 8090-{unidad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -308,7 +308,7 @@ def enviar_correo_factura_rechazada_corp(correo_destino, nombre_proveedor, unida
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"❌ RECHAZO CORPORATIVO: Unidad 8090-{unidad} (Requiere Ajuste de Precio)"
+    asunto = f"❌ Rechazo por Evaluación Corporativa - Unidad 8090-{unidad} (Requiere Ajuste)"
     
     precios_html = ""
     if precios_recomendados and len(precios_recomendados) > 0:
@@ -354,7 +354,7 @@ def enviar_correo_factura_rechazada_admin(correo_destino, nombre_proveedor, unid
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"❌ COTIZACIÓN RECHAZADA: Unidad 8090-{unidad} (Requiere Ajuste de Precio)"
+    asunto = f"❌ Rechazo Técnico/Administrativo de Cotización - Unidad 8090-{unidad}"
     
     precios_html = ""
     if precios_recomendados and len(precios_recomendados) > 0:
@@ -400,7 +400,7 @@ def enviar_correo_factura_rechazada_super(correo_destino, nombre_proveedor, unid
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"❌ COTIZACIÓN RECHAZADA: Unidad 8090-{unidad} (Requiere Ajuste de Precio)"
+    asunto = f"❌ Rechazo Técnico/Administrativo de Cotización - Unidad 8090-{unidad}"
     
     precios_html = ""
     if precios_recomendados and len(precios_recomendados) > 0:
@@ -446,7 +446,7 @@ def enviar_correo_ticket_rechazado(correo_destino, nombre_empleado, ticket, unid
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"❌ REPORTE CANCELADO: Ticket {ticket} (Unidad 8090-{unidad})"
+    asunto = f"❌ Cancelación de Reporte - Folio {ticket} (Unidad 8090-{unidad})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -473,7 +473,7 @@ def enviar_correo_factura_fiscal_subida(correo_destino, proveedor, unidad, titul
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Factura Final Recibida: {proveedor} (Folio: {folio})"
+    asunto = f"Recepción de Comprobante Fiscal (CFDI) - {proveedor} (Folio {folio})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -501,7 +501,7 @@ def enviar_correo_factura_fiscal_rechazada(correo_destino, proveedor, unidad, fo
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Aviso Importante: Factura Rechazada (Unidad {unidad})"
+    asunto = f"Notificación de Rechazo de Comprobante Fiscal - Unidad 8090-{unidad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -527,7 +527,7 @@ def enviar_correo_esperando_liberacion(correo_destino, nombre_admin, ticket, uni
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Revisión y Liberación Pendiente: Unidad 8090-{unidad} (Ticket: {ticket})"
+    asunto = f"Solicitud de Revisión y Liberación Contable - Unidad 8090-{unidad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -556,7 +556,7 @@ def enviar_correo_esperando_liberacion(correo_destino, nombre_admin, ticket, uni
 def enviar_correo_notificacion_corp_documentos(lista_corps, proveedor, unidad, precio, ticket, supervisor_nombre):
     """Envía correo a corporativos solicitando la liberación de documentos para cotizaciones mayores a $10,001."""
     precio_fmt = f"{float(precio):,.2f}"
-    asunto = f"Autorización Requerida: Cotización Mayor - Unidad 8090-{unidad} (${precio_fmt} MXN)"
+    asunto = f"Solicitud de Aprobación de Presupuesto Extraordinario - Unidad 8090-{unidad} (${precio_fmt} MXN)"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -598,7 +598,7 @@ def enviar_correo_recordatorio_doc_contable(lista_corps, ticket, unidad, proveed
     if not lista_corps:
         return False, "No hay correos"
 
-    asunto = f"⚠️ Acción Requerida: Falta Documento Contable (50) para Unidad 8090-{unidad}"
+    asunto = f"⚠️ Requerimiento de Documento Contable (50) - Unidad 8090-{unidad}"
     for corp in lista_corps:
         cuerpo_html = f"""
         <html>
@@ -637,7 +637,7 @@ def enviar_correo_recordatorio_doc_contable(lista_corps, ticket, unidad, proveed
 # =========================================================
 
 def enviar_correo_ciudad_asignada(correo, nombre, ciudad, asignado_por):
-    asunto = f"📋 Nueva Ciudad Asignada: {ciudad}"
+    asunto = f"📋 Asignación de Jurisdicción Operativa - Ciudad: {ciudad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -658,7 +658,7 @@ def enviar_correo_ciudad_asignada(correo, nombre, ciudad, asignado_por):
     disparar_correo(correo, asunto, cuerpo_html)
 
 def enviar_correo_ciudad_removida(correo, nombre, ciudad, removido_por):
-    asunto = f"⚠️ Ciudad Removida de su Perfil: {ciudad}"
+    asunto = f"⚠️ Remoción de Jurisdicción Operativa - Ciudad: {ciudad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -679,7 +679,7 @@ def enviar_correo_ciudad_removida(correo, nombre, ciudad, removido_por):
     disparar_correo(correo, asunto, cuerpo_html)
 
 def enviar_correo_cambio_subrol(correo, nombre, nuevo_subrol, modificado_por):
-    asunto = f"🔄 Cambio de Puesto/Rol a: {nuevo_subrol}"
+    asunto = f"🔄 Actualización de Funciones y Permisos - Rol: {nuevo_subrol}"
 
     color_banner = "#3b82f6" if nuevo_subrol == "Administrador" else "#10b981"
 
@@ -713,7 +713,7 @@ def enviar_correo_admin_revisa_10k(correo_admin, nombre_admin, ticket, unidad, p
         return False, "Sin correo"
 
     precio_fmt = f"{float(precio):,.2f}"
-    asunto = f"⚠️ NUEVA COTIZACIÓN >$10,000 - Requiere tu Aprobación (Unidad 8090-{unidad})"
+    asunto = f"⚠️ Solicitud de Aprobación para Presupuesto Mayor - Unidad 8090-{unidad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -750,7 +750,7 @@ def enviar_correo_admin_aprobado_a_corp(lista_corps, ticket, unidad, proveedor, 
         return 0
 
     precio_fmt = f"{float(precio):,.2f}"
-    asunto = f"✅ COTIZACIÓN APROBADA POR ADMINISTRACIÓN - Requiere Autorización Financiera (${precio_fmt} MXN)"
+    asunto = f"✅ Aprobación Administrativa Emitida - En Espera de Autorización Financiera (${precio_fmt} MXN)"
 
     enviados = 0
     for corp in lista_corps:
@@ -800,7 +800,7 @@ def enviar_correo_admin_rechaza_supervisor(correo_supervisor, nombre_supervisor,
             precios_html += f"<li>Cotización {int(p.get('idx', 0)) + 1}: <strong style='color: #f59e0b;'>${p.get('precio_recomendado', 'N/A')} MXN</strong></li>"
         precios_html += "</ul></div>"
 
-    asunto = f"❌ COTIZACIÓN RECHAZADA - Requiere Corrección de Precios (Unidad 8090-{unidad})"
+    asunto = f"❌ Rechazo Administrativo - Se Requiere Ajuste Presupuestal (Unidad 8090-{unidad})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -838,7 +838,7 @@ def enviar_correo_admin_cancela_caras(correo_supervisor, nombre_supervisor, tick
     if not correo_supervisor or correo_supervisor.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"🚫 COTIZACIÓN ENVIADA A CARAS (Unidad 8090-{unidad})"
+    asunto = f"🚫 Trámite Clasificado como Presupuesto Extraordinario (Unidad 8090-{unidad})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -881,7 +881,7 @@ def enviar_correo_corp_rechaza_admin(correo_admin, nombre_admin, ticket, unidad,
             precios_html += f"<li>Cotización {int(p.get('idx', 0)) + 1}: <strong style='color: #f59e0b;'>${p.get('precio_recomendado', 'N/A')} MXN</strong></li>"
         precios_html += "</ul></div>"
 
-    asunto = f"❌ COTIZACIÓN RECHAZADA POR CORPORATIVOS - Reevaluación Necesaria (${precio_fmt} MXN)"
+    asunto = f"❌ Resolución Corporativa: Presupuesto Rechazado - Requiere Reevaluación (${precio_fmt} MXN)"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -927,7 +927,7 @@ def enviar_correo_corp_rechaza_supervisor(correo_supervisor, nombre_supervisor, 
             precios_html += f"<li>Cotización {int(p.get('idx', 0)) + 1}: <strong style='color: #f59e0b;'>${p.get('precio_recomendado', 'N/A')} MXN</strong></li>"
         precios_html += "</ul></div>"
 
-    asunto = f"❌ COTIZACIÓN RECHAZADA POR CORPORATIVOS - Requiere Corrección (Unidad 8090-{unidad})"
+    asunto = f"❌ Resolución Corporativa: Presupuesto Rechazado - Unidad 8090-{unidad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -966,7 +966,7 @@ def enviar_correo_corp_aprobado(correo_supervisor, nombre_supervisor, ticket, un
         return False, "Sin correo"
 
     precio_fmt = f"{float(precio):,.2f}"
-    asunto = f"✅ COTIZACIÓN APROBADA POR CORPORATIVOS - Proceder (Unidad 8090-{unidad})"
+    asunto = f"✅ Resolución Corporativa: Presupuesto Aprobado - Unidad 8090-{unidad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1001,7 +1001,7 @@ def enviar_correo_taller_aprobado(correo_taller, nombre_taller, ticket, unidad, 
     if not correo_taller or correo_taller.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"🟢 LUZ VERDE - Autorización para Iniciar Trabajo (Unidad 8090-{unidad})"
+    asunto = f"Autorización Oficial para Inicio de Reparación - Unidad 8090-{unidad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1036,7 +1036,7 @@ def enviar_correo_taller_facturar(correo_taller, nombre_taller, ticket, unidad):
     if not correo_taller or correo_taller.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"🟢 TRABAJO ENTREGADO - Sube tu Factura Fiscal (Unidad 8090-{unidad})"
+    asunto = f"Confirmación de Entrega Técnica - Solicitud de Comprobante Fiscal (Unidad 8090-{unidad})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1069,7 +1069,7 @@ def enviar_correo_liberacion_supervisor(correo_supervisor, nombre_supervisor, ti
     if not correo_supervisor or correo_supervisor.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"🔑 RESPALDO DE PIN - Unidad 8090-{unidad} (Ticket: {ticket})"
+    asunto = f"🔑 Respaldo de Credenciales de Acceso (PIN) - Unidad 8090-{unidad} (Folio {ticket})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1101,7 +1101,7 @@ def enviar_correo_factura_fiscal_aprobada(correo_proveedor, nombre_proveedor, un
     if not correo_proveedor or correo_proveedor.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"✅ FACTURA APROBADA - Unidad 8090-{unidad} (Ticket: {ticket})"
+    asunto = f"✅ Validación Exitosa de Comprobante Fiscal - Unidad 8090-{unidad} (Folio {ticket})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1133,7 +1133,7 @@ def enviar_correo_doc50_proveedor(correo_proveedor, nombre_proveedor, unidad, ti
     if not correo_proveedor or correo_proveedor.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"💰 TRÁMITE DE PAGO EN PROCESO (Doc 50) - Unidad 8090-{unidad} (Ticket: {ticket})"
+    asunto = f"💰 Notificación de Trámite de Pago en Proceso (Doc 50) - Unidad 8090-{unidad} (Folio {ticket})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">

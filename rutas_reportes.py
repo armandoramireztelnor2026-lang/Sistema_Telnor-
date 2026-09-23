@@ -30,6 +30,12 @@ def nuevo_reporte():
     unidad_req = request.form.get("unidad")
     eco_full = f"8090-{unidad_req}"
     
+    # 0. Check if the unit is inactive
+    unidades_data = leer_json("unidades.json")
+    if unidad_req in unidades_data and unidades_data[unidad_req].get("Estado") == "Inactiva":
+        return jsonify({"status": "error", "message": f"La unidad {unidad_req} se encuentra Inhabilitada/Incosteable y no puede ser reportada."})
+
+    
     # 1. Check facturas.json (tickets in taller not yet delivered/closed)
     facturas_data = leer_json("facturas.json")
     facturas_report_ids = set()
@@ -125,9 +131,20 @@ def lista_reportes():
     if session['usuario']['rol'] == 'administracion':
         subrol = session['usuario']['datos_perfil'].get('subrol', '')
         if subrol == 'Supervisor':
-            mi_ciudad = session['usuario']['datos_perfil'].get('ciudad', '')
-            # Solo dejamos los reportes que coincidan con la ciudad del Supervisor
-            data['reportes'] = [r for r in data.get('reportes', []) if r.get('ciudad') == mi_ciudad]
+            usuario_id = session['usuario']['usuario']
+            usuarios_data = leer_json("usuarios.json")
+            
+            mi_ciudad = ""
+            ciudades_asignadas = []
+            for u in usuarios_data.get("usuarios", []):
+                if u.get("usuario") == usuario_id:
+                    mi_ciudad = u.get("datos_perfil", {}).get("ciudad", "")
+                    ciudades_asignadas = u.get("datos_perfil", {}).get("ciudades_asignadas", [])
+                    break
+                    
+            ciudades_permitidas = [mi_ciudad] + ciudades_asignadas
+            # Solo dejamos los reportes que coincidan con la ciudad (o ciudades extra) del Supervisor
+            data['reportes'] = [r for r in data.get('reportes', []) if r.get('ciudad') in ciudades_permitidas]
             
     return jsonify(data)
 

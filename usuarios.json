@@ -46,9 +46,9 @@
                 "encargado": "Armando Ramirez",
                 "responsable": "Dilan Fernandez",
                 "telefono": "6634041184",
-                "direccion": "Blvd. Fundadores 5045, Fracc El Rub\u00ed, 22637 Tijuana, B.C.",
+                "direccion": "Blvd. Fundadores 5045, Fracc El Rubí, 22637 Tijuana, B.C.",
                 "codigo_postal": "22435",
-                "descripcion": "Venta y suministro de refacciones automotrices, aceites, lubricantes y componentes mec\u00e1nicos generales para todo tipo de autom\u00f3viles.",
+                "descripcion": "Venta y suministro de refacciones automotrices, aceites, lubricantes y componentes mecánicos generales para todo tipo de automóviles.",
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "foto_ruta": "temp_20260820125349_autopartes_motores.png"
             }
@@ -68,7 +68,8 @@
                 "area": "Automotriz",
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "subrol": "Administrador",
-                "foto_ruta": "temp_20260905162600_administrador.jpg"
+                "foto_ruta": "temp_20260905162600_administrador.jpg",
+                "ciudades_asignadas": []
             }
         },
         {

@@ -100,6 +100,11 @@ def login():
 def estado_unidad(eco):
     eco_full = f"8090-{eco}"
     
+    # 0. Checar si la unidad esta inactiva (ej. por Cotizacion Cara o manual)
+    unidades_data = leer_json('unidades.json')
+    if eco in unidades_data and unidades_data[eco].get('Estado') == 'Inactiva':
+        return jsonify({"status": "success", "estado": "Unidad Inhabilitada/Incosteable"})
+
     # 1. Checar facturas.json primero (Unidades ya asignadas a taller)
     facturas_data = leer_json('facturas.json')
     todas_facturas = facturas_data.get('facturas', [])

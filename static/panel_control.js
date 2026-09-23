@@ -131,6 +131,8 @@ function asignarCiudadPanel(usuarioId) {
     let ciudad = select.value;
     if (!confirm(`¿Deseas asignar la ciudad "${ciudad}" a este usuario?`)) return;
 
+    mostrarLoaderDinamico("Procesando...", "Asignando ciudad y notificando \u23F3");
+
     fetch('/api/panel/asignar_ciudad', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -138,10 +140,12 @@ function asignarCiudadPanel(usuarioId) {
     })
     .then(res => res.json())
     .then(data => {
+        ocultarLoaderDinamico();
         alert(data.message);
         if (data.status === 'success') cargarPanelControl();
     })
     .catch(err => {
+        ocultarLoaderDinamico();
         console.error(err);
         alert('Error al conectar con el servidor.');
     });
@@ -150,6 +154,8 @@ function asignarCiudadPanel(usuarioId) {
 function quitarCiudadPanel(usuarioId, ciudad) {
     if (!confirm(`¿Deseas REMOVER la ciudad "${ciudad}" de este usuario? Se le enviará un correo de notificación.`)) return;
 
+    mostrarLoaderDinamico("Procesando...", "Removiendo ciudad y notificando \u23F3");
+
     fetch('/api/panel/quitar_ciudad', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -157,10 +163,12 @@ function quitarCiudadPanel(usuarioId, ciudad) {
     })
     .then(res => res.json())
     .then(data => {
+        ocultarLoaderDinamico();
         alert(data.message);
         if (data.status === 'success') cargarPanelControl();
     })
     .catch(err => {
+        ocultarLoaderDinamico();
         console.error(err);
         alert('Error al conectar con el servidor.');
     });

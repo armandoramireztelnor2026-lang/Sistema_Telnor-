@@ -57,7 +57,7 @@ def procesar_liberacion_si_aplica(f):
     corp_ok = f.get("aprobado_corp", False)
 
     if admin_ok and corp_ok and "liberado_admin" not in f:
-        ciudad_real = f.get("ciudad", f.get("unidad"))
+        ciudad_real = obtener_ciudad_de_factura(f)
         correo_admin, nombre_admin = encontrar_admin_por_ciudad(ciudad_real)
 
         if correo_admin:
@@ -286,11 +286,21 @@ def listar_facturas():
             # --- FILTRO GEOGRÁFICO PARA SUPERVISORES ---
             subrol = session["usuario"]["datos_perfil"].get("subrol", "")
             if subrol == "Supervisor":
-                mi_ciudad = session["usuario"]["datos_perfil"].get("ciudad", "")
+                usuario_id = session["usuario"]["usuario"]
                 usuarios_data = leer_json("usuarios.json")
                 
-                # Primero, buscamos cómo se llaman todos los proveedores de la misma ciudad (o los que son globales/sin ciudad)
-                proveedores_locales = [u["datos_perfil"]["nombre_proveedor"] for u in usuarios_data.get("usuarios", []) if u["rol"] == "proveedores" and (u["datos_perfil"].get("ciudad") == mi_ciudad or not u["datos_perfil"].get("ciudad"))]
+                mi_ciudad = ""
+                ciudades_asignadas = []
+                for u in usuarios_data.get("usuarios", []):
+                    if u.get("usuario") == usuario_id:
+                        mi_ciudad = u.get("datos_perfil", {}).get("ciudad", "")
+                        ciudades_asignadas = u.get("datos_perfil", {}).get("ciudades_asignadas", [])
+                        break
+                        
+                ciudades_permitidas = [mi_ciudad] + ciudades_asignadas
+                
+                # Primero, buscamos cómo se llaman todos los proveedores de esas ciudades (o los que son globales/sin ciudad)
+                proveedores_locales = [u["datos_perfil"]["nombre_proveedor"] for u in usuarios_data.get("usuarios", []) if u["rol"] == "proveedores" and (u["datos_perfil"].get("ciudad") in ciudades_permitidas or not u["datos_perfil"].get("ciudad"))]
                 
                 # Luego, solo le mostramos al Supervisor las facturas que vengan de esos proveedores locales
                 facturas = [f for f in facturas if f.get("proveedor") in proveedores_locales]
@@ -314,6 +324,41 @@ def listar_facturas():
     return jsonify({"facturas": facturas})
 
 
+
+
+def obtener_ciudad_de_factura(f):
+    c = f.get("ciudad")
+    if c and c.strip():
+        return c
+    
+    prov_nombre = f.get("proveedor")
+    if prov_nombre:
+        usuarios = leer_json("usuarios.json")
+        for u in usuarios.get("usuarios", []):
+            if u.get("rol") == "proveedores" and u.get("datos_perfil", {}).get("nombre_proveedor") == prov_nombre:
+                c_prov = u.get("datos_perfil", {}).get("ciudad")
+                if c_prov:
+                    return c_prov
+
+    unidad = str(f.get("unidad", ""))
+    unidad_corta = unidad.replace("8090-", "")
+    
+    reportes = leer_json("reportes.json").get("reportes", [])
+    for r in reversed(reportes):
+        r_uni = str(r.get("unidad", ""))
+        if r_uni == unidad_corta or f"8090-{r_uni}" == unidad:
+            if r.get("ciudad"):
+                return r.get("ciudad")
+
+    if os.path.exists("archivo_reportes.json"):
+        archivos = leer_json("archivo_reportes.json").get("reportes", [])
+        for r in reversed(archivos):
+            r_uni = str(r.get("unidad", ""))
+            if r_uni == unidad_corta or f"8090-{r_uni}" == unidad:
+                if r.get("ciudad"):
+                    return r.get("ciudad")
+
+    return unidad
 
 def encontrar_admin_por_ciudad(ciudad):
     usuarios = leer_json("usuarios.json")
@@ -372,9 +417,9 @@ def confirmar_admin():
                     if i == 0: f["pdf_cotizacion_asignacion"] = nombre_pdf
 
             # Primero validar si existe administrador para la ciudad
-            correo_admin, nombre_admin = encontrar_admin_por_ciudad(f.get("ciudad", f.get("unidad")))
+            correo_admin, nombre_admin = encontrar_admin_por_ciudad(obtener_ciudad_de_factura(f))
             if not correo_admin:
-                return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para la ciudad '{f.get('ciudad', f.get('unidad'))}'. Es obligatorio contar con un Administrador para liberar el documento contable. No se puede avanzar."})
+                return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para la ciudad '{obtener_ciudad_de_factura(f)}'. Es obligatorio contar con un Administrador para liberar el documento contable. No se puede avanzar."})
 
             reportes_data = leer_json("reportes.json")
             for r in reportes_data.get("reportes", []):
@@ -383,21 +428,10 @@ def confirmar_admin():
                     if f.get("pdf_cotizacion_asignacion"): r["pdf_cotizacion_asignacion"] = f["pdf_cotizacion_asignacion"]
                     escribir_json("reportes.json", reportes_data)
                     break
-            # ===== NUEVA LOGICA DE BLOQUEO PARA DOC 50 =====
-            correo_admin, nombre_admin = encontrar_admin_por_ciudad(f.get("ciudad", f.get("unidad")))
-            if correo_admin:
-                f["liberado_admin"] = False
-                try:
-                    from notificaciones import enviar_correo_esperando_liberacion
-                    enviar_correo_esperando_liberacion(correo_admin, nombre_admin, f.get("id_reporte", "N/A"), f.get("unidad", ""), nums_orden[0] if nums_orden else "N/A", nums_orden[0] if nums_orden else "N/A")
-                except Exception as e:
-                    print("Error al enviar correo: ", e)
-            # ===============================================
-
-            escribir_json("facturas.json", data)
             precio_float = float(f.get("precio", 0))
 
             if precio_float >= 10001.0:
+                escribir_json("facturas.json", data)
                 msg_base = "Órdenes asignadas por el Supervisor. Enviando a Administrador para revisión..."
                 usuarios_data = leer_json("usuarios.json")
                 admins_10k = [u for u in usuarios_data.get("usuarios", [])
@@ -418,6 +452,17 @@ def confirmar_admin():
                             nums_orden_txt
                         )
             else:
+                # ===== NUEVA LOGICA DE BLOQUEO PARA DOC 50 =====
+                correo_admin, nombre_admin = encontrar_admin_por_ciudad(obtener_ciudad_de_factura(f))
+                if correo_admin:
+                    f["liberado_admin"] = False
+                    try:
+                        from notificaciones import enviar_correo_esperando_liberacion
+                        enviar_correo_esperando_liberacion(correo_admin, nombre_admin, f.get("id_reporte", "N/A"), f.get("unidad", ""), nums_orden[0] if nums_orden else "N/A", nums_orden[0] if nums_orden else "N/A")
+                    except Exception as e:
+                        print("Error al enviar correo: ", e)
+                # ===============================================
+                escribir_json("facturas.json", data)
                 msg_base = "Órdenes asignadas y validadas por Administración."
                 
                 proveedor_nombre = f.get('proveedor', '')
@@ -555,6 +600,17 @@ def aprobar_10k():
             elif accion == "caras":
                 f["estado"] = "Cancelado_Cotizacion_Cara"
                 escribir_json("facturas.json", data)
+                
+                try:
+                    unidad_num = str(f.get("unidad", "")).replace("8090-", "")
+                    if unidad_num:
+                        unidades = leer_json("unidades.json")
+                        if unidades and unidad_num in unidades:
+                            unidades[unidad_num]["Estado"] = "Inactiva"
+                            escribir_json("unidades.json", unidades)
+                except Exception as e:
+                    print("Error desactivando unidad en caras:", str(e))
+
 
                 usuarios_data = leer_json("usuarios.json")
                 supervisores = [u for u in usuarios_data.get("usuarios", [])
@@ -595,6 +651,18 @@ def confirmar_corp():
 
             f["aprobado_corp"] = True
             f["estado_custom"] = ""
+
+            # ===== NUEVA LOGICA DE BLOQUEO PARA DOC 50 =====
+            correo_admin, nombre_admin = encontrar_admin_por_ciudad(obtener_ciudad_de_factura(f))
+            if correo_admin:
+                f["liberado_admin"] = False
+                try:
+                    from notificaciones import enviar_correo_esperando_liberacion
+                    enviar_correo_esperando_liberacion(correo_admin, nombre_admin, f.get("id_reporte", "N/A"), f.get("unidad", ""), f.get("numero_orden", "N/A"), f.get("numero_cotizacion_asignacion", "N/A"))
+                except Exception as e:
+                    print("Error al enviar correo doc 50: ", e)
+            # ===============================================
+
             escribir_json("facturas.json", data)
 
             usuarios_data = leer_json("usuarios.json")
@@ -1187,9 +1255,9 @@ def editar_seccion_especifica():
     pdf_antiguo = None
     
     if seccion == "orden":
-        correo_admin, nombre_admin = encontrar_admin_por_ciudad(factura.get("ciudad", factura.get("unidad")))
+        correo_admin, nombre_admin = encontrar_admin_por_ciudad(obtener_ciudad_de_factura(factura))
         if not correo_admin:
-            return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para la ciudad '{factura.get('ciudad', factura.get('unidad'))}'. Es obligatorio contar con un Administrador. No se puede avanzar."})
+            return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para la ciudad '{obtener_ciudad_de_factura(factura)}'. Es obligatorio contar con un Administrador. No se puede avanzar."})
             
         pdf_antiguo = factura.get("pdf_cotizacion_asignacion")
         factura["numero_cotizacion_asignacion"] = identificador
