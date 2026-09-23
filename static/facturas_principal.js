@@ -1661,12 +1661,21 @@ function abrirAsignacionReporte(idReporte) {
         });
         // ---------------------------------------------------------
 
+        const selectCompania = document.getElementById('select-compania');
+        if (r.compania && selectCompania) {
+            selectCompania.value = r.compania;
+        } else if (selectCompania) {
+            selectCompania.value = "";
+        }
+
         if (r.asignado_a && r.asignado_a !== "") {
             if (buscador) { buscador.value = r.asignado_a; buscador.disabled = true; }
+            if (selectCompania) { selectCompania.disabled = true; }
             document.querySelector('#modal-asignar-reporte .btn-success-modal').style.display = 'none';
         }
         else {
             if (buscador) buscador.disabled = false;
+            if (selectCompania) { selectCompania.disabled = false; }
             document.querySelector('#modal-asignar-reporte .btn-success-modal').style.display = 'block';
             renderizarListaFlotante(listaProveedoresParaAsignar);
         }
