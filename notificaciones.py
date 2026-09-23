@@ -226,7 +226,7 @@ def enviar_correo_confirmacion_reporte(correo_destino, nombre_empleado, ticket, 
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"✅ Confirmación de Registro de Incidencia - Folio {ticket}"
+    asunto = f"📋 Confirmación de Registro de Incidencia - Folio {ticket}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -254,7 +254,7 @@ def enviar_correo_confirmacion_factura(correo_destino, nombre_proveedor, unidad,
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"✅ Confirmación de Recepción de Cotización - Unidad 8090-{unidad}"
+    asunto = f"📄 Confirmación de Recepción de Cotización - Unidad 8090-{unidad}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -469,7 +469,7 @@ def enviar_correo_ticket_rechazado(correo_destino, nombre_empleado, ticket, unid
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
 
-def enviar_correo_factura_fiscal_subida(correo_destino, proveedor, unidad, titulo, folio):
+def enviar_correo_factura_fiscal_subida(correo_destino, proveedor, unidad, titulo, folio, nombre_supervisor="Supervisor"):
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
@@ -482,7 +482,7 @@ def enviar_correo_factura_fiscal_subida(correo_destino, proveedor, unidad, titul
                 <h2 style="color: #ffffff; margin: 0;">NUEVA FACTURA FISCAL RECIBIDA</h2>
             </div>
             <div style="padding: 20px;">
-                <p>Hola <strong>Administración</strong>,</p>
+                <p>Hola <strong>{nombre_supervisor}</strong>,</p>
                 <p>El proveedor <strong>{proveedor}</strong> ha subido su factura final (CFDI) para pago.</p>
                 <ul style="list-style: none; padding: 0;">
                     <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{unidad}</li>
@@ -750,7 +750,7 @@ def enviar_correo_admin_aprobado_a_corp(lista_corps, ticket, unidad, proveedor, 
         return 0
 
     precio_fmt = f"{float(precio):,.2f}"
-    asunto = f"✅ Aprobación Administrativa Emitida - En Espera de Autorización Financiera (${precio_fmt} MXN)"
+    asunto = f"⏳ Aprobación Administrativa Emitida - En Espera de Autorización Financiera (${precio_fmt} MXN)"
 
     enviados = 0
     for corp in lista_corps:
@@ -1160,3 +1160,30 @@ def enviar_correo_doc50_proveedor(correo_proveedor, nombre_proveedor, unidad, ti
     </html>
     """
     return disparar_correo(correo_proveedor, asunto, cuerpo_html)
+
+def enviar_correo_confirmacion_aprobacion_actor(correo_destino, actor, unidad, precio, rol_aprobador="Supervisor"):
+    if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    asunto = f"✅ Confirmación de Aprobación Exitosa - Unidad 8090-{unidad}"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #10b981; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">APROBACIÓN REGISTRADA</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{actor}</strong>,</p>
+                <p>El sistema ha registrado correctamente su validación y aprobación como <strong>{rol_aprobador}</strong> para el presupuesto de la unidad <strong>8090-{unidad}</strong>.</p>
+                <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Monto Aprobado:</strong> ${precio:,.2f} MXN</li>
+                </ul>
+                <p>El proceso continuará automáticamente a la siguiente etapa.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_destino, asunto, cuerpo_html)

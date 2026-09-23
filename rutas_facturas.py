@@ -483,6 +483,16 @@ def confirmar_admin():
                         vehiculo_info
                     )
 
+            # Enviar correo de confirmación al actor
+            correo_actor = session.get("usuario", {}).get("datos_perfil", {}).get("correo", "")
+            nombre_actor = session.get("usuario", {}).get("datos_perfil", {}).get("nombres", "Supervisor")
+            if correo_actor:
+                try:
+                    from notificaciones import enviar_correo_confirmacion_aprobacion_actor
+                    enviar_correo_confirmacion_aprobacion_actor(correo_actor, nombre_actor, f.get("unidad", "S/N"), precio_float, "Supervisor")
+                except Exception as e:
+                    print("Error al enviar confirmación de aprobación a supervisor:", e)
+
             return jsonify({"status": "success", "message": msg_base})
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
@@ -528,6 +538,16 @@ def aprobar_10k():
                         precio_float,
                         admin_nombres
                     )
+
+                # Enviar correo de confirmación al actor
+                correo_actor = session.get("usuario", {}).get("datos_perfil", {}).get("correo", "")
+                nombre_actor = session.get("usuario", {}).get("datos_perfil", {}).get("nombres", "Administrador")
+                if correo_actor:
+                    try:
+                        from notificaciones import enviar_correo_confirmacion_aprobacion_actor
+                        enviar_correo_confirmacion_aprobacion_actor(correo_actor, nombre_actor, f.get("unidad", "S/N"), precio_float, "Administrador")
+                    except Exception as e:
+                        print("Error al enviar confirmación de aprobación a administrador:", e)
 
                 return jsonify({"status": "success", "message": "Cotización aprobada. Enviada a Corporativos."})
 
@@ -698,6 +718,16 @@ def confirmar_corp():
                     f.get("unidad", "S/N"),
                     vehiculo_info
                 )
+
+            # Enviar correo de confirmación al actor
+            correo_actor = session.get("usuario", {}).get("datos_perfil", {}).get("correo", "")
+            nombre_actor = session.get("usuario", {}).get("datos_perfil", {}).get("nombres", "Corporativo")
+            if correo_actor:
+                try:
+                    from notificaciones import enviar_correo_confirmacion_aprobacion_actor
+                    enviar_correo_confirmacion_aprobacion_actor(correo_actor, nombre_actor, f.get("unidad", "S/N"), precio_float, "Corporativo")
+                except Exception as e:
+                    print("Error al enviar confirmación de aprobación a corporativo:", e)
 
             mensaje_extra = procesar_liberacion_si_aplica(f)
             return jsonify({"status": "success", "message": "Autorización financiera aprobada. Se notificó al Supervisor." + mensaje_extra})
@@ -1101,9 +1131,25 @@ def subir_factura_final():
             f['validacion_fiscal'] = 'Pendiente'
             escribir_json('facturas.json', data)
             
-            # Notificar
-            enviar_correo_factura_fiscal_subida("armandoramireztelnor2026@gmail.com", f.get('proveedor', 'Proveedor'), f.get('unidad', 'S/N'), f.get('titulo', 'Sin Título'), folios[0] if folios else 'Varios')
-            return jsonify({"status": "success", "message": "Facturas fiscales subidas correctamente. Se notificó a Administración."})
+            # Notificar al Supervisor
+            usuarios_data = leer_json("usuarios.json")
+            supervisores = [u for u in usuarios_data.get("usuarios", [])
+                           if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
+            
+            for sup in supervisores:
+                correo_sup = sup["datos_perfil"].get("correo")
+                nombre_sup = sup["datos_perfil"].get("nombres", "Supervisor")
+                if correo_sup:
+                    enviar_correo_factura_fiscal_subida(
+                        correo_sup, 
+                        f.get('proveedor', 'Proveedor'), 
+                        f.get('unidad', 'S/N'), 
+                        f.get('titulo', 'Sin Título'), 
+                        folios[0] if folios else 'Varios',
+                        nombre_sup
+                    )
+
+            return jsonify({"status": "success", "message": "Facturas fiscales subidas correctamente. Se notificó al Supervisor."})
             
     return jsonify({"status": "error", "message": "No se encontró el registro."})
             

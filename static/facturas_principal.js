@@ -416,6 +416,18 @@ async function cargarFacturas() {
             if (tbodyDocContables && countDocContables === 0) tbodyDocContables.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay documentos contables pendientes</td></tr>`;
             if (tbodyArchivo && countArchivo === 0) tbodyArchivo.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay registros archivados</td></tr>`;
             if (tbodyArchivoCorp && countArchivoCorp === 0) tbodyArchivoCorp.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay registros archivados</td></tr>`;
+
+            // Aplicar paginación a todas las bandejas si existe la función
+            if (typeof aplicarPaginacion === 'function') {
+                if (tbody) aplicarPaginacion('tabla-facturas', 20, true);
+                if (tbodyFinales) aplicarPaginacion('tabla-facturas-finales', 20, true);
+                if (tbodyDocContables) aplicarPaginacion('tabla-doc-contables', 20, true);
+                if (tbodyArchivo) aplicarPaginacion('tabla-archivo', 20, true);
+                if (tbodyArchivoProv) aplicarPaginacion('tabla-archivo-prov', 20, true);
+                if (tbodyArchivoCorp) aplicarPaginacion('tabla-archivo-corp', 20, true);
+                let tbodyArchivoCancelado = document.getElementById('tabla-archivo-cancelado');
+                if (tbodyArchivoCancelado) aplicarPaginacion('tabla-archivo-cancelado', 20, true);
+            }
         }
     } catch (err) { console.error("Error al cargar datos globales", err); }
 }

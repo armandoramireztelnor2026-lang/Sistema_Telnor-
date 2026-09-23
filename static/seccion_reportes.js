@@ -313,6 +313,10 @@ function renderizarTablaReportes(lista) {
     });
 
     actualizarKPIs(totalGasto, pendientesDoc50, pendientesOC);
+
+    if (typeof aplicarPaginacion === 'function') {
+        aplicarPaginacion('tabla-seccion-reportes', 20, true);
+    }
 }
 
 // ==========================================

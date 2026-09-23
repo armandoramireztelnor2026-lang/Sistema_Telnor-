@@ -11,9 +11,7 @@ window.cambiarPagina = function(tbodyId, direccion) {
 };
 
 window.aplicarPaginacion = function(tbodyId, itemsPerPage = 20, resetPage = true) {
-    // Excluir explícitamente la tabla de reportes
-    if (tbodyId === 'tabla-seccion-reportes') return;
-    
+
     if (resetPage) {
         window.paginacionEstado[tbodyId] = 1;
     }
