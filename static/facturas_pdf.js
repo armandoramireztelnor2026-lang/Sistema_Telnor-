@@ -132,6 +132,7 @@ function generarPDFSilencioso(idFactura) {
 
 function imprimirReporteTaller() {
     if(!reporteSeleccionado) return;
+    if(!confirm("¿Estás seguro de que deseas imprimir este reporte?")) return;
     const r = reporteSeleccionado;
     let emailStatus = (r.email && r.email.trim() !== "" && r.email.trim() !== "No proporcionado") ? r.email : "No proporcionado";
     let ciudadStatus = r.ciudad || "No especificada";

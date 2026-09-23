@@ -228,6 +228,9 @@ def renovar_password():
 
 @app.route('/api/eliminar_usuario', methods=['POST'])
 def eliminar_usuario():
+    if 'usuario' in session and session['usuario'].get('datos_perfil', {}).get('subrol') == 'Supervisor':
+        return jsonify({"status": "error", "message": "Los supervisores no tienen permisos para eliminar usuarios."})
+        
     usuario_id = request.json.get('usuario')
     usuarios_data = leer_json('usuarios.json')
     nuevos_usuarios = []

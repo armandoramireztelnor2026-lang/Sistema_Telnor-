@@ -524,7 +524,7 @@ function cargarListaUsuarios(rolBuscado, idTabla) {
                     <button class="btn-danger" style="background-color: #b45309; margin-bottom: 5px; width: 100%;" onclick="abrirModalDetallesUsuario('${u.usuario}')">📄 Ver PDF / Detalles</button>
                     <div style="display:flex; gap:5px; width:100%;">
                         <button class="btn-info" onclick="abrirModalEditar('${u.usuario}')" style="flex:1;">Editar</button>
-                        <button class="btn-danger-sm" onclick="eliminarUsuario('${u.usuario}', '${rolBuscado}')" style="flex:1;">Eliminar</button>
+                        ${subrolActual !== 'Supervisor' ? `<button class="btn-danger-sm" onclick="eliminarUsuario('${u.usuario}', '${rolBuscado}')" style="flex:1;">Eliminar</button>` : ''}
                     </div>
                 </div>`;
 

@@ -86,6 +86,22 @@ function renderizarTablaReportes(lista) {
         let numEco = f.unidad ? `8090-${f.unidad.replace('8090-', '')}` : pendienteHTML;
         let fechaTicket = f.fecha || reporteOrig.fecha || pendienteHTML;
 
+        // NUEVO CALCULO DE TIEMPO DEL TICKET
+        let fechaTicketFinalizado = f.fecha_cierre || pendienteHTML;
+        let tiempoTicket = "En Proceso";
+        
+        if (fechaTicket !== pendienteHTML && fechaTicketFinalizado !== pendienteHTML) {
+            let ft1 = new Date(fechaTicket);
+            let ft2 = new Date(fechaTicketFinalizado);
+            if (!isNaN(ft1) && !isNaN(ft2)) {
+                let diffMsT = Math.abs(ft2 - ft1);
+                let diffDaysT = Math.floor(diffMsT / (1000 * 60 * 60 * 24));
+                let diffHoursT = Math.floor((diffMsT % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                let diffMinutesT = Math.floor((diffMsT % (1000 * 60 * 60)) / (1000 * 60));
+                tiempoTicket = `${diffDaysT}d ${diffHoursT}h ${diffMinutesT}m`;
+            }
+        }
+
         // Determinar el Estado
         let estado = 'N/A';
         let tieneCotizacion = f.cotizaciones && f.cotizaciones.length > 0;
@@ -165,16 +181,19 @@ function renderizarTablaReportes(lista) {
         let fechaEntrada = f.fecha || pendienteHTML;
         let fechaSalida = f.fecha_cierre || pendienteHTML;
         let tiempoTaller = pendienteHTML;
-        
         // Calculate days in shop for Top 10
         f.dias_taller = 0;
         if (fechaEntrada !== pendienteHTML && fechaSalida !== pendienteHTML) {
             let f1 = new Date(f.fecha);
             let f2 = new Date(f.fecha_cierre);
             if (!isNaN(f1) && !isNaN(f2)) {
-                let diffDays = Math.ceil(Math.abs(f2 - f1) / (1000 * 60 * 60 * 24));
-                tiempoTaller = diffDays + ' día(s)';
+                let diffMs = Math.abs(f2 - f1);
+                let diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
                 f.dias_taller = diffDays;
+                
+                let diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                let diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                tiempoTaller = `${diffDays}d ${diffHours}h ${diffMinutes}m`;
             }
         }
 
@@ -285,6 +304,8 @@ function renderizarTablaReportes(lista) {
                 <td style="vertical-align:top; padding-top:15px;"><strong>${ticket}</strong></td>
                 <td style="vertical-align:top; padding-top:15px;">${numEco}</td>
                 <td style="vertical-align:top; padding-top:15px;">${fechaTicket}</td>
+                <td style="vertical-align:top; padding-top:15px;">${tiempoTicket}</td>
+                <td style="vertical-align:top; padding-top:15px;">${fechaTicketFinalizado}</td>
                 <td style="vertical-align:top; padding-top:15px;"><span style="background:#0ea5e9; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">${estado}</span></td>
                 <td style="vertical-align:top; padding-top:15px;">${statusUnidad}</td>
                 <td style="vertical-align:top; padding-top:15px;">${nombreSup}</td>
