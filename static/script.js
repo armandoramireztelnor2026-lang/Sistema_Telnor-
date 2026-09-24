@@ -217,11 +217,18 @@ function procesarRegistro(rol) {
 
 function marcarBotonActivo(vista) {
     document.querySelectorAll('.btn-sidebar').forEach(b => {
-        if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("('" + vista + "')")) {
-            let nav = b.closest('.nav-menu') || b.closest('.sidebar');
-            if (nav) {
-                nav.querySelectorAll('.btn-sidebar').forEach(btn => btn.classList.remove('active'));
-                b.classList.add('active');
+        let onclickAttr = b.getAttribute('onclick');
+        if (onclickAttr) {
+            let matchesView = onclickAttr.includes("('" + vista + "')");
+            let matches10k = (vista === 'cotizaciones-10k' && onclickAttr.includes("verCotizacionesMas10000"));
+            let matchesDoc = (vista === 'documentos-contables' && onclickAttr.includes("documentos-contables"));
+            
+            if (matchesView || matches10k || matchesDoc) {
+                let nav = b.closest('.nav-menu') || b.closest('.sidebar');
+                if (nav) {
+                    nav.querySelectorAll('.btn-sidebar').forEach(btn => btn.classList.remove('active'));
+                    b.classList.add('active');
+                }
             }
         }
     });
