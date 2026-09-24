@@ -61,6 +61,25 @@ def nuevo_reporte():
             if str(r.get("id")) not in facturas_report_ids:
                 return jsonify({"status": "error", "message": f"La unidad {unidad_req} ya tiene un reporte activo en proceso de asignación."})
 
+    # 3. Validar que exista al menos un Administrador o Supervisor para esa ciudad
+    ciudad_reporte = request.form.get("ciudad", "No especificada")
+    usuarios_data = leer_json("usuarios.json")
+    autoridad_encontrada = False
+    for u in usuarios_data.get("usuarios", []):
+        if u.get("rol") == "administracion":
+            perfil = u.get("datos_perfil", {})
+            subrol = perfil.get("subrol", "")
+            ciudad_admin = perfil.get("ciudad", "")
+            ciudades_extra = perfil.get("ciudades_asignadas", [])
+            
+            if subrol in ["Administrador", "Supervisor"]:
+                if ciudad_admin == ciudad_reporte or ciudad_reporte in ciudades_extra:
+                    autoridad_encontrada = True
+                    break
+                
+    if not autoridad_encontrada:
+        return jsonify({"status": "error", "message": f"No se puede crear el reporte: No hay Administrador ni Supervisor registrado para la ciudad de {ciudad_reporte}."})
+
     nuevo_id = f"REP-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
     reporte = {
         "id": nuevo_id,
