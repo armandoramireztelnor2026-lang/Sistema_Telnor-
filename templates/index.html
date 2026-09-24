@@ -232,6 +232,12 @@
 
     <!-- SCRIPTS ORIGINALES -->
     <script src="/static/script.js?v=1788806395"></script>
+    <script>
+        // Limpiar el localStorage al estar en la pantalla de Login (cerrar sesión)
+        localStorage.removeItem('activeViewAdmin');
+        localStorage.removeItem('activeViewProv');
+        localStorage.removeItem('activeViewCorp');
+    </script>
 
     <!-- SCRIPT DE APOYO PARA LA NUEVA LÓGICA DE BOTONES -->
     <script>

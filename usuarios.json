@@ -69,7 +69,9 @@
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "subrol": "Administrador",
                 "foto_ruta": "temp_20260905162600_administrador.jpg",
-                "ciudades_asignadas": []
+                "ciudades_asignadas": [
+                    "Tecate"
+                ]
             }
         },
         {
@@ -87,7 +89,8 @@
                 "area": "Automotriz",
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "subrol": "Supervisor",
-                "foto_ruta": "temp_20260909110514_supervisor.jpg"
+                "foto_ruta": "temp_20260909110514_supervisor.jpg",
+                "ciudades_asignadas": []
             }
         }
     ]

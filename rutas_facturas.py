@@ -191,13 +191,20 @@ def nueva_factura():
     compania_asignada = "RUMN"
     import re as re_mod
     match_ticket = re_mod.search(r"\[TICKET:(.*?)\]", retro_global)
+    ciudad_ticket = ""
     if match_ticket:
         ticket_id = match_ticket.group(1).strip()
         rep_data = leer_json("reportes.json")
         for r in rep_data.get("reportes", []):
             if str(r.get("id")) == str(ticket_id):
                 compania_asignada = r.get("compania", "RUMN")
+                ciudad_ticket = r.get("ciudad", "")
                 break
+                
+    if not ciudad_ticket:
+        unidades_data = leer_json("unidades.json")
+        if unidades_data and unidad_sola in unidades_data:
+            ciudad_ticket = unidades_data[unidad_sola].get("Ciudad Base", "Tijuana")
 
     # Título global = primer título de cotización
     titulo_global = cotizaciones_array[0].get("titulo", "Sin título") if cotizaciones_array else "Sin título"
@@ -238,13 +245,13 @@ def nueva_factura():
     admins_data = []
     corps_data = []
 
-    proveedor_ciudad = session["usuario"]["datos_perfil"].get("ciudad", "")
-
     for u in usuarios_data.get("usuarios", []):
         if u["rol"] == "administracion":
             subrol = u["datos_perfil"].get("subrol", "Administración")
             ciudad_admin = u["datos_perfil"].get("ciudad", "")
-            if subrol == "Supervisor" and ciudad_admin == proveedor_ciudad:
+            ciudades_extra = u["datos_perfil"].get("ciudades_asignadas", [])
+            
+            if subrol == "Supervisor" and (ciudad_admin == ciudad_ticket or ciudad_ticket in ciudades_extra):
                 correo = u["datos_perfil"].get("correo")
                 if correo:
                     nombre = f"{u['datos_perfil'].get('nombres', '')} {u['datos_perfil'].get('apellido_paterno', '')}".strip()
