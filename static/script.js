@@ -261,6 +261,7 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'panel-control' && typeof cargarPanelControl === 'function') cargarPanelControl();
     if (vista === 'reportes' && typeof cargarReportesAdmin === 'function') cargarReportesAdmin();
     if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'documentos_contables') && typeof cargarFacturas === 'function') cargarFacturas();
+    if (vista === 'cotizaciones-10k' && typeof cargarCotizaciones10k === 'function') cargarCotizaciones10k();
 }
 
 function cambiarVistaProv(vista) {
@@ -715,7 +716,8 @@ function descargarPDF() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+// --- INICIALIZACION ROBUSTA ESPERANDO A QUE CARGUEN TODOS LOS SCRIPTS ---
+window.addEventListener('load', function() {
     if (document.getElementById('vista-pendientes')) { 
         let savedView = localStorage.getItem('activeViewAdmin');
         if (savedView) {
@@ -725,7 +727,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 cambiarVistaAdmin(savedView);
             }
         } else {
-            let subrol = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+            let subrol = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value.trim() : '';
             if (subrol === 'Jefatura') {
                 cambiarVistaAdmin('pendientes');
             } else if (subrol === 'Supervisor') {
@@ -737,7 +739,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     cambiarVistaAdmin('cotizaciones-10k');
                 }
             } else {
-                // Fallback for any other potential subrol like 'Asistente', 'Auditor' etc
                 cambiarVistaAdmin('reportes'); 
             }
         }

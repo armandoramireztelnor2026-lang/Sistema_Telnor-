@@ -627,6 +627,7 @@ def aprobar_10k():
 
             elif accion == "caras":
                 f["estado"] = "Cancelado_Cotizacion_Cara"
+                f["fecha_cierre"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 escribir_json("facturas.json", data)
                 
                 try:
@@ -750,6 +751,7 @@ def cancelar_cotizacion():
     for f in data.get("facturas", []):
         if f["id"] == factura_id:
             f["estado"] = "Cancelado_Cotizacion_Cara"
+            f["fecha_cierre"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             escribir_json("facturas.json", data)
             try:
                 unidad_num = f.get("unidad", "").replace("8090-", "")
@@ -1282,7 +1284,7 @@ def doc50():
                         f['numero_doc50'] = nums_doc50[i]
 
             f['estado'] = 'Archivado'
-            f['fecha_cierre'] = datetime.datetime.now().strftime('%Y-%m-%d')
+            f['fecha_cierre'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             escribir_json('facturas.json', data)
 
             proveedor_nombre = f.get('proveedor', '')

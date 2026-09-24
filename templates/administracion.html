@@ -1274,7 +1274,7 @@
         <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
     </div>
 
-    <script src="/static/script.js?v=230926_2152"></script>
+    <script src="/static/script.js?v=999999"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js?v=5"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
@@ -1789,6 +1789,25 @@
 
     <script src="/static/panel_control.js?v=1"></script>
 
+    <!-- FOOLPROOF FALLBACK -->
+    <script>
+        setTimeout(function() {
+            var sub = document.getElementById('subrol-actual');
+            var subrol = sub ? sub.value.trim() : '';
+            var active = localStorage.getItem('activeViewAdmin');
+            
+            if (subrol === 'Administrador' && !active) {
+                var c10k = document.getElementById('vista-cotizaciones-10k');
+                if (c10k && c10k.style.display === 'none') {
+                    if (typeof verCotizacionesMas10000 === 'function') {
+                        verCotizacionesMas10000();
+                    } else if (typeof cambiarVistaAdmin === 'function') {
+                        cambiarVistaAdmin('cotizaciones-10k');
+                    }
+                }
+            }
+        }, 500);
+    </script>
 </body>
 
 </html>
