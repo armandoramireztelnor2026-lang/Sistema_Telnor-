@@ -1274,7 +1274,7 @@
         <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
     </div>
 
-    <script src="/static/script.js?v=48566"></script>
+    <script src="/static/script.js?v=230926_2152"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js?v=5"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
@@ -1803,13 +1803,18 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             setTimeout(() => {
-                {% if usuario.datos_perfil.subrol == 'Jefatura' %}
-                if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('panel-control');
-                {% elif usuario.datos_perfil.subrol == 'Supervisor' %}
-                if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('reportes');
-                {% elif usuario.datos_perfil.subrol == 'Administrador' %}
-                if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('documentos-contables');
-                {% endif %}
+                let savedView = localStorage.getItem('activeViewAdmin');
+                if (savedView && typeof cambiarVistaAdmin === 'function') {
+                    cambiarVistaAdmin(savedView);
+                } else {
+                    {% if usuario.datos_perfil.subrol == 'Jefatura' %}
+                    if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('panel-control');
+                    {% elif usuario.datos_perfil.subrol == 'Supervisor' %}
+                    if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('reportes');
+                    {% elif usuario.datos_perfil.subrol == 'Administrador' %}
+                    if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('documentos-contables');
+                    {% endif %}
+                }
             }, 100);
         });
     </script>

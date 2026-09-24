@@ -215,7 +215,21 @@ function procesarRegistro(rol) {
     });
 }
 
+function marcarBotonActivo(vista) {
+    document.querySelectorAll('.btn-sidebar').forEach(b => {
+        if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("('" + vista + "')")) {
+            let nav = b.closest('.nav-menu') || b.closest('.sidebar');
+            if (nav) {
+                nav.querySelectorAll('.btn-sidebar').forEach(btn => btn.classList.remove('active'));
+                b.classList.add('active');
+            }
+        }
+    });
+}
+
 function cambiarVistaAdmin(vista) {
+    localStorage.setItem('activeViewAdmin', vista);
+    marcarBotonActivo(vista);
     const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
@@ -243,6 +257,8 @@ function cambiarVistaAdmin(vista) {
 }
 
 function cambiarVistaProv(vista) {
+    localStorage.setItem('activeViewProv', vista);
+    marcarBotonActivo(vista);
     document.getElementById('vista-facturas').style.display = 'none';
     if (document.getElementById('vista-reportes-prov')) {
         document.getElementById('vista-reportes-prov').style.display = 'none';
@@ -271,6 +287,8 @@ function cambiarVistaProv(vista) {
 }
 
 function cambiarVistaCorp(vista) {
+    localStorage.setItem('activeViewCorp', vista);
+    marcarBotonActivo(vista);
     if (document.getElementById('vista-cotizaciones-corp')) {
         document.getElementById('vista-cotizaciones-corp').style.display = 'none';
     }
@@ -692,15 +710,26 @@ function descargarPDF() {
 
 document.addEventListener("DOMContentLoaded", function () {
     if (document.getElementById('vista-pendientes')) { 
-        let subrol = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
-        if (subrol === 'Administrador') {
-            cambiarVistaAdmin('documentos-contables');
+        let savedView = localStorage.getItem('activeViewAdmin');
+        if (savedView) {
+            cambiarVistaAdmin(savedView);
         } else {
-            cambiarVistaAdmin('facturas'); 
+            let subrol = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+            if (subrol === 'Administrador') {
+                cambiarVistaAdmin('documentos-contables');
+            } else {
+                cambiarVistaAdmin('facturas'); 
+            }
         }
     }
-    if (document.getElementById('vista-reportes-prov')) { cambiarVistaProv('facturas'); }
-    if (document.getElementById('vista-cotizaciones-corp')) { cambiarVistaCorp('cotizaciones'); }
+    if (document.getElementById('vista-reportes-prov')) { 
+        let savedView = localStorage.getItem('activeViewProv');
+        cambiarVistaProv(savedView ? savedView : 'facturas'); 
+    }
+    if (document.getElementById('vista-cotizaciones-corp')) { 
+        let savedView = localStorage.getItem('activeViewCorp');
+        cambiarVistaCorp(savedView ? savedView : 'cotizaciones'); 
+    }
 });
 // --- EFECTO DE SELECCION GLOBAL PARA FILAS DE TABLA ---
 document.addEventListener('click', function (e) {

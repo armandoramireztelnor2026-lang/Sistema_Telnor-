@@ -94,7 +94,7 @@ async function cargarFacturas() {
                 let precioParaAp = parseFloat(f.precio_estimado || f.precio || 0);
                 let apAdmin = f.aprobado_admin !== undefined ? f.aprobado_admin : (f.estado === 'Confirmada');
                 let apCorp = f.aprobado_corp !== undefined ? f.aprobado_corp : (f.estado === 'Confirmada');
-                
+
                 let apAdminTotal = apAdmin;
                 if (precioParaAp >= 10001) {
                     apAdminTotal = (f.aprobado_admin === true && f.aprobado_admin_10k === true);
@@ -112,9 +112,9 @@ async function cargarFacturas() {
                 }
 
                 if (f.estado === 'Archivado' || (rolUsuario === 'proveedores' && f.validacion_fiscal === 'Aprobada') || (rolUsuario === 'corporativos' && confirmadaTotal)) {
-                    
+
                     let numCots = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones.length : 1;
-                    
+
                     let doc50Html = '';
                     let folioHtml = '';
                     let provHtml = '';
@@ -124,7 +124,7 @@ async function cargarFacturas() {
                     for (let idx = 0; idx < numCots; idx++) {
                         let cot = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones[idx] : null;
                         let bStyle = (idx < numCots - 1) ? 'border-bottom:1px solid #334155; margin-bottom:5px; padding-bottom:5px;' : '';
-                        let label = numCots > 1 ? `<strong style="color:#a3b1c6; font-size:0.8em; display:block;">Opción ${idx+1}:</strong>` : '';
+                        let label = numCots > 1 ? `<strong style="color:#a3b1c6; font-size:0.8em; display:block;">Opción ${idx + 1}:</strong>` : '';
 
                         let doc50 = cot ? (cot.numero_doc50 || 'Pendiente') : (f.numero_doc50 || 'Pendiente');
                         let folio = cot ? (cot.factura_folio || 'Pendiente') : (f.factura_folio || 'Pendiente');
@@ -172,7 +172,7 @@ async function cargarFacturas() {
 
                 if (f.estado_custom && f.estado_custom !== "") { textoEstado = f.estado_custom; badgeColor = confirmadaTotal ? '#2d6a4f' : '#b45309'; }
                 else if (confirmadaTotal) { badgeColor = '#2d6a4f'; textoEstado = 'Aprobada (Con Orden)'; }
-                else { 
+                else {
                     badgeColor = '#b45309';
                     if (precioParaAp >= 10001) {
                         if (!f.aprobado_admin) {
@@ -185,7 +185,7 @@ async function cargarFacturas() {
                             textoEstado = 'Pendiente: Corp';
                         }
                     } else {
-                        textoEstado = 'Pendiente: Supervisor'; 
+                        textoEstado = 'Pendiente: Supervisor';
                     }
                 }
                 let estadoBadge = `<span style="background:${badgeColor}; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">${textoEstado}</span>`;
@@ -1032,13 +1032,13 @@ function generarHtmlDetalles(f, modo, precioBonito) {
                 <strong>Evidencias (Fotos/Videos):</strong><br>
                 <div style="display:flex; gap:10px; overflow-x:auto; padding:10px 0;">
                     ${(c.fotos_evidencia || []).map(foto => {
-                        let fLower = foto.toLowerCase();
-                        if (fLower.endsWith('.mp4') || fLower.endsWith('.mov') || fLower.endsWith('.webm') || fLower.endsWith('.avi')) {
-                            return `<div style="height:70px; width:70px; border-radius:5px; border:2px solid #0284c7; background:#1b4332; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')" title="Ver Video"><div style="font-size:24px;">🎥</div><div style="font-size:9px; color:#fff;">Ver</div></div>`;
-                        } else {
-                            return `<img src="/static/facturas_archivos/${foto}" style="height:70px; border-radius:5px; border:2px solid #eab308; cursor:zoom-in; flex-shrink:0;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')">`;
-                        }
-                    }).join('')}
+            let fLower = foto.toLowerCase();
+            if (fLower.endsWith('.mp4') || fLower.endsWith('.mov') || fLower.endsWith('.webm') || fLower.endsWith('.avi')) {
+                return `<div style="height:70px; width:70px; border-radius:5px; border:2px solid #0284c7; background:#1b4332; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')" title="Ver Video"><div style="font-size:24px;">🎥</div><div style="font-size:9px; color:#fff;">Ver</div></div>`;
+            } else {
+                return `<img src="/static/facturas_archivos/${foto}" style="height:70px; border-radius:5px; border:2px solid #eab308; cursor:zoom-in; flex-shrink:0;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')">`;
+            }
+        }).join('')}
                     ${!(c.fotos_evidencia && c.fotos_evidencia.length > 0) ? '<span style="color:#9ca3af; font-style:italic;">Sin evidencias adjuntas.</span>' : ''}
                 </div>
             </div>
@@ -2346,7 +2346,7 @@ function enviarRechazoSuper() {
 
     // Ocultar el modal de inmediato para que no se sigan viendo los inputs
     document.getElementById('modal-rechazo-super').style.display = 'none';
-    
+
     mostrarLoaderDinamico("Cancelando cotización...", "Notificando al taller 📧");
 
     fetch('/api/facturas/rechazar_super', {
@@ -2565,7 +2565,7 @@ function previsualizarFotosEvidencia(input, previewId) {
             mediaEl.autoplay = true;
             mediaEl.loop = true;
             mediaEl.title = file.name;
-            mediaEl.onclick = function() {
+            mediaEl.onclick = function () {
                 const lb = document.getElementById('lightbox-modal');
                 const lbImg = document.getElementById('lightbox-img');
                 if (lb && lbImg) {

@@ -419,11 +419,16 @@
         </div>
     </div>
 
-    <script src="/static/script.js?v=250914"></script>
+    <script src="/static/script.js?v=230926_2152"></script>
     <script>
     document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => {
-            if (typeof cambiarVistaProv === 'function') cambiarVistaProv('reportes');
+            let savedView = localStorage.getItem('activeViewProv');
+            if (savedView && typeof cambiarVistaProv === 'function') {
+                cambiarVistaProv(savedView);
+            } else {
+                if (typeof cambiarVistaProv === 'function') cambiarVistaProv('reportes');
+            }
         }, 100);
     });
     </script>
