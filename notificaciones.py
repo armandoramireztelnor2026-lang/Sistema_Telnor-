@@ -48,7 +48,7 @@ def enviar_correo_liberacion_doc50_supervisor(correo_destino, nombre_supervisor,
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Aviso de Liberación para Captura de Doc. Contable (Unidad 8090-{unidad})"
+    asunto = f"Aviso de Liberación para Captura de Doc. Contable (Unidad 8090-{str(unidad).replace('8090-', '')})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -61,7 +61,7 @@ def enviar_correo_liberacion_doc50_supervisor(correo_destino, nombre_supervisor,
                 <p>El área de <strong>Administración</strong> ha habilitado la captura del Número de Documento Contable 50 para el ticket <strong>{ticket}</strong>.</p>
                 <p>Ya puedes ingresar al sistema y capturar el folio correspondiente para que el trámite pueda continuar hacia la fase de carga de factura (CFDI) por parte del proveedor.</p>
                 <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                 </ul>
             </div>
         </div>
@@ -70,11 +70,11 @@ def enviar_correo_liberacion_doc50_supervisor(correo_destino, nombre_supervisor,
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
 
-def enviar_correo_ticket_finalizado_supervisor(correo_destino, nombre_supervisor, unidad, ticket, doc50_num):
+def enviar_correo_ticket_finalizado_supervisor(correo_destino, nombre_supervisor, unidad, ticket, nums_doc50):
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"TICKET FINALIZADO Y ARCHIVADO (Unidad 8090-{unidad})"
+    asunto = f"TICKET FINALIZADO Y ARCHIVADO (Unidad 8090-{str(unidad).replace('8090-', '')})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -87,8 +87,8 @@ def enviar_correo_ticket_finalizado_supervisor(correo_destino, nombre_supervisor
                 <p>Te notificamos que el proceso administrativo para el ticket <strong>{ticket}</strong> ha concluido satisfactoriamente.</p>
                 <p>El Documento Contable 50 ha sido capturado en el sistema, por lo que este reporte pasa al estado <strong>Archivado</strong> y se da por cerrado definitivamente.</p>
                 <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{unidad}</li>
-                    <li style="margin-bottom: 10px;"><strong>Folio Doc 50 Capturado:</strong> {doc50_num}</li>
+                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
+                    <li style="margin-bottom: 10px;"><strong>Folio(s) Doc 50 Capturado(s):</strong> {', '.join(nums_doc50) if isinstance(nums_doc50, list) else nums_doc50}</li>
                 </ul>
             </div>
         </div>
@@ -101,7 +101,7 @@ def enviar_correo_liberacion(correo_destino, ticket, unidad, codigo, nombre_chof
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Notificación de Liberación de Unidad 8090-{unidad} - Folio {ticket}"
+    asunto = f"Notificación de Liberación de Unidad 8090-{str(unidad).replace('8090-', '')} - Folio {ticket}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -111,14 +111,14 @@ def enviar_correo_liberacion(correo_destino, ticket, unidad, codigo, nombre_chof
             </div>
             <div style="padding: 20px;">
                 <p>Hola <strong>{nombre_chofer}</strong>,</p>
-                <p>El taller mecánico ha notificado que la reparación de la unidad <strong>8090-{unidad}</strong> ha sido finalizada y se encuentra lista para su recolección física.</p>
+                <p>El taller mecánico ha notificado que la reparación de la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong> ha sido finalizada y se encuentra lista para su recolección física.</p>
                 <p>Para proceder con la liberación del vehículo, presente el siguiente código de autorización en la ventanilla de Automotriz:</p>
                 <div style="background-color: #0b1c30; color: #10b981; padding: 15px; text-align: center; font-size: 32px; font-weight: bold; border-radius: 8px; letter-spacing: 5px; margin: 25px 0;">
                     {codigo}
                 </div>
                 <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Folio de Reporte:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                 </ul>
             </div>
         </div>
@@ -131,7 +131,7 @@ def enviar_correo_nueva_orden(correo_destino, nombre_proveedor, ticket, unidad, 
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Asignación de Orden de Trabajo - Unidad 8090-{unidad} (Folio {ticket})"
+    asunto = f"Asignación de Orden de Trabajo - Unidad 8090-{str(unidad).replace('8090-', '')} (Folio {ticket})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -144,7 +144,7 @@ def enviar_correo_nueva_orden(correo_destino, nombre_proveedor, ticket, unidad, 
                 <p>Se le notifica que se ha asignado una nueva orden de trabajo para ser atendida en sus instalaciones.</p>
                 <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket asignado:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad a recibir:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad a recibir:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Falla reportada:</strong> <em>"{falla}"</em></li>
                 </ul>
                 <p>Ingrese al portal de proveedores para consultar la documentación y emitir su cotización.</p>
@@ -159,7 +159,7 @@ def enviar_correo_nueva_factura(lista_admins, proveedor, unidad, precio, titulo=
     if not lista_admins:
         return False, "No hay correos"
 
-    asunto = f"Revisión Técnica de Cotización - {proveedor} (Unidad 8090-{unidad})"
+    asunto = f"Revisión Técnica de Cotización - {proveedor} (Unidad 8090-{str(unidad).replace('8090-', '')})"
     
     lista_html = ""
     adjuntos = []
@@ -198,7 +198,7 @@ def enviar_correo_nueva_factura(lista_admins, proveedor, unidad, precio, titulo=
                     
                     <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
                         <li style="margin-bottom: 8px; font-size: 1.1em; color: #0284c7;"><strong>Taller Emisor:</strong> {proveedor}</li>
-                        <li style="margin-bottom: 15px; font-size: 1.1em; color: #0284c7;"><strong>Unidad atendida:</strong> 8090-{unidad}</li>
+                        <li style="margin-bottom: 15px; font-size: 1.1em; color: #0284c7;"><strong>Unidad atendida:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                         {lista_html}
                         <li style="margin-top: 15px; font-weight:bold;"><strong>Costo Total Estimado:</strong> ${precio:,.2f} MXN (Sin IVA)</li>
                     </ul>
@@ -217,7 +217,7 @@ def enviar_correo_nueva_factura_corp(lista_corps, proveedor, unidad, precio, tit
     if not lista_corps:
         return False, "No hay correos"
 
-    asunto = f"Solicitud de Autorización Financiera - {proveedor} (Unidad 8090-{unidad})"
+    asunto = f"Solicitud de Autorización Financiera - {proveedor} (Unidad 8090-{str(unidad).replace('8090-', '')})"
     for corp in lista_corps:
         cuerpo_html = f"""
         <html>
@@ -231,7 +231,7 @@ def enviar_correo_nueva_factura_corp(lista_corps, proveedor, unidad, precio, tit
                     <p>Se le notifica que se requiere su autorización financiera para procesar una cotización que supera los $10,000 MXN establecidos.</p>
                     <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
                         <li style="margin-bottom: 8px;"><strong>Taller Emisor:</strong> {proveedor}</li>
-                        <li style="margin-bottom: 8px;"><strong>Unidad atendida:</strong> 8090-{unidad}</li>
+                        <li style="margin-bottom: 8px;"><strong>Unidad atendida:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                         <li style="margin-bottom: 8px;"><strong>Monto por autorizar:</strong> ${precio:,.2f} MXN (Sin IVA)</li>
                     </ul>
                     <p>Ingrese al portal corporativo para analizar la cotización anexada y emitir la autorización correspondiente.</p>
@@ -247,7 +247,7 @@ def enviar_correo_nuevo_ticket(lista_admins, ticket, unidad, ciudad, falla, empl
     if not lista_admins:
         return False, "No hay correos"
 
-    asunto = f"Registro de Nueva Incidencia - Unidad 8090-{unidad} ({ciudad})"
+    asunto = f"Registro de Nueva Incidencia - Unidad 8090-{str(unidad).replace('8090-', '')} ({ciudad})"
     for admin in lista_admins:
         cuerpo_html = f"""
         <html>
@@ -261,7 +261,7 @@ def enviar_correo_nuevo_ticket(lista_admins, ticket, unidad, ciudad, falla, empl
                     <p>Se le notifica que un operador ha registrado un nuevo reporte de falla en el sistema que requiere su atención.</p>
                     <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
                         <li style="margin-bottom: 8px;"><strong>Folio:</strong> {ticket}</li>
-                        <li style="margin-bottom: 8px;"><strong>Unidad afectada:</strong> 8090-{unidad}</li>
+                        <li style="margin-bottom: 8px;"><strong>Unidad afectada:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                         <li style="margin-bottom: 8px;"><strong>Ubicación Base:</strong> {ciudad}</li>
                         <li style="margin-bottom: 8px;"><strong>Operador a cargo:</strong> {empleado}</li>
                         <li style="margin-bottom: 8px;"><strong>Falla reportada:</strong> <em>"{falla}"</em></li>
@@ -292,7 +292,7 @@ def enviar_correo_confirmacion_reporte(correo_destino, nombre_empleado, ticket, 
                 <p>Le confirmamos que su reporte de incidencia ha sido registrado correctamente en nuestro sistema y ya se encuentra en la bandeja de Automotriz para su revisión.</p>
                 <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Folio de Reporte (Ticket):</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Falla registrada:</strong> <em>"{falla}"</em></li>
                 </ul>
                 <p>Nos pondremos en contacto con usted en cuanto se le asigne un taller a su unidad o cuando el servicio haya concluido.</p>
@@ -307,7 +307,7 @@ def enviar_correo_confirmacion_factura(correo_destino, nombre_proveedor, unidad,
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"📄 Confirmación de Recepción de Cotización - Unidad 8090-{unidad}"
+    asunto = f"📄 Confirmación de Recepción de Cotización - Unidad 8090-{str(unidad).replace('8090-', '')}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -319,7 +319,7 @@ def enviar_correo_confirmacion_factura(correo_destino, nombre_proveedor, unidad,
                 <p>Hola <strong>{nombre_proveedor}</strong>,</p>
                 <p>Le confirmamos que su cotización ha sido cargada al sistema exitosamente y ya se encuentra en la bandeja del departamento Automotriz para su revisión técnica y financiera.</p>
                 <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
-                    <li style="margin-bottom: 8px;"><strong>Unidad Atendida:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad Atendida:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Costo Estimado:</strong> ${precio:,.2f} MXN (Sin IVA)</li>
                 </ul>
                 <p>El sistema le notificará cuando la orden sea aprobada para que inicie la reparación.</p>
@@ -334,7 +334,7 @@ def enviar_correo_factura_rechazada(correo_destino, nombre_proveedor, unidad, mo
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"❌ Notificación de Rechazo de Trámite - Unidad 8090-{unidad}"
+    asunto = f"❌ Notificación de Rechazo de Trámite - Unidad 8090-{str(unidad).replace('8090-', '')}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -344,7 +344,7 @@ def enviar_correo_factura_rechazada(correo_destino, nombre_proveedor, unidad, mo
             </div>
             <div style="padding: 20px;">
                 <p>Hola <strong>{nombre_proveedor}</strong>,</p>
-                <p>Se le notifica que la administración de Automotriz ha rechazado o eliminado su cotización/trámite correspondiente a la unidad <strong>8090-{unidad}</strong>.</p>
+                <p>Se le notifica que la administración de Automotriz ha rechazado o eliminado su cotización/trámite correspondiente a la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong>.</p>
                 <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 4px;">
                     <h4 style="margin: 0 0 10px 0; color: #991b1b;">Motivo del rechazo:</h4>
                     <p style="margin: 0; font-style: italic; color: #7f1d1d;">"{motivo}"</p>
@@ -361,7 +361,7 @@ def enviar_correo_factura_rechazada_corp(correo_destino, nombre_proveedor, unida
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"❌ Rechazo por Evaluación Corporativa - Unidad 8090-{unidad} (Requiere Ajuste)"
+    asunto = f"❌ Rechazo por Evaluación Corporativa - Unidad 8090-{str(unidad).replace('8090-', '')} (Requiere Ajuste)"
     
     precios_html = ""
     if precios_recomendados and len(precios_recomendados) > 0:
@@ -379,7 +379,7 @@ def enviar_correo_factura_rechazada_corp(correo_destino, nombre_proveedor, unida
             </div>
             <div style="padding: 20px;">
                 <p>Hola <strong>{nombre_proveedor}</strong>,</p>
-                <p>Se le notifica que el área de <strong>Corporativo / Gastos Mayores</strong> ha evaluado su cotización para la unidad <strong>8090-{unidad}</strong> y ha sido <strong>rechazada</strong> debido a observaciones en el costo.</p>
+                <p>Se le notifica que el área de <strong>Corporativo / Gastos Mayores</strong> ha evaluado su cotización para la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong> y ha sido <strong>rechazada</strong> debido a observaciones en el costo.</p>
                 
                 <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 4px;">
                     <h4 style="margin: 0 0 10px 0; color: #991b1b;">Motivo del rechazo y observaciones generales:</h4>
@@ -407,7 +407,7 @@ def enviar_correo_factura_rechazada_admin(correo_destino, nombre_proveedor, unid
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"❌ Rechazo Técnico/Administrativo de Cotización - Unidad 8090-{unidad}"
+    asunto = f"❌ Rechazo Técnico/Administrativo de Cotización - Unidad 8090-{str(unidad).replace('8090-', '')}"
     
     precios_html = ""
     if precios_recomendados and len(precios_recomendados) > 0:
@@ -425,7 +425,7 @@ def enviar_correo_factura_rechazada_admin(correo_destino, nombre_proveedor, unid
             </div>
             <div style="padding: 20px;">
                 <p>Hola <strong>{nombre_proveedor}</strong>,</p>
-                <p>Se le notifica que la <strong>Administración</strong> ha evaluado su cotización para la unidad <strong>8090-{unidad}</strong> y ha sido <strong>rechazada</strong> debido a observaciones en el costo.</p>
+                <p>Se le notifica que la <strong>Administración</strong> ha evaluado su cotización para la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong> y ha sido <strong>rechazada</strong> debido a observaciones en el costo.</p>
                 
                 <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 4px;">
                     <h4 style="margin: 0 0 10px 0; color: #991b1b;">Motivo del rechazo y observaciones generales:</h4>
@@ -453,7 +453,7 @@ def enviar_correo_factura_rechazada_super(correo_destino, nombre_proveedor, unid
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"❌ Rechazo Técnico/Administrativo de Cotización - Unidad 8090-{unidad}"
+    asunto = f"❌ Rechazo Técnico/Administrativo de Cotización - Unidad 8090-{str(unidad).replace('8090-', '')}"
     
     precios_html = ""
     if precios_recomendados and len(precios_recomendados) > 0:
@@ -471,7 +471,7 @@ def enviar_correo_factura_rechazada_super(correo_destino, nombre_proveedor, unid
             </div>
             <div style="padding: 20px;">
                 <p>Hola <strong>{nombre_proveedor}</strong>,</p>
-                <p>Se le notifica que la <strong>Supervisión de Mantenimiento</strong> ha evaluado su cotización para la unidad <strong>8090-{unidad}</strong> y ha sido <strong>rechazada</strong> debido a observaciones en el costo.</p>
+                <p>Se le notifica que la <strong>Supervisión de Mantenimiento</strong> ha evaluado su cotización para la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong> y ha sido <strong>rechazada</strong> debido a observaciones en el costo.</p>
                 
                 <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 4px;">
                     <h4 style="margin: 0 0 10px 0; color: #991b1b;">Motivo del rechazo y observaciones generales:</h4>
@@ -499,7 +499,7 @@ def enviar_correo_ticket_rechazado(correo_destino, nombre_empleado, ticket, unid
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"❌ Cancelación de Reporte - Folio {ticket} (Unidad 8090-{unidad})"
+    asunto = f"❌ Cancelación de Reporte - Folio {ticket} (Unidad 8090-{str(unidad).replace('8090-', '')})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -538,7 +538,7 @@ def enviar_correo_confirmacion_factura_fiscal(correo_destino, proveedor, unidad,
                 <p>Hola <strong>{proveedor}</strong>,</p>
                 <p>Tu factura final (CFDI) se ha subido de forma correcta al sistema de Telnor.</p>
                 <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 10px;"><strong>Concepto:</strong> {titulo}</li>
                     <li style="margin-bottom: 10px;"><strong>Folio Fiscal:</strong> {folio}</li>
                 </ul>
@@ -566,7 +566,7 @@ def enviar_correo_factura_fiscal_subida(correo_destino, proveedor, unidad, titul
                 <p>Hola <strong>{nombre_supervisor}</strong>,</p>
                 <p>El proveedor <strong>{proveedor}</strong> ha subido su factura final (CFDI) para pago.</p>
                 <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 10px;"><strong>Concepto:</strong> {titulo}</li>
                     <li style="margin-bottom: 10px;"><strong>Folio Fiscal:</strong> {folio}</li>
                 </ul>
@@ -582,7 +582,7 @@ def enviar_correo_factura_fiscal_rechazada(correo_destino, proveedor, unidad, fo
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Notificación de Rechazo de Comprobante Fiscal - Unidad 8090-{unidad}"
+    asunto = f"Notificación de Rechazo de Comprobante Fiscal - Unidad 8090-{str(unidad).replace('8090-', '')}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -592,7 +592,7 @@ def enviar_correo_factura_fiscal_rechazada(correo_destino, proveedor, unidad, fo
             </div>
             <div style="padding: 20px;">
                 <p>Hola <strong>{proveedor}</strong>,</p>
-                <p>Le notificamos que el departamento de Administración Automotriz ha <strong>rechazado</strong> la factura fiscal que subió para la unidad <strong>8090-{unidad}</strong> (Folio reportado: {folio_rechazado}).</p>
+                <p>Le notificamos que el departamento de Administración Automotriz ha <strong>rechazado</strong> la factura fiscal que subió para la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong> (Folio reportado: {folio_rechazado}).</p>
                 <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 4px;">
                     <h4 style="margin: 0 0 10px 0; color: #991b1b;">Motivo del Rechazo:</h4>
                     <p style="margin: 0; font-style: italic; color: #7f1d1d;">"{motivo}"</p>
@@ -608,7 +608,7 @@ def enviar_correo_esperando_liberacion(correo_destino, nombre_admin, ticket, uni
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Solicitud de Revisión y Liberación Contable - Unidad 8090-{unidad}"
+    asunto = f"Solicitud de Revisión y Liberación Contable - Unidad 8090-{str(unidad).replace('8090-', '')}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -618,10 +618,10 @@ def enviar_correo_esperando_liberacion(correo_destino, nombre_admin, ticket, uni
             </div>
             <div style="padding: 20px;">
                 <p>Hola <strong>{nombre_admin}</strong>,</p>
-                <p>Se le notifica que se han subido los datos de pedido para la unidad <strong>8090-{unidad}</strong> y está en espera de su revisión y liberación para continuar con el proceso (Subir Doc. Contable).</p>
+                <p>Se le notifica que se han subido los datos de pedido para la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong> y está en espera de su revisión y liberación para continuar con el proceso (Subir Doc. Contable).</p>
                 <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Número de Orden:</strong> {num_orden}</li>
                     <li style="margin-bottom: 8px;"><strong>Número de Pedido:</strong> {num_pedido}</li>
                 </ul>
@@ -637,7 +637,7 @@ def enviar_correo_esperando_liberacion(correo_destino, nombre_admin, ticket, uni
 def enviar_correo_notificacion_corp_documentos(lista_corps, proveedor, unidad, precio, ticket, supervisor_nombre):
     """Envía correo a corporativos solicitando la liberación de documentos para cotizaciones mayores a $10,001."""
     precio_fmt = f"{float(precio):,.2f}"
-    asunto = f"Solicitud de Aprobación de Presupuesto Extraordinario - Unidad 8090-{unidad} (${precio_fmt} MXN)"
+    asunto = f"Solicitud de Aprobación de Presupuesto Extraordinario - Unidad 8090-{str(unidad).replace('8090-', '')} (${precio_fmt} MXN)"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -651,7 +651,7 @@ def enviar_correo_notificacion_corp_documentos(lista_corps, proveedor, unidad, p
                 <p>El Supervisor <strong>{supervisor_nombre}</strong> le solicita su autorización para liberar los documentos de la siguiente cotización que supera el monto permitido:</p>
                 <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Taller/Proveedor:</strong> {proveedor}</li>
                     <li style="margin-bottom: 8px;"><strong>Monto Total:</strong> <span style="color: #dc2626; font-weight: bold; font-size: 1.1em;">${precio_fmt} MXN</span></li>
                 </ul>
@@ -679,7 +679,7 @@ def enviar_correo_recordatorio_doc_contable(lista_corps, ticket, unidad, proveed
     if not lista_corps:
         return False, "No hay correos"
 
-    asunto = f"⚠️ Requerimiento de Documento Contable (50) - Unidad 8090-{unidad}"
+    asunto = f"⚠️ Requerimiento de Documento Contable (50) - Unidad 8090-{str(unidad).replace('8090-', '')}"
     for corp in lista_corps:
         cuerpo_html = f"""
         <html>
@@ -695,7 +695,7 @@ def enviar_correo_recordatorio_doc_contable(lista_corps, ticket, unidad, proveed
                     <h3 style="color: #1f2937; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">Detalles del Servicio:</h3>
                     <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
                         <li style="margin-bottom: 8px;"><strong>Folio (Ticket):</strong> {ticket}</li>
-                        <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                        <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                         <li style="margin-bottom: 8px;"><strong>Taller:</strong> {proveedor}</li>
                         <li style="margin-bottom: 8px;"><strong>Solicitante (Supervisor):</strong> {supervisor}</li>
                         <li style="margin-bottom: 8px;"><strong>Ciudad:</strong> {ciudad}</li>
@@ -794,7 +794,7 @@ def enviar_correo_admin_revisa_10k(correo_admin, nombre_admin, ticket, unidad, p
         return False, "Sin correo"
 
     precio_fmt = f"{float(precio):,.2f}"
-    asunto = f"⚠️ Solicitud de Aprobación para Presupuesto Mayor - Unidad 8090-{unidad}"
+    asunto = f"⚠️ Solicitud de Aprobación para Presupuesto Mayor - Unidad 8090-{str(unidad).replace('8090-', '')}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -809,7 +809,7 @@ def enviar_correo_admin_revisa_10k(correo_admin, nombre_admin, ticket, unidad, p
 
                 <ul style="background-color: #fef2f2; padding: 15px 30px; border-radius: 8px; border: 1px solid #fecaca; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Proveedor:</strong> {proveedor}</li>
                     <li style="margin-bottom: 8px;"><strong>Monto Total:</strong> <span style="color: #dc2626; font-weight: bold; font-size: 1.1em;">${precio_fmt} MXN</span></li>
                     <li style="margin-bottom: 8px;"><strong>Números de Orden Asignados:</strong> {numeros_orden}</li>
@@ -851,7 +851,7 @@ def enviar_correo_admin_aprobado_a_corp(lista_corps, ticket, unidad, proveedor, 
 
                         <ul style="background-color: #f0fdf4; padding: 15px 30px; border-radius: 8px; border: 1px solid #86efac; list-style-type: none; margin-left: 0;">
                             <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                            <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                            <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                             <li style="margin-bottom: 8px;"><strong>Proveedor:</strong> {proveedor}</li>
                             <li style="margin-bottom: 8px;"><strong>Monto Total a Autorizar:</strong> <span style="color: #10b981; font-weight: bold; font-size: 1.1em;">${precio_fmt} MXN</span></li>
                         </ul>
@@ -881,7 +881,7 @@ def enviar_correo_admin_rechaza_supervisor(correo_supervisor, nombre_supervisor,
             precios_html += f"<li>Cotización {int(p.get('idx', 0)) + 1}: <strong style='color: #f59e0b;'>${p.get('precio_recomendado', 'N/A')} MXN</strong></li>"
         precios_html += "</ul></div>"
 
-    asunto = f"❌ Rechazo Administrativo - Se Requiere Ajuste Presupuestal (Unidad 8090-{unidad})"
+    asunto = f"❌ Rechazo Administrativo - Se Requiere Ajuste Presupuestal (Unidad 8090-{str(unidad).replace('8090-', '')})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -895,7 +895,7 @@ def enviar_correo_admin_rechaza_supervisor(correo_supervisor, nombre_supervisor,
 
                 <ul style="background-color: #fef2f2; padding: 15px 30px; border-radius: 8px; border: 1px solid #fecaca; list-style-type: none; margin-left: 0; margin-bottom: 15px;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Proveedor:</strong> {proveedor}</li>
                 </ul>
 
@@ -919,7 +919,7 @@ def enviar_correo_admin_cancela_caras(correo_supervisor, nombre_supervisor, tick
     if not correo_supervisor or correo_supervisor.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"🚫 Trámite Clasificado como Presupuesto Extraordinario (Unidad 8090-{unidad})"
+    asunto = f"🚫 Trámite Clasificado como Presupuesto Extraordinario (Unidad 8090-{str(unidad).replace('8090-', '')})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -933,7 +933,7 @@ def enviar_correo_admin_cancela_caras(correo_supervisor, nombre_supervisor, tick
 
                 <ul style="background-color: #fef3c7; padding: 15px 30px; border-radius: 8px; border: 1px solid #fde047; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                 </ul>
 
                 <div style="background-color: #fef3c7; border-left: 4px solid #b45309; padding: 15px; margin: 15px 0; border-radius: 4px;">
@@ -976,7 +976,7 @@ def enviar_correo_corp_rechaza_admin(correo_admin, nombre_admin, ticket, unidad,
 
                 <ul style="background-color: #fef2f2; padding: 15px 30px; border-radius: 8px; border: 1px solid #fecaca; list-style-type: none; margin-left: 0; margin-bottom: 15px;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Proveedor:</strong> {proveedor}</li>
                     <li style="margin-bottom: 8px;"><strong>Monto Rechazado:</strong> <span style="color: #dc2626; font-weight: bold; font-size: 1.1em;">${precio_fmt} MXN</span></li>
                 </ul>
@@ -1008,7 +1008,7 @@ def enviar_correo_corp_rechaza_supervisor(correo_supervisor, nombre_supervisor, 
             precios_html += f"<li>Cotización {int(p.get('idx', 0)) + 1}: <strong style='color: #f59e0b;'>${p.get('precio_recomendado', 'N/A')} MXN</strong></li>"
         precios_html += "</ul></div>"
 
-    asunto = f"❌ Resolución Corporativa: Presupuesto Rechazado - Unidad 8090-{unidad}"
+    asunto = f"❌ Resolución Corporativa: Presupuesto Rechazado - Unidad 8090-{str(unidad).replace('8090-', '')}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1022,7 +1022,7 @@ def enviar_correo_corp_rechaza_supervisor(correo_supervisor, nombre_supervisor, 
 
                 <ul style="background-color: #fef2f2; padding: 15px 30px; border-radius: 8px; border: 1px solid #fecaca; list-style-type: none; margin-left: 0; margin-bottom: 15px;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Proveedor:</strong> {proveedor}</li>
                 </ul>
 
@@ -1047,7 +1047,7 @@ def enviar_correo_corp_aprobado(correo_supervisor, nombre_supervisor, ticket, un
         return False, "Sin correo"
 
     precio_fmt = f"{float(precio):,.2f}"
-    asunto = f"✅ Resolución Corporativa: Presupuesto Aprobado - Unidad 8090-{unidad}"
+    asunto = f"✅ Resolución Corporativa: Presupuesto Aprobado - Unidad 8090-{str(unidad).replace('8090-', '')}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1062,7 +1062,7 @@ def enviar_correo_corp_aprobado(correo_supervisor, nombre_supervisor, ticket, un
 
                 <ul style="background-color: #f0fdf4; padding: 15px 30px; border-radius: 8px; border: 1px solid #86efac; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Proveedor:</strong> {proveedor}</li>
                     <li style="margin-bottom: 8px;"><strong>Monto Aprobado:</strong> <span style="color: #10b981; font-weight: bold; font-size: 1.1em;">${precio_fmt} MXN</span></li>
                 </ul>
@@ -1082,7 +1082,7 @@ def enviar_correo_taller_aprobado(correo_taller, nombre_taller, ticket, unidad, 
     if not correo_taller or correo_taller.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Autorización Oficial para Inicio de Reparación - Unidad 8090-{unidad}"
+    asunto = f"Autorización Oficial para Inicio de Reparación - Unidad 8090-{str(unidad).replace('8090-', '')}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1098,7 +1098,7 @@ def enviar_correo_taller_aprobado(correo_taller, nombre_taller, ticket, unidad, 
 
                 <ul style="background-color: #f0fdf4; padding: 15px 30px; border-radius: 8px; border: 1px solid #86efac; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Vehículo:</strong> {vehiculo_info}</li>
                 </ul>
 
@@ -1117,7 +1117,7 @@ def enviar_correo_taller_facturar(correo_taller, nombre_taller, ticket, unidad):
     if not correo_taller or correo_taller.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"Confirmación de Entrega Técnica - Solicitud de Comprobante Fiscal (Unidad 8090-{unidad})"
+    asunto = f"Confirmación de Entrega Técnica - Solicitud de Comprobante Fiscal (Unidad 8090-{str(unidad).replace('8090-', '')})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1132,7 +1132,7 @@ def enviar_correo_taller_facturar(correo_taller, nombre_taller, ticket, unidad):
 
                 <ul style="background-color: #f0f9ff; padding: 15px 30px; border-radius: 8px; border: 1px solid #bae6fd; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                 </ul>
 
                 <p style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b; color: #92400e;">
@@ -1150,7 +1150,7 @@ def enviar_correo_liberacion_supervisor(correo_supervisor, nombre_supervisor, ti
     if not correo_supervisor or correo_supervisor.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"🔑 Respaldo de Credenciales de Acceso (PIN) - Unidad 8090-{unidad} (Folio {ticket})"
+    asunto = f"🔑 Respaldo de Credenciales de Acceso (PIN) - Unidad 8090-{str(unidad).replace('8090-', '')} (Folio {ticket})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1182,7 +1182,7 @@ def enviar_correo_factura_fiscal_aprobada(correo_proveedor, nombre_proveedor, un
     if not correo_proveedor or correo_proveedor.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"✅ Validación Exitosa de Comprobante Fiscal - Unidad 8090-{unidad} (Folio {ticket})"
+    asunto = f"✅ Validación Exitosa de Comprobante Fiscal - Unidad 8090-{str(unidad).replace('8090-', '')} (Folio {ticket})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1196,7 +1196,7 @@ def enviar_correo_factura_fiscal_aprobada(correo_proveedor, nombre_proveedor, un
 
                 <ul style="background-color: #f0fdf4; padding: 15px 30px; border-radius: 8px; border: 1px solid #86efac; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                 </ul>
 
                 <p style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b; color: #92400e;">
@@ -1209,12 +1209,12 @@ def enviar_correo_factura_fiscal_aprobada(correo_proveedor, nombre_proveedor, un
     """
     return disparar_correo(correo_proveedor, asunto, cuerpo_html)
 
-def enviar_correo_doc50_proveedor(correo_proveedor, nombre_proveedor, unidad, ticket, num_doc50):
+def enviar_correo_doc50_proveedor(correo_proveedor, nombre_proveedor, unidad, ticket, nums_doc50):
     """Notifica al Taller/Proveedor que su ticket recibió el Número de Documento Contable 50."""
     if not correo_proveedor or correo_proveedor.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"💰 Notificación de Trámite de Pago en Proceso (Doc 50) - Unidad 8090-{unidad} (Folio {ticket})"
+    asunto = f"💰 Notificación de Trámite de Pago en Proceso (Doc 50) - Unidad 8090-{str(unidad).replace('8090-', '')} (Folio {ticket})"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1229,7 +1229,8 @@ def enviar_correo_doc50_proveedor(correo_proveedor, nombre_proveedor, unidad, ti
 
                 <ul style="background-color: #eff6ff; padding: 15px 30px; border-radius: 8px; border: 1px solid #bfdbfe; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
+                    <li style="margin-bottom: 8px;"><strong>Documentos 50 Asignados:</strong> {', '.join(nums_doc50) if isinstance(nums_doc50, list) else nums_doc50}</li>
                 </ul>
 
                 <p style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #16a34a; color: #166534;">
@@ -1246,7 +1247,7 @@ def enviar_correo_confirmacion_aprobacion_actor(correo_destino, actor, unidad, p
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
 
-    asunto = f"✅ Confirmación de Aprobación Exitosa - Unidad 8090-{unidad}"
+    asunto = f"✅ Confirmación de Aprobación Exitosa - Unidad 8090-{str(unidad).replace('8090-', '')}"
     cuerpo_html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
@@ -1256,9 +1257,9 @@ def enviar_correo_confirmacion_aprobacion_actor(correo_destino, actor, unidad, p
             </div>
             <div style="padding: 20px;">
                 <p>Hola <strong>{actor}</strong>,</p>
-                <p>El sistema ha registrado correctamente su validación y aprobación como <strong>{rol_aprobador}</strong> para el presupuesto de la unidad <strong>8090-{unidad}</strong>.</p>
+                <p>El sistema ha registrado correctamente su validación y aprobación como <strong>{rol_aprobador}</strong> para el presupuesto de la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong>.</p>
                 <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 8px;"><strong>Monto Aprobado:</strong> ${precio:,.2f} MXN</li>
                 </ul>
                 <p>El proceso continuará automáticamente a la siguiente etapa.</p>
