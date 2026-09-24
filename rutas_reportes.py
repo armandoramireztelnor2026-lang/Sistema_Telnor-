@@ -61,10 +61,13 @@ def nuevo_reporte():
             if str(r.get("id")) not in facturas_report_ids:
                 return jsonify({"status": "error", "message": f"La unidad {unidad_req} ya tiene un reporte activo en proceso de asignación."})
 
-    # 3. Validar que exista al menos un Administrador o Supervisor para esa ciudad
+    # 3. Validar que exista al menos un Administrador Y un Supervisor para esa ciudad
     ciudad_reporte = request.form.get("ciudad", "No especificada")
     usuarios_data = leer_json("usuarios.json")
-    autoridad_encontrada = False
+    
+    hay_admin = False
+    hay_super = False
+    
     for u in usuarios_data.get("usuarios", []):
         if u.get("rol") == "administracion":
             perfil = u.get("datos_perfil", {})
@@ -72,13 +75,21 @@ def nuevo_reporte():
             ciudad_admin = perfil.get("ciudad", "")
             ciudades_extra = perfil.get("ciudades_asignadas", [])
             
-            if subrol in ["Administrador", "Supervisor"]:
-                if ciudad_admin == ciudad_reporte or ciudad_reporte in ciudades_extra:
-                    autoridad_encontrada = True
-                    break
+            if ciudad_admin == ciudad_reporte or ciudad_reporte in ciudades_extra:
+                if subrol == "Administrador":
+                    hay_admin = True
+                elif subrol == "Supervisor":
+                    hay_super = True
                 
-    if not autoridad_encontrada:
-        return jsonify({"status": "error", "message": f"No se puede crear el reporte: No hay Administrador ni Supervisor registrado para la ciudad de {ciudad_reporte}."})
+    if not hay_admin or not hay_super:
+        if not hay_admin and not hay_super:
+            msg = f"No se puede crear el reporte: Faltan un Administrador y un Supervisor registrados para la ciudad de {ciudad_reporte}."
+        elif not hay_admin:
+            msg = f"No se puede crear el reporte: Falta un Administrador registrado para la ciudad de {ciudad_reporte}."
+        else:
+            msg = f"No se puede crear el reporte: Falta un Supervisor registrado para la ciudad de {ciudad_reporte}."
+            
+        return jsonify({"status": "error", "message": msg})
 
     nuevo_id = f"REP-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
     reporte = {
