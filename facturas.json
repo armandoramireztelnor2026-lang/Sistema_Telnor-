@@ -1,3 +1,55 @@
 {
-    "facturas": []
+    "facturas": [
+        {
+            "id": "20260923235818",
+            "proveedor": "Autopartes y Motores B.C.",
+            "unidad": "8090-1133",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "n",
+            "retro": "[TICKET:REP-20260923234123]\r\nREPORTE ORIGINAL DEL CHOFER: n\n\n[ADMINISTRACI\u00d3N - Factura Rechazada]: Favor de enviarla otra vez",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 4600.0,
+            "fecha": "2026-09-23",
+            "numero_orden": "112",
+            "compania": "RUMN",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-09-23T23:58:18.867993",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "81303085",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 4600.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20260923234123]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1790233098847_0_Credencial.jpeg"
+                    ],
+                    "pdf_cotizacion": "1790233098847_0_Meta_1.5_Analisis_del_Modulo_3_Infraestructura_global_de_AWS.pdf",
+                    "numero_orden": "112",
+                    "numero_cotizacion_asignacion": "113",
+                    "factura_folio": "11111",
+                    "factura_pdf": "FACTURA_FINAL_20260923235818_0_Meta_1.5_Analisis_del_Modulo_3_Infraestructura_global_de_AWS.pdf"
+                }
+            ],
+            "numero_cotizacion_asignacion": "113",
+            "liberado_admin": true,
+            "comentarios": "Hola haber si esto no se rompe",
+            "autor_comentario": "Luigi Estrada",
+            "eliminado_por": "",
+            "validacion_fiscal": "Aprobada",
+            "factura_folio": "11111",
+            "factura_pdf": "FACTURA_FINAL_20260923235818_0_Meta_1.5_Analisis_del_Modulo_3_Infraestructura_global_de_AWS.pdf"
+        }
+    ]
 }

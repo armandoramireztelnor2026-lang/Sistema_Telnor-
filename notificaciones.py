@@ -44,6 +44,32 @@ def disparar_correo(destino, asunto, cuerpo_html, adjuntos=None):
         print(f"Error enviando correo: {e}")
         return False, str(e)
 
+def enviar_correo_liberacion_doc50_supervisor(correo_destino, nombre_supervisor, unidad, ticket):
+    if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    asunto = f"Aviso de Liberación para Captura de Doc. Contable (Unidad 8090-{unidad})"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #f59e0b; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">CAMPO DOC 50 HABILITADO</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre_supervisor}</strong>,</p>
+                <p>El área de <strong>Administración</strong> ha habilitado la captura del Número de Documento Contable 50 para el ticket <strong>{ticket}</strong>.</p>
+                <p>Ya puedes ingresar al sistema y capturar el folio correspondiente para que el trámite pueda continuar hacia la fase de carga de factura (CFDI) por parte del proveedor.</p>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                </ul>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_destino, asunto, cuerpo_html)
+
 def enviar_correo_liberacion(correo_destino, ticket, unidad, codigo, nombre_chofer, telefono_chofer):
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
@@ -462,6 +488,34 @@ def enviar_correo_ticket_rechazado(correo_destino, nombre_empleado, ticket, unid
                     <p style="margin: 0; font-style: italic; color: #7f1d1d;">"{motivo}"</p>
                 </div>
                 <p>Si cree que esto es un error, por favor comuníquese directamente con el departamento Automotriz.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_destino, asunto, cuerpo_html)
+
+def enviar_correo_confirmacion_factura_fiscal(correo_destino, proveedor, unidad, titulo, folio):
+    if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    asunto = f"Confirmación de subida de Comprobante Fiscal (CFDI) - Folio {folio}"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">FACTURA FISCAL SUBIDA EXITOSAMENTE</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{proveedor}</strong>,</p>
+                <p>Tu factura final (CFDI) se ha subido de forma correcta al sistema de Telnor.</p>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 10px;"><strong>Concepto:</strong> {titulo}</li>
+                    <li style="margin-bottom: 10px;"><strong>Folio Fiscal:</strong> {folio}</li>
+                </ul>
+                <p style="margin-top: 20px;">Tu factura pasará ahora al proceso de revisión por parte del equipo de Administración para proceder con el trámite de pago correspondiente.</p>
             </div>
         </div>
     </body>

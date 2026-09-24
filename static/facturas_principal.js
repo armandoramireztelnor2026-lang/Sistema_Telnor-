@@ -376,7 +376,11 @@ async function cargarFacturas() {
 
                                 if (valFiscal === 'Pendiente') {
                                     estadoFiscalBadge = `<span style="background:#b45309; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">Pendiente Validación</span>`;
-                                    btnAdminExtra += `<button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalValidacionFiscal('${f.id}', '${f.factura_folio}', '${f.pdf_fiscal || f.factura_pdf}', '${f.unidad}')">Revisar y Validar</button>`;
+                                    if (subrolAct === 'Supervisor') {
+                                        btnAdminExtra += `<button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalValidacionFiscal('${f.id}', '${f.factura_folio}', '${f.pdf_fiscal || f.factura_pdf}', '${f.unidad}')">Revisar y Validar</button>`;
+                                    } else {
+                                        btnAdminExtra += `<span style="color:#b45309; font-size:0.85em; display:block; text-align:center; margin-bottom:5px;">Esperando validación del Supervisor</span>`;
+                                    }
                                 } else if (valFiscal === 'Aprobada') {
                                     estadoFiscalBadge = `<span style="background:#2d6a4f; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">Factura Aprobada</span>`;
                                     btnAdminExtra += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#ef4444; border:none; margin:0; width:100%;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.pdf_fiscal || f.factura_pdf}')">📄 Ver Factura PDF</button>`;

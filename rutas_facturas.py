@@ -19,6 +19,7 @@ from notificaciones import (
     enviar_correo_factura_rechazada_admin,
     enviar_correo_factura_rechazada_super,
     enviar_correo_factura_fiscal_subida,
+    enviar_correo_confirmacion_factura_fiscal,
     enviar_correo_factura_fiscal_rechazada,
     enviar_correo_factura_fiscal_aprobada,
     enviar_correo_doc50_proveedor,
@@ -1155,8 +1156,18 @@ def subir_factura_final():
                         folios[0] if folios else 'Varios',
                         nombre_sup
                     )
+            # Notificar al Taller (Proveedor)
+            correo_prov = session["usuario"]["datos_perfil"].get("correo")
+            if correo_prov:
+                enviar_correo_confirmacion_factura_fiscal(
+                    correo_prov,
+                    f.get('proveedor', 'Proveedor'),
+                    f.get('unidad', 'S/N'),
+                    f.get('titulo', 'Sin Título'),
+                    folios[0] if folios else 'Varios'
+                )
 
-            return jsonify({"status": "success", "message": "Facturas fiscales subidas correctamente. Se notificó al Supervisor."})
+            return jsonify({"status": "success", "message": "Facturas fiscales subidas correctamente. Se notificó al Supervisor y al Taller."})
             
     return jsonify({"status": "error", "message": "No se encontró el registro."})
             
@@ -1166,6 +1177,10 @@ def subir_factura_final():
 def validar_fiscal():
     if 'usuario' not in session or session['usuario']['rol'] != 'administracion':
         return jsonify({"status": "error", "message": "No tienes permisos para validar facturas."})
+    
+    subrol = session["usuario"]["datos_perfil"].get("subrol", "")
+    if subrol != "Supervisor":
+        return jsonify({"status": "error", "message": "Solo el supervisor puede validar facturas."})
     
     factura_id = request.json.get('id')
     data = leer_json('facturas.json')
@@ -1192,6 +1207,10 @@ def validar_fiscal():
 def rechazar_fiscal():
     if 'usuario' not in session or session['usuario']['rol'] != 'administracion':
         return jsonify({"status": "error", "message": "No tienes permisos para rechazar facturas."})
+    
+    subrol = session["usuario"]["datos_perfil"].get("subrol", "")
+    if subrol != "Supervisor":
+        return jsonify({"status": "error", "message": "Solo el supervisor puede rechazar facturas."})
     
     factura_id = request.json.get('id')
     motivo = request.json.get('motivo', 'Sin motivo especificado')
@@ -1223,7 +1242,7 @@ def rechazar_fiscal():
             # Buscar correo del proveedor
             correo_proveedor = ""
             for u in usuarios:
-                if u.get('usuario') == f.get('proveedor'):
+                if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == f.get('proveedor'):
                     correo_proveedor = u.get('datos_perfil', {}).get('correo', '')
                     break
             
@@ -1422,7 +1441,40 @@ def liberar_doc50():
         if str(f["id"]) == str(factura_id):
             f["liberado_admin"] = True
             escribir_json("facturas.json", data)
-            return jsonify({"status": "success", "message": "Ticket liberado correctamente para captura de Doc Contable."})
+            
+            # Encontrar ciudad del ticket para notificar al supervisor
+            retro = f.get("retro", "")
+            import re as re_mod
+            match_ticket = re_mod.search(r"\[TICKET:(.*?)\]", retro)
+            ciudad_ticket = ""
+            if match_ticket:
+                ticket_id = match_ticket.group(1).strip()
+                rep_data = leer_json("reportes.json")
+                for r in rep_data.get("reportes", []):
+                    if str(r.get("id")) == str(ticket_id):
+                        ciudad_ticket = r.get("ciudad", "")
+                        break
+            if not ciudad_ticket:
+                unidades_data = leer_json("unidades.json")
+                unidad_sola = str(f.get("unidad", "")).replace("8090-", "")
+                if unidades_data and unidad_sola in unidades_data:
+                    ciudad_ticket = unidades_data[unidad_sola].get("Ciudad Base", "Tijuana")
+            
+            usuarios_data = leer_json("usuarios.json")
+            for u in usuarios_data.get("usuarios", []):
+                if u["rol"] == "administracion":
+                    subrol_u = u["datos_perfil"].get("subrol", "")
+                    ciudad_admin = u["datos_perfil"].get("ciudad", "")
+                    ciudades_extra = u["datos_perfil"].get("ciudades_asignadas", [])
+                    
+                    if subrol_u == "Supervisor" and (ciudad_admin == ciudad_ticket or ciudad_ticket in ciudades_extra):
+                        correo = u["datos_perfil"].get("correo")
+                        nombre_sup = u["datos_perfil"].get("nombres", "Supervisor")
+                        if correo:
+                            from notificaciones import enviar_correo_liberacion_doc50_supervisor
+                            enviar_correo_liberacion_doc50_supervisor(correo, nombre_sup, f.get("unidad", "S/N"), f.get("id_reporte", f.get("numero_reporte", "N/A")))
+                            
+            return jsonify({"status": "success", "message": "Ticket liberado correctamente para captura de Doc Contable. Se ha notificado al Supervisor."})
             
     return jsonify({"status": "error", "message": "Factura no encontrada."})
 
