@@ -426,6 +426,8 @@ td {
     text-align: left;
     color: #e0e6ed;
     white-space: nowrap;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 14px !important;
 }
 
 th {

@@ -1296,6 +1296,43 @@ def doc50():
             if correo_prov:
                 enviar_correo_doc50_proveedor(correo_prov, proveedor_nombre, f.get("unidad", "S/N").replace("8090-", ""), f.get("id", "N/A"), nums_doc50[0] if nums_doc50 else "N/A")
 
+            # Encontrar ciudad del ticket para notificar al supervisor de finalizacion
+            retro = f.get("retro", "")
+            import re as re_mod
+            match_ticket = re_mod.search(r"\[TICKET:(.*?)\]", retro)
+            ciudad_ticket = ""
+            if match_ticket:
+                ticket_id = match_ticket.group(1).strip()
+                rep_data = leer_json("reportes.json")
+                for r in rep_data.get("reportes", []):
+                    if str(r.get("id")) == str(ticket_id):
+                        ciudad_ticket = r.get("ciudad", "")
+                        break
+            if not ciudad_ticket:
+                unidades_data = leer_json("unidades.json")
+                unidad_sola = str(f.get("unidad", "")).replace("8090-", "")
+                if unidades_data and unidad_sola in unidades_data:
+                    ciudad_ticket = unidades_data[unidad_sola].get("Ciudad Base", "Tijuana")
+            
+            for u in usuarios_data.get("usuarios", []):
+                if u["rol"] == "administracion":
+                    subrol_u = u["datos_perfil"].get("subrol", "")
+                    ciudad_admin = u["datos_perfil"].get("ciudad", "")
+                    ciudades_extra = u["datos_perfil"].get("ciudades_asignadas", [])
+                    
+                    if subrol_u == "Supervisor" and (ciudad_admin == ciudad_ticket or ciudad_ticket in ciudades_extra):
+                        correo = u["datos_perfil"].get("correo")
+                        nombre_sup = u["datos_perfil"].get("nombres", "Supervisor")
+                        if correo:
+                            from notificaciones import enviar_correo_ticket_finalizado_supervisor
+                            enviar_correo_ticket_finalizado_supervisor(
+                                correo, 
+                                nombre_sup, 
+                                f.get("unidad", "S/N").replace("8090-", ""), 
+                                f.get("id_reporte", f.get("numero_reporte", "N/A")), 
+                                nums_doc50[0] if nums_doc50 else "N/A"
+                            )
+
             return jsonify({'status': 'success', 'message': 'Documentos Contables subidos. El proceso ha concluido para todas las cotizaciones.'})
 
     return jsonify({'status': 'error', 'message': 'Factura no encontrada.'})

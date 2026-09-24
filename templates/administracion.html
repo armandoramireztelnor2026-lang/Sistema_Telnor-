@@ -1800,24 +1800,7 @@
     </div>
 
     <script src="/static/panel_control.js?v=1"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            setTimeout(() => {
-                let savedView = localStorage.getItem('activeViewAdmin');
-                if (savedView && typeof cambiarVistaAdmin === 'function') {
-                    cambiarVistaAdmin(savedView);
-                } else {
-                    {% if usuario.datos_perfil.subrol == 'Jefatura' %}
-                    if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('panel-control');
-                    {% elif usuario.datos_perfil.subrol == 'Supervisor' %}
-                    if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('reportes');
-                    {% elif usuario.datos_perfil.subrol == 'Administrador' %}
-                    if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('documentos-contables');
-                    {% endif %}
-                }
-            }, 100);
-        });
-    </script>
+
 </body>
 
 </html>

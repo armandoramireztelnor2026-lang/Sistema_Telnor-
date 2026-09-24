@@ -420,18 +420,7 @@
     </div>
 
     <script src="/static/script.js?v=230926_2152"></script>
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        setTimeout(() => {
-            let savedView = localStorage.getItem('activeViewProv');
-            if (savedView && typeof cambiarVistaProv === 'function') {
-                cambiarVistaProv(savedView);
-            } else {
-                if (typeof cambiarVistaProv === 'function') cambiarVistaProv('reportes');
-            }
-        }, 100);
-    });
-    </script>
+
 
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js?v=5"></script>

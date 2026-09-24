@@ -712,19 +712,32 @@ document.addEventListener("DOMContentLoaded", function () {
     if (document.getElementById('vista-pendientes')) { 
         let savedView = localStorage.getItem('activeViewAdmin');
         if (savedView) {
-            cambiarVistaAdmin(savedView);
+            if (savedView === 'cotizaciones-10k' && typeof verCotizacionesMas10000 === 'function') {
+                verCotizacionesMas10000();
+            } else {
+                cambiarVistaAdmin(savedView);
+            }
         } else {
             let subrol = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
-            if (subrol === 'Administrador') {
-                cambiarVistaAdmin('documentos-contables');
+            if (subrol === 'Jefatura') {
+                cambiarVistaAdmin('pendientes');
+            } else if (subrol === 'Supervisor') {
+                cambiarVistaAdmin('reportes');
+            } else if (subrol === 'Administrador') {
+                if (typeof verCotizacionesMas10000 === 'function') {
+                    verCotizacionesMas10000();
+                } else {
+                    cambiarVistaAdmin('cotizaciones-10k');
+                }
             } else {
-                cambiarVistaAdmin('facturas'); 
+                // Fallback for any other potential subrol like 'Asistente', 'Auditor' etc
+                cambiarVistaAdmin('reportes'); 
             }
         }
     }
     if (document.getElementById('vista-reportes-prov')) { 
         let savedView = localStorage.getItem('activeViewProv');
-        cambiarVistaProv(savedView ? savedView : 'facturas'); 
+        cambiarVistaProv(savedView ? savedView : 'reportes'); 
     }
     if (document.getElementById('vista-cotizaciones-corp')) { 
         let savedView = localStorage.getItem('activeViewCorp');

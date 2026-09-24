@@ -198,6 +198,30 @@ async function cargarFacturas() {
                 let precioBonito = formatearMoneda(f.precio);
                 let btnAccion = '';
 
+                let ordenes = [];
+                let pedidos = [];
+                let folios = [];
+                let doc50s = [];
+                
+                if (f.cotizaciones && f.cotizaciones.length > 0) {
+                    f.cotizaciones.forEach(c => {
+                        if (c.numero_orden) ordenes.push(c.numero_orden);
+                        if (c.numero_cotizacion_asignacion) pedidos.push(c.numero_cotizacion_asignacion);
+                        if (c.factura_folio) folios.push(c.factura_folio);
+                        if (c.numero_doc50) doc50s.push(c.numero_doc50);
+                    });
+                } else {
+                    if (f.numero_orden) ordenes.push(f.numero_orden);
+                    if (f.numero_cotizacion_asignacion) pedidos.push(f.numero_cotizacion_asignacion);
+                    if (f.factura_folio) folios.push(f.factura_folio);
+                    if (f.numero_doc50) doc50s.push(f.numero_doc50);
+                }
+                
+                let ordStr = [...new Set(ordenes)].join(', ') || 'Pendiente';
+                let pedStr = [...new Set(pedidos)].join(', ') || '';
+                let folStr = [...new Set(folios)].join(', ') || '';
+                let docStr = [...new Set(doc50s)].join(', ') || '';
+
                 if (rolUsuario === 'administracion') {
                     btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">`;
 
@@ -232,7 +256,7 @@ async function cargarFacturas() {
                     btnAccion += `</div>`;
                 } else {
                     btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; align-items:stretch; width:100%;">
-                        <span style="font-size:0.9em; font-weight:bold; color:#a3b1c6; margin-bottom: 2px;">${f.numero_orden ? 'Orden Oficial: <span style="color:#f59e0b;">' + f.numero_orden + '</span>' : 'En revisión...'}</span>
+                        <span style="font-size:0.9em; font-weight:bold; color:#a3b1c6; margin-bottom: 2px;">${ordStr !== 'Pendiente' ? 'Orden Oficial: <span style="color:#f59e0b;">' + ordStr + '</span>' : 'En revisión...'}</span>
                         <button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box;" onclick="abrirDetalles('${f.id}')">Ver Detalles (PDF)</button>`;
 
                     if (confirmadaTotal && entregadoTexto !== 'Sí') {
@@ -262,7 +286,10 @@ async function cargarFacturas() {
                 }
 
                 let ciaExtra = f.compania ? ` | Cia: <strong style="color:white;">${f.compania}</strong>` : ``;
-                let infoExtra = `<br><small style="color:#a3b1c6;">Ticket: ${obtenerIdReporte(f) || 'S/T'} | Orden: <strong style="color:#f59e0b;">${f.numero_orden || 'Pendiente'}</strong>${ciaExtra}</small>`;
+                let infoExtra = `<br><small style="color:#a3b1c6;">Ticket: ${obtenerIdReporte(f) || 'S/T'} | Orden(es): <strong style="color:#f59e0b;">${ordStr}</strong>${ciaExtra}</small>`;
+                if (pedStr) infoExtra += `<br><small style="color:#a3b1c6;">Pedido(s): <strong style="color:#f59e0b;">${pedStr}</strong></small>`;
+                if (folStr) infoExtra += `<br><small style="color:#a3b1c6;">Factura(s): <strong style="color:#f59e0b;">${folStr}</strong></small>`;
+                if (docStr) infoExtra += `<br><small style="color:#a3b1c6;">Doc50(s): <strong style="color:#f59e0b;">${docStr}</strong></small>`;
                 let tdTitulo = `<td>${tituloCompleto}${infoExtra}</td>`;
 
                 let indStr = '';

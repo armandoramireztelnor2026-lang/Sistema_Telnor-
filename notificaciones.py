@@ -70,6 +70,33 @@ def enviar_correo_liberacion_doc50_supervisor(correo_destino, nombre_supervisor,
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
 
+def enviar_correo_ticket_finalizado_supervisor(correo_destino, nombre_supervisor, unidad, ticket, doc50_num):
+    if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    asunto = f"TICKET FINALIZADO Y ARCHIVADO (Unidad 8090-{unidad})"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #2d6a4f; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">TICKET FINALIZADO CON ÉXITO</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{nombre_supervisor}</strong>,</p>
+                <p>Te notificamos que el proceso administrativo para el ticket <strong>{ticket}</strong> ha concluido satisfactoriamente.</p>
+                <p>El Documento Contable 50 ha sido capturado en el sistema, por lo que este reporte pasa al estado <strong>Archivado</strong> y se da por cerrado definitivamente.</p>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{unidad}</li>
+                    <li style="margin-bottom: 10px;"><strong>Folio Doc 50 Capturado:</strong> {doc50_num}</li>
+                </ul>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_destino, asunto, cuerpo_html)
+
 def enviar_correo_liberacion(correo_destino, ticket, unidad, codigo, nombre_chofer, telefono_chofer):
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
         return False, "Sin correo"
