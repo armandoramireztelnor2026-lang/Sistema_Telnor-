@@ -1,7 +1,8 @@
 {
     "100126": {
         "Marca": "CHEVROLET",
-        "Modelo": "2025"
+        "Modelo": "2025",
+        "Juridicos": false
     },
     "100428": {
         "Marca": "CHEVROLET",

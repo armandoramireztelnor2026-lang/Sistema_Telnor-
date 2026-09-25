@@ -30,10 +30,13 @@ def nuevo_reporte():
     unidad_req = request.form.get("unidad")
     eco_full = f"8090-{unidad_req}"
     
-    # 0. Check if the unit is inactive
+    # 0. Check if the unit is inactive or in Juridicos
     unidades_data = leer_json("unidades.json")
-    if unidad_req in unidades_data and unidades_data[unidad_req].get("Estado") == "Inactiva":
-        return jsonify({"status": "error", "message": f"La unidad {unidad_req} se encuentra Inhabilitada/Incosteable y no puede ser reportada."})
+    if unidad_req in unidades_data:
+        if unidades_data[unidad_req].get("Juridicos") == True:
+            return jsonify({"status": "error", "message": f"La unidad {unidad_req} se encuentra en Jurídicos y no puede ser reportada."})
+        if unidades_data[unidad_req].get("Estado") == "Inactiva":
+            return jsonify({"status": "error", "message": f"La unidad {unidad_req} se encuentra Inhabilitada/Incosteable y no puede ser reportada."})
 
     
     # 1. Check facturas.json (tickets in taller not yet delivered/closed)
@@ -402,6 +405,28 @@ def toggle_estado_unidad():
             data[numero]["Estado"] = "Inactiva" if current == "Activa" else "Activa"
             escribir_json("unidades.json", data)
             return jsonify({"status": "success", "message": f"Estado cambiado a {data[numero]['Estado']}"})
+        else:
+            return jsonify({"status": "error", "message": "Unidad no encontrada"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+@reportes_bp.route("/api/unidades/toggle_juridicos", methods=["POST"])
+def toggle_juridicos_unidad():
+    numero = request.form.get("numero")
+    
+    if not numero:
+        return jsonify({"status": "error", "message": "Falta el numero de la unidad"})
+        
+    try:
+        data = leer_json("unidades.json")
+        if not data:
+            data = {}
+            
+        if numero in data:
+            current = data[numero].get("Juridicos", False)
+            data[numero]["Juridicos"] = not current
+            escribir_json("unidades.json", data)
+            return jsonify({"status": "success", "message": f"Estado Juridicos cambiado a {data[numero]['Juridicos']}"})
         else:
             return jsonify({"status": "error", "message": "Unidad no encontrada"})
     except Exception as e:

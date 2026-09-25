@@ -1,3 +1,60 @@
 {
-    "facturas": []
+    "facturas": [
+        {
+            "id": "20260924125352",
+            "proveedor": "Autopartes y Motores B.C.",
+            "unidad": "8090-1133",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "n",
+            "retro": "[TICKET:REP-20260924123912]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 11000.0,
+            "fecha": "2026-09-24",
+            "numero_orden": "112",
+            "compania": "RUMN",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-09-24T12:53:52.199932",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "28798707",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 11000.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20260924123912]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1790279632174_0_Comprobante_de_Pago_1.jpeg"
+                    ],
+                    "pdf_cotizacion": "1790279632174_0_Meta_1.5_Analisis_del_Modulo_3_Infraestructura_global_de_AWS.pdf",
+                    "numero_orden": "112",
+                    "numero_cotizacion_asignacion": "113",
+                    "factura_folio": "1111",
+                    "factura_pdf": "FACTURA_FINAL_20260924125352_0_Meta_2.2_2.3_Dashboard_De_La_Cruz__Yael_Garnica_Alexis_Ramirez_Armando.docx.pdf",
+                    "numero_doc50": "1111"
+                }
+            ],
+            "numero_cotizacion_asignacion": "113",
+            "aprobado_admin_10k": true,
+            "comentarios": "Hola es una prueba, esta actualizdo por mi",
+            "autor_comentario": "Jesus  Ramirez",
+            "eliminado_por": "",
+            "liberado_admin": true,
+            "factura_folio": "1111",
+            "factura_pdf": "FACTURA_FINAL_20260924125352_0_Meta_2.2_2.3_Dashboard_De_La_Cruz__Yael_Garnica_Alexis_Ramirez_Armando.docx.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "1111",
+            "estado": "Archivado",
+            "fecha_cierre": "2026-09-24 13:22:08"
+        }
+    ]
 }

@@ -358,24 +358,56 @@
             const unidadInput = document.getElementById('unidad-input');
             const marcaInput = document.getElementById('marca-input');
             const modeloInput = document.getElementById('modelo-input');
+            const btnSubmit = document.getElementById('btn-enviar-reporte');
             
             if (!unidadInput || !marcaInput || !modeloInput) return;
             
             const rawVal = unidadInput.value.trim();
             const val = "8090" + rawVal;
-            console.log("Tecleando unidad:", val);
             
-                        if (globalUnidadesData[val]) {
-                if (globalUnidadesData[val].Estado === 'Inactiva') {
+            if (globalUnidadesData[val]) {
+                const info = globalUnidadesData[val];
+                if (info.Juridicos === true) {
+                    marcaInput.value = 'UNIDAD EN JURÍDICOS';
+                    modeloInput.value = 'BLOQUEADA';
+                    if(btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerText = 'Unidad Inhabilitada (Jurídicos)';
+                        btnSubmit.style.background = '#6d28d9';
+                    }
+                } else if (info.Estado === 'Inactiva') {
                     marcaInput.value = 'UNIDAD INACTIVA';
                     modeloInput.value = 'NO DISPONIBLE';
+                    if(btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerText = 'Unidad Inactiva';
+                        btnSubmit.style.background = '#6b7280';
+                    }
+                } else if (info.activa_en_taller === true) {
+                    marcaInput.value = info.Marca || '';
+                    modeloInput.value = info.Modelo || '';
+                    if(btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerText = 'La unidad ya tiene un ticket activo';
+                        btnSubmit.style.background = '#ef4444';
+                    }
                 } else {
-                    marcaInput.value = globalUnidadesData[val].Marca || '';
-                    modeloInput.value = globalUnidadesData[val].Modelo || '';
+                    marcaInput.value = info.Marca || '';
+                    modeloInput.value = info.Modelo || '';
+                    if(btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerText = 'Enviar Reporte al Sistema';
+                        btnSubmit.style.background = '';
+                    }
                 }
             } else {
                 marcaInput.value = '';
                 modeloInput.value = '';
+                if(btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerText = 'Enviar Reporte al Sistema';
+                    btnSubmit.style.background = '';
+                }
             }
         }
 

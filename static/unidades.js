@@ -11,9 +11,15 @@ async function cargarUnidades() {
 
         let rows = '';
         for (const [idUnidad, info] of Object.entries(data)) {
-            let disabledAttr = info.activa_en_taller ? 'disabled' : '';
-            let styleOpacity = info.activa_en_taller ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
-            let tooltip = info.activa_en_taller ? 'title="Esta unidad tiene un ticket activo y no puede ser modificada"' : '';
+            let isInShop = info.activa_en_taller;
+            let isJuridico = info.Juridicos === true;
+            
+            let disabledAttr = (isInShop || isJuridico) ? 'disabled' : '';
+            let styleOpacity = (isInShop || isJuridico) ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
+            let tooltip = isInShop ? 'title="Esta unidad tiene un ticket activo y no puede ser modificada"' : (isJuridico ? 'title="Unidad inhabilitada por estar en Jurídicos"' : '');
+            
+            let juridicoBtnText = isJuridico ? 'Quitar Jurídicos' : 'Jurídicos';
+            let juridicoBtnColor = isJuridico ? '#6d28d9' : '#8b5cf6';
             
             rows += `
                 <tr>
@@ -24,9 +30,10 @@ async function cargarUnidades() {
                         <button ${disabledAttr} ${tooltip} onclick="abrirModalUnidad('editar', '${idUnidad}', '${info.Marca || ''}', '${info.Modelo || ''}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:5px; margin-right:5px; ${styleOpacity}">Editar</button>
                         <button ${disabledAttr} ${tooltip} onclick="eliminarUnidad('${idUnidad}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:5px; margin-right:5px; ${styleOpacity}">Eliminar</button>
                         ${info.Estado === 'Inactiva' 
-                            ? `<button ${disabledAttr} ${tooltip} onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; ${styleOpacity}">Activar</button>`
-                            : `<button ${disabledAttr} ${tooltip} onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#f59e0b; color:white; border:none; padding:5px 10px; border-radius:5px; ${styleOpacity}">Desactivar</button>`
+                            ? `<button ${disabledAttr} ${tooltip} onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; margin-right:5px; ${styleOpacity}">Activar</button>`
+                            : `<button ${disabledAttr} ${tooltip} onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#f59e0b; color:white; border:none; padding:5px 10px; border-radius:5px; margin-right:5px; ${styleOpacity}">Desactivar</button>`
                         }
+                        <button onclick="verJuridicos('${idUnidad}')" style="background:${juridicoBtnColor}; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">${juridicoBtnText}</button>
                     </td>
                 </tr>
             `;
@@ -147,5 +154,25 @@ async function toggleEstadoUnidad(numero) {
     } catch (e) {
         console.error(e);
         alert('Error al cambiar el estado.');
+    }
+}
+
+async function verJuridicos(numero) {
+    if (!confirm('¿Estás seguro de cambiar el estado jurídico de la unidad ' + numero + '?')) return;
+
+    let fd = new FormData();
+    fd.append('numero', numero);
+
+    try {
+        let res = await fetch('/api/unidades/toggle_juridicos', { method: 'POST', body: fd });
+        let data = await res.json();
+        if (data.status === 'success') {
+            cargarUnidades();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error al cambiar el estado jurídico.');
     }
 }
