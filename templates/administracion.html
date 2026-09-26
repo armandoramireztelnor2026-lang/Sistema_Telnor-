@@ -145,6 +145,7 @@
                 {% if usuario.datos_perfil.subrol == 'Jefatura' %}
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('pendientes')">Nuevos Registros</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('accesos')">Accesos (Credenciales)</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('ciudades-copes')">Ciudades / COPEs</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('panel-control')">Panel de Control</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
@@ -433,6 +434,18 @@
                             </thead>
                             <tbody id="tabla-accesos"></tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== CIUDADES / COPEs ========== -->
+            <div id="vista-ciudades-copes" style="display: none;">
+                <div class="top-bar">
+                    <h2>Ciudades / COPEs-Edificios</h2>
+                </div>
+                <div class="admin-container">
+                    <div id="ciudades-copes-container">
+                        <p style="text-align:center; color:#a3b1c6; padding:40px;">Cargando catálogo...</p>
                     </div>
                 </div>
             </div>
@@ -1788,6 +1801,7 @@
     </div>
 
     <script src="/static/panel_control.js?v=1"></script>
+    <script src="/static/ciudades_copes.js?v=1"></script>
 
     <!-- FOOLPROOF FALLBACK -->
     <script>

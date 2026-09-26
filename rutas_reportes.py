@@ -64,8 +64,8 @@ def nuevo_reporte():
             if str(r.get("id")) not in facturas_report_ids:
                 return jsonify({"status": "error", "message": f"La unidad {unidad_req} ya tiene un reporte activo en proceso de asignación."})
 
-    # 3. Validar que exista al menos un Administrador Y un Supervisor para esa ciudad
-    ciudad_reporte = request.form.get("ciudad", "No especificada")
+    # 3. Validar que exista al menos un Administrador Y un Supervisor para ese COPE
+    cope_reporte = request.form.get("cope", "No especificado")
     usuarios_data = leer_json("usuarios.json")
     
     hay_admin = False
@@ -75,10 +75,10 @@ def nuevo_reporte():
         if u.get("rol") == "administracion":
             perfil = u.get("datos_perfil", {})
             subrol = perfil.get("subrol", "")
-            ciudad_admin = perfil.get("ciudad", "")
-            ciudades_extra = perfil.get("ciudades_asignadas", [])
+            cope_admin = perfil.get("cope", "")
+            copes_extra = perfil.get("copes_asignados", [])
             
-            if ciudad_admin == ciudad_reporte or ciudad_reporte in ciudades_extra:
+            if cope_admin == cope_reporte or cope_reporte in copes_extra:
                 if subrol == "Administrador":
                     hay_admin = True
                 elif subrol == "Supervisor":
@@ -86,11 +86,11 @@ def nuevo_reporte():
                 
     if not hay_admin or not hay_super:
         if not hay_admin and not hay_super:
-            msg = f"No se puede crear el reporte: Faltan un Administrador y un Supervisor registrados para la ciudad de {ciudad_reporte}."
+            msg = f"No se puede crear el reporte: Faltan un Administrador y un Supervisor registrados para el COPE {cope_reporte}."
         elif not hay_admin:
-            msg = f"No se puede crear el reporte: Falta un Administrador registrado para la ciudad de {ciudad_reporte}."
+            msg = f"No se puede crear el reporte: Falta un Administrador registrado para el COPE {cope_reporte}."
         else:
-            msg = f"No se puede crear el reporte: Falta un Supervisor registrado para la ciudad de {ciudad_reporte}."
+            msg = f"No se puede crear el reporte: Falta un Supervisor registrado para el COPE {cope_reporte}."
             
         return jsonify({"status": "error", "message": msg})
 
@@ -123,14 +123,15 @@ def nuevo_reporte():
     usuarios_data = leer_json("usuarios.json")
     admins_data = []
     
-    # Solo notificar a los Admins de la MISMA ciudad, o a la Jefatura
+    # Solo notificar a los Supervisores del mismo COPE
     for u in usuarios_data.get("usuarios", []):
             if u.get("rol") == "administracion":
                 subrol = u["datos_perfil"].get("subrol", "")
-                ciudad_admin = u["datos_perfil"].get("ciudad", "")
+                cope_admin = u["datos_perfil"].get("cope", "")
+                copes_extra = u["datos_perfil"].get("copes_asignados", [])
                 
-                # Solo enviar a Supervisores de esa ciudad
-                if subrol == "Supervisor" and ciudad_admin == reporte["ciudad"]:
+                # Solo enviar a Supervisores de ese COPE
+                if subrol == "Supervisor" and (cope_admin == reporte["cope"] or reporte["cope"] in copes_extra):
                     correo = u["datos_perfil"].get("correo")
                     if correo:
                         nombre_completo = f"{u['datos_perfil'].get('nombres', '')} {u['datos_perfil'].get('apellido_paterno', '')}".strip()
@@ -167,17 +168,17 @@ def lista_reportes():
             usuario_id = session['usuario']['usuario']
             usuarios_data = leer_json("usuarios.json")
             
-            mi_ciudad = ""
-            ciudades_asignadas = []
+            mi_cope = ""
+            copes_asignados = []
             for u in usuarios_data.get("usuarios", []):
                 if u.get("usuario") == usuario_id:
-                    mi_ciudad = u.get("datos_perfil", {}).get("ciudad", "")
-                    ciudades_asignadas = u.get("datos_perfil", {}).get("ciudades_asignadas", [])
+                    mi_cope = u.get("datos_perfil", {}).get("cope", "")
+                    copes_asignados = u.get("datos_perfil", {}).get("copes_asignados", [])
                     break
                     
-            ciudades_permitidas = [mi_ciudad] + ciudades_asignadas
-            # Solo dejamos los reportes que coincidan con la ciudad (o ciudades extra) del Supervisor
-            data['reportes'] = [r for r in data.get('reportes', []) if r.get('ciudad') in ciudades_permitidas]
+            copes_permitidos = [mi_cope] + copes_asignados
+            # Solo dejamos los reportes que coincidan con el COPE (o COPEs extra) del Supervisor
+            data['reportes'] = [r for r in data.get('reportes', []) if r.get('cope') in copes_permitidos]
             
     return jsonify(data)
 

@@ -14,7 +14,15 @@ from notificaciones import (
 
 panel_control_bp = Blueprint("panel_control_bp", __name__)
 
-# Catálogo fijo de ciudades disponibles en Telnor
+# COPEs disponibles: se leen dinámicamente del catálogo
+def get_copes_disponibles():
+    data = leer_json('ciudades_copes.json')
+    copes = []
+    for ciudad in data.get('ciudades', []):
+        copes.extend(ciudad.get('copes', []))
+    return sorted(set(copes))
+
+# Mantener CIUDADES_DISPONIBLES para compatibilidad de otros campos del perfil
 CIUDADES_DISPONIBLES = [
     "Tijuana", "Mexicali", "Ensenada", "Tecate", "Rosarito", "San Quintin", "San Felipe"
 ]
@@ -38,7 +46,7 @@ def es_jefatura():
 
 @panel_control_bp.route('/api/panel/ciudades_disponibles', methods=['GET'])
 def ciudades_disponibles():
-    return jsonify({"ciudades": CIUDADES_DISPONIBLES})
+    return jsonify({"ciudades": CIUDADES_DISPONIBLES, "copes": get_copes_disponibles()})
 
 
 @panel_control_bp.route('/api/panel/personal', methods=['GET'])
@@ -67,7 +75,7 @@ def listar_personal():
             "correo": dp.get("correo", ""),
             "num_empleado": dp.get("num_empleado", ""),
             "foto_ruta": dp.get("foto_ruta", ""),
-            "ciudades_asignadas": dp.get("ciudades_asignadas", [])
+            "copes_asignados": dp.get("copes_asignados", [])
         }
         subrol = dp.get("subrol", "")
         if subrol == "Jefatura":
@@ -82,21 +90,22 @@ def listar_personal():
         "jefatura": jefatura,
         "supervisores": supervisores,
         "administradores": administradores,
-        "ciudades_disponibles": CIUDADES_DISPONIBLES
+        "ciudades_disponibles": CIUDADES_DISPONIBLES,
+        "copes_disponibles": get_copes_disponibles()
     })
 
 
-@panel_control_bp.route('/api/panel/asignar_ciudad', methods=['POST'])
-def asignar_ciudad():
+@panel_control_bp.route('/api/panel/asignar_cope', methods=['POST'])
+def asignar_cope():
     if not es_jefatura():
         return jsonify({"status": "error", "message": "Acceso denegado."}), 403
 
     usuario_id = request.json.get('usuario')
-    ciudad = request.json.get('ciudad')
-    if not usuario_id or not ciudad:
+    cope = request.json.get('cope')
+    if not usuario_id or not cope:
         return jsonify({"status": "error", "message": "Faltan datos."})
-    if ciudad not in CIUDADES_DISPONIBLES:
-        return jsonify({"status": "error", "message": f"Ciudad '{ciudad}' no es válida."})
+    if cope not in COPES_DISPONIBLES:
+        return jsonify({"status": "error", "message": f"COPE '{cope}' no es válido."})
 
     usuarios_data = leer_json('usuarios.json')
     encontrado = False
@@ -108,16 +117,16 @@ def asignar_ciudad():
             dp = u.get('datos_perfil', {})
             subrol = dp.get('subrol', '')
             if subrol == 'Jefatura':
-                return jsonify({"status": "error", "message": "No se pueden asignar ciudades a Jefatura desde aquí."})
+                return jsonify({"status": "error", "message": "No se pueden asignar COPEs a Jefatura desde aquí."})
             
-            ciudades = dp.get('ciudades_asignadas', [])
-            if ciudad in ciudades:
-                return jsonify({"status": "error", "message": f"La ciudad '{ciudad}' ya está asignada."})
-            if ciudad == dp.get('ciudad', ''):
-                return jsonify({"status": "error", "message": f"'{ciudad}' ya es su ciudad principal."})
+            copes = dp.get('copes_asignados', [])
+            if cope in copes:
+                return jsonify({"status": "error", "message": f"El COPE '{cope}' ya está asignado."})
+            if cope == dp.get('cope', ''):
+                return jsonify({"status": "error", "message": f"'{cope}' ya es su COPE principal."})
 
-            ciudades.append(ciudad)
-            dp['ciudades_asignadas'] = ciudades
+            copes.append(cope)
+            dp['copes_asignados'] = copes
             correo_destino = dp.get('correo', '')
             nombre_destino = f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()
             encontrado = True
@@ -130,21 +139,30 @@ def asignar_ciudad():
 
     if correo_destino:
         try:
-            enviar_correo_ciudad_asignada(correo_destino, nombre_destino, ciudad, obtener_nombre_sesion())
+            enviar_correo_ciudad_asignada(correo_destino, nombre_destino, cope, obtener_nombre_sesion())
         except Exception as e:
             print(f"Error al enviar correo: {e}")
 
-    return jsonify({"status": "success", "message": f"Ciudad '{ciudad}' asignada a {nombre_destino} exitosamente."})
+    return jsonify({"status": "success", "message": f"COPE '{cope}' asignado a {nombre_destino} exitosamente."})
 
 
-@panel_control_bp.route('/api/panel/quitar_ciudad', methods=['POST'])
-def quitar_ciudad():
+# Mantener endpoint antiguo por retrocompatibilidad
+@panel_control_bp.route('/api/panel/asignar_ciudad', methods=['POST'])
+def asignar_ciudad():
+    # Redirigir internamente a asignar_cope renombrando el campo
+    if request.json:
+        request.json['cope'] = request.json.get('ciudad', '')
+    return asignar_cope()
+
+
+@panel_control_bp.route('/api/panel/quitar_cope', methods=['POST'])
+def quitar_cope():
     if not es_jefatura():
         return jsonify({"status": "error", "message": "Acceso denegado."}), 403
 
     usuario_id = request.json.get('usuario')
-    ciudad = request.json.get('ciudad')
-    if not usuario_id or not ciudad:
+    cope = request.json.get('cope')
+    if not usuario_id or not cope:
         return jsonify({"status": "error", "message": "Faltan datos."})
 
     usuarios_data = leer_json('usuarios.json')
@@ -155,27 +173,30 @@ def quitar_ciudad():
     for u in usuarios_data.get('usuarios', []):
         if u.get('usuario') == usuario_id and u.get('rol') == 'administracion':
             dp = u.get('datos_perfil', {})
-            ciudades = dp.get('ciudades_asignadas', [])
-            if ciudad not in ciudades:
-                return jsonify({"status": "error", "message": f"La ciudad '{ciudad}' no está asignada."})
+            copes = dp.get('copes_asignados', [])
+            if cope not in copes:
+                return jsonify({"status": "error", "message": f"El COPE '{cope}' no está asignado."})
 
-            # === REGLA: NO QUITAR CIUDAD SI HAY TICKETS ACTIVOS ===
+            # === REGLA: NO QUITAR COPE SI HAY TICKETS ACTIVOS ===
             reportes_data = leer_json("reportes.json")
             for r in reportes_data.get("reportes", []):
-                if r.get("ciudad") == ciudad and r.get("estado") not in ["Eliminado", "Finalizado"]:
-                    return jsonify({"status": "error", "message": f"No se puede remover la ciudad porque hay reportes activos en {ciudad} (Ej. {r.get('id')}). Deben finalizarse primero."})
+                if r.get("cope") == cope and r.get("estado") not in ["Eliminado", "Finalizado"]:
+                    return jsonify({"status": "error", "message": f"No se puede remover el COPE porque hay reportes activos en {cope} (Ej. {r.get('id')}). Deben finalizarse primero."})
 
             facturas_data = leer_json("facturas.json")
-            proveedores_ciudad = [usr["datos_perfil"]["nombre_proveedor"] for usr in usuarios_data.get("usuarios", []) if usr.get("rol") == "proveedores" and usr.get("datos_perfil", {}).get("ciudad") == ciudad]
-
+            reportes_dict = {str(r.get("id")): r for r in reportes_data.get("reportes", [])}
+            import re as _re
             for f in facturas_data.get("facturas", []):
-                if f.get("proveedor") in proveedores_ciudad and f.get("estado") not in ["Eliminado", "Finalizado", "Rechazado", "Cancelado_Cotizacion_Cara"]:
-                    t_id = f.get("id_reporte") or f.get("numero_reporte") or f.get("id")
-                    return jsonify({"status": "error", "message": f"No se puede remover la ciudad porque hay tickets activos en {ciudad} (Ej. Factura {t_id}). Deben finalizarse primero."})
+                retro = f.get("retro", "")
+                m = _re.search(r"\[TICKET:(.*?)\]", retro)
+                if m:
+                    rep = reportes_dict.get(m.group(1).strip(), {})
+                    if rep.get("cope") == cope and f.get("estado") not in ["Eliminado", "Finalizado", "Rechazado", "Cancelado_Cotizacion_Cara"]:
+                        t_id = f.get("id_reporte") or f.get("numero_reporte") or f.get("id")
+                        return jsonify({"status": "error", "message": f"No se puede remover el COPE porque hay tickets activos en {cope} (Ej. Factura {t_id}). Deben finalizarse primero."})
 
-
-            ciudades.remove(ciudad)
-            dp['ciudades_asignadas'] = ciudades
+            copes.remove(cope)
+            dp['copes_asignados'] = copes
             correo_destino = dp.get('correo', '')
             nombre_destino = f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()
             encontrado = True
@@ -188,12 +209,19 @@ def quitar_ciudad():
 
     if correo_destino:
         try:
-            enviar_correo_ciudad_removida(correo_destino, nombre_destino, ciudad, obtener_nombre_sesion())
+            enviar_correo_ciudad_removida(correo_destino, nombre_destino, cope, obtener_nombre_sesion())
         except Exception as e:
             print(f"Error al enviar correo: {e}")
 
-    return jsonify({"status": "success", "message": f"Ciudad '{ciudad}' removida de {nombre_destino}."})
+    return jsonify({"status": "success", "message": f"COPE '{cope}' removido de {nombre_destino}."})
 
+
+# Mantener endpoint antiguo por retrocompatibilidad
+@panel_control_bp.route('/api/panel/quitar_ciudad', methods=['POST'])
+def quitar_ciudad():
+    if request.json:
+        request.json['cope'] = request.json.get('ciudad', '')
+    return quitar_cope()
 
 @panel_control_bp.route('/api/panel/cambiar_subrol', methods=['POST'])
 def cambiar_subrol():

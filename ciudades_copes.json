@@ -1,0 +1,53 @@
+{
+    "ciudades": [
+        {
+            "nombre": "Tijuana",
+            "copes": [
+                "PE CALLE 10",
+                "PIO PICO",
+                "CALLE QUINTA",
+                "RIO",
+                "LIBERTAD",
+                "METRO",
+                "PE OTAY INDUSTRIAL",
+                "PE SEMINARIO",
+                "PE PLAYAS",
+                "PE ROSARITO"
+            ]
+        },
+        {
+            "nombre": "Tecate",
+            "copes": [
+                "PE TECATE"
+            ]
+        },
+        {
+            "nombre": "Ensenada",
+            "copes": [
+                "PE ENSENADA"
+            ]
+        },
+        {
+            "nombre": "San Quintin",
+            "copes": [
+                "PE SAN QUINTIN"
+            ]
+        },
+        {
+            "nombre": "Mexicali",
+            "copes": [
+                "PE PERIFERICO",
+                "REFORMA",
+                "ANAHUAC",
+                "DE PIONEROS"
+            ]
+        },
+        {
+            "nombre": "San Luis Rio Colorado",
+            "copes": [
+                "PE SAN LUIS RC",
+                "CALLE 14"
+            ]
+        }
+    ]
+}

@@ -192,20 +192,15 @@ def nueva_factura():
     compania_asignada = "RUMN"
     import re as re_mod
     match_ticket = re_mod.search(r"\[TICKET:(.*?)\]", retro_global)
-    ciudad_ticket = ""
+    cope_ticket = ""
     if match_ticket:
         ticket_id = match_ticket.group(1).strip()
         rep_data = leer_json("reportes.json")
         for r in rep_data.get("reportes", []):
             if str(r.get("id")) == str(ticket_id):
                 compania_asignada = r.get("compania", "RUMN")
-                ciudad_ticket = r.get("ciudad", "")
+                cope_ticket = r.get("cope", "")
                 break
-                
-    if not ciudad_ticket:
-        unidades_data = leer_json("unidades.json")
-        if unidades_data and unidad_sola in unidades_data:
-            ciudad_ticket = unidades_data[unidad_sola].get("Ciudad Base", "Tijuana")
 
     # Título global = primer título de cotización
     titulo_global = cotizaciones_array[0].get("titulo", "Sin título") if cotizaciones_array else "Sin título"
@@ -249,10 +244,10 @@ def nueva_factura():
     for u in usuarios_data.get("usuarios", []):
         if u["rol"] == "administracion":
             subrol = u["datos_perfil"].get("subrol", "Administración")
-            ciudad_admin = u["datos_perfil"].get("ciudad", "")
-            ciudades_extra = u["datos_perfil"].get("ciudades_asignadas", [])
+            cope_admin = u["datos_perfil"].get("cope", "")
+            copes_extra = u["datos_perfil"].get("copes_asignados", [])
             
-            if subrol == "Supervisor" and (ciudad_admin == ciudad_ticket or ciudad_ticket in ciudades_extra):
+            if subrol == "Supervisor" and (cope_admin == cope_ticket or cope_ticket in copes_extra):
                 correo = u["datos_perfil"].get("correo")
                 if correo:
                     nombre = f"{u['datos_perfil'].get('nombres', '')} {u['datos_perfil'].get('apellido_paterno', '')}".strip()
@@ -291,27 +286,36 @@ def listar_facturas():
             facturas = [f for f in facturas if float(f.get("precio", 0)) >= 10001.0]
             
         elif rol == "administracion":
-            # --- FILTRO GEOGRÁFICO PARA SUPERVISORES ---
+            # --- FILTRO POR COPE PARA SUPERVISORES ---
             subrol = session["usuario"]["datos_perfil"].get("subrol", "")
             if subrol == "Supervisor":
                 usuario_id = session["usuario"]["usuario"]
                 usuarios_data = leer_json("usuarios.json")
                 
-                mi_ciudad = ""
-                ciudades_asignadas = []
+                mi_cope = ""
+                copes_asignados = []
                 for u in usuarios_data.get("usuarios", []):
                     if u.get("usuario") == usuario_id:
-                        mi_ciudad = u.get("datos_perfil", {}).get("ciudad", "")
-                        ciudades_asignadas = u.get("datos_perfil", {}).get("ciudades_asignadas", [])
+                        mi_cope = u.get("datos_perfil", {}).get("cope", "")
+                        copes_asignados = u.get("datos_perfil", {}).get("copes_asignados", [])
                         break
                         
-                ciudades_permitidas = [mi_ciudad] + ciudades_asignadas
+                copes_permitidos = [mi_cope] + copes_asignados
                 
-                # Primero, buscamos cómo se llaman todos los proveedores de esas ciudades (o los que son globales/sin ciudad)
-                proveedores_locales = [u["datos_perfil"]["nombre_proveedor"] for u in usuarios_data.get("usuarios", []) if u["rol"] == "proveedores" and (u["datos_perfil"].get("ciudad") in ciudades_permitidas or not u["datos_perfil"].get("ciudad"))]
+                # Obtener el COPE de cada factura vía su ticket de origen
+                reportes_data_map = leer_json("reportes.json")
+                reporte_a_cope = {str(r.get("id")): r.get("cope", "") for r in reportes_data_map.get("reportes", [])}
                 
-                # Luego, solo le mostramos al Supervisor las facturas que vengan de esos proveedores locales
-                facturas = [f for f in facturas if f.get("proveedor") in proveedores_locales]
+                import re as _re
+                def get_cope_factura(f):
+                    retro = f.get("retro", "")
+                    m = _re.search(r"\[TICKET:(.*?)\]", retro)
+                    if m:
+                        return reporte_a_cope.get(m.group(1).strip(), "")
+                    return ""
+                
+                # Solo mostrar facturas cuyo COPE coincida con los del Supervisor
+                facturas = [f for f in facturas if get_cope_factura(f) in copes_permitidos]
 
 
     # INYECTAR DATOS DEL REPORTE INICIAL
@@ -1299,7 +1303,7 @@ def doc50():
             retro = f.get("retro", "")
             import re as re_mod
             match_ticket = re_mod.search(r"\[TICKET:(.*?)\]", retro)
-            ciudad_ticket = ""
+            cope_ticket = ""
             real_ticket_id = f.get("id_reporte", f.get("numero_reporte", f.get("id", "N/A")))
             
             if match_ticket:
@@ -1307,14 +1311,8 @@ def doc50():
                 rep_data = leer_json("reportes.json")
                 for r in rep_data.get("reportes", []):
                     if str(r.get("id")) == str(real_ticket_id):
-                        ciudad_ticket = r.get("ciudad", "")
+                        cope_ticket = r.get("cope", "")
                         break
-            
-            if not ciudad_ticket:
-                unidades_data = leer_json("unidades.json")
-                unidad_sola = str(f.get("unidad", "")).replace("8090-", "")
-                if unidades_data and unidad_sola in unidades_data:
-                    ciudad_ticket = unidades_data[unidad_sola].get("Ciudad Base", "Tijuana")
 
             if correo_prov:
                 enviar_correo_doc50_proveedor(
@@ -1328,10 +1326,10 @@ def doc50():
             for u in usuarios_data.get("usuarios", []):
                 if u["rol"] == "administracion":
                     subrol_u = u["datos_perfil"].get("subrol", "")
-                    ciudad_admin = u["datos_perfil"].get("ciudad", "")
-                    ciudades_extra = u["datos_perfil"].get("ciudades_asignadas", [])
+                    cope_admin = u["datos_perfil"].get("cope", "")
+                    copes_extra = u["datos_perfil"].get("copes_asignados", [])
                     
-                    if subrol_u == "Supervisor" and (ciudad_admin == ciudad_ticket or ciudad_ticket in ciudades_extra):
+                    if subrol_u == "Supervisor" and (cope_admin == cope_ticket or cope_ticket in copes_extra):
                         correo = u["datos_perfil"].get("correo")
                         nombre_sup = u["datos_perfil"].get("nombres", "Supervisor")
                         if correo:
@@ -1494,34 +1492,40 @@ def liberar_doc50():
             retro = f.get("retro", "")
             import re as re_mod
             match_ticket = re_mod.search(r"\[TICKET:(.*?)\]", retro)
-            ciudad_ticket = ""
+            cope_ticket = ""
             if match_ticket:
                 ticket_id = match_ticket.group(1).strip()
                 rep_data = leer_json("reportes.json")
                 for r in rep_data.get("reportes", []):
                     if str(r.get("id")) == str(ticket_id):
-                        ciudad_ticket = r.get("ciudad", "")
+                        cope_ticket = r.get("cope", "")
                         break
-            if not ciudad_ticket:
-                unidades_data = leer_json("unidades.json")
-                unidad_sola = str(f.get("unidad", "")).replace("8090-", "")
-                if unidades_data and unidad_sola in unidades_data:
-                    ciudad_ticket = unidades_data[unidad_sola].get("Ciudad Base", "Tijuana")
             
             usuarios_data = leer_json("usuarios.json")
             for u in usuarios_data.get("usuarios", []):
                 if u["rol"] == "administracion":
                     subrol_u = u["datos_perfil"].get("subrol", "")
-                    ciudad_admin = u["datos_perfil"].get("ciudad", "")
-                    ciudades_extra = u["datos_perfil"].get("ciudades_asignadas", [])
+                    cope_admin = u["datos_perfil"].get("cope", "")
+                    copes_extra = u["datos_perfil"].get("copes_asignados", [])
                     
-                    if subrol_u == "Supervisor" and (ciudad_admin == ciudad_ticket or ciudad_ticket in ciudades_extra):
+                    if subrol_u == "Supervisor" and (cope_admin == cope_ticket or cope_ticket in copes_extra):
                         correo = u["datos_perfil"].get("correo")
                         nombre_sup = u["datos_perfil"].get("nombres", "Supervisor")
                         if correo:
                             from notificaciones import enviar_correo_liberacion_doc50_supervisor
                             enviar_correo_liberacion_doc50_supervisor(correo, nombre_sup, f.get("unidad", "S/N"), f.get("id_reporte", f.get("numero_reporte", "N/A")))
                             
+            # Enviar correo al taller de que ya pueden facturar
+            proveedor_nombre = f.get('proveedor', '')
+            correo_prov = ""
+            for u in usuarios_data.get("usuarios", []):
+                if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == proveedor_nombre:
+                    correo_prov = u.get('datos_perfil', {}).get('correo', '')
+                    break
+            if correo_prov:
+                from notificaciones import enviar_correo_taller_facturar
+                enviar_correo_taller_facturar(correo_prov, proveedor_nombre, f.get("id", "N/A"), f.get("unidad", "S/N"))
+                
             return jsonify({"status": "success", "message": "Ticket liberado correctamente para captura de Doc Contable. Se ha notificado al Supervisor."})
             
     return jsonify({"status": "error", "message": "Factura no encontrada."})

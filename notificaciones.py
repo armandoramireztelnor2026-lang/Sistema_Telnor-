@@ -1123,12 +1123,12 @@ def enviar_correo_taller_facturar(correo_taller, nombre_taller, ticket, unidad):
     <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
         <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
             <div style="background-color: #0284c7; padding: 20px; text-align: center;">
-                <h2 style="color: #ffffff; margin: 0;">UNIDAD ENTREGADA</h2>
-                <p style="color: #e0f2fe; margin: 5px 0 0 0;">El Código PIN ha sido validado exitosamente</p>
+                <h2 style="color: #ffffff; margin: 0;">FACTURACIÓN AUTORIZADA</h2>
+                <p style="color: #e0f2fe; margin: 5px 0 0 0;">El expediente ha sido revisado y aprobado</p>
             </div>
             <div style="padding: 20px;">
                 <p>Hola <strong>{nombre_taller}</strong>,</p>
-                <p>Te confirmamos que el Supervisor/Chofer ha <strong>validado el código PIN de liberación</strong> para la unidad.</p>
+                <p>Te confirmamos que la Administración ha verificado la entrega de la unidad y ha <strong>autorizado el inicio de tu trámite de facturación</strong>.</p>
 
                 <ul style="background-color: #f0f9ff; padding: 15px 30px; border-radius: 8px; border: 1px solid #bae6fd; list-style-type: none; margin-left: 0;">
                     <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>

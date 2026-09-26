@@ -142,15 +142,36 @@
     </div>
 
     <script>
-        // LÓGICA DE CASCADA (REPORTE EXTERNO)
-        const zonasCope = {
-            "Tijuana": ["PE CALLE 10", "PIO PICO", "CALLE QUINTA", "RIO", "LIBERTAD", "METRO", "PE OTAY INDUSTRIAL", "PE SEMINARIO", "PE PLAYAS", "PE ROSARITO", "PE TECATE"],
-            "Tecate": ["PE CALLE 10", "PIO PICO", "CALLE QUINTA", "RIO", "LIBERTAD", "METRO", "PE OTAY INDUSTRIAL", "PE SEMINARIO", "PE PLAYAS", "PE ROSARITO", "PE TECATE"],
-            "Ensenada": ["PE ENSENADA", "PE SAN QUINTIN"],
-            "San Quintin": ["PE ENSENADA", "PE SAN QUINTIN"],
-            "Mexicali": ["PE PERIFERICO", "REFORMA", "ANAHUAC", "DE PIONEROS"],
-            "San Luis Rio Colorado": ["PE SAN LUIS RC", "CALLE 14"]
-        };
+        // LÓGICA DE CASCADA (REPORTE EXTERNO) — carga dinámica desde el catálogo
+        let zonasCope = {};
+
+        // Cargar catálogo al iniciar la página
+        fetch('/api/catalogo_ciudades')
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    zonasCope = data.catalogo;
+                    // Poblar el select de ciudades dinámicamente
+                    const ciudadSelect = document.getElementById('ciudad-reporte');
+                    if (ciudadSelect) {
+                        ciudadSelect.innerHTML = '<option value="" disabled selected>Seleccione Ciudad...</option>';
+                        Object.keys(zonasCope).forEach(ciudad => {
+                            ciudadSelect.innerHTML += `<option value="${ciudad}">${ciudad}</option>`;
+                        });
+                    }
+                }
+            })
+            .catch(() => {
+                // Fallback si la API no responde
+                zonasCope = {
+                    "Tijuana": ["PE CALLE 10", "PIO PICO", "CALLE QUINTA", "RIO", "LIBERTAD", "METRO", "PE OTAY INDUSTRIAL", "PE SEMINARIO", "PE PLAYAS", "PE ROSARITO"],
+                    "Tecate": ["PE TECATE"],
+                    "Ensenada": ["PE ENSENADA"],
+                    "San Quintin": ["PE SAN QUINTIN"],
+                    "Mexicali": ["PE PERIFERICO", "REFORMA", "ANAHUAC", "DE PIONEROS"],
+                    "San Luis Rio Colorado": ["PE SAN LUIS RC", "CALLE 14"]
+                };
+            });
 
         function actualizarCopeReporte() {
             const ciudad = document.getElementById('ciudad-reporte').value;

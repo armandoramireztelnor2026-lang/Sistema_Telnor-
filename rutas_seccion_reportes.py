@@ -58,70 +58,57 @@ def obtener_lista_seccion_reportes():
     # Mapear nombre del supervisor a cada ticket
     usuarios_list = leer_json('usuarios.json').get('usuarios', [])
     
-    # 1. Mapeo: proveedor -> ciudad
-    prov_a_ciudad = {}
-    for u in usuarios_list:
-        if u.get('rol') == 'proveedores':
-            nombre_prov = u.get('datos_perfil', {}).get('nombre_proveedor')
-            ciudad_prov = u.get('datos_perfil', {}).get('ciudad')
-            if nombre_prov and ciudad_prov:
-                prov_a_ciudad[nombre_prov] = ciudad_prov
-
-    # 2. Mapeo: ciudad -> nombre de supervisor, administrador y jefatura
-    ciudad_a_sup = {}
-    ciudad_a_admin = {}
-    ciudad_a_jefatura = {}
+    # 1. Mapeo: COPE -> nombre de supervisor, administrador y jefatura
+    cope_a_sup = {}
+    cope_a_admin = {}
+    nombre_jefatura = "No asignado"
     for u in usuarios_list:
         if u.get('rol') == 'administracion':
             subrol = u.get('datos_perfil', {}).get('subrol')
-            ciudad = u.get('datos_perfil', {}).get('ciudad', '')
+            cope_principal = u.get('datos_perfil', {}).get('cope', '')
+            copes_extra = u.get('datos_perfil', {}).get('copes_asignados', [])
             nombres = u.get('datos_perfil', {}).get('nombres', '')
             apellido_pat = u.get('datos_perfil', {}).get('apellido_paterno', '')
             apellido_mat = u.get('datos_perfil', {}).get('apellido_materno', '')
             import re
             nombre_completo = re.sub(r'\s+', ' ', f"{nombres} {apellido_pat} {apellido_mat}").strip()
             
-            ciudad_lower = ciudad.strip().lower()
-            if ciudad_lower:
-                if subrol == 'Supervisor':
-                    ciudad_a_sup[ciudad_lower] = nombre_completo
-                elif subrol == 'Administrador':
-                    ciudad_a_admin[ciudad_lower] = nombre_completo
-                elif subrol == 'Jefatura':
-                    ciudad_a_jefatura[ciudad_lower] = nombre_completo
+            todos_copes = [cope_principal] + copes_extra if cope_principal else copes_extra
+            for cope in todos_copes:
+                if cope:
+                    if subrol == 'Supervisor':
+                        cope_a_sup[cope] = nombre_completo
+                    elif subrol == 'Administrador':
+                        cope_a_admin[cope] = nombre_completo
+            
+            if subrol == 'Jefatura' and nombre_completo:
+                nombre_jefatura = nombre_completo
 
-    # Precalcular ciudades de los reportes para busqueda rapida
-    reporte_a_ciudad = {str(r.get("id")): r.get("ciudad", "") for r in todos_reportes}
+    # Precalcular COPEs de los reportes para búsqueda rápida
+    reporte_a_cope = {str(r.get("id")): r.get("cope", "") for r in todos_reportes}
 
-    # 3. Asignar nombres al ticket
+    # 2. Asignar nombres al ticket
+    import re as _re
     for f in todos_combinados:
-        ciudad_f = f.get('ciudad', '')
+        cope_f = f.get('cope', '')
         
-        # Si no tiene ciudad (como las facturas), extraerla del reporte original
-        if not ciudad_f:
+        # Si no tiene COPE (como las facturas), extraerlo del reporte original
+        if not cope_f:
             r_id = f.get("id_reporte") or f.get("numero_reporte")
             if not r_id:
                 retro = f.get("retro", "")
-                import re
-                match = re.search(r"\[TICKET:(.*?)\]", retro)
+                match = _re.search(r"\[TICKET:(.*?)\]", retro)
                 if match:
                     r_id = match.group(1).strip()
             if r_id:
-                ciudad_f = reporte_a_ciudad.get(str(r_id), "")
-                
-        # Fallback al proveedor por si acaso
-        if not ciudad_f:
-            prov = f.get('proveedor', '')
-            ciudad_f = prov_a_ciudad.get(prov, '')
+                cope_f = reporte_a_cope.get(str(r_id), "")
 
-        ciudad_lower = ciudad_f.strip().lower()
-        sup_nombre = ciudad_a_sup.get(ciudad_lower, "No asignado")
-        admin_nombre = ciudad_a_admin.get(ciudad_lower, "No asignado")
-        jefatura_nombre = ciudad_a_jefatura.get(ciudad_lower, "No asignado")
+        sup_nombre = cope_a_sup.get(cope_f, "No asignado")
+        admin_nombre = cope_a_admin.get(cope_f, "No asignado")
         
         f['supervisor_nombre'] = sup_nombre
         f['administrador_nombre'] = admin_nombre
-        f['jefatura_nombre'] = jefatura_nombre
+        f['jefatura_nombre'] = nombre_jefatura
     
     return jsonify({
         "status": "success",

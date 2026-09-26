@@ -18,13 +18,13 @@ function cargarPanelControl() {
             let html = '';
 
             // SECCIÓN JEFATURA
-            html += renderSeccion('🛠️ Jefatura', data.jefatura, '#f59e0b', data.ciudades_disponibles, false);
+            html += renderSeccion('🛠️ Jefatura', data.jefatura, '#f59e0b', data.copes_disponibles || [], false);
 
             // SECCIÓN SUPERVISORES
-            html += renderSeccion('👤 Supervisores', data.supervisores, '#10b981', data.ciudades_disponibles, true);
+            html += renderSeccion('👤 Supervisores', data.supervisores, '#10b981', data.copes_disponibles || [], true);
 
             // SECCIÓN ADMINISTRADORES
-            html += renderSeccion('🛡️ Administradores', data.administradores, '#3b82f6', data.ciudades_disponibles, true);
+            html += renderSeccion('🛡️ Administradores', data.administradores, '#3b82f6', data.copes_disponibles || [], true);
 
             container.innerHTML = html;
         })
@@ -34,7 +34,7 @@ function cargarPanelControl() {
         });
 }
 
-function renderSeccion(titulo, usuarios, color, ciudadesDisponibles, permiteEditar) {
+function renderSeccion(titulo, usuarios, color, copesDisponibles, permiteEditar) {
     let html = `
     <div style="background: #0d1b2a; border-radius: 12px; margin-bottom: 25px; overflow: hidden; border: 1px solid #1e293b;">
         <div style="background: ${color}; padding: 15px 20px;">
@@ -52,33 +52,34 @@ function renderSeccion(titulo, usuarios, color, ciudadesDisponibles, permiteEdit
             // Badge de subrol
             let badgeColor = u.subrol === 'Jefatura' ? '#f59e0b' : u.subrol === 'Supervisor' ? '#10b981' : '#3b82f6';
 
-            // Ciudades asignadas
-            let ciudadesHTML = '';
-            if (u.ciudades_asignadas && u.ciudades_asignadas.length > 0) {
-                ciudadesHTML = u.ciudades_asignadas.map(c => 
+            // COPEs asignados (extra)
+            let copesHTML = '';
+            if (u.copes_asignados && u.copes_asignados.length > 0) {
+                copesHTML = u.copes_asignados.map(c =>
                     `<span style="display:inline-flex; align-items:center; background:#1e293b; color:#e2e8f0; padding:4px 10px; border-radius:20px; font-size:0.85em; margin:3px;">
-                        ${c} ${permiteEditar ? `<button onclick="quitarCiudadPanel('${u.usuario}', '${c}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1em; margin-left:5px; padding:0;" title="Quitar ciudad">&times;</button>` : ''}
+                        ${c} ${permiteEditar ? `<button onclick="quitarCopePanel('${u.usuario}', '${c}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1em; margin-left:5px; padding:0;" title="Quitar COPE">&times;</button>` : ''}
                     </span>`
                 ).join('');
             } else {
-                ciudadesHTML = '<span style="color:#64748b; font-size:0.85em;">Sin ciudades adicionales</span>';
+                copesHTML = '<span style="color:#64748b; font-size:0.85em;">Sin COPEs adicionales</span>';
             }
 
-            // Dropdown para asignar ciudad
+            // Dropdown para asignar COPE extra
             let asignarBtnHTML = '';
             if (permiteEditar) {
-                let opcionesHTML = ciudadesDisponibles
-                    .filter(c => c !== u.ciudad && !(u.ciudades_asignadas || []).includes(c))
+                // Filtrar el COPE principal y los ya asignados del dropdown
+                let opcionesHTML = copesDisponibles
+                    .filter(c => c !== u.cope && !(u.copes_asignados || []).includes(c))
                     .map(c => `<option value="${c}">${c}</option>`)
                     .join('');
 
                 asignarBtnHTML = `
                 <div style="display:flex; gap:8px; align-items:center; margin-top:10px;">
-                    <select id="select-ciudad-${u.usuario.replace(/[^a-zA-Z0-9]/g, '_')}" style="background:#1e293b; color:#e2e8f0; border:1px solid #334155; border-radius:6px; padding:6px 10px; font-size:0.85em; flex:1;">
-                        <option value="">Seleccionar ciudad...</option>
+                    <select id="select-cope-${u.usuario.replace(/[^a-zA-Z0-9]/g, '_')}" style="background:#1e293b; color:#e2e8f0; border:1px solid #334155; border-radius:6px; padding:6px 10px; font-size:0.85em; flex:1;">
+                        <option value="">Seleccionar COPE adicional...</option>
                         ${opcionesHTML}
                     </select>
-                    <button onclick="asignarCiudadPanel('${u.usuario}')" style="background:${color}; color:white; border:none; border-radius:6px; padding:6px 14px; cursor:pointer; font-weight:bold; font-size:0.85em; white-space:nowrap;">+ Asignar</button>
+                    <button onclick="asignarCopePanel('${u.usuario}')" style="background:${color}; color:white; border:none; border-radius:6px; padding:6px 14px; cursor:pointer; font-weight:bold; font-size:0.85em; white-space:nowrap;">+ Asignar</button>
                 </div>`;
             }
 
@@ -102,13 +103,14 @@ function renderSeccion(titulo, usuarios, color, ciudadesDisponibles, permiteEdit
                         <span style="background:${badgeColor}; color:white; padding:2px 10px; border-radius:12px; font-size:0.75em; font-weight:bold;">${u.subrol}</span>
                     </div>
                     <div style="color:#94a3b8; font-size:0.88em; line-height:1.7;">
-                        <div>📍 <strong>Ciudad Principal:</strong> ${u.ciudad || 'N/A'} ${u.cope ? '| <strong>COPE:</strong> ' + u.cope : ''}</div>
-                        <div>🏢 <strong>Área:</strong> ${u.area || 'N/A'} | <strong>No. Empleado:</strong> ${u.num_empleado || 'N/A'}</div>
+                        <div>📍 <strong>Ciudad:</strong> ${u.ciudad || 'N/A'}</div>
+                        <div>🏢 <strong>COPE Principal:</strong> <span style="color:#34d399; font-weight:bold;">${u.cope || 'No asignado'}</span></div>
+                        <div>🗂️ <strong>Área:</strong> ${u.area || 'N/A'} | <strong>No. Empleado:</strong> ${u.num_empleado || 'N/A'}</div>
                         <div>📧 <strong>Correo:</strong> ${u.correo || 'N/A'}</div>
                     </div>
                     <div style="margin-top:8px;">
-                        <div style="color:#a3b1c6; font-size:0.85em; font-weight:600; margin-bottom:5px;">Ciudades Adicionales Asignadas:</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:3px;">${ciudadesHTML}</div>
+                        <div style="color:#a3b1c6; font-size:0.85em; font-weight:600; margin-bottom:5px;">🏗️ COPEs Adicionales Asignados:</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:3px;">${copesHTML}</div>
                     </div>
                     ${asignarBtnHTML}
                     ${promoverBtnHTML}
@@ -121,22 +123,22 @@ function renderSeccion(titulo, usuarios, color, ciudadesDisponibles, permiteEdit
     return html;
 }
 
-function asignarCiudadPanel(usuarioId) {
-    let selectId = 'select-ciudad-' + usuarioId.replace(/[^a-zA-Z0-9]/g, '_');
+function asignarCopePanel(usuarioId) {
+    let selectId = 'select-cope-' + usuarioId.replace(/[^a-zA-Z0-9]/g, '_');
     let select = document.getElementById(selectId);
     if (!select || !select.value) {
-        alert('Selecciona una ciudad primero.');
+        alert('Selecciona un COPE primero.');
         return;
     }
-    let ciudad = select.value;
-    if (!confirm(`¿Deseas asignar la ciudad "${ciudad}" a este usuario?`)) return;
+    let cope = select.value;
+    if (!confirm(`¿Deseas asignar el COPE "${cope}" a este usuario?`)) return;
 
-    mostrarLoaderDinamico("Procesando...", "Asignando ciudad y notificando \u23F3");
+    mostrarLoaderDinamico("Procesando...", "Asignando COPE y notificando ⏳");
 
-    fetch('/api/panel/asignar_ciudad', {
+    fetch('/api/panel/asignar_cope', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario: usuarioId, ciudad: ciudad })
+        body: JSON.stringify({ usuario: usuarioId, cope: cope })
     })
     .then(res => res.json())
     .then(data => {
@@ -151,15 +153,15 @@ function asignarCiudadPanel(usuarioId) {
     });
 }
 
-function quitarCiudadPanel(usuarioId, ciudad) {
-    if (!confirm(`¿Deseas REMOVER la ciudad "${ciudad}" de este usuario? Se le enviará un correo de notificación.`)) return;
+function quitarCopePanel(usuarioId, cope) {
+    if (!confirm(`¿Deseas REMOVER el COPE "${cope}" de este usuario? Se le enviará un correo de notificación.`)) return;
 
-    mostrarLoaderDinamico("Procesando...", "Removiendo ciudad y notificando \u23F3");
+    mostrarLoaderDinamico("Procesando...", "Removiendo COPE y notificando ⏳");
 
-    fetch('/api/panel/quitar_ciudad', {
+    fetch('/api/panel/quitar_cope', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario: usuarioId, ciudad: ciudad })
+        body: JSON.stringify({ usuario: usuarioId, cope: cope })
     })
     .then(res => res.json())
     .then(data => {

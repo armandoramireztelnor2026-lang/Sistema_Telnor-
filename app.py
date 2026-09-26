@@ -17,6 +17,7 @@ from rutas_facturas import facturas_bp
 from rutas_reportes import reportes_bp  
 from rutas_seccion_reportes import seccion_reportes_bp
 from rutas_panel_control import panel_control_bp
+from rutas_ciudades_copes import ciudades_copes_bp
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta_super_segura_2026"
@@ -25,6 +26,7 @@ app.register_blueprint(facturas_bp)
 app.register_blueprint(reportes_bp)     
 app.register_blueprint(seccion_reportes_bp)
 app.register_blueprint(panel_control_bp)     
+app.register_blueprint(ciudades_copes_bp)
 
 CARPETAS = {
     "temporal": "static/registros_confirmar",
@@ -301,9 +303,6 @@ def validar_codigo():
                     if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == proveedor_nombre:
                         correo_prov = u.get('datos_perfil', {}).get('correo', '')
                         break
-                
-                if correo_prov:
-                    enviar_correo_taller_facturar(correo_prov, proveedor_nombre, f.get("id", "N/A"), f.get("unidad", "S/N"))
                 
                 return jsonify({"status": "success", "message": "Match perfecto."})
             else:

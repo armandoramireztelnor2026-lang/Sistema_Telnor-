@@ -237,7 +237,7 @@ function marcarBotonActivo(vista) {
 function cambiarVistaAdmin(vista) {
     localStorage.setItem('activeViewAdmin', vista);
     marcarBotonActivo(vista);
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k'];
+    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';
@@ -259,6 +259,7 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'seccion-reportes' && typeof cargarSeccionReportes === 'function') cargarSeccionReportes();
 
     if (vista === 'panel-control' && typeof cargarPanelControl === 'function') cargarPanelControl();
+    if (vista === 'ciudades-copes' && typeof cargarCiudadesCopes === 'function') cargarCiudadesCopes();
     if (vista === 'reportes' && typeof cargarReportesAdmin === 'function') cargarReportesAdmin();
     if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'documentos_contables') && typeof cargarFacturas === 'function') cargarFacturas();
     if (vista === 'cotizaciones-10k' && typeof cargarCotizaciones10k === 'function') cargarCotizaciones10k();
