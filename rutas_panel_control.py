@@ -104,7 +104,7 @@ def asignar_cope():
     cope = request.json.get('cope')
     if not usuario_id or not cope:
         return jsonify({"status": "error", "message": "Faltan datos."})
-    if cope not in COPES_DISPONIBLES:
+    if cope not in get_copes_disponibles():
         return jsonify({"status": "error", "message": f"COPE '{cope}' no es válido."})
 
     usuarios_data = leer_json('usuarios.json')

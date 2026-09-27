@@ -59,31 +59,32 @@ function renderCiudadesCopes(ciudades) {
     ciudades.forEach(ciudad => {
         const copesBadges = ciudad.copes.length > 0
             ? ciudad.copes.map(cope => `
-                <span style="display:inline-flex; align-items:center; background:#1e293b; border:1px solid #334155; color:#e2e8f0; padding:5px 10px; border-radius:20px; font-size:0.82em; margin:3px; gap:6px;">
+                <span style="display:inline-flex; align-items:center; background:#172a45; border:1px solid #2d4a6e; color:#e2e8f0; padding:6px 12px; border-radius:20px; font-size:0.9em; margin:3px; gap:8px; font-weight:500;">
                     🏢 ${cope}
                     <button onclick="eliminarCope('${ciudad.nombre}','${cope}')" title="Eliminar COPE"
-                        style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1em; padding:0; line-height:1;">&times;</button>
+                        style="display:inline-flex; align-items:center; justify-content:center; background:#7f1d1d; border:none; color:#fca5a5; cursor:pointer; font-size:0.95em; font-style:normal; font-weight:bold; width:18px; height:18px; border-radius:50%; padding:0; line-height:1; flex-shrink:0;">&#10005;</button>
                 </span>`).join('')
-            : `<span style="color:#64748b; font-size:0.85em; font-style:italic;">Sin COPEs registrados</span>`;
+            : `<span style="color:#64748b; font-size:0.88em;">Sin COPEs registrados</span>`;
 
         const safeId = ciudad.nombre.replace(/[^a-zA-Z0-9]/g, '_');
 
         html += `
-        <div style="background:#0d1b2a; border-radius:12px; overflow:hidden; border:1px solid #1e293b; display:flex; flex-direction:column;">
+        <div style="background:#0d1b2a; border-radius:12px; overflow:hidden; border:1px solid #1e3a5f; display:flex; flex-direction:column; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
             <!-- Header ciudad -->
-            <div style="background:linear-gradient(135deg,#1e3a5f,#112641); padding:14px 16px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="background:linear-gradient(135deg,#1e3a5f,#0f2440); padding:14px 16px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
-                    <div style="color:#e2e8f0; font-weight:bold; font-size:1.05em;">📍 ${ciudad.nombre}</div>
-                    <div style="color:#64748b; font-size:0.8em; margin-top:2px;">${ciudad.copes.length} COPE(s)</div>
+                    <div style="color:#e2e8f0; font-weight:700; font-size:1.1em; letter-spacing:0.3px;">📍 ${ciudad.nombre}</div>
+                    <div style="color:#60a5fa; font-size:0.82em; margin-top:3px; font-weight:500;">${ciudad.copes.length} COPE(s) registrado(s)</div>
                 </div>
                 <button onclick="confirmarEliminarCiudad('${ciudad.nombre}')" title="Eliminar ciudad"
-                    style="background:#7f1d1d; color:#fca5a5; border:none; border-radius:6px; padding:5px 10px; cursor:pointer; font-size:0.8em;">
+                    style="background:#7f1d1d; color:#fca5a5; border:1px solid #991b1b; border-radius:7px; padding:6px 12px; cursor:pointer; font-size:0.8em; font-weight:600; display:flex; align-items:center; gap:5px;">
                     🗑️ Eliminar
                 </button>
             </div>
             <!-- COPEs -->
             <div style="padding:14px 14px 8px 14px; flex:1;">
-                <div style="display:flex; flex-wrap:wrap; gap:2px; min-height:36px;">
+                <div style="color:#64748b; font-size:0.78em; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px;">COPEs / Edificios</div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px; min-height:36px;">
                     ${copesBadges}
                 </div>
             </div>
@@ -91,10 +92,10 @@ function renderCiudadesCopes(ciudades) {
             <div style="padding:10px 14px 14px 14px; border-top:1px solid #1e293b;">
                 <div style="display:flex; gap:8px;">
                     <input id="input-cope-${safeId}" type="text" placeholder="Nuevo COPE (ej: PE NORTE)"
-                        style="flex:1; background:#1e293b; color:#e2e8f0; border:1px solid #334155; border-radius:6px; padding:6px 10px; font-size:0.82em;"
+                        style="flex:1; background:#1e293b; color:#e2e8f0; border:1px solid #334155; border-radius:6px; padding:7px 10px; font-size:0.88em;"
                         onkeydown="if(event.key==='Enter') agregarCope('${ciudad.nombre}')">
                     <button onclick="agregarCope('${ciudad.nombre}')"
-                        style="background:#3b82f6; color:white; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; font-weight:bold; font-size:0.82em; white-space:nowrap;">
+                        style="background:#3b82f6; color:white; border:none; border-radius:6px; padding:7px 14px; cursor:pointer; font-weight:700; font-size:0.88em; white-space:nowrap;">
                         + COPE
                     </button>
                 </div>
