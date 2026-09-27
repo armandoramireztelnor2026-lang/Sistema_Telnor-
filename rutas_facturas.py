@@ -509,6 +509,38 @@ def confirmar_admin():
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
+@facturas_bp.route("/api/facturas/actualizar_ordenes_admin", methods=["POST"])
+def actualizar_ordenes_admin():
+    factura_id = request.form.get("id")
+    nums_orden = request.form.getlist("numero_orden[]")
+    nums_cotizacion = request.form.getlist("numero_cotizacion[]")
+
+    data = leer_json("facturas.json")
+    
+    for f in data.get("facturas", []):
+        if str(f["id"]) == str(factura_id):
+            if nums_orden: f["numero_orden"] = nums_orden[0]
+            if nums_cotizacion: f["numero_cotizacion_asignacion"] = nums_cotizacion[0]
+            
+            cots = f.get("cotizaciones", [])
+            for i, cot in enumerate(cots):
+                if i < len(nums_orden):
+                    cot["numero_orden"] = nums_orden[i]
+                if i < len(nums_cotizacion):
+                    cot["numero_cotizacion_asignacion"] = nums_cotizacion[i]
+                    
+            reportes_data = leer_json("reportes.json")
+            for r in reportes_data.get("reportes", []):
+                if str(r.get("id")) == str(f.get("reporte_id", "")):
+                    if nums_cotizacion: r["numero_cotizacion_asignacion"] = nums_cotizacion[0]
+                    escribir_json("reportes.json", reportes_data)
+                    break
+                    
+            escribir_json("facturas.json", data)
+            return jsonify({"status": "success", "message": "Datos de Pedido/Orden actualizados correctamente."})
+            
+    return jsonify({"status": "error", "message": "Registro no encontrado."})
+
 
 @facturas_bp.route("/api/facturas/aprobar_10k", methods=["POST"])
 def aprobar_10k():

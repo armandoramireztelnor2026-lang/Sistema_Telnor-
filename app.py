@@ -294,6 +294,7 @@ def validar_codigo():
                 return jsonify({"status": "error", "message": "Esta factura aún no tiene un código de liberación activo."})
             if str(codigo_real) == str(codigo_ingresado):
                 f['entregado'] = "Sí"
+                f['liberado_admin'] = False  # Bloqueado hasta que Admin lo libere
                 escribir_json('facturas.json', data)
                 
                 proveedor_nombre = f.get('proveedor', '')

@@ -12,6 +12,27 @@ document.addEventListener("DOMContentLoaded", function () {
     if (document.getElementById('tabla-facturas')) cargarFacturas();
 });
 
+function liberarTicketAdmin(facturaId) {
+    if (!confirm('¿Confirmas liberar este ticket para que el taller pueda subir su factura?\n\nEsta acción notificará al proveedor que ya puede proceder.')) return;
+    mostrarLoaderDinamico('Procesando...', 'Liberando ticket ⏳');
+    fetch('/api/facturas/liberar_doc50', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: facturaId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        ocultarLoaderDinamico();
+        alert(data.message || (data.status === 'success' ? 'Ticket liberado exitosamente.' : 'Error al liberar.'));
+        if (data.status === 'success') cargarFacturas();
+    })
+    .catch(err => {
+        ocultarLoaderDinamico();
+        console.error(err);
+        alert('Error al conectar con el servidor.');
+    });
+}
+
 document.addEventListener('click', function (e) {
     const buscador = document.getElementById('buscador-proveedor');
     const lista = document.getElementById('lista-proveedores-flotante');
@@ -239,6 +260,12 @@ async function cargarFacturas() {
                         } else {
                             btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px; text-align:center;">⌛ Esperando unidad lista...</span>`;
                         }
+                    } else if (confirmadaTotal && entregadoTexto === 'Sí' && f.liberado_admin === false) {
+                        // Unidad entregada, pendiente de liberación por Admin
+                        btnAccion += `<button onclick="liberarTicketAdmin('${f.id}')"
+                            style="background:linear-gradient(135deg,#10b981,#059669); color:white; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; font-weight:bold; font-size:0.85em; width:100%; margin-top:2px;">
+                            ✅ Liberar Ticket para Facturación
+                        </button>`;
                     }
 
                     btnAccion += `<div style="display:flex; gap:5px;"><button class="btn-danger-sm" style="flex:1; margin:0;" onclick="eliminarFacturaDefinitiva('${f.id}')">Eliminar</button></div>`;
@@ -272,9 +299,17 @@ async function cargarFacturas() {
                             }
                         }
                     } else if (confirmadaTotal && entregadoTexto === 'Sí') {
-                        if (!f.factura_folio) {
+                        if (f.liberado_admin === false) {
+                            // 🔒 Bloqueado — Admin aún no ha liberado el ticket
+                            btnAccion += `<div style="background:#1e293b; border:1px solid #f59e0b; border-radius:8px; padding:10px; margin-top:5px; text-align:center;">
+                                <div style="color:#f59e0b; font-weight:bold; font-size:0.85em;">🔒 Ticket en revisión</div>
+                                <div style="color:#94a3b8; font-size:0.78em; margin-top:4px;">El Administrador debe liberar este ticket antes de que puedas subir tu factura.</div>
+                            </div>`;
+                        } else if (f.liberado_admin === true && !f.factura_folio) {
+                            // ✅ Liberado por Admin — puede subir factura
                             btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; margin-top:5px; width:100%;" onclick="abrirModalSubirFactura('${f.id}')">🧾 Subir Factura Final (PDF)</button>`;
-                        } else {
+                        } else if (f.factura_folio) {
+                            // Factura ya subida — mostrar botón de ver
                             if (f.cotizaciones && f.cotizaciones.length > 1) {
                                 btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Facturas Subidas</button>`;
                             } else {
@@ -389,6 +424,7 @@ async function cargarFacturas() {
                         if (rolUsuario === 'administracion') {
                             btnAdminExtra = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">`;
                             btnAdminExtra += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
+                            btnAdminExtra += `<button class="btn-warning" onclick="abrirActualizarOrdenes('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#eab308; color:black; border:none; padding:8px; border-radius:6px; font-weight:bold; font-size:0.85em; cursor:pointer;">Actualizar Datos(Pedido/Orden)</button>`;
 
 
                             let valFiscal = f.validacion_fiscal || 'Pendiente';
@@ -1234,6 +1270,90 @@ function confirmarFacturaAdmin() {
     }).catch(err => {
         ocultarLoaderDinamico();
         console.error(err);
+    });
+}
+
+function abrirActualizarOrdenes(idFactura) {
+    const f = facturasGlobal.find(x => String(x.id) === String(idFactura));
+    if (!f) return;
+
+    let cots = f.cotizaciones || [{ precio: f.precio, numero_orden: f.numero_orden || '', numero_cotizacion_asignacion: f.numero_cotizacion_asignacion || '' }];
+
+    let html = `
+    <div id="modal-actualizar-ordenes" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+        <div style="background:#0b1c30; padding:25px; border-radius:12px; width:90%; max-width:600px; color:white; border:1px solid #1f395a; max-height:80vh; overflow-y:auto;">
+            <h2 style="color:#0ea5e9; border-bottom:2px solid #1f395a; padding-bottom:10px; margin-top:0;">Actualizar Pedido/Orden</h2>
+            <form id="form-actualizar-ordenes">
+                <input type="hidden" name="id" value="${f.id}">
+    `;
+
+    cots.forEach((cot, idx) => {
+        let nOrd = cot.numero_orden || 'Pendiente';
+        let nCot = cot.numero_cotizacion_asignacion || 'Pendiente';
+        html += `
+                <div style="margin-top:15px; background:#112240; padding:15px; border-radius:8px; border:1px solid #1f395a;">
+                    <h4 style="color:#10b981; margin-top:0;">Cotización ${idx + 1}: ${cot.titulo || 'Sin Título'}</h4>
+                    
+                    <label style="display:block; margin-bottom:5px; font-weight:bold; color:#94a3b8;">Número de Orden <span style="color:#0ea5e9; font-weight:normal; float:right;">Actual: ${nOrd}</span></label>
+                    <input type="text" name="numero_orden[]" data-old="${nOrd}" placeholder="Dejar en blanco para mantener el actual..." style="width:100%; padding:10px; border-radius:6px; background:#0b1c30; color:white; border:1px solid #1f395a; margin-bottom:15px;">
+                    
+                    <label style="display:block; margin-bottom:5px; font-weight:bold; color:#94a3b8;">Solicitud de Pedido <span style="color:#0ea5e9; font-weight:normal; float:right;">Actual: ${nCot}</span></label>
+                    <input type="text" name="numero_cotizacion[]" data-old="${nCot}" placeholder="Dejar en blanco para mantener el actual..." style="width:100%; padding:10px; border-radius:6px; background:#0b1c30; color:white; border:1px solid #1f395a;">
+                </div>
+        `;
+    });
+
+    html += `
+            </form>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button type="button" onclick="document.getElementById('modal-actualizar-ordenes').remove()" style="background:#475569; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer;">Cancelar</button>
+                <button type="button" onclick="guardarActualizarOrdenes()" style="background:#10b981; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>`;
+
+    let div = document.createElement('div');
+    div.innerHTML = html;
+    document.body.appendChild(div.firstElementChild);
+}
+
+function guardarActualizarOrdenes() {
+    if (!confirm("¿Estás seguro de que deseas actualizar estos datos?")) return;
+
+    let form = document.getElementById('form-actualizar-ordenes');
+    let formData = new FormData(form);
+
+    // Reemplazar campos vacíos con su valor original
+    let inputsOrd = form.querySelectorAll('input[name="numero_orden[]"]');
+    let inputsCot = form.querySelectorAll('input[name="numero_cotizacion[]"]');
+    
+    formData.delete("numero_orden[]");
+    formData.delete("numero_cotizacion[]");
+
+    inputsOrd.forEach(input => {
+        let val = input.value.trim() !== '' ? input.value.trim() : (input.getAttribute('data-old') !== 'Pendiente' ? input.getAttribute('data-old') : '');
+        formData.append("numero_orden[]", val);
+    });
+
+    inputsCot.forEach(input => {
+        let val = input.value.trim() !== '' ? input.value.trim() : (input.getAttribute('data-old') !== 'Pendiente' ? input.getAttribute('data-old') : '');
+        formData.append("numero_cotizacion[]", val);
+    });
+
+    mostrarLoaderDinamico("Guardando cambios...", "Actualizando Pedido/Orden ⏳");
+
+    fetch('/api/facturas/actualizar_ordenes_admin', {
+        method: 'POST',
+        body: formData
+    }).then(res => res.json()).then(data => {
+        ocultarLoaderDinamico();
+        alert(data.message);
+        document.getElementById('modal-actualizar-ordenes').remove();
+        cargarFacturas();
+    }).catch(err => {
+        ocultarLoaderDinamico();
+        console.error(err);
+        alert("Error al actualizar");
     });
 }
 

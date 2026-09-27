@@ -86,19 +86,19 @@ function renderizarTablaReportes(lista) {
         let numEco = f.unidad ? `8090-${f.unidad.replace('8090-', '')}` : pendienteHTML;
         let fechaTicket = f.fecha || reporteOrig.fecha || pendienteHTML;
 
-        // NUEVO CALCULO DE TIEMPO DEL TICKET
-        let fechaTicketFinalizado = f.fecha_cierre || pendienteHTML;
-        let tiempoTicket = "En Proceso";
-        
-        if (fechaTicket !== pendienteHTML && fechaTicketFinalizado !== pendienteHTML) {
+        // CALCULO DE TIEMPO DEL TICKET
+        // Inicio: fecha del reporte. Fin: fecha_cierre si existe, si no => ahora
+        let tiempoTicket = pendienteHTML;
+        if (fechaTicket !== pendienteHTML) {
             let ft1 = new Date(fechaTicket);
-            let ft2 = new Date(fechaTicketFinalizado);
-            if (!isNaN(ft1) && !isNaN(ft2)) {
-                let diffMsT = Math.abs(ft2 - ft1);
+            let ft2 = f.fecha_cierre ? new Date(f.fecha_cierre) : new Date();
+            if (!isNaN(ft1) && !isNaN(ft2) && ft2 >= ft1) {
+                let diffMsT = ft2 - ft1;
                 let diffDaysT = Math.floor(diffMsT / (1000 * 60 * 60 * 24));
                 let diffHoursT = Math.floor((diffMsT % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 let diffMinutesT = Math.floor((diffMsT % (1000 * 60 * 60)) / (1000 * 60));
-                tiempoTicket = `${diffDaysT}d ${diffHoursT}h ${diffMinutesT}m`;
+                let sufijo = f.fecha_cierre ? '' : ' ⏱️';
+                tiempoTicket = `${diffDaysT}d ${diffHoursT}h ${diffMinutesT}m${sufijo}`;
             }
         }
 
@@ -181,19 +181,22 @@ function renderizarTablaReportes(lista) {
         let fechaEntrada = f.fecha || pendienteHTML;
         let fechaSalida = f.fecha_cierre || pendienteHTML;
         let tiempoTaller = pendienteHTML;
-        // Calculate days in shop for Top 10
+        // CALCULO DE TIEMPO EN TALLER
+        // Inicio: timestamp (cuando el taller recibió el ticket). Fin: fecha_cierre si existe, si no => ahora
+        // Sólo aplica si el ticket ya fue asignado a un taller (no is_unassigned)
         f.dias_taller = 0;
-        if (fechaEntrada !== pendienteHTML && fechaSalida !== pendienteHTML) {
-            let f1 = new Date(f.fecha);
-            let f2 = new Date(f.fecha_cierre);
-            if (!isNaN(f1) && !isNaN(f2)) {
-                let diffMs = Math.abs(f2 - f1);
+        let fechaInicioTaller = f.timestamp || f.fecha; // timestamp = cuando se creó la factura (asignación al taller)
+        if (!f.is_unassigned && fechaInicioTaller) {
+            let f1 = new Date(fechaInicioTaller);
+            let f2 = f.fecha_cierre ? new Date(f.fecha_cierre) : new Date();
+            if (!isNaN(f1) && !isNaN(f2) && f2 >= f1) {
+                let diffMs = f2 - f1;
                 let diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
                 f.dias_taller = diffDays;
-                
                 let diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 let diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                tiempoTaller = `${diffDays}d ${diffHours}h ${diffMinutes}m`;
+                let sufijo = f.fecha_cierre ? '' : ' ⏱️';
+                tiempoTaller = `${diffDays}d ${diffHours}h ${diffMinutes}m${sufijo}`;
             }
         }
 
@@ -305,7 +308,7 @@ function renderizarTablaReportes(lista) {
                 <td style="vertical-align:top; padding-top:15px;">${numEco}</td>
                 <td style="vertical-align:top; padding-top:15px;">${fechaTicket}</td>
                 <td style="vertical-align:top; padding-top:15px;">${tiempoTicket}</td>
-                <td style="vertical-align:top; padding-top:15px;">${fechaTicketFinalizado}</td>
+                <td style="vertical-align:top; padding-top:15px;">${f.fecha_cierre || pendienteHTML}</td>
                 <td style="vertical-align:top; padding-top:15px;"><span style="background:#0ea5e9; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">${estado}</span></td>
                 <td style="vertical-align:top; padding-top:15px;">${statusUnidad}</td>
                 <td style="vertical-align:top; padding-top:15px;">${nombreSup}</td>
