@@ -90,7 +90,10 @@
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "subrol": "Supervisor",
                 "foto_ruta": "temp_20260909110514_supervisor.jpg",
-                "ciudades_asignadas": []
+                "ciudades_asignadas": [],
+                "copes_asignados": [
+                    "PE CALLE 10"
+                ]
             }
         }
     ]
