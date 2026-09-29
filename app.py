@@ -235,6 +235,12 @@ def eliminar_usuario():
         
     usuario_id = request.json.get('usuario')
     usuarios_data = leer_json('usuarios.json')
+    
+    usuario_a_eliminar = next((u for u in usuarios_data.get('usuarios', []) if u['usuario'] == usuario_id), None)
+    if usuario_a_eliminar and usuario_a_eliminar.get('datos_perfil', {}).get('subrol') == 'Jefatura':
+        jefaturas_restantes = [u for u in usuarios_data.get('usuarios', []) if u.get('datos_perfil', {}).get('subrol') == 'Jefatura' and u['usuario'] != usuario_id]
+        if not jefaturas_restantes:
+            return jsonify({"status": "error", "message": "No se puede eliminar a este usuario porque debe haber al menos un perfil de Jefatura en el sistema."})
     nuevos_usuarios = []
     eliminado = False
     for u in usuarios_data.get('usuarios', []):
@@ -259,6 +265,21 @@ def editar_usuario():
     usuarios_data = leer_json('usuarios.json')
     for u in usuarios_data.get('usuarios', []):
         if u['usuario'] == usuario_id:
+            nuevo_subrol = request.form.get('subrol')
+            subrol_actual = u['datos_perfil'].get('subrol')
+
+            if nuevo_subrol == 'Jefatura' and subrol_actual in ['Supervisor', 'Administrador', 'Administracion']:
+                nombre_usuario = f"{u['datos_perfil'].get('nombres', '').strip()} {u['datos_perfil'].get('apellido_paterno', '').strip()}".strip()
+                facturas_data = leer_json('facturas.json')
+                tiene_pendientes = False
+                for f in facturas_data.get('facturas', []):
+                    if f.get('responsable') == nombre_usuario:
+                        if f.get('entregado') != 'Sí' or not f.get('liberado_admin'):
+                            tiene_pendientes = True
+                            break
+                if tiene_pendientes:
+                    return jsonify({"status": "error", "message": f"No se puede asignar el rol de Jefatura porque el usuario tiene tickets asignados que aún no han sido finalizados."})
+
             rol = u['rol']
             foto_nueva = request.files.get('foto')
             u['datos_perfil']['cope'] = request.form.get('cope', 'No especificado')

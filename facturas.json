@@ -71,13 +71,13 @@
             "numero_orden": "1111",
             "compania": "RUMN",
             "aprobado_admin": true,
-            "aprobado_corp": false,
+            "aprobado_corp": true,
             "timestamp": "2026-09-29T00:20:28.893783",
             "estado_custom": "",
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
-            "codigo_liberacion": "",
-            "entregado": "No",
+            "codigo_liberacion": "56254193",
+            "entregado": "S\u00ed",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
@@ -99,7 +99,8 @@
             "aprobado_admin_10k": true,
             "comentarios": "haber si esto no falla",
             "autor_comentario": "Jesus  Ramirez",
-            "eliminado_por": ""
+            "eliminado_por": "",
+            "liberado_admin": false
         }
     ]
 }
