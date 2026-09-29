@@ -1262,15 +1262,31 @@ def marcar_lista():
                         break
                         
             unidad_limpia = str(f.get('unidad', '')).replace('8090-', '')
-            exito, msg_correo = enviar_correo_liberacion(correo_chofer, ticket_id or "N/A", unidad_limpia, codigo, nombre_chofer, telefono_chofer)
+            
+            # Si el ticket fue reactivado desde Cotizaciones Caras, el chofer
+            # ya NO tiene que ver con la unidad — solo se notifica al Supervisor
+            es_reactivado = f.get('reactivado_desde_caras', False)
+            
+            if not es_reactivado:
+                exito, msg_correo = enviar_correo_liberacion(correo_chofer, ticket_id or f.get('id', 'N/A'), unidad_limpia, codigo, nombre_chofer, telefono_chofer)
             
             usuarios_data = leer_json('usuarios.json')
+            cope_ticket = obtener_cope_de_factura(f)
             supervisores = [u for u in usuarios_data.get('usuarios', []) if u['rol'] == 'administracion' and u.get('datos_perfil', {}).get('subrol') == 'Supervisor']
             for sup in supervisores:
                 correo_sup = sup.get('datos_perfil', {}).get('correo')
                 nombre_sup = sup.get('datos_perfil', {}).get('nombres', 'Supervisor')
+                cope_sup = sup.get('datos_perfil', {}).get('cope', '')
+                copes_adicionales_sup = sup.get('datos_perfil', {}).get('copes_adicionales', [])
+                # Filtrar solo el supervisor del COPE correspondiente (o todos si no hay COPE)
+                if cope_ticket and cope_sup and cope_sup != cope_ticket and cope_ticket not in copes_adicionales_sup:
+                    continue
                 if correo_sup:
-                    enviar_correo_liberacion_supervisor(correo_sup, nombre_sup, ticket_id or "N/A", unidad_limpia, codigo, nombre_chofer)
+                    if es_reactivado:
+                        # Ticket reactivado: el supervisor recibe el PIN directamente
+                        enviar_correo_liberacion_supervisor(correo_sup, nombre_sup, ticket_id or f.get('id', 'N/A'), unidad_limpia, codigo, "Reactivado (sin chofer asignado)")
+                    else:
+                        enviar_correo_liberacion_supervisor(correo_sup, nombre_sup, ticket_id or f.get('id', 'N/A'), unidad_limpia, codigo, nombre_chofer)
             
             escribir_json('facturas.json', data)
             return jsonify({"status": "success", "message": "¡Unidad marcada como lista! El PIN ha sido enviado al chofer."})
@@ -1615,6 +1631,68 @@ def editar_seccion_especifica():
             print(f"Error al borrar pdf antiguo {pdf_antiguo}: {e}")
             
     return jsonify({"status": "success"})
+
+
+@facturas_bp.route("/api/facturas/reactivar_desde_caras", methods=["POST"])
+def reactivar_desde_caras():
+    if "usuario" not in session or session["usuario"]["rol"] != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"})
+
+    factura_id = request.json.get("id")
+    data = leer_json("facturas.json")
+
+    for f in data.get("facturas", []):
+        if str(f["id"]) == str(factura_id):
+            if f.get("estado") != "Cancelado_Cotizacion_Cara":
+                return jsonify({"status": "error", "message": "Este ticket no está en Cotizaciones Caras."})
+
+            # Resetear campos para reiniciar el flujo desde "Asignar Taller"
+            f["estado"] = ""
+            f["estado_custom"] = ""
+            f["aprobado_admin"] = False
+            f["aprobado_corp"] = False
+            f["aprobado_admin_10k"] = False
+            f["liberado_admin"] = False
+            f["fecha_cierre"] = None
+            f["codigo_liberacion"] = None
+            f["entregado"] = None
+            f["proveedor"] = None
+            f["numero_orden"] = None
+            f["numero_cotizacion_asignacion"] = None
+            f["fotos_cotizacion"] = []
+            f["cotizaciones"] = []
+            # Bandera que indica que el chofer ya NO debe recibir el PIN de liberacion
+            f["reactivado_desde_caras"] = True
+
+            # Reactivar unidad en unidades.json
+            try:
+                unidad_num = str(f.get("unidad", "")).replace("8090-", "")
+                if unidad_num:
+                    unidades = leer_json("unidades.json")
+                    if unidades and unidad_num in unidades:
+                        unidades[unidad_num]["Estado"] = "Activa"
+                        escribir_json("unidades.json", unidades)
+            except Exception as e:
+                print("Error reactivando unidad:", str(e))
+
+            escribir_json("facturas.json", data)
+
+            # Notificar al Supervisor del COPE correspondiente
+            try:
+                cope_f = obtener_cope_de_factura(f)
+                correo_sup, nombre_sup = encontrar_supervisor_por_cope(cope_f)
+                if correo_sup:
+                    from notificaciones import enviar_correo_nueva_orden
+                    ticket_id = f.get("id_reporte", f.get("id", "N/A"))
+                    unidad_txt = f.get("unidad", "S/N")
+                    falla_txt = f.get("titulo", "Revisión reactivada desde Cotización Cara")
+                    enviar_correo_nueva_orden(correo_sup, nombre_sup, ticket_id, unidad_txt, falla_txt)
+            except Exception as e:
+                print("Error enviando correo de reactivación:", str(e))
+
+            return jsonify({"status": "success", "message": "Ticket reactivado correctamente. El Supervisor ha sido notificado para retomar el proceso."})
+
+    return jsonify({"status": "error", "message": "Registro no encontrado."})
 
 
 @facturas_bp.route("/api/facturas/eliminar_silencioso", methods=["POST"])

@@ -126,8 +126,9 @@ async function cargarFacturas() {
                     if (tbodyArchivoCancelado && rolUsuario === 'administracion') {
                         let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0; width:100%; background:#0284c7; border:none; color:white;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>`;
                         let idRep = obtenerIdReporte(f) || 'N/A';
+                        let btnReactivar = `<button style="font-size:0.8em; padding:8px 10px; margin:0; width:100%; background:#f59e0b; border:none; color:white; border-radius:4px; margin-top:5px; cursor:pointer; font-weight:bold;" onclick="reactivarDesdeCaras('${f.id}')">🔄 Reactivar Ticket</button>`;
                         let btnEliminar = `<button class="btn-danger" style="font-size:0.8em; padding:8px 10px; margin:0; width:100%; background:#ef4444; border:none; color:white; border-radius:4px; margin-top:5px; cursor:pointer;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar</button>`;
-                        tbodyArchivoCancelado.innerHTML += `<tr><td><span style="color:#ef4444; font-weight:bold;">${idRep}</span></td><td>${f.unidad}</td><td><strong>${f.proveedor}</strong></td><td><span style="color:#ef4444; font-weight:bold;">Cancelado por Cotización Cara</span></td><td><div style="display:flex; flex-direction:column; gap:5px;">${btnVerExp}${btnEliminar}</div></td></tr>`;
+                        tbodyArchivoCancelado.innerHTML += `<tr><td><span style="color:#ef4444; font-weight:bold;">${idRep}</span></td><td>${f.unidad}</td><td><strong>${f.proveedor || 'Sin taller'}</strong></td><td><span style="color:#ef4444; font-weight:bold;">Cancelado por Cotización Cara</span></td><td><div style="display:flex; flex-direction:column; gap:5px;">${btnVerExp}${btnReactivar}${btnEliminar}</div></td></tr>`;
                     }
                     return; // skip active trays
                 }
@@ -167,21 +168,24 @@ async function cargarFacturas() {
                             <button class="btn-danger-sm" style="width:100%; background:#ef4444; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar</button>
                         </div>`;
                         let idReporteAsociado = obtenerIdReporte(f) || 'N/A';
-                        tbodyArchivo.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idReporteAsociado}</span></td><td style="vertical-align:top;">${doc50Html}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
+                        let badgeCarasArch = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                        tbodyArchivo.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idReporteAsociado}</span>${badgeCarasArch}</td><td style="vertical-align:top;">${doc50Html}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                         countArchivo++;
                     }
 
                     if (tbodyArchivoProv && rolUsuario === 'proveedores' && f.proveedor === nombreProveedorActual) {
                         let idRepArchProv = obtenerIdReporte(f) || 'S/T';
+                        let badgeCarasArchProv = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
                         let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                        tbodyArchivoProv.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idRepArchProv}</span></td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
+                        tbodyArchivoProv.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idRepArchProv}</span>${badgeCarasArchProv}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                         countArchivoProv++;
                     }
 
                     if (tbodyArchivoCorp && rolUsuario === 'corporativos') {
                         let idRepArchCorp = obtenerIdReporte(f) || 'S/T';
+                        let badgeCarasArchCorp = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
                         let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                        tbodyArchivoCorp.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idRepArchCorp}</span></td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
+                        tbodyArchivoCorp.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idRepArchCorp}</span>${badgeCarasArchCorp}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                         countArchivoCorp++;
                     }
                     return; // Skip rendering in active trays
@@ -346,7 +350,8 @@ async function cargarFacturas() {
                 let tdPrecioInd = `<td><small style="color:#a3b1c6;">${indStr}</small></td>`;
 
                 let idRepForTable = obtenerIdReporte(f) || 'S/T';
-                let tdTicket = `<td><span style="color:#0ea5e9; font-weight:bold;">${idRepForTable}</span></td>`;
+                let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                let tdTicket = `<td><span style="color:#0ea5e9; font-weight:bold;">${idRepForTable}</span>${badgeCaras}</td>`;
 
 
                 // ==========================================
@@ -402,9 +407,10 @@ async function cargarFacturas() {
                         }
 
                         let idRepTable = obtenerIdReporte(f) || 'S/T';
+                        let badgeCarasDoc = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
                         let pFormat = f.precio ? parseFloat(f.precio).toLocaleString('en-US') : '0';
 
-                        tbodyDocContables.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepTable}</span></td><td><span style="color:#10b981; font-weight:bold;">${ffStr}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><small style="color:#a3b1c6;">${indStrLocal}</small></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
+                        tbodyDocContables.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepTable}</span>${badgeCarasDoc}</td><td><span style="color:#10b981; font-weight:bold;">${ffStr}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><small style="color:#a3b1c6;">${indStrLocal}</small></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
                         countDocContables++;
 
                         if (subrolAct === 'Administrador') {
@@ -761,6 +767,31 @@ function procesarRechazoConMotivo() {
 
 function eliminarFacturaDefinitiva(idFactura) { abrirModalRechazo(idFactura, 'factura'); }
 
+async function reactivarDesdeCaras(idFactura) {
+    if (!confirm("¿Reactivar este ticket?\n\nEl ticket volverá al inicio del proceso (Asignar Taller). El Supervisor será notificado.\n\nNOTA: El chofer ya NO recibirá ninguna notificación ni código de liberación para esta unidad.")) return;
+
+    if (typeof mostrarLoaderDinamico === 'function') mostrarLoaderDinamico("Procesando...", "Reactivando ticket...");
+
+    try {
+        const res = await fetch('/api/facturas/reactivar_desde_caras', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: idFactura })
+        });
+        const d = await res.json();
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
+        if (d.status === 'success') {
+            alert("✅ " + d.message);
+            if (typeof cargarFacturas === 'function') cargarFacturas();
+        } else {
+            alert("Error: " + d.message);
+        }
+    } catch (e) {
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
+        alert("Error de conexión al reactivar el ticket.");
+    }
+}
+
 function eliminarFacturaSilenciosa(idFactura) {
     if (!confirm("¿Estás 100% seguro de ELIMINAR este registro de forma permanente del sistema? No se pedirá motivo ni se notificará al chofer.")) return;
 
@@ -1081,6 +1112,35 @@ function generarHtmlDetalles(f, modo, precioBonito) {
 
     let multiCot = cots.length > 1;
 
+    // ─── BANNER: Ticket reactivado desde Cotizaciones Caras ───────────────────
+    let bannerCaras = '';
+    if (f.reactivado_desde_caras) {
+        bannerCaras = `
+        <div style="
+            background: linear-gradient(135deg, #78350f, #92400e);
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        ">
+            <div style="font-size: 28px; line-height:1;">⚠️</div>
+            <div>
+                <div style="color:#fbbf24; font-weight:bold; font-size:1em; margin-bottom:4px;">
+                    TICKET REACTIVADO DESDE COTIZACIÓN CARA
+                </div>
+                <div style="color:#fde68a; font-size:0.88em; line-height:1.5;">
+                    Este ticket fue previamente archivado en <strong>Cotizaciones Caras</strong> y luego reactivado para continuar el proceso con un nuevo taller.<br>
+                    <strong>El chofer original ya NO recibirá ninguna notificación, código de liberación ni aviso de unidad lista.</strong><br>
+                    El PIN de liberación se envía únicamente al Supervisor.
+                </div>
+            </div>
+        </div>`;
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     let cotizacionesBlocksHtml = cots.map((c, i) => {
 
         // SECCION 2
@@ -1179,6 +1239,7 @@ function generarHtmlDetalles(f, modo, precioBonito) {
 
     return `
         ${htmlReporte}
+        ${bannerCaras}
         ${cotizacionesBlocksHtml}
     `;
 }
