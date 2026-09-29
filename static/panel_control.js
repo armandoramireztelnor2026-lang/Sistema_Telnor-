@@ -83,15 +83,23 @@ function renderSeccion(titulo, usuarios, color, copesDisponibles, permiteEditar)
                 </div>`;
             }
 
-            // Botón cambiar subrol (solo para Supervisores y Administradores)
+            // Botón cambiar subrol
             let promoverBtnHTML = '';
-            if (permiteEditar && u.subrol !== 'Jefatura') {
-                let textoBoton = u.subrol === 'Administrador' ? '🔄 Cambiar a Supervisor' : '🔄 Cambiar a Administrador';
+            if (permiteEditar) {
+                let opcionesRoles = ['Supervisor', 'Administrador', 'Jefatura'].filter(r => r !== u.subrol);
+                let opcionesRolHTML = opcionesRoles.map(r => `<option value="${r}">${r}</option>`).join('');
+
                 promoverBtnHTML = `
-                <button onclick="cambiarSubrolPanel('${u.usuario}', '${nombreCompleto}', '${u.subrol}')" 
-                    style="background:#7c3aed; color:white; border:none; border-radius:6px; padding:6px 14px; cursor:pointer; font-weight:bold; font-size:0.85em; margin-top:10px; width:100%;">
-                    ${textoBoton}
-                </button>`;
+                <div style="display:flex; gap:8px; align-items:center; margin-top:10px; width:100%;">
+                    <select id="select-rol-${u.usuario.replace(/[^a-zA-Z0-9]/g, '_')}" style="background:#1e293b; color:#e2e8f0; border:1px solid #334155; border-radius:6px; padding:6px 10px; font-size:0.85em; flex:1;">
+                        <option value="">Seleccionar rol...</option>
+                        ${opcionesRolHTML}
+                    </select>
+                    <button onclick="cambiarSubrolPanel('${u.usuario}', '${nombreCompleto}')" 
+                        style="background:#7c3aed; color:white; border:none; border-radius:6px; padding:6px 14px; cursor:pointer; font-weight:bold; font-size:0.85em; white-space:nowrap;">
+                        🔄 Cambiar Rol
+                    </button>
+                </div>`;
             }
 
             html += `
@@ -176,14 +184,21 @@ function quitarCopePanel(usuarioId, cope) {
     });
 }
 
-function cambiarSubrolPanel(usuarioId, nombre, subrolActual) {
-    let nuevoSubrol = subrolActual === 'Administrador' ? 'Supervisor' : 'Administrador';
-    if (!confirm(`¿Estás seguro de cambiar el rol de "${nombre}" de ${subrolActual} a ${nuevoSubrol}?\n\nEsta acción modificará sus permisos en el sistema.`)) return;
+function cambiarSubrolPanel(usuarioId, nombre) {
+    let selectId = 'select-rol-' + usuarioId.replace(/[^a-zA-Z0-9]/g, '_');
+    let select = document.getElementById(selectId);
+    if (!select || !select.value) {
+        alert('Selecciona un nuevo rol primero.');
+        return;
+    }
+    let nuevoSubrol = select.value;
+    
+    if (!confirm(`¿Estás seguro de cambiar el rol de "${nombre}" a ${nuevoSubrol}?\n\nEsta acción modificará sus permisos en el sistema.`)) return;
 
     fetch('/api/panel/cambiar_subrol', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario: usuarioId })
+        body: JSON.stringify({ usuario: usuarioId, nuevo_subrol: nuevoSubrol })
     })
     .then(res => res.json())
     .then(data => {

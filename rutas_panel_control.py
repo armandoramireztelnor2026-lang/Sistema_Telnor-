@@ -229,23 +229,37 @@ def cambiar_subrol():
         return jsonify({"status": "error", "message": "Acceso denegado."}), 403
 
     usuario_id = request.json.get('usuario')
-    if not usuario_id:
-        return jsonify({"status": "error", "message": "Falta el usuario."})
+    nuevo_subrol = request.json.get('nuevo_subrol')
+    if not usuario_id or not nuevo_subrol:
+        return jsonify({"status": "error", "message": "Faltan datos requeridos (usuario o rol)."})
 
     usuarios_data = leer_json('usuarios.json')
     encontrado = False
     correo_destino = ""
     nombre_destino = ""
-    nuevo_subrol = ""
 
     for u in usuarios_data.get('usuarios', []):
         if u.get('usuario') == usuario_id and u.get('rol') == 'administracion':
             dp = u.get('datos_perfil', {})
             subrol_actual = dp.get('subrol')
-            if subrol_actual == 'Jefatura':
-                return jsonify({"status": "error", "message": "No se puede cambiar el rol a otro usuario de Jefatura."})
 
-            nuevo_subrol = 'Supervisor' if subrol_actual == 'Administrador' else 'Administrador'
+            if subrol_actual == 'Jefatura' and nuevo_subrol != 'Jefatura':
+                jefaturas_restantes = [x for x in usuarios_data.get('usuarios', []) if x.get('datos_perfil', {}).get('subrol') == 'Jefatura' and x['usuario'] != usuario_id]
+                if not jefaturas_restantes:
+                    return jsonify({"status": "error", "message": "No se puede cambiar el rol porque debe haber al menos un perfil de Jefatura en el sistema."})
+
+            if subrol_actual in ['Supervisor', 'Administrador', 'Administracion']:
+                nombre_usuario = f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()
+                facturas_data = leer_json('facturas.json')
+                tiene_pendientes = False
+                for f in facturas_data.get('facturas', []):
+                    if f.get('responsable') == nombre_usuario:
+                        if f.get('entregado') != 'Sí' or not f.get('liberado_admin'):
+                            tiene_pendientes = True
+                            break
+                if tiene_pendientes:
+                    return jsonify({"status": "error", "message": f"No se puede cambiar el rol de {nombre_usuario} porque tiene tickets asignados que aún no han sido finalizados."})
+
             dp['subrol'] = nuevo_subrol
             correo_destino = dp.get('correo', '')
             nombre_destino = f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()

@@ -59,8 +59,8 @@ def procesar_liberacion_si_aplica(f):
     corp_ok = f.get("aprobado_corp", False)
 
     if admin_ok and corp_ok and "liberado_admin" not in f:
-        ciudad_real = obtener_ciudad_de_factura(f)
-        correo_admin, nombre_admin = encontrar_admin_por_ciudad(ciudad_real)
+        cope_real = obtener_cope_de_factura(f)
+        correo_admin, nombre_admin = encontrar_admin_por_cope(cope_real)
 
         if correo_admin:
             f["liberado_admin"] = False
@@ -375,13 +375,57 @@ def obtener_ciudad_de_factura(f):
 
 def encontrar_admin_por_ciudad(ciudad):
     usuarios = leer_json("usuarios.json")
+    fallback_admin = (None, None)
     for u in usuarios.get("usuarios", []):
         if u.get("rol") == "administracion":
             dp = u.get("datos_perfil", {})
             if dp.get("subrol") == "Administrador":
+                correo = dp.get("correo")
+                nombre = f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()
+                if not fallback_admin[0]:
+                    fallback_admin = (correo, nombre)
                 if dp.get("ciudad") == ciudad:
-                    return (dp.get("correo"), f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip())
-    return (None, None)
+                    return (correo, nombre)
+    return fallback_admin
+
+def obtener_cope_de_factura(f):
+    c = f.get("cope")
+    if c and c.strip():
+        return c
+    unidad = str(f.get("unidad", ""))
+    unidad_corta = unidad.replace("8090-", "")
+    reportes = leer_json("reportes.json").get("reportes", [])
+    for r in reversed(reportes):
+        r_uni = str(r.get("unidad", ""))
+        if r_uni == unidad_corta or f"8090-{r_uni}" == unidad:
+            if r.get("cope"):
+                return r.get("cope")
+    if os.path.exists("archivo_reportes.json"):
+        archivos = leer_json("archivo_reportes.json").get("reportes", [])
+        for r in reversed(archivos):
+            r_uni = str(r.get("unidad", ""))
+            if r_uni == unidad_corta or f"8090-{r_uni}" == unidad:
+                if r.get("cope"):
+                    return r.get("cope")
+    return ""
+
+def encontrar_admin_por_cope(cope):
+    usuarios = leer_json("usuarios.json")
+    fallback_admin = (None, None)
+    for u in usuarios.get("usuarios", []):
+        if u.get("rol") == "administracion":
+            dp = u.get("datos_perfil", {})
+            if dp.get("subrol") == "Administrador":
+                correo = dp.get("correo")
+                nombre = f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()
+                if not fallback_admin[0]:
+                    fallback_admin = (correo, nombre)
+                
+                copes_adicionales = dp.get("copes_adicionales", [])
+                if dp.get("cope") == cope or cope in copes_adicionales:
+                    return (correo, nombre)
+    
+    return fallback_admin
 
 @facturas_bp.route("/api/facturas/confirmar_admin", methods=["POST"])
 
@@ -429,10 +473,10 @@ def confirmar_admin():
                     cot["pdf_cotizacion_asignacion"] = nombre_pdf
                     if i == 0: f["pdf_cotizacion_asignacion"] = nombre_pdf
 
-            # Primero validar si existe administrador para la ciudad
-            correo_admin, nombre_admin = encontrar_admin_por_ciudad(obtener_ciudad_de_factura(f))
+            # Primero validar si existe administrador para el COPE
+            correo_admin, nombre_admin = encontrar_admin_por_cope(obtener_cope_de_factura(f))
             if not correo_admin:
-                return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para la ciudad '{obtener_ciudad_de_factura(f)}'. Es obligatorio contar con un Administrador para liberar el documento contable. No se puede avanzar."})
+                return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para el COPE/Edificio '{obtener_cope_de_factura(f)}'. Es obligatorio contar con un Administrador para liberar el documento contable. No se puede avanzar."})
 
             reportes_data = leer_json("reportes.json")
             for r in reportes_data.get("reportes", []):
@@ -466,7 +510,7 @@ def confirmar_admin():
                         )
             else:
                 # ===== NUEVA LOGICA DE BLOQUEO PARA DOC 50 =====
-                correo_admin, nombre_admin = encontrar_admin_por_ciudad(obtener_ciudad_de_factura(f))
+                correo_admin, nombre_admin = encontrar_admin_por_cope(obtener_cope_de_factura(f))
                 if correo_admin:
                     f["liberado_admin"] = False
                     try:
@@ -830,7 +874,8 @@ def confirmar_corp():
             f["estado_custom"] = ""
 
             # ===== NUEVA LOGICA DE BLOQUEO PARA DOC 50 =====
-            correo_admin, nombre_admin = encontrar_admin_por_ciudad(obtener_ciudad_de_factura(f))
+            cope_fact = obtener_cope_de_factura(f)
+            correo_admin, nombre_admin = encontrar_admin_por_cope(cope_fact)
             if correo_admin:
                 f["liberado_admin"] = False
                 try:
@@ -1517,9 +1562,9 @@ def editar_seccion_especifica():
     pdf_antiguo = None
     
     if seccion == "orden":
-        correo_admin, nombre_admin = encontrar_admin_por_ciudad(obtener_ciudad_de_factura(factura))
+        correo_admin, nombre_admin = encontrar_admin_por_cope(obtener_cope_de_factura(factura))
         if not correo_admin:
-            return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para la ciudad '{obtener_ciudad_de_factura(factura)}'. Es obligatorio contar con un Administrador. No se puede avanzar."})
+            return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para el COPE/Edificio '{obtener_cope_de_factura(factura)}'. Es obligatorio contar con un Administrador. No se puede avanzar."})
             
         pdf_antiguo = factura.get("pdf_cotizacion_asignacion")
         factura["numero_cotizacion_asignacion"] = identificador
