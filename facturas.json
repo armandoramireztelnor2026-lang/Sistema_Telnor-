@@ -95,7 +95,11 @@
                     "numero_cotizacion_asignacion": "1112"
                 }
             ],
-            "numero_cotizacion_asignacion": "1112"
+            "numero_cotizacion_asignacion": "1112",
+            "aprobado_admin_10k": true,
+            "comentarios": "haber si esto no falla",
+            "autor_comentario": "Jesus  Ramirez",
+            "eliminado_por": ""
         }
     ]
 }

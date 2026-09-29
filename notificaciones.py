@@ -836,6 +836,7 @@ def enviar_correo_admin_aprobado_a_corp(lista_corps, ticket, unidad, proveedor, 
     enviados = 0
     for corp in lista_corps:
         correo = corp.get("correo")
+        nombre_corp = corp.get("nombre", "Miembro")
         if correo and correo.strip():
             cuerpo_html = f"""
             <html>
@@ -846,7 +847,7 @@ def enviar_correo_admin_aprobado_a_corp(lista_corps, ticket, unidad, proveedor, 
                         <p style="color: #d1fae5; margin: 5px 0 0 0;">El Administrador ha aprobado técnicamente</p>
                     </div>
                     <div style="padding: 20px;">
-                        <p>Estimado(a) miembro de <strong>Corporativos</strong>,</p>
+                        <p>Estimado(a) <strong>{nombre_corp} - Corporativos</strong>,</p>
                         <p>El Administrador <strong>{admin_nombre}</strong> ha aprobado técnicamente la cotización correspondiente a la siguiente unidad y requiere tu autorización financiera:</p>
 
                         <ul style="background-color: #f0fdf4; padding: 15px 30px; border-radius: 8px; border: 1px solid #86efac; list-style-type: none; margin-left: 0;">

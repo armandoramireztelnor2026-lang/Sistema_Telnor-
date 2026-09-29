@@ -253,8 +253,12 @@ async function cargarFacturas() {
                     } else {
                         btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
 
-                        if (!confirmadaTotal && subrolAct === 'Supervisor' && precioParaAp >= 10001 && !f.aprobado_admin_10k) {
-                            btnAccion += `<button class="btn-info" style="background:#f59e0b; color:white; font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; border:none; margin-top:5px; font-weight:bold;" onclick="notificarAdmin10k('${f.id}')">🔔 Notificar Admin</button>`;
+                        if (!confirmadaTotal && subrolAct === 'Supervisor' && precioParaAp >= 10001) {
+                            if (!f.aprobado_admin_10k) {
+                                btnAccion += `<button class="btn-info" style="background:#f59e0b; color:white; font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; border:none; margin-top:5px; font-weight:bold;" onclick="notificarAdmin10k('${f.id}')">🔔 Notificar Admin</button>`;
+                            } else if (f.aprobado_admin_10k && !f.aprobado_corp) {
+                                btnAccion += `<button class="btn-info" style="background:#8b5cf6; color:white; font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; border:none; margin-top:5px; font-weight:bold;" onclick="notificarCorp10k('${f.id}')">🔔 Notificar Corp</button>`;
+                            }
                         }
                     }
 
@@ -1410,6 +1414,31 @@ function notificarAdmin10k(idFactura) {
         ocultarLoaderDinamico();
         console.error(err);
         alert("Ocurrió un error al intentar notificar al administrador.");
+    });
+}
+
+function notificarCorp10k(idFactura) {
+    if (!confirm("¿Deseas enviar un correo automático a corporativos para recordarles que revisen esta cotización?")) return;
+
+    let formData = new FormData();
+    formData.append("id", idFactura);
+
+    mostrarLoaderDinamico("Notificando a corporativos...", "Enviando correo 📧");
+
+    fetch('/api/facturas/notificar_corp_10k', {
+        method: 'POST',
+        body: formData
+    }).then(res => res.json()).then(data => {
+        ocultarLoaderDinamico();
+        if (data.status === 'success') {
+            alert(data.message);
+        } else {
+            alert("Error: " + data.message);
+        }
+    }).catch(err => {
+        ocultarLoaderDinamico();
+        console.error(err);
+        alert("Ocurrió un error al intentar notificar a corporativos.");
     });
 }
 

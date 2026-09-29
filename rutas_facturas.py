@@ -609,6 +609,50 @@ def notificar_admin_10k():
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
+@facturas_bp.route("/api/facturas/notificar_corp_10k", methods=["POST"])
+def notificar_corp_10k():
+    factura_id = request.form.get("id")
+    data = leer_json("facturas.json")
+
+    for f in data.get("facturas", []):
+        if str(f["id"]) == str(factura_id):
+            unidad = f.get("unidad", "")
+            precio_float = float(f.get("precio", 0))
+            proveedor = f.get("proveedor", "S/N")
+            
+            import re
+            retro = f.get("retro", "")
+            match = re.search(r"\[TICKET:(.*?)\]", retro)
+            ticket_id = match.group(1) if match else "N/A"
+
+            usuarios_data = leer_json("usuarios.json")
+            corps = [u for u in usuarios_data.get("usuarios", [])
+                    if u["rol"] == "corporativos"]
+
+            lista_corps_para_correo = []
+            for corp in corps:
+                correo = corp.get("datos_perfil", {}).get("correo")
+                nombre = corp.get("datos_perfil", {}).get("nombres", "Miembro")
+                if correo:
+                    lista_corps_para_correo.append({"correo": correo, "nombre": nombre})
+            
+            admin_nombres = "Administrador"
+            
+            from notificaciones import enviar_correo_admin_aprobado_a_corp
+            if lista_corps_para_correo:
+                enviar_correo_admin_aprobado_a_corp(
+                    lista_corps_para_correo,
+                    ticket_id,
+                    unidad,
+                    proveedor,
+                    precio_float,
+                    admin_nombres
+                )
+            
+            return jsonify({"status": "success", "message": "Recordatorio enviado a corporativos exitosamente."})
+            
+    return jsonify({"status": "error", "message": "Registro no encontrado."})
+
 @facturas_bp.route("/api/facturas/aprobar_10k", methods=["POST"])
 def aprobar_10k():
     factura_id = request.form.get("id")
@@ -632,9 +676,10 @@ def aprobar_10k():
 
                 lista_corps_para_correo = []
                 for corp in corps:
-                    correo = corp["datos_perfil"].get("correo")
+                    correo = corp.get("datos_perfil", {}).get("correo")
+                    nombre = corp.get("datos_perfil", {}).get("nombres", "Miembro")
                     if correo:
-                        lista_corps_para_correo.append({"correo": correo})
+                        lista_corps_para_correo.append({"correo": correo, "nombre": nombre})
                 
                 admin_nombres = "Administrador"
                 if "usuario" in session and "datos_perfil" in session["usuario"]:
