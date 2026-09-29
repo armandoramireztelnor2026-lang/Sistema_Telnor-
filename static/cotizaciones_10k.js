@@ -49,7 +49,9 @@ async function cargarCotizaciones10k() {
                 let btnCaras = `<button style="${btnStyle} background:#b91c1c !important;" ${hoverStr} onclick="abrirCancelacion10k('${f.id}')">Cancelar Ticket (Cara)</button>`;
                 let acciones = `<div style="display:flex; flex-direction:column;">${btnVerDetalles}${btnAprobar}${btnRechazar}${btnCaras}</div>`;
 
-                tbody.innerHTML += `<tr><td><strong>${f.id}</strong></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${f.titulo}</td><td><strong>$${pFormat} MXN</strong></td>${tdPrecioInd}<td>${acciones}</td></tr>`;
+                let idRepForTable = typeof obtenerIdReporte === 'function' ? obtenerIdReporte(f) : (f.id || 'S/T');
+                let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                tbody.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepForTable}</span>${badgeCaras}</td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${f.titulo}</td><td><strong>$${pFormat} MXN</strong></td>${tdPrecioInd}<td>${acciones}</td></tr>`;
             });
         } else {
             tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#ef4444;">Error al cargar datos del servidor.</td></tr>`;

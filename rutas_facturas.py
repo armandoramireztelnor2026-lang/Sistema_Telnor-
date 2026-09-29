@@ -191,6 +191,7 @@ def nueva_factura():
     # Detectar compañía desde ticket vinculado
     retro_global = cotizaciones_array[0].get("retro", "") if cotizaciones_array else ""
     compania_asignada = "RUMN"
+    reactivado_flag = False
     import re as re_mod
     match_ticket = re_mod.search(r"\[TICKET:(.*?)\]", retro_global)
     cope_ticket = ""
@@ -201,6 +202,7 @@ def nueva_factura():
             if str(r.get("id")) == str(ticket_id):
                 compania_asignada = r.get("compania", "RUMN")
                 cope_ticket = r.get("cope", "")
+                reactivado_flag = r.get("reactivado_desde_caras", False)
                 break
 
     # Título global = primer título de cotización
@@ -232,6 +234,7 @@ def nueva_factura():
         "codigo_liberacion": "",
         "entregado": "No",
         "cotizaciones": cotizaciones_array,
+        "reactivado_desde_caras": reactivado_flag
     }
 
     data = leer_json("facturas.json")
@@ -1646,23 +1649,26 @@ def reactivar_desde_caras():
             if f.get("estado") != "Cancelado_Cotizacion_Cara":
                 return jsonify({"status": "error", "message": "Este ticket no está en Cotizaciones Caras."})
 
-            # Resetear campos para reiniciar el flujo desde "Asignar Taller"
-            f["estado"] = ""
-            f["estado_custom"] = ""
-            f["aprobado_admin"] = False
-            f["aprobado_corp"] = False
-            f["aprobado_admin_10k"] = False
-            f["liberado_admin"] = False
-            f["fecha_cierre"] = None
-            f["codigo_liberacion"] = None
-            f["entregado"] = None
-            f["proveedor"] = None
-            f["numero_orden"] = None
-            f["numero_cotizacion_asignacion"] = None
-            f["fotos_cotizacion"] = []
-            f["cotizaciones"] = []
-            # Bandera que indica que el chofer ya NO debe recibir el PIN de liberacion
-            f["reactivado_desde_caras"] = True
+            # Extraer el ID del reporte original
+            retro = f.get("retro", "")
+            import re as re_mod
+            match_ticket = re_mod.search(r"\[TICKET:(.*?)\]", retro)
+            ticket_id = match_ticket.group(1).strip() if match_ticket else None
+
+            # Eliminar la factura para que el ticket regrese a la Bandeja de Reportes inicial
+            data["facturas"].remove(f)
+
+            if ticket_id:
+                # Marcar el reporte original como reactivado desde caras
+                try:
+                    reportes_data = leer_json("reportes.json")
+                    for r in reportes_data.get("reportes", []):
+                        if str(r.get("id")) == str(ticket_id):
+                            r["reactivado_desde_caras"] = True
+                            break
+                    escribir_json("reportes.json", reportes_data)
+                except Exception as e:
+                    print("Error actualizando reporte:", str(e))
 
             # Reactivar unidad en unidades.json
             try:

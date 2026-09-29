@@ -1893,7 +1893,8 @@ async function cargarReportesAdmin() {
             let ciaBadge = r.compania ? `Cia: <strong>${r.compania}</strong> | ` : ``;
             let tdUnidadChofer = `<td>8090-${r.unidad}<br><small style="color:#a3b1c6;">${ciaBadge}Op: ${r.empleado}</small></td>`;
 
-            tbody.innerHTML += `<tr><td><strong>${r.id}</strong></td><td>${r.fecha}</td>${tdUnidadChofer}<td>${r.falla.substring(0, 30)}...</td><td>${r.mantenimiento}</td><td>${estadoBadge}</td><td>${btnAccion}</td></tr>`;
+            let badgeCaras = r.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+            tbody.innerHTML += `<tr><td><strong>${r.id}</strong>${badgeCaras}</td><td>${r.fecha}</td>${tdUnidadChofer}<td>${r.falla.substring(0, 30)}...</td><td>${r.mantenimiento}</td><td>${estadoBadge}</td><td>${btnAccion}</td></tr>`;
         });
     } catch (err) { console.error(err); }
 }

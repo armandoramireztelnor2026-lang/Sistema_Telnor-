@@ -332,10 +332,11 @@ function renderizarTablaReportes(lista) {
         let cleanEco = numEco === pendienteHTML ? 'pendiente' : numEco.replace(/<[^>]*>?/gm, '');
 
         // Set row info for filtering
+        let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
         let rowHtml = `
             <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-estado="${estado}">
                 <td style="vertical-align:top; padding-top:15px;"><input type="checkbox" class="chk-reporte" value="${ticket}"></td>
-                <td style="vertical-align:top; padding-top:15px;"><strong>${ticket}</strong></td>
+                <td style="vertical-align:top; padding-top:15px;"><span style="color:#0ea5e9; font-weight:bold;">${ticket}</span>${badgeCaras}</td>
                 <td style="vertical-align:top; padding-top:15px;">${numEco}</td>
                 <td style="vertical-align:top; padding-top:15px;">${fechaTicket}</td>
                 <td style="vertical-align:top; padding-top:15px;">${tiempoTicket}</td>

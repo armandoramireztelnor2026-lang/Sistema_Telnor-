@@ -14,7 +14,8 @@ function previsualizarFactura() {
         if(r) {
             document.getElementById('pdf-seccion-reporte').style.display = 'block';
             let emailStatus = (r.email && r.email.trim() !== "" && r.email.trim() !== "No proporcionado") ? r.email : "No proporcionado";
-            document.getElementById('prev-rep-ticket').innerText = r.id; 
+            let badgeStr = (r.reactivado_desde_caras) ? ` <br><span style="color:#f59e0b; font-size:0.85em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+            document.getElementById('prev-rep-ticket').innerHTML = r.id + badgeStr; 
             document.getElementById('prev-rep-fecha').innerText = r.fecha; 
             document.getElementById('prev-rep-unidad').innerText = "8090-" + r.unidad;
             document.getElementById('prev-rep-marca').innerText = r.marca + " " + r.modelo;
@@ -71,7 +72,8 @@ function generarPDFSilencioso(idFactura) {
         if(r) {
             document.getElementById('pdf-seccion-reporte').style.display = 'block';
             let emailStatus = (r.email && r.email.trim() !== "" && r.email.trim() !== "No proporcionado") ? r.email : "No proporcionado";
-            document.getElementById('prev-rep-ticket').innerText = r.id; 
+            let badgeStr2 = (r.reactivado_desde_caras || f.reactivado_desde_caras) ? ` <br><span style="color:#f59e0b; font-size:0.85em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+            document.getElementById('prev-rep-ticket').innerHTML = r.id + badgeStr2; 
             document.getElementById('prev-rep-fecha').innerText = r.fecha; 
             document.getElementById('prev-rep-unidad').innerText = "8090-" + r.unidad;
             document.getElementById('prev-rep-marca').innerText = r.marca + " " + r.modelo;
