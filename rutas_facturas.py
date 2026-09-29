@@ -23,6 +23,7 @@ from notificaciones import (
     enviar_correo_factura_fiscal_rechazada,
     enviar_correo_factura_fiscal_aprobada,
     enviar_correo_doc50_proveedor,
+    enviar_correo_correccion_orden,
     enviar_correo_esperando_liberacion,
     enviar_correo_notificacion_corp_documentos,
     enviar_correo_recordatorio_doc_contable,
@@ -541,6 +542,72 @@ def actualizar_ordenes_admin():
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
+@facturas_bp.route("/api/facturas/solicitar_correccion_orden", methods=["POST"])
+def solicitar_correccion_orden():
+    factura_id = request.form.get("id")
+    data = leer_json("facturas.json")
+    
+    for f in data.get("facturas", []):
+        if str(f["id"]) == str(factura_id):
+            # Obtener datos de la factura/reporte para el correo
+            import re
+            retro = f.get("retro", "")
+            match = re.search(r"\[TICKET:(REP-\d+)\]", retro)
+            reporte_id = match.group(1) if match else None
+            
+            correo_supervisor = ""
+            supervisor = "Supervisor"
+            unidad = f.get("unidad", "")
+            
+            # Buscar el correo del supervisor en reportes.json
+            if reporte_id:
+                reportes_data = leer_json("reportes.json")
+                for r in reportes_data.get("reportes", []):
+                    if str(r.get("id")) == str(reporte_id):
+                        correo_supervisor = r.get("email", "") or r.get("correo_solicitante", "")
+                        supervisor = r.get("empleado", "") or r.get("solicitante", "Supervisor")
+                        break
+            
+            if not correo_supervisor:
+                return jsonify({"status": "error", "message": "No se encontró el correo del supervisor para este ticket."})
+            
+            enviar_correo_correccion_orden(correo_supervisor, supervisor, unidad)
+            return jsonify({"status": "success", "message": "Notificación enviada al supervisor."})
+            
+    return jsonify({"status": "error", "message": "Registro no encontrado."})
+
+@facturas_bp.route("/api/facturas/notificar_admin_10k", methods=["POST"])
+def notificar_admin_10k():
+    factura_id = request.form.get("id")
+    data = leer_json("facturas.json")
+
+    for f in data.get("facturas", []):
+        if str(f["id"]) == str(factura_id):
+            unidad = f.get("unidad", "")
+            precio_float = float(f.get("precio", 0))
+            proveedor = f.get("proveedor", "S/N")
+            
+            import re
+            retro = f.get("retro", "")
+            match = re.search(r"\[TICKET:(.*?)\]", retro)
+            ticket_id = match.group(1) if match else "N/A"
+            
+            orden = f.get("numero_orden") or f.get("numero_cotizacion_asignacion") or "Pendiente"
+
+            usuarios_data = leer_json("usuarios.json")
+            admins = [u for u in usuarios_data.get("usuarios", [])
+                    if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Administrador"]
+            
+            from notificaciones import enviar_correo_admin_revisa_10k
+            for adm in admins:
+                correo = adm.get("datos_perfil", {}).get("correo")
+                nombre = adm.get("datos_perfil", {}).get("nombres", "Administrador")
+                if correo:
+                    enviar_correo_admin_revisa_10k(correo, nombre, ticket_id, unidad, proveedor, precio_float, orden)
+            
+            return jsonify({"status": "success", "message": "Notificación enviada al administrador exitosamente."})
+            
+    return jsonify({"status": "error", "message": "Registro no encontrado."})
 
 @facturas_bp.route("/api/facturas/aprobar_10k", methods=["POST"])
 def aprobar_10k():

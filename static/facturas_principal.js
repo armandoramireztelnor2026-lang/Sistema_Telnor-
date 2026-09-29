@@ -20,17 +20,17 @@ function liberarTicketAdmin(facturaId) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: facturaId })
     })
-    .then(r => r.json())
-    .then(data => {
-        ocultarLoaderDinamico();
-        alert(data.message || (data.status === 'success' ? 'Ticket liberado exitosamente.' : 'Error al liberar.'));
-        if (data.status === 'success') cargarFacturas();
-    })
-    .catch(err => {
-        ocultarLoaderDinamico();
-        console.error(err);
-        alert('Error al conectar con el servidor.');
-    });
+        .then(r => r.json())
+        .then(data => {
+            ocultarLoaderDinamico();
+            alert(data.message || (data.status === 'success' ? 'Ticket liberado exitosamente.' : 'Error al liberar.'));
+            if (data.status === 'success') cargarFacturas();
+        })
+        .catch(err => {
+            ocultarLoaderDinamico();
+            console.error(err);
+            alert('Error al conectar con el servidor.');
+        });
 }
 
 document.addEventListener('click', function (e) {
@@ -223,7 +223,7 @@ async function cargarFacturas() {
                 let pedidos = [];
                 let folios = [];
                 let doc50s = [];
-                
+
                 if (f.cotizaciones && f.cotizaciones.length > 0) {
                     f.cotizaciones.forEach(c => {
                         if (c.numero_orden) ordenes.push(c.numero_orden);
@@ -237,11 +237,13 @@ async function cargarFacturas() {
                     if (f.factura_folio) folios.push(f.factura_folio);
                     if (f.numero_doc50) doc50s.push(f.numero_doc50);
                 }
-                
+
                 let ordStr = [...new Set(ordenes)].join(', ') || 'Pendiente';
                 let pedStr = [...new Set(pedidos)].join(', ') || '';
                 let folStr = [...new Set(folios)].join(', ') || '';
                 let docStr = [...new Set(doc50s)].join(', ') || '';
+
+                let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
 
                 if (rolUsuario === 'administracion') {
                     btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">`;
@@ -250,6 +252,10 @@ async function cargarFacturas() {
                         btnAccion += `<button class="btn-success" onclick="abrirRevisionAdmin('${f.id}')" style="display:block; width:100%; margin:0;">Aprobar y Asignar Orden</button>`;
                     } else {
                         btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
+
+                        if (!confirmadaTotal && subrolAct === 'Supervisor' && precioParaAp >= 10001 && !f.aprobado_admin_10k) {
+                            btnAccion += `<button class="btn-info" style="background:#f59e0b; color:white; font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; border:none; margin-top:5px; font-weight:bold;" onclick="notificarAdmin10k('${f.id}')">🔔 Notificar Admin</button>`;
+                        }
                     }
 
                     if (!confirmadaTotal) {
@@ -343,7 +349,6 @@ async function cargarFacturas() {
                 // LÓGICA INDEPENDIENTE PARA DOC CONTABLES
                 // ==========================================
                 let valFiscalX = f.validacion_fiscal || 'Pendiente';
-                let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
 
                 if (tbodyDocContables && rolUsuario === 'administracion') {
                     let showInDoc = false;
@@ -358,12 +363,13 @@ async function cargarFacturas() {
                     }
 
                     if (showInDoc) {
-                        let btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                        let btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;"
                             <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
 
                         if (subrolAct === 'Administrador') {
                             if (f.liberado_admin === false) {
                                 btnDoc += `<button class="btn-success" style="display:block; width:100%; margin:0; background-color: #f59e0b;" onclick="liberarDocContable('${f.id}')">✔️ Liberar Ticket</button>`;
+                                btnDoc += `<button class="btn-info" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#1e3a8a; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:0.9em; cursor:pointer;" onclick="solicitarCorreccionOrden('${f.id}')">Corrección (Num. Pedido y Orden)</button>`;
                             } else {
                                 btnDoc += `<button class="btn-info" disabled style="display:block; width:100%; margin:0; background-color:#475569; cursor:not-allowed;">Ticket Liberado</button>`;
                             }
@@ -424,7 +430,7 @@ async function cargarFacturas() {
                         if (rolUsuario === 'administracion') {
                             btnAdminExtra = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">`;
                             btnAdminExtra += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
-                            btnAdminExtra += `<button class="btn-warning" onclick="abrirActualizarOrdenes('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#eab308; color:black; border:none; padding:8px; border-radius:6px; font-weight:bold; font-size:0.85em; cursor:pointer;">Actualizar Datos(Pedido/Orden)</button>`;
+                            btnAdminExtra += `<button class="btn-info" onclick="abrirActualizarOrdenes('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#1e3a8a; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:0.9em; cursor:pointer;">Actualizar Datos(Pedido/Orden)</button>`;
 
 
                             let valFiscal = f.validacion_fiscal || 'Pendiente';
@@ -1326,7 +1332,7 @@ function guardarActualizarOrdenes() {
     // Reemplazar campos vacíos con su valor original
     let inputsOrd = form.querySelectorAll('input[name="numero_orden[]"]');
     let inputsCot = form.querySelectorAll('input[name="numero_cotizacion[]"]');
-    
+
     formData.delete("numero_orden[]");
     formData.delete("numero_cotizacion[]");
 
@@ -1354,6 +1360,56 @@ function guardarActualizarOrdenes() {
         ocultarLoaderDinamico();
         console.error(err);
         alert("Error al actualizar");
+    });
+}
+
+function solicitarCorreccionOrden(idFactura) {
+    if (!confirm("¿Deseas enviar una notificación al supervisor para que corrija los números de orden/pedido de este ticket?")) return;
+
+    let formData = new FormData();
+    formData.append("id", idFactura);
+
+    mostrarLoaderDinamico("Notificando al supervisor...", "Enviando correo 📧");
+
+    fetch('/api/facturas/solicitar_correccion_orden', {
+        method: 'POST',
+        body: formData
+    }).then(res => res.json()).then(data => {
+        ocultarLoaderDinamico();
+        if (data.status === 'success') {
+            alert(data.message);
+        } else {
+            alert("Error: " + data.message);
+        }
+    }).catch(err => {
+        ocultarLoaderDinamico();
+        console.error(err);
+        alert("Ocurrió un error al intentar notificar al supervisor.");
+    });
+}
+
+function notificarAdmin10k(idFactura) {
+    if (!confirm("¿Deseas enviar un correo automático al administrador para notificarle que debe revisar y validar la cotización de este ticket?")) return;
+
+    let formData = new FormData();
+    formData.append("id", idFactura);
+
+    mostrarLoaderDinamico("Notificando al administrador...", "Enviando correo 📧");
+
+    fetch('/api/facturas/notificar_admin_10k', {
+        method: 'POST',
+        body: formData
+    }).then(res => res.json()).then(data => {
+        ocultarLoaderDinamico();
+        if (data.status === 'success') {
+            alert(data.message);
+        } else {
+            alert("Error: " + data.message);
+        }
+    }).catch(err => {
+        ocultarLoaderDinamico();
+        console.error(err);
+        alert("Ocurrió un error al intentar notificar al administrador.");
     });
 }
 

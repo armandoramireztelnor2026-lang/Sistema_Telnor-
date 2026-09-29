@@ -1269,3 +1269,26 @@ def enviar_correo_confirmacion_aprobacion_actor(correo_destino, actor, unidad, p
     </html>
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
+
+def enviar_correo_correccion_orden(correo_destino, supervisor, unidad):
+    asunto = f"Corrección Requerida: Números de Pedido/Orden - Unidad 8090-{str(unidad).replace('8090-', '')}"
+    cuerpo_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #f59e0b; padding: 20px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0;">CORRECCIÓN REQUERIDA</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p>Hola <strong>{supervisor}</strong>,</p>
+                <p>Se le notifica que es necesario <strong>actualizar los datos (números de orden y solicitud de pedido)</strong> correspondientes a la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong>.</p>
+                <p>El sistema detectó un error con estos números. Ya sea que contengan algún dígito erróneo o se requiera corregir todo el número, le solicitamos que ingrese a la plataforma, ubique este ticket en su bandeja de <strong>Facturas</strong> y actualice los datos mediante la acción "Actualizar Datos(Pedido/Orden)".</p>
+                <p>Favor de atender esta solicitud a la brevedad para no demorar el proceso.</p>
+                <br>
+                <p style="font-size: 0.9em; color: #6b7280;">Este es un mensaje automático del sistema. No responda a este correo.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return disparar_correo(correo_destino, asunto, cuerpo_html)
