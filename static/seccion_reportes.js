@@ -84,13 +84,30 @@ function renderizarTablaReportes(lista) {
         let pendienteHTML = '<span style="background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">Pendiente</span>';
 
         let numEco = f.unidad ? `8090-${f.unidad.replace('8090-', '')}` : pendienteHTML;
-        let fechaTicket = f.fecha || reporteOrig.fecha || pendienteHTML;
+        let fechaTicketBase = f.fecha || reporteOrig.fecha || pendienteHTML;
+        let fechaTicket = fechaTicketBase;
+        
+        // Agregar hora si es posible
+        if (fechaTicket !== pendienteHTML) {
+            let ts = f.timestamp || reporteOrig.timestamp;
+            if (ts) {
+                let dt = new Date(ts);
+                if (!isNaN(dt)) {
+                    let yyyy = dt.getFullYear();
+                    let mm = String(dt.getMonth() + 1).padStart(2, '0');
+                    let dd = String(dt.getDate()).padStart(2, '0');
+                    let hh = String(dt.getHours()).padStart(2, '0');
+                    let min = String(dt.getMinutes()).padStart(2, '0');
+                    fechaTicket = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+                }
+            }
+        }
 
         // CALCULO DE TIEMPO DEL TICKET
         // Inicio: fecha del reporte. Fin: fecha_cierre si existe, si no => ahora
         let tiempoTicket = pendienteHTML;
-        if (fechaTicket !== pendienteHTML) {
-            let ft1 = new Date(fechaTicket);
+        if (fechaTicketBase !== pendienteHTML) {
+            let ft1 = new Date(fechaTicketBase);
             let ft2 = f.fecha_cierre ? new Date(f.fecha_cierre) : new Date();
             if (!isNaN(ft1) && !isNaN(ft2) && ft2 >= ft1) {
                 let diffMsT = ft2 - ft1;
@@ -178,7 +195,21 @@ function renderizarTablaReportes(lista) {
         let nombreSup = f.supervisor_nombre || "No asignado";
         let nombreAdmin = f.administrador_nombre || "No asignado";
         let nombreJefatura = f.jefatura_nombre || "No asignado";
-        let fechaEntrada = f.fecha || pendienteHTML;
+        
+        let fechaEntradaBase = f.fecha || pendienteHTML;
+        let fechaEntrada = fechaEntradaBase;
+        if (fechaEntrada !== pendienteHTML && f.timestamp) {
+            let dt = new Date(f.timestamp);
+            if (!isNaN(dt)) {
+                let yyyy = dt.getFullYear();
+                let mm = String(dt.getMonth() + 1).padStart(2, '0');
+                let dd = String(dt.getDate()).padStart(2, '0');
+                let hh = String(dt.getHours()).padStart(2, '0');
+                let min = String(dt.getMinutes()).padStart(2, '0');
+                fechaEntrada = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+            }
+        }
+        
         let fechaSalida = f.fecha_cierre || pendienteHTML;
         let tiempoTaller = pendienteHTML;
         // CALCULO DE TIEMPO EN TALLER

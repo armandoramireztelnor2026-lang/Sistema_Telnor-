@@ -395,7 +395,7 @@ def enviar_correo_factura_rechazada_corp(correo_destino, nombre_proveedor, unida
                 
                 <p>El ticket original ha sido cancelado en el sistema. Por favor, <strong>ingrese de nuevo al Portal de Proveedores para crear una nueva cotización</strong> ajustando los precios según las recomendaciones anteriores.</p>
                 <br>
-                <p style="font-size: 0.9em; color: #6b7280;">Este es un mensaje automático del Sistema Telnor. Por favor, no responda a este correo.</p>
+                <p style="font-size: 0.9em; color: #6b7280;">Este es un mensaje automático del Sistema de Gestión Automotriz. Por favor, no responda a este correo.</p>
             </div>
         </div>
     </body>
@@ -441,7 +441,7 @@ def enviar_correo_factura_rechazada_admin(correo_destino, nombre_proveedor, unid
                 
                 <p>El registro de su cotización ha sido eliminado del sistema. Por favor, <strong>ingrese de nuevo al Portal de Proveedores para crear y subir una nueva cotización</strong> ajustando los precios según las recomendaciones anteriores.</p>
                 <br>
-                <p style="font-size: 0.9em; color: #6b7280;">Este es un mensaje automático del Sistema Telnor. Por favor, no responda a este correo.</p>
+                <p style="font-size: 0.9em; color: #6b7280;">Este es un mensaje automático del Sistema de Gestión Automotriz. Por favor, no responda a este correo.</p>
             </div>
         </div>
     </body>
@@ -487,7 +487,7 @@ def enviar_correo_factura_rechazada_super(correo_destino, nombre_proveedor, unid
                 
                 <p>El registro de su cotización ha sido eliminado del sistema. Por favor, <strong>ingrese de nuevo al Portal de Proveedores para crear y subir una nueva cotización</strong> ajustando los precios según las recomendaciones anteriores.</p>
                 <br>
-                <p style="font-size: 0.9em; color: #6b7280;">Este es un mensaje automático del Sistema Telnor. Por favor, no responda a este correo.</p>
+                <p style="font-size: 0.9em; color: #6b7280;">Este es un mensaje automático del Sistema de Gestión Automotriz. Por favor, no responda a este correo.</p>
             </div>
         </div>
     </body>
@@ -536,7 +536,7 @@ def enviar_correo_confirmacion_factura_fiscal(correo_destino, proveedor, unidad,
             </div>
             <div style="padding: 20px;">
                 <p>Hola <strong>{proveedor}</strong>,</p>
-                <p>Tu factura final (CFDI) se ha subido de forma correcta al sistema de Telnor.</p>
+                <p>Tu factura final (CFDI) se ha subido de forma correcta al sistema.</p>
                 <ul style="list-style: none; padding: 0;">
                     <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
                     <li style="margin-bottom: 10px;"><strong>Concepto:</strong> {titulo}</li>
@@ -660,7 +660,7 @@ def enviar_correo_notificacion_corp_documentos(lista_corps, proveedor, unidad, p
                 </p>
             </div>
             <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 0.85em; color: #6b7280;">
-                Sistema Telnor - Gestión Automotriz
+                Sistema de Gestión Automotriz
             </div>
         </div>
     </body>

@@ -69,7 +69,7 @@ def procesar_liberacion_si_aplica(f):
                 enviar_correo_esperando_liberacion(
                     correo_admin,
                     nombre_admin,
-                    f.get("id_reporte", "N/A"),
+                    f.get("id_reporte", f.get("id", "N/A")),
                     f.get("unidad", ""),
                     num_orden,
                     num_orden
@@ -427,6 +427,23 @@ def encontrar_admin_por_cope(cope):
     
     return fallback_admin
 
+def encontrar_supervisor_por_cope(cope):
+    usuarios = leer_json("usuarios.json")
+    fallback_sup = (None, None)
+    for u in usuarios.get("usuarios", []):
+        if u.get("rol") == "administracion":
+            dp = u.get("datos_perfil", {})
+            if dp.get("subrol") == "Supervisor":
+                correo = dp.get("correo")
+                nombre = f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()
+                if not fallback_sup[0]:
+                    fallback_sup = (correo, nombre)
+                
+                copes_adicionales = dp.get("copes_adicionales", [])
+                if dp.get("cope") == cope or cope in copes_adicionales:
+                    return (correo, nombre)
+    return fallback_sup
+
 @facturas_bp.route("/api/facturas/confirmar_admin", methods=["POST"])
 
 def confirmar_admin():
@@ -515,7 +532,7 @@ def confirmar_admin():
                     f["liberado_admin"] = False
                     try:
                         from notificaciones import enviar_correo_esperando_liberacion
-                        enviar_correo_esperando_liberacion(correo_admin, nombre_admin, f.get("id_reporte", "N/A"), f.get("unidad", ""), nums_orden[0] if nums_orden else "N/A", nums_orden[0] if nums_orden else "N/A")
+                        enviar_correo_esperando_liberacion(correo_admin, nombre_admin, f.get("id_reporte", f.get("id", "N/A")), f.get("unidad", ""), nums_orden[0] if nums_orden else "N/A", nums_orden[0] if nums_orden else "N/A")
                     except Exception as e:
                         print("Error al enviar correo: ", e)
                 # ===============================================
@@ -593,24 +610,10 @@ def solicitar_correccion_orden():
     
     for f in data.get("facturas", []):
         if str(f["id"]) == str(factura_id):
-            # Obtener datos de la factura/reporte para el correo
-            import re
-            retro = f.get("retro", "")
-            match = re.search(r"\[TICKET:(REP-\d+)\]", retro)
-            reporte_id = match.group(1) if match else None
-            
-            correo_supervisor = ""
-            supervisor = "Supervisor"
+            # Buscar el correo del supervisor basado en el COPE del ticket
+            cope_factura = obtener_cope_de_factura(f)
+            correo_supervisor, supervisor = encontrar_supervisor_por_cope(cope_factura)
             unidad = f.get("unidad", "")
-            
-            # Buscar el correo del supervisor en reportes.json
-            if reporte_id:
-                reportes_data = leer_json("reportes.json")
-                for r in reportes_data.get("reportes", []):
-                    if str(r.get("id")) == str(reporte_id):
-                        correo_supervisor = r.get("email", "") or r.get("correo_solicitante", "")
-                        supervisor = r.get("empleado", "") or r.get("solicitante", "Supervisor")
-                        break
             
             if not correo_supervisor:
                 return jsonify({"status": "error", "message": "No se encontró el correo del supervisor para este ticket."})
@@ -880,7 +883,7 @@ def confirmar_corp():
                 f["liberado_admin"] = False
                 try:
                     from notificaciones import enviar_correo_esperando_liberacion
-                    enviar_correo_esperando_liberacion(correo_admin, nombre_admin, f.get("id_reporte", "N/A"), f.get("unidad", ""), f.get("numero_orden", "N/A"), f.get("numero_cotizacion_asignacion", "N/A"))
+                    enviar_correo_esperando_liberacion(correo_admin, nombre_admin, f.get("id_reporte", f.get("id", "N/A")), f.get("unidad", ""), f.get("numero_orden", "N/A"), f.get("numero_cotizacion_asignacion", "N/A"))
                 except Exception as e:
                     print("Error al enviar correo doc 50: ", e)
             # ===============================================
@@ -1575,7 +1578,7 @@ def editar_seccion_especifica():
         factura["liberado_admin"] = False
         try:
             from notificaciones import enviar_correo_esperando_liberacion
-            enviar_correo_esperando_liberacion(correo_admin, nombre_admin, factura.get("id_reporte", "N/A"), factura.get("unidad", ""), identificador, identificador)
+            enviar_correo_esperando_liberacion(correo_admin, nombre_admin, factura.get("id_reporte", factura.get("id", "N/A")), factura.get("unidad", ""), identificador, identificador)
         except Exception as e:
             print("Error al enviar correo: ", e)
         # ===============================================
@@ -1764,7 +1767,7 @@ def notificar_corporativos():
 
     proveedor = factura.get("proveedor", "N/A")
     unidad = factura.get("unidad", "N/A").replace("8090-", "")
-    ticket = factura.get("id_reporte", "N/A")
+    ticket = factura.get("id_reporte", factura.get("id", "N/A"))
 
     enviados = enviar_correo_notificacion_corp_documentos(corps_data, proveedor, unidad, precio, ticket, supervisor_nombre)
 

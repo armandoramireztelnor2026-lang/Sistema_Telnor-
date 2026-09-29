@@ -367,7 +367,7 @@ async function cargarFacturas() {
                     }
 
                     if (showInDoc) {
-                        let btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;"
+                        let btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
                             <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
 
                         if (subrolAct === 'Administrador') {
