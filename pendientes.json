@@ -1,3 +1,69 @@
 {
-    "pendientes": []
+    "pendientes": [
+        {
+            "rol": "administracion",
+            "cope": "PE CALLE 10",
+            "apellido_paterno": "Giron",
+            "apellido_materno": "Gonzales",
+            "nombres": "Samuel",
+            "ciudad": "Tijuana",
+            "num_empleado": "1111111",
+            "area": "Automotriz",
+            "correo": "armandoramireztelnor2026@gmail.com",
+            "subrol": "Supervisor",
+            "foto_ruta": "temp_20260929140101_Supervisor.png"
+        },
+        {
+            "rol": "administracion",
+            "cope": "PE CALLE 10",
+            "apellido_paterno": "Marquez",
+            "apellido_materno": "Galvan",
+            "nombres": "Manuel Alejandro ",
+            "ciudad": "Tijuana",
+            "num_empleado": "1111112",
+            "area": "Automotriz",
+            "correo": "armandoramireztelnor2026@gmail.com",
+            "subrol": "Administrador",
+            "foto_ruta": "temp_20260929140200_Administrador.png"
+        },
+        {
+            "rol": "administracion",
+            "cope": "PE CALLE 10",
+            "apellido_paterno": "Pe\u00f1u\u00f1uri ",
+            "apellido_materno": "Rivas",
+            "nombres": "Jose Alejandro ",
+            "ciudad": "Tijuana",
+            "num_empleado": "1111113",
+            "area": "Automotriz",
+            "correo": "armandoramireztelnor2026@gmail.com",
+            "subrol": "Jefatura",
+            "foto_ruta": "temp_20260929140529_Jefatura.png"
+        },
+        {
+            "rol": "administracion",
+            "cope": "PE SEMINARIO",
+            "apellido_paterno": "Heredia ",
+            "apellido_materno": "Salazar",
+            "nombres": "Oscar ",
+            "ciudad": "Tijuana",
+            "num_empleado": "1111114",
+            "area": "Automotriz",
+            "correo": "armandoramireztelnor2026@gmail.com",
+            "subrol": "Supervisor",
+            "foto_ruta": "temp_20260929140729_Supervisor.png"
+        },
+        {
+            "rol": "administracion",
+            "cope": "PE PERIFERICO",
+            "apellido_paterno": "Reyes",
+            "apellido_materno": "Valenzuela",
+            "nombres": "Jesus Alfredo ",
+            "ciudad": "Mexicali",
+            "num_empleado": "1111115",
+            "area": "Automotriz",
+            "correo": "armandoramireztelnor2026@gmail.com",
+            "subrol": "Supervisor",
+            "foto_ruta": "temp_20260929140908_Supervisor.png"
+        }
+    ]
 }
