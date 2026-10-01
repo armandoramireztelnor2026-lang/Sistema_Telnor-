@@ -106,8 +106,9 @@ function renderizarTablaReportes(lista) {
         // CALCULO DE TIEMPO DEL TICKET
         // Inicio: fecha del reporte. Fin: fecha_cierre si existe, si no => ahora
         let tiempoTicket = pendienteHTML;
-        if (fechaTicketBase !== pendienteHTML) {
-            let ft1 = new Date(fechaTicketBase);
+        let tsBase = f.timestamp || reporteOrig.timestamp;
+        if (tsBase || fechaTicketBase !== pendienteHTML) {
+            let ft1 = tsBase ? new Date(tsBase) : new Date(fechaTicketBase + "T00:00:00");
             let ft2 = f.fecha_cierre ? new Date(f.fecha_cierre) : new Date();
             if (!isNaN(ft1) && !isNaN(ft2) && ft2 >= ft1) {
                 let diffMsT = ft2 - ft1;
@@ -218,7 +219,7 @@ function renderizarTablaReportes(lista) {
         f.dias_taller = 0;
         let fechaInicioTaller = f.timestamp || f.fecha; // timestamp = cuando se creó la factura (asignación al taller)
         if (!f.is_unassigned && fechaInicioTaller) {
-            let f1 = new Date(fechaInicioTaller);
+            let f1 = f.timestamp ? new Date(fechaInicioTaller) : new Date(fechaInicioTaller + "T00:00:00");
             let f2 = f.fecha_cierre ? new Date(f.fecha_cierre) : new Date();
             if (!isNaN(f1) && !isNaN(f2) && f2 >= f1) {
                 let diffMs = f2 - f1;
