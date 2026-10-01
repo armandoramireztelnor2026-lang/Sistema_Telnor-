@@ -91,7 +91,17 @@
                 <div class="input-group"><input type="text" id="tel-prov" placeholder="Teléfono" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
                 <div class="input-group"><input type="text" id="cp-prov" placeholder="Código Postal" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
                 
-                <!-- Los campos de ciudad y COPE han sido removidos de proveedores -->
+                <div class="input-group full-width">
+                    <select id="ciudad-prov" name="ciudad" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;">
+                        <option value="" disabled selected>Seleccione Ciudad Base...</option>
+                        <option value="Tijuana">Tijuana</option>
+                        <option value="Tecate">Tecate</option>
+                        <option value="Ensenada">Ensenada</option>
+                        <option value="San Quintin">San Quintin</option>
+                        <option value="Mexicali">Mexicali</option>
+                        <option value="San Luis Rio Colorado">San Luis Rio Colorado</option>
+                    </select>
+                </div>
 
                 <div class="input-group full-width"><input type="text" id="dir-prov" placeholder="Dirección Completa" required></div>
                 <div class="input-group full-width"><textarea id="desc-prov" placeholder="Descripción del Proveedor / Servicios" required style="width: 100%; min-height: 80px; padding: 12px 15px; border-radius: 8px; border: 1px solid #1f395a; background-color: #112641; color: white; font-family: 'Poppins', sans-serif; resize: vertical;"></textarea></div>

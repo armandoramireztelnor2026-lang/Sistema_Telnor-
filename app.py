@@ -176,8 +176,10 @@ def aprobar_usuario():
     usuarios_data = leer_json('usuarios.json')
     usuario_encontrado, nuevos_pendientes = None, []
     for p in pendientes_data.get('pendientes', []):
-        if p.get('correo') == id_pendiente or p.get('num_empleado') == id_pendiente: usuario_encontrado = p
-        else: nuevos_pendientes.append(p)
+        if not usuario_encontrado and (p.get('correo') == id_pendiente or p.get('num_empleado') == id_pendiente):
+            usuario_encontrado = p
+        else:
+            nuevos_pendientes.append(p)
     if usuario_encontrado:
         rol = usuario_encontrado['rol']
         año_actual = datetime.datetime.now().year
@@ -202,8 +204,10 @@ def rechazar_usuario():
     pendientes_data = leer_json('pendientes.json')
     usuario_encontrado, nuevos_pendientes = None, []
     for p in pendientes_data.get('pendientes', []):
-        if p.get('correo') == id_pendiente or p.get('num_empleado') == id_pendiente: usuario_encontrado = p
-        else: nuevos_pendientes.append(p)
+        if not usuario_encontrado and (p.get('correo') == id_pendiente or p.get('num_empleado') == id_pendiente):
+            usuario_encontrado = p
+        else:
+            nuevos_pendientes.append(p)
     if usuario_encontrado:
         nombre_foto = usuario_encontrado.get('foto_ruta')
         if nombre_foto:

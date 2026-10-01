@@ -1665,6 +1665,9 @@ def reactivar_desde_caras():
                     for r in reportes_data.get("reportes", []):
                         if str(r.get("id")) == str(ticket_id):
                             r["reactivado_desde_caras"] = True
+                            r["estado"] = "Pendiente de Revisión"
+                            r["asignado_a"] = ""
+                            r["compania"] = ""
                             break
                     escribir_json("reportes.json", reportes_data)
                 except Exception as e:

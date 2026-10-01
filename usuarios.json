@@ -1,24 +1,6 @@
 {
     "usuarios": [
         {
-            "usuario": "Jesus_Ramirez-RUMN-2026-admin",
-            "password": "nHdhann9",
-            "rol": "administracion",
-            "datos_perfil": {
-                "rol": "administracion",
-                "apellido_paterno": "Ramirez",
-                "apellido_materno": "Genesis",
-                "nombres": "Jesus ",
-                "num_empleado": "298172819",
-                "area": "Automotriz",
-                "foto_ruta": "temp_20260811124519_foto_administracion.jpg",
-                "ciudad": "Tijuana",
-                "correo": "armandoramireztelnor2026@gmail.com",
-                "subrol": "Jefatura",
-                "cope": "PIO PICO"
-            }
-        },
-        {
             "usuario": "Alejandro_Gimenez-RUMN-2026-corp",
             "password": "LnryypPu",
             "rol": "corporativos",
@@ -36,64 +18,188 @@
             }
         },
         {
-            "usuario": "AutopartesyMotoresB.C.-RUMN-2026-prov",
-            "password": "M33BdAlg",
-            "rol": "proveedores",
-            "datos_perfil": {
-                "rol": "proveedores",
-                "cope": "No especificado",
-                "nombre_proveedor": "Autopartes y Motores B.C.",
-                "encargado": "Armando Ramirez",
-                "responsable": "Dilan Fernandez",
-                "telefono": "6634041184",
-                "direccion": "Blvd. Fundadores 5045, Fracc El Rubí, 22637 Tijuana, B.C.",
-                "codigo_postal": "22435",
-                "descripcion": "Venta y suministro de refacciones automotrices, aceites, lubricantes y componentes mecánicos generales para todo tipo de automóviles.",
-                "correo": "armandoramireztelnor2026@gmail.com",
-                "foto_ruta": "temp_20260820125349_autopartes_motores.png"
-            }
-        },
-        {
-            "usuario": "Manuel_Cabrera-RUMN-2026-admin",
-            "password": "qJ3Tq6OT",
+            "usuario": "JoseAlejandro_Pe\u00f1u\u00f1uri -RUMN-2026-admin",
+            "password": "AIw5Wipg",
             "rol": "administracion",
             "datos_perfil": {
                 "rol": "administracion",
                 "cope": "PE CALLE 10",
-                "apellido_paterno": "Cabrera",
-                "apellido_materno": "Lopez",
-                "nombres": "Manuel",
+                "apellido_paterno": "Pe\u00f1u\u00f1uri ",
+                "apellido_materno": "Rivas",
+                "nombres": "Jose Alejandro ",
                 "ciudad": "Tijuana",
-                "num_empleado": "21231234",
+                "num_empleado": "1111113",
                 "area": "Automotriz",
                 "correo": "armandoramireztelnor2026@gmail.com",
-                "subrol": "Administrador",
-                "foto_ruta": "temp_20260905162600_administrador.jpg",
-                "ciudades_asignadas": [
-                    "Tecate"
-                ]
+                "subrol": "Jefatura",
+                "foto_ruta": "temp_20260929140529_Jefatura.png"
             }
         },
         {
-            "usuario": "Luigi_Estrada -RUMN-2026-admin",
-            "password": "LPqHLMh0",
+            "usuario": "Samuel_Giron-RUMN-2026-admin",
+            "password": "ReApH6nL",
             "rol": "administracion",
             "datos_perfil": {
                 "rol": "administracion",
-                "cope": "LIBERTAD",
-                "apellido_paterno": "Estrada ",
-                "apellido_materno": "Villa",
-                "nombres": "Luigi",
+                "cope": "PE CALLE 10",
+                "apellido_paterno": "Giron",
+                "apellido_materno": "Gonzales",
+                "nombres": "Samuel",
                 "ciudad": "Tijuana",
-                "num_empleado": "8172612",
+                "num_empleado": "1111111",
                 "area": "Automotriz",
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "subrol": "Supervisor",
-                "foto_ruta": "temp_20260909110514_supervisor.jpg",
-                "ciudades_asignadas": [],
-                "copes_asignados": [
-                    "PE CALLE 10"
-                ]
+                "foto_ruta": "temp_20260929140101_Supervisor.png"
+            }
+        },
+        {
+            "usuario": "ManuelAlejandro_Marquez-RUMN-2026-admin",
+            "password": "KepmtjVP",
+            "rol": "administracion",
+            "datos_perfil": {
+                "rol": "administracion",
+                "cope": "PE CALLE 10",
+                "apellido_paterno": "Marquez",
+                "apellido_materno": "Galvan",
+                "nombres": "Manuel Alejandro ",
+                "ciudad": "Tijuana",
+                "num_empleado": "1111112",
+                "area": "Automotriz",
+                "correo": "armandoramireztelnor2026@gmail.com",
+                "subrol": "Administrador",
+                "foto_ruta": "temp_20260929140200_Administrador.png"
+            }
+        },
+        {
+            "usuario": "Oscar_Heredia -RUMN-2026-admin",
+            "password": "9XXl4RFJ",
+            "rol": "administracion",
+            "datos_perfil": {
+                "rol": "administracion",
+                "cope": "PE SEMINARIO",
+                "apellido_paterno": "Heredia ",
+                "apellido_materno": "Salazar",
+                "nombres": "Oscar ",
+                "ciudad": "Tijuana",
+                "num_empleado": "1111114",
+                "area": "Automotriz",
+                "correo": "armandoramireztelnor2026@gmail.com",
+                "subrol": "Supervisor",
+                "foto_ruta": "temp_20260929140729_Supervisor.png"
+            }
+        },
+        {
+            "usuario": "JesusAlfredo_Reyes-RUMN-2026-admin",
+            "password": "nKj5ODWp",
+            "rol": "administracion",
+            "datos_perfil": {
+                "rol": "administracion",
+                "cope": "PE PERIFERICO",
+                "apellido_paterno": "Reyes",
+                "apellido_materno": "Valenzuela",
+                "nombres": "Jesus Alfredo ",
+                "ciudad": "Mexicali",
+                "num_empleado": "1111115",
+                "area": "Automotriz",
+                "correo": "armandoramireztelnor2026@gmail.com",
+                "subrol": "Supervisor",
+                "foto_ruta": "temp_20260929140908_Supervisor.png"
+            }
+        },
+        {
+            "usuario": "AUTOPARTESYMOTORESB.C.-RUMN-2026-prov",
+            "password": "RX1Nzc1O",
+            "rol": "proveedores",
+            "datos_perfil": {
+                "rol": "proveedores",
+                "cope": "No especificado",
+                "nombre_proveedor": "AUTOPARTES Y MOTORES B.C.",
+                "encargado": "Armando Ramirez",
+                "responsable": "Armando Ramirez ",
+                "telefono": "6640000000",
+                "ciudad": "Tijuana",
+                "direccion": "Colonia Centro, CP 06000",
+                "codigo_postal": "22423",
+                "descripcion": "Taller",
+                "correo": "armandoramireztelnor2026@gmail.com",
+                "foto_ruta": "temp_20260930221710_proveedores.jpg"
+            }
+        },
+        {
+            "usuario": "AYALAPULIDOESPERANZA-RUMN-2026-prov",
+            "password": "Ekc62xqw",
+            "rol": "proveedores",
+            "datos_perfil": {
+                "rol": "proveedores",
+                "cope": "No especificado",
+                "nombre_proveedor": "AYALA PULIDO ESPERANZA ",
+                "encargado": "Armando Ramirez",
+                "responsable": "Armando Ramirez ",
+                "telefono": "6640000000",
+                "ciudad": "Tijuana",
+                "direccion": "Colonia Centro, CP 06000",
+                "codigo_postal": "22423",
+                "descripcion": "Taller",
+                "correo": "armandoramireztelnor2026@gmail.com",
+                "foto_ruta": "temp_20260930222613_proveedores.jpg"
+            }
+        },
+        {
+            "usuario": "CESARALBERTOBERNALCASTRO-RUMN-2026-prov",
+            "password": "hl78AFcF",
+            "rol": "proveedores",
+            "datos_perfil": {
+                "rol": "proveedores",
+                "cope": "No especificado",
+                "nombre_proveedor": "CESAR ALBERTO BERNAL CASTRO",
+                "encargado": "Armando Ramirez",
+                "responsable": "Armando Ramirez ",
+                "telefono": "6640000000",
+                "ciudad": "Tijuana",
+                "direccion": "Colonia Centro, CP 06000",
+                "codigo_postal": "22423",
+                "descripcion": "Taller",
+                "correo": "armandoramireztelnor2026@gmail.com",
+                "foto_ruta": "temp_20260930222644_proveedores.jpg"
+            }
+        },
+        {
+            "usuario": "GALLEGOS-RUMN-2026-prov",
+            "password": "YOhvlI9o",
+            "rol": "proveedores",
+            "datos_perfil": {
+                "rol": "proveedores",
+                "cope": "No especificado",
+                "nombre_proveedor": "GALLEGOS",
+                "encargado": "Armando Ramirez",
+                "responsable": "Armando Ramirez ",
+                "telefono": "6640000000",
+                "ciudad": "Tijuana",
+                "direccion": "Colonia Centro, CP 06000",
+                "codigo_postal": "22423",
+                "descripcion": "Taller",
+                "correo": "armandoramireztelnor2026@gmail.com",
+                "foto_ruta": "temp_20260930222856_proveedores.jpg"
+            }
+        },
+        {
+            "usuario": "RECONSTRUCTORA-RUMN-2026-prov",
+            "password": "OZBNf074",
+            "rol": "proveedores",
+            "datos_perfil": {
+                "rol": "proveedores",
+                "cope": "No especificado",
+                "nombre_proveedor": "RECONSTRUCTORA",
+                "encargado": "Armando Ramirez",
+                "responsable": "Armando Ramirez ",
+                "telefono": "6640000000",
+                "ciudad": "Tijuana",
+                "direccion": "Colonia Centro, CP 06000",
+                "codigo_postal": "22423",
+                "descripcion": "Taller",
+                "correo": "armandoramireztelnor2026@gmail.com",
+                "foto_ruta": "temp_20260930223024_proveedores.jpg"
             }
         }
     ]

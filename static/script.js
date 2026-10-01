@@ -186,6 +186,7 @@ function procesarRegistro(rol) {
         formData.append('encargado', document.getElementById('encargado-prov').value);
         formData.append('responsable', document.getElementById('responsable-prov').value);
         formData.append('telefono', document.getElementById('tel-prov').value);
+        formData.append('ciudad', document.getElementById('ciudad-prov').value);
         formData.append('direccion', document.getElementById('dir-prov').value);
         formData.append('codigo_postal', document.getElementById('cp-prov').value);
         formData.append('descripcion', document.getElementById('desc-prov').value);
