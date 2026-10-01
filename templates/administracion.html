@@ -548,9 +548,6 @@
                 <div class="top-bar" style="display:flex; justify-content:space-between; align-items:center;">
                     <h2>Sección de Reportes Analíticos</h2>
                     <div style="display:flex; gap:10px;">
-                        <button class="btn-primary" onclick="alert('Módulo de Historial/Año en desarrollo')"
-                            style="background:#0f172a; border:none; padding:8px 15px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">📅
-                            Historial/Año</button>
                         <button class="btn-primary" onclick="exportarExcel()"
                             style="background:#10b981; border:none; padding:8px 15px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">📊
                             Exportar a Excel</button>
@@ -573,16 +570,11 @@
                         </div>
                         <div
                             style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid #334155; text-align:center;">
-                            <h4 style="margin:0; color:#94a3b8; font-size:0.9em;">Tickets Pendientes OC</h4>
+                            <h4 style="margin:0; color:#94a3b8; font-size:0.9em;">Tickets Pend. Num. Pedido y Orden</h4>
                             <div id="kpi-pendientes-oc"
                                 style="font-size:1.5em; font-weight:bold; color:#ef4444; margin-top:5px;">0</div>
                         </div>
-                        <div style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid #3b82f6; text-align:center; cursor:pointer; transition:all 0.3s;"
-                            onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='#0f172a'"
-                            onclick="mostrarTop10()">
-                            <h4 style="margin:0; color:#60a5fa; font-size:0.9em;">🏆 Top 10 Tiempos en Taller</h4>
-                            <div style="font-size:1em; color:white; margin-top:8px;">Ver Ranking</div>
-                        </div>
+
                     </div>
 
                     <!-- ADVANCED FILTERS -->
@@ -768,9 +760,7 @@
             <div id="vista-archivo" style="display: none;">
                 <div class="top-bar" style="display:flex; justify-content:space-between; align-items:center;">
                     <h2>Archivo General</h2>
-                    <button class="btn-primary" onclick="alert('Módulo de Historial/Año en desarrollo')"
-                        style="background:#0f172a; border:none; padding:8px 15px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">📅
-                        Historial/Año</button>
+
                 </div>
                 <div class="admin-container">
                     <div style="display:flex; gap:10px; margin-bottom: 20px;">
