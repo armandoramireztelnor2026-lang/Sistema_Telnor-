@@ -659,6 +659,49 @@ def notificar_admin_10k():
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
+@facturas_bp.route("/api/facturas/notificar_admin_liberar_manual", methods=["POST"])
+def notificar_admin_liberar_manual():
+    factura_id = request.form.get("id")
+    data = leer_json("facturas.json")
+
+    for f in data.get("facturas", []):
+        if str(f["id"]) == str(factura_id):
+            unidad = f.get("unidad", "")
+            
+            try:
+                import re
+                retro = f.get("retro") or ""
+                match = re.search(r"\[TICKET:(.*?)\]", str(retro))
+                ticket_id = match.group(1) if match else f.get("id_reporte", factura_id)
+                
+                num_orden = f.get("numero_orden", "N/A")
+                num_pedido = f.get("numero_cotizacion_asignacion", "N/A")
+
+                usuarios_data = leer_json("usuarios.json")
+                admins = [u for u in usuarios_data.get("usuarios", [])
+                        if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Administrador"]
+                
+                from notificaciones import enviar_correo_esperando_liberacion
+                enviados = 0
+                for adm in admins:
+                    correo = adm.get("datos_perfil", {}).get("correo")
+                    nombre = adm.get("datos_perfil", {}).get("nombres", "Administrador")
+                    if correo:
+                        enviar_correo_esperando_liberacion(correo, nombre, ticket_id, unidad, num_orden, num_pedido)
+                        enviados += 1
+                
+                if enviados == 0:
+                    return jsonify({"status": "error", "message": "No se encontraron administradores con correo configurado."})
+                
+                return jsonify({"status": "success", "message": "Notificación enviada al administrador exitosamente."})
+            except Exception as e:
+                import traceback
+                error_msg = str(e)
+                traceback.print_exc()
+                return jsonify({"status": "error", "message": f"Error interno: {error_msg}"})
+            
+    return jsonify({"status": "error", "message": "Registro no encontrado."})
+
 @facturas_bp.route("/api/facturas/notificar_corp_10k", methods=["POST"])
 def notificar_corp_10k():
     factura_id = request.form.get("id")

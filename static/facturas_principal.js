@@ -276,10 +276,14 @@ async function cargarFacturas() {
                         }
                     } else if (confirmadaTotal && entregadoTexto === 'Sí' && f.liberado_admin === false) {
                         // Unidad entregada, pendiente de liberación por Admin
-                        btnAccion += `<button onclick="liberarTicketAdmin('${f.id}')"
-                            style="background:linear-gradient(135deg,#10b981,#059669); color:white; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; font-weight:bold; font-size:0.85em; width:100%; margin-top:2px;">
-                            ✅ Liberar Ticket para Facturación
-                        </button>`;
+                        if (subrolAct === 'Supervisor') {
+                            btnAccion += `<button class="btn-info" style="background:#f59e0b; color:white; font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; border:none; margin-top:5px; font-weight:bold; cursor:pointer; border-radius:4px;" onclick="notificarAdminLiberacion('${f.id}')">🔔 Notificar al Administrador</button>`;
+                        } else {
+                            btnAccion += `<button onclick="liberarTicketAdmin('${f.id}')"
+                                style="background:linear-gradient(135deg,#10b981,#059669); color:white; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; font-weight:bold; font-size:0.85em; width:100%; margin-top:2px;">
+                                ✅ Liberar Ticket para Facturación
+                            </button>`;
+                        }
                     }
 
                     btnAccion += `<div style="display:flex; gap:5px;"><button class="btn-danger-sm" style="flex:1; margin:0;" onclick="eliminarFacturaDefinitiva('${f.id}')">Eliminar</button></div>`;
@@ -441,6 +445,11 @@ async function cargarFacturas() {
                             btnAdminExtra = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">`;
                             btnAdminExtra += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
                             btnAdminExtra += `<button class="btn-info" onclick="abrirActualizarOrdenes('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#1e3a8a; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:0.9em; cursor:pointer;">Actualizar Datos(Pedido/Orden)</button>`;
+                            
+                            // Nuevo botón manual para notificar al Admin
+                            if (f.liberado_admin === false) {
+                                btnAdminExtra += `<button class="btn-info" onclick="notificarAdminLiberacion('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#f59e0b; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:0.9em; font-weight:bold; cursor:pointer;">🔔 Notificar Admin (Liberar)</button>`;
+                            }
 
 
                             let valFiscal = f.validacion_fiscal || 'Pendiente';
@@ -1475,6 +1484,31 @@ function notificarAdmin10k(idFactura) {
         ocultarLoaderDinamico();
         console.error(err);
         alert("Ocurrió un error al intentar notificar al administrador.");
+    });
+}
+
+function notificarAdminLiberacion(idFactura) {
+    if (!confirm("¿Deseas enviar un correo automático al administrador para recordarle que debe revisar y liberar el documento contable de este ticket?")) return;
+
+    let formData = new FormData();
+    formData.append("id", idFactura);
+
+    mostrarLoaderDinamico("Notificando al administrador...", "Enviando correo 📧");
+
+    fetch('/api/facturas/notificar_admin_liberar_manual', {
+        method: 'POST',
+        body: formData
+    }).then(res => res.json()).then(data => {
+        ocultarLoaderDinamico();
+        if (data.status === 'success') {
+            alert(data.message);
+        } else {
+            alert("Error: " + data.message);
+        }
+    }).catch(err => {
+        ocultarLoaderDinamico();
+        console.error(err);
+        alert("Ocurrió un error al intentar enviar la notificación.");
     });
 }
 

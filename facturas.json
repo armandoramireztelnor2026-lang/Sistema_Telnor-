@@ -1,3 +1,48 @@
 {
-    "facturas": []
+    "facturas": [
+        {
+            "id": "20261001003511",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1133",
+            "responsable": "Luis Ramirez",
+            "telefono": "6634041184",
+            "titulo": "n",
+            "retro": "[TICKET:REP-20260930232111]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 500.0,
+            "fecha": "2026-10-01",
+            "numero_orden": "112",
+            "compania": "RUMN",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-10-01T00:35:11.982786",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "55551547",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 500.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20260930232111]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1790840111969_0_Jefatura.png"
+                    ],
+                    "pdf_cotizacion": "1790840111969_0_Meta_2.1._Analisis_del_Modulo_4_Seguridad_en_la_nube.pdf",
+                    "numero_orden": "112",
+                    "numero_cotizacion_asignacion": "113"
+                }
+            ],
+            "reactivado_desde_caras": true,
+            "numero_cotizacion_asignacion": "113",
+            "liberado_admin": false
+        }
+    ]
 }

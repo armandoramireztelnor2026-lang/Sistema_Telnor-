@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Falla - RUMN</title>
-    <link rel="stylesheet" href="/static/style.css?v=50975">
+    <link rel="stylesheet" href="/static/style.css?v=60111">
     <style>
+        * { box-sizing: border-box; }
         body { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background-color: #081422; }
         .report-container { width: 100%; max-width: 800px; background-color: #112641; padding: 30px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin: auto; }
         .report-header { text-align: center; margin-bottom: 25px; }
@@ -127,8 +128,8 @@
                 </div>
                 <div class="input-group full-width-smart" style="text-align: center; margin-top: 15px;">
                     <label style="color: #f59e0b; font-size: 16px; margin-bottom: 10px; display: block;">Firma del Empleado / Chofer:</label>
-                    <div style="background: white; border: 2px dashed #1f395a; border-radius: 8px; display: inline-block; position: relative;">
-                        <canvas id="canvas-firma" width="400" height="200" style="cursor: crosshair; display: block; border-radius: 8px;"></canvas>
+                    <div style="background: white; border: 2px dashed #1f395a; border-radius: 8px; display: inline-block; position: relative; width: 100%; max-width: 400px; box-sizing: border-box; overflow: hidden;">
+                        <canvas id="canvas-firma" width="400" height="200" style="cursor: crosshair; display: block; border-radius: 8px; max-width: 100%; height: auto; touch-action: none;"></canvas>
                         <button type="button" onclick="limpiarFirma()" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Limpiar</button>
                     </div>
                     <p style="color: #a3b1c6; font-size: 12px; margin-top: 5px;">Use el ratón o el dedo (en pantalla táctil) para firmar en el recuadro blanco.</p>
@@ -204,9 +205,12 @@
                 clientY = evt.touches[0].clientY;
             }
             
+            let scaleX = canvas.width / rect.width;
+            let scaleY = canvas.height / rect.height;
+
             return {
-                x: clientX - rect.left,
-                y: clientY - rect.top
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
             };
         }
 
