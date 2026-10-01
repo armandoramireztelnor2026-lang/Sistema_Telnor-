@@ -128,11 +128,13 @@
                 </div>
                 <div class="input-group full-width-smart" style="text-align: center; margin-top: 15px;">
                     <label style="color: #f59e0b; font-size: 16px; margin-bottom: 10px; display: block;">Firma del Empleado / Chofer:</label>
-                    <div style="background: white; border: 2px dashed #1f395a; border-radius: 8px; display: inline-block; position: relative; width: 100%; max-width: 400px; box-sizing: border-box; overflow: hidden;">
+                    <div style="background: white; border: 2px dashed #1f395a; border-radius: 8px; display: inline-block; position: relative; width: 100%; max-width: 400px; box-sizing: border-box; overflow: hidden; margin-bottom: 10px;">
                         <canvas id="canvas-firma" width="400" height="200" style="cursor: crosshair; display: block; border-radius: 8px; max-width: 100%; height: auto; touch-action: none;"></canvas>
-                        <button type="button" onclick="limpiarFirma()" style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;">Limpiar</button>
                     </div>
-                    <p style="color: #a3b1c6; font-size: 12px; margin-top: 5px;">Use el ratón o el dedo (en pantalla táctil) para firmar en el recuadro blanco.</p>
+                    <div style="text-align: center;">
+                        <button type="button" onclick="limpiarFirma()" style="background: #ef4444; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold;">Limpiar</button>
+                    </div>
+                    <p style="color: #a3b1c6; font-size: 12px; margin-top: 15px;">Use el ratón o el dedo (en pantalla táctil) para firmar en el recuadro blanco.</p>
                     <input type="hidden" name="firma_chofer" id="hidden_firma" required>
                 </div>
             </div>
