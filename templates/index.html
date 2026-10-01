@@ -240,9 +240,39 @@
         <span class="toggle-link" id="link-corporativos" onclick="toggleModo('corporativos')">¿No tienes cuenta? Solicitar Registro</span>
     </div>
 
+    <!-- SECCIÓN QR PARA REPORTE MÓVIL -->
+    <div style="text-align: center; margin-top: 40px; margin-bottom: 40px; color: white; display: flex; flex-direction: column; align-items: center;">
+        <h3 style="margin-bottom: 15px; font-family: 'Poppins', sans-serif;">Escanea para Levantar Reporte desde tu Móvil</h3>
+        <div id="qrcode" style="display: inline-block; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);"></div>
+        <p style="margin-top: 10px; font-size: 0.9em; color: #94a3b8;">Usa la cámara de tu celular</p>
+    </div>
+
     <!-- SCRIPTS ORIGINALES -->
     <script src="/static/script.js?v=1788806395"></script>
+    <script src="/static/qrcode.min.js"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var serverIp = "{{ local_ip }}";
+            var port = window.location.port ? ":" + window.location.port : ":5000";
+            var base_url = window.location.origin;
+            
+            // Si el usuario entra por localhost o 127.0.0.1 en la PC, 
+            // forzamos la IP de la red local para que el QR sirva en móviles.
+            if (base_url.includes("localhost") || base_url.includes("127.0.0.1")) {
+                base_url = window.location.protocol + "//" + serverIp + port;
+            }
+            
+            var reportUrl = base_url + "/reportar";
+            new QRCode(document.getElementById("qrcode"), {
+                text: reportUrl,
+                width: 250,
+                height: 250,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        });
+
         // Limpiar el localStorage al estar en la pantalla de Login (cerrar sesión)
         localStorage.removeItem('activeViewAdmin');
         localStorage.removeItem('activeViewProv');

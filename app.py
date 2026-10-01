@@ -11,6 +11,7 @@ import random
 import string
 import datetime
 import webbrowser
+import socket
 from threading import Timer
 from notificaciones import enviar_correo_taller_facturar
 from rutas_facturas import facturas_bp
@@ -55,8 +56,19 @@ def inicializar_sistema():
 
 inicializar_sistema()
 
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
 @app.route('/')
-def index(): return render_template('index.html')
+def index(): 
+    return render_template('index.html', local_ip=get_local_ip())
 
 @app.route('/reportar')
 def reportar(): return render_template('reporte.html') 

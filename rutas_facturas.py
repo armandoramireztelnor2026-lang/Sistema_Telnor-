@@ -35,7 +35,8 @@ from notificaciones import (
     enviar_correo_admin_cancela_caras,
     enviar_correo_corp_rechaza_admin,
     enviar_correo_corp_rechaza_supervisor,
-    enviar_correo_corp_aprobado
+    enviar_correo_corp_aprobado,
+    enviar_correo_admin_rechazo_fiscal
 )
 
 facturas_bp = Blueprint("facturas_bp", __name__)
@@ -1399,23 +1400,39 @@ def subir_factura_final():
             f['validacion_fiscal'] = 'Pendiente'
             escribir_json('facturas.json', data)
             
+            # Obtener el COPE del ticket
+            import re
+            retro_str = f.get("retro") or ""
+            match_ticket = re.search(r"\[TICKET:(.*?)\]", str(retro_str))
+            ticket_id = match_ticket.group(1).strip() if match_ticket else f.get('id_reporte', f.get('id'))
+            
+            cope_ticket = ""
+            rep_data = leer_json("reportes.json")
+            for r in rep_data.get("reportes", []):
+                if str(r.get("id")) == str(ticket_id):
+                    cope_ticket = r.get("cope", "")
+                    break
+
             # Notificar al Supervisor
             usuarios_data = leer_json("usuarios.json")
             supervisores = [u for u in usuarios_data.get("usuarios", [])
                            if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
             
             for sup in supervisores:
-                correo_sup = sup["datos_perfil"].get("correo")
-                nombre_sup = sup["datos_perfil"].get("nombres", "Supervisor")
-                if correo_sup:
-                    enviar_correo_factura_fiscal_subida(
-                        correo_sup, 
-                        f.get('proveedor', 'Proveedor'), 
-                        f.get('unidad', 'S/N'), 
-                        f.get('titulo', 'Sin Título'), 
-                        folios[0] if folios else 'Varios',
-                        nombre_sup
-                    )
+                cope_admin = sup.get("datos_perfil", {}).get("cope", "")
+                copes_extra = sup.get("datos_perfil", {}).get("copes_asignados", [])
+                if cope_admin == cope_ticket or cope_ticket in copes_extra:
+                    correo_sup = sup["datos_perfil"].get("correo")
+                    nombre_sup = sup["datos_perfil"].get("nombres", "Supervisor")
+                    if correo_sup:
+                        enviar_correo_factura_fiscal_subida(
+                            correo_sup, 
+                            f.get('proveedor', 'Proveedor'), 
+                            f.get('unidad', 'S/N'), 
+                            f.get('titulo', 'Sin Título'), 
+                            folios[0] if folios else 'Varios',
+                            nombre_sup
+                        )
             # Notificar al Taller (Proveedor)
             correo_prov = session["usuario"]["datos_perfil"].get("correo")
             if correo_prov:
@@ -1492,6 +1509,7 @@ def rechazar_fiscal():
                 cot.pop('pdf_fiscal', None)
 
             f['validacion_fiscal'] = 'Rechazada'
+            f['liberado_admin'] = False
             
             # Opcional: Agregar comentario al ticket o mandar correo aquí, por ahora solo retro interna
             if not f.get('retro'): f['retro'] = ""
@@ -1499,17 +1517,30 @@ def rechazar_fiscal():
             
             escribir_json('facturas.json', data)
             
-            # Buscar correo del proveedor
+            # Buscar correo del proveedor y administradores
             correo_proveedor = ""
+            lista_admins = []
+            cope_factura = f.get('cope')
             for u in usuarios:
-                if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == f.get('proveedor'):
-                    correo_proveedor = u.get('datos_perfil', {}).get('correo', '')
-                    break
+                perfil = u.get('datos_perfil', {})
+                if u.get('rol') == 'proveedores' and perfil.get('nombre_proveedor') == f.get('proveedor'):
+                    correo_proveedor = perfil.get('correo', '')
+                elif u.get('rol') == 'administracion' and perfil.get('subrol') == 'Administrador':
+                    # Filtrar por el mismo COPE del ticket (factura) si está definido
+                    if not cope_factura or perfil.get('cope') == cope_factura:
+                        correo = perfil.get('correo')
+                        nombre_admin = perfil.get('nombres', '') + " " + perfil.get('apellido_paterno', '')
+                        if correo:
+                            lista_admins.append({'correo': correo, 'nombre': nombre_admin.strip()})
+            
+            nombre_supervisor = session['usuario']['datos_perfil'].get('nombres', 'Supervisor')
+            if lista_admins:
+                enviar_correo_admin_rechazo_fiscal(lista_admins, f.get('id'), f.get('unidad'), motivo, nombre_supervisor)
             
             if correo_proveedor:
                 enviar_correo_factura_fiscal_rechazada(correo_proveedor, f.get('proveedor'), f.get('unidad'), folio_borrado, motivo)
             
-            return jsonify({"status": "success", "message": "Factura rechazada. Se notificará al proveedor para que la suba de nuevo."})
+            return jsonify({"status": "success", "message": "Factura rechazada. Se reinició la liberación contable y se notificó a Administración y al proveedor."})
     return jsonify({"status": "error", "message": "Factura no encontrada."})
 
 @facturas_bp.route('/api/facturas/doc50', methods=['POST'])

@@ -7,7 +7,7 @@
             "responsable": "Luis Ramirez",
             "telefono": "6634041184",
             "titulo": "n",
-            "retro": "[TICKET:REP-20260930232111]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+            "retro": "[TICKET:REP-20260930232111]\r\nREPORTE ORIGINAL DEL CHOFER: n\n\n[ADMINISTRACI\u00d3N - Factura Rechazada]: Favor de modificarla por que hay errores en la factura por favor\n\n[ADMINISTRACI\u00d3N - Factura Rechazada]: haber si no falla",
             "diagnostico": "n",
             "trabajo_realizar": "n",
             "mantenimiento": "Preventivo",
@@ -37,12 +37,21 @@
                     ],
                     "pdf_cotizacion": "1790840111969_0_Meta_2.1._Analisis_del_Modulo_4_Seguridad_en_la_nube.pdf",
                     "numero_orden": "112",
-                    "numero_cotizacion_asignacion": "113"
+                    "numero_cotizacion_asignacion": "113",
+                    "factura_folio": "21231",
+                    "factura_pdf": "FACTURA_FINAL_20261001003511_0_Meta_2.1._Analisis_del_Modulo_4_Seguridad_en_la_nube.pdf",
+                    "numero_doc50": "5092312312"
                 }
             ],
             "reactivado_desde_caras": true,
             "numero_cotizacion_asignacion": "113",
-            "liberado_admin": false
+            "liberado_admin": true,
+            "validacion_fiscal": "Aprobada",
+            "factura_folio": "21231",
+            "factura_pdf": "FACTURA_FINAL_20261001003511_0_Meta_2.1._Analisis_del_Modulo_4_Seguridad_en_la_nube.pdf",
+            "numero_doc50": "5092312312",
+            "estado": "Archivado",
+            "fecha_cierre": "2026-10-01 11:15:48"
         }
     ]
 }

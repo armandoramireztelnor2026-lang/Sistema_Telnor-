@@ -1293,3 +1293,38 @@ def enviar_correo_correccion_orden(correo_destino, supervisor, unidad):
     </html>
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
+
+def enviar_correo_admin_rechazo_fiscal(lista_admins, ticket, unidad, motivo, nombre_supervisor="Supervisor"):
+    asunto = f"Revisión Requerida - Factura Fiscal Rechazada: {unidad}"
+    
+    for admin in lista_admins:
+        correo = admin.get('correo')
+        nombre_admin = admin.get('nombre', 'Administrador')
+        
+        if not correo:
+            continue
+
+        cuerpo_html = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+            <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+                <div style="background-color: #ef4444; padding: 20px; text-align: center;">
+                    <h2 style="color: #ffffff; margin: 0;">FACTURA FISCAL RECHAZADA</h2>
+                </div>
+                <div style="padding: 20px;">
+                    <p>Hola <strong>{nombre_admin}</strong>,</p>
+                    <p>El supervisor <strong>{nombre_supervisor}</strong> ha rechazado la validación de la factura fiscal para la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong> (Ticket: <strong>{ticket}</strong>).</p>
+                    <p><strong>Motivo del rechazo:</strong></p>
+                    <blockquote style="border-left: 4px solid #ef4444; padding-left: 10px; margin-left: 0; color: #4b5563; font-style: italic;">
+                        {motivo}
+                    </blockquote>
+                    <p><strong>El proceso de liberación del documento contable ha sido reiniciado (deshecho).</strong></p>
+                    <p>Por favor, revisa si es necesario que el supervisor corrija los datos (mediante actualizar datos de pedido/orden) o realiza las validaciones pertinentes para que en su momento vuelva a liberar el número de documento contable (Doc50).</p>
+                    <br>
+                    <p style="font-size: 0.9em; color: #6b7280;">Este es un mensaje automático del sistema.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        disparar_correo(correo, asunto, cuerpo_html)

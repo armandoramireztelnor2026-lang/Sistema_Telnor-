@@ -444,7 +444,10 @@ async function cargarFacturas() {
                         if (rolUsuario === 'administracion') {
                             btnAdminExtra = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">`;
                             btnAdminExtra += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
-                            btnAdminExtra += `<button class="btn-info" onclick="abrirActualizarOrdenes('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#1e3a8a; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:0.9em; cursor:pointer;">Actualizar Datos(Pedido/Orden)</button>`;
+                            
+                            if (!f.liberado_admin) {
+                                btnAdminExtra += `<button class="btn-info" onclick="abrirActualizarOrdenes('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#1e3a8a; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:0.9em; cursor:pointer;">Actualizar Datos(Pedido/Orden)</button>`;
+                            }
                             
                             // Nuevo botón manual para notificar al Admin
                             if (f.liberado_admin === false) {
