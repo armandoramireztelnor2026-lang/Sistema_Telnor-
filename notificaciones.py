@@ -51,18 +51,24 @@ def enviar_correo_liberacion_doc50_supervisor(correo_destino, nombre_supervisor,
     asunto = f"Aviso de Liberación para Captura de Doc. Contable (Unidad 8090-{str(unidad).replace('8090-', '')})"
     cuerpo_html = f"""
     <html>
-    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-            <div style="background-color: #f59e0b; padding: 20px; text-align: center;">
-                <h2 style="color: #ffffff; margin: 0;">CAMPO DOC 50 HABILITADO</h2>
+    <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; padding: 30px; margin: 0;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center;">
+                <h2 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 1px;">✅ DOCUMENTO 50 HABILITADO</h2>
             </div>
-            <div style="padding: 20px;">
-                <p>Hola <strong>{nombre_supervisor}</strong>,</p>
-                <p>El área de <strong>Administración</strong> ha habilitado la captura del Número de Documento Contable 50 para el ticket <strong>{ticket}</strong>.</p>
-                <p>Ya puedes ingresar al sistema y capturar el folio correspondiente para que el trámite pueda continuar hacia la fase de carga de factura (CFDI) por parte del proveedor.</p>
-                <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
-                </ul>
+            <div style="padding: 35px;">
+                <p style="font-size: 16px; color: #374151;">Hola <strong>{nombre_supervisor}</strong>,</p>
+                <p style="font-size: 16px; color: #4b5563; line-height: 1.6;">El área de <strong>Administración</strong> ha liberado oficialmente el candado para la carga del Documento Contable (DOC 50) correspondiente al siguiente servicio:</p>
+                
+                <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 15px 20px; margin: 25px 0; border-radius: 4px;">
+                    <p style="margin: 0 0 10px 0; font-size: 15px;"><strong style="color: #1e293b;">🎫 Número de Ticket:</strong> <span style="color: #3b82f6; font-weight: bold;">{ticket}</span></p>
+                    <p style="margin: 0; font-size: 15px;"><strong style="color: #1e293b;">🚚 Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</p>
+                </div>
+                
+                <p style="font-size: 15px; color: #4b5563; line-height: 1.6;">Ya puedes ingresar al sistema y capturar el folio correspondiente para que el trámite avance hacia la fase de carga de factura (CFDI) por parte del proveedor.</p>
+                
+                <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+                <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0;">Este es un mensaje automático generado por el sistema.<br>Por favor no respondas a este correo.</p>
             </div>
         </div>
     </body>

@@ -68,7 +68,7 @@ def get_local_ip():
 
 @app.route('/')
 def index(): 
-    return redirect(url_for('reportar'))
+    return redirect(url_for('login_page'))
 
 @app.route('/admin-login')
 def login_page(): 

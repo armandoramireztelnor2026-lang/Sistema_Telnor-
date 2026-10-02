@@ -163,9 +163,12 @@ async function cargarFacturas() {
                     }
 
                     if (f.estado === 'Archivado' && tbodyArchivo && rolUsuario === 'administracion') {
+                        let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+                        let btnArchivar = subrolAct === 'Supervisor' ? `<button class="btn-info" style="width:100%; background:#8b5cf6; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="alert('Función Archivar pendiente')">Archivar</button>` : '';
                         let btnVerExp = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
                             <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; color:white; margin:0; width:100%;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>
                             <button class="btn-danger-sm" style="width:100%; background:#ef4444; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar</button>
+                            ${btnArchivar}
                         </div>`;
                         let idReporteAsociado = obtenerIdReporte(f) || 'N/A';
                         let badgeCarasArch = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';

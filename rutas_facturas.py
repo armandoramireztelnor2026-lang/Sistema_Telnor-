@@ -950,18 +950,21 @@ def confirmar_corp():
             supervisores = [u for u in usuarios_data.get("usuarios", [])
                            if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
 
+            responsable_factura = f.get("responsable", "").strip()
             for sup in supervisores:
-                correo = sup["datos_perfil"].get("correo")
-                nombre = sup["datos_perfil"].get("nombres", "Supervisor")
-                if correo:
-                    enviar_correo_corp_aprobado(
-                        correo,
-                        nombre,
-                        f.get("id", "N/A"),
-                        f.get("unidad", "S/N"),
-                        f.get("proveedor", "Sin especificar"),
-                        precio_float
-                    )
+                nombre_sup = f"{sup['datos_perfil'].get('nombres', '').strip()} {sup['datos_perfil'].get('apellido_paterno', '').strip()}".strip()
+                if nombre_sup == responsable_factura:
+                    correo = sup["datos_perfil"].get("correo")
+                    nombre = sup["datos_perfil"].get("nombres", "Supervisor")
+                    if correo:
+                        enviar_correo_corp_aprobado(
+                            correo,
+                            nombre,
+                            f.get("id", "N/A"),
+                            f.get("unidad", "S/N"),
+                            f.get("proveedor", "Sin especificar"),
+                            precio_float
+                        )
             
             proveedor_nombre = f.get('proveedor', '')
             correo_prov = ""
@@ -1875,7 +1878,8 @@ def liberar_doc50():
                         nombre_sup = u["datos_perfil"].get("nombres", "Supervisor")
                         if correo:
                             from notificaciones import enviar_correo_liberacion_doc50_supervisor
-                            enviar_correo_liberacion_doc50_supervisor(correo, nombre_sup, f.get("unidad", "S/N"), f.get("id_reporte", f.get("numero_reporte", "N/A")))
+                            ticket_para_correo = ticket_id if match_ticket else f.get("id", "N/A")
+                            enviar_correo_liberacion_doc50_supervisor(correo, nombre_sup, f.get("unidad", "S/N"), ticket_para_correo)
                             
             # Enviar correo al taller de que ya pueden facturar
             proveedor_nombre = f.get('proveedor', '')
