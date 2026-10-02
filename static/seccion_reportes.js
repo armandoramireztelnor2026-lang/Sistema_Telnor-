@@ -84,12 +84,12 @@ function renderizarTablaReportes(lista) {
         let pendienteHTML = '<span style="background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">Pendiente</span>';
 
         let numEco = f.unidad ? `8090-${f.unidad.replace('8090-', '')}` : pendienteHTML;
-        let fechaTicketBase = f.fecha || reporteOrig.fecha || pendienteHTML;
+        let fechaTicketBase = reporteOrig.fecha || f.fecha || pendienteHTML;
         let fechaTicket = fechaTicketBase;
         
         // Agregar hora si es posible
         if (fechaTicket !== pendienteHTML) {
-            let ts = f.timestamp || reporteOrig.timestamp;
+            let ts = reporteOrig.timestamp || f.timestamp;
             if (ts) {
                 let dt = new Date(ts);
                 if (!isNaN(dt)) {
@@ -106,7 +106,7 @@ function renderizarTablaReportes(lista) {
         // CALCULO DE TIEMPO DEL TICKET
         // Inicio: fecha del reporte. Fin: fecha_cierre si existe, si no => ahora
         let tiempoTicket = pendienteHTML;
-        let tsBase = f.timestamp || reporteOrig.timestamp;
+        let tsBase = reporteOrig.timestamp || f.timestamp;
         if (tsBase || fechaTicketBase !== pendienteHTML) {
             let ft1 = tsBase ? new Date(tsBase) : new Date(fechaTicketBase + "T00:00:00");
             let ft2 = f.fecha_cierre ? new Date(f.fecha_cierre) : new Date();

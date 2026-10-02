@@ -68,6 +68,10 @@ def get_local_ip():
 
 @app.route('/')
 def index(): 
+    return redirect(url_for('reportar'))
+
+@app.route('/admin-login')
+def login_page(): 
     return render_template('index.html', local_ip=get_local_ip())
 
 @app.route('/reportar')
@@ -75,23 +79,23 @@ def reportar(): return render_template('reporte.html')
 
 @app.route('/proveedores')
 def proveedores(): 
-    if 'usuario' not in session or session['usuario']['rol'] != 'proveedores': return redirect(url_for('index'))
+    if 'usuario' not in session or session['usuario']['rol'] != 'proveedores': return redirect(url_for('login_page'))
     return render_template('proveedores.html', usuario=session['usuario'])
 
 @app.route('/administracion')
 def administracion(): 
-    if 'usuario' not in session or session['usuario']['rol'] != 'administracion': return redirect(url_for('index'))
+    if 'usuario' not in session or session['usuario']['rol'] != 'administracion': return redirect(url_for('login_page'))
     return render_template('administracion.html', usuario=session['usuario'])
 
 @app.route('/corporativos')
 def corporativos(): 
-    if 'usuario' not in session or session['usuario']['rol'] != 'corporativos': return redirect(url_for('index'))
+    if 'usuario' not in session or session['usuario']['rol'] != 'corporativos': return redirect(url_for('login_page'))
     return render_template('corporativos.html', usuario=session['usuario'])
 
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('index'))
+    return redirect(url_for('login_page'))
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -336,13 +340,26 @@ def validar_codigo():
                 
                 proveedor_nombre = f.get('proveedor', '')
                 usuarios_data = leer_json("usuarios.json")
-                correo_prov = ""
-                for u in usuarios_data.get("usuarios", []):
-                    if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == proveedor_nombre:
-                        correo_prov = u.get('datos_perfil', {}).get('correo', '')
-                        break
                 
-                return jsonify({"status": "success", "message": "Match perfecto."})
+                # Obtener correo de los administradores
+                admins = [u for u in usuarios_data.get("usuarios", []) if u.get("rol") == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Administrador"]
+                
+                import re
+                retro = f.get("retro", "")
+                match = re.search(r"\[TICKET:(.*?)\]", str(retro))
+                ticket_id = match.group(1) if match else f.get("id_reporte", str(id_factura))
+                unidad = f.get("unidad", "")
+                num_orden = f.get("numero_orden", "N/A")
+                num_pedido = f.get("numero_cotizacion_asignacion", "N/A")
+                
+                from notificaciones import enviar_correo_esperando_liberacion
+                for adm in admins:
+                    correo = adm.get("datos_perfil", {}).get("correo")
+                    nombre = adm.get("datos_perfil", {}).get("nombres", "Administrador")
+                    if correo:
+                        enviar_correo_esperando_liberacion(correo, nombre, ticket_id, unidad, num_orden, num_pedido)
+                
+                return jsonify({"status": "success", "message": "Match perfecto. Se ha notificado al Administrador."})
             else:
                 return jsonify({"status": "error", "message": "El código es incorrecto. Pide al chofer que revise su correo nuevamente."})
     return jsonify({"status": "error", "message": "No se encontró la factura en el sistema."})

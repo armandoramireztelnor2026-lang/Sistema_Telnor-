@@ -196,6 +196,9 @@ def nueva_factura():
     import re as re_mod
     match_ticket = re_mod.search(r"\[TICKET:(.*?)\]", retro_global)
     cope_ticket = ""
+    comentarios_heredados = ""
+    autor_comentario_heredado = ""
+    eliminado_por_heredado = ""
     if match_ticket:
         ticket_id = match_ticket.group(1).strip()
         rep_data = leer_json("reportes.json")
@@ -204,6 +207,9 @@ def nueva_factura():
                 compania_asignada = r.get("compania", "RUMN")
                 cope_ticket = r.get("cope", "")
                 reactivado_flag = r.get("reactivado_desde_caras", False)
+                comentarios_heredados = r.get("comentarios", "")
+                autor_comentario_heredado = r.get("autor_comentario", "")
+                eliminado_por_heredado = r.get("eliminado_por", "")
                 break
 
     # Título global = primer título de cotización
@@ -235,7 +241,10 @@ def nueva_factura():
         "codigo_liberacion": "",
         "entregado": "No",
         "cotizaciones": cotizaciones_array,
-        "reactivado_desde_caras": reactivado_flag
+        "reactivado_desde_caras": reactivado_flag,
+        "comentarios": comentarios_heredados,
+        "autor_comentario": autor_comentario_heredado,
+        "eliminado_por": eliminado_por_heredado
     }
 
     data = leer_json("facturas.json")

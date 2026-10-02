@@ -52,6 +52,60 @@
             "numero_doc50": "5092312312",
             "estado": "Archivado",
             "fecha_cierre": "2026-10-01 11:15:48"
+        },
+        {
+            "id": "20261002002631",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1133",
+            "responsable": "Armando Ramirez ",
+            "telefono": "6634041184",
+            "titulo": "n",
+            "retro": "[TICKET:REP-20261002001145]\r\nREPORTE ORIGINAL DEL CHOFER: N",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 12000.0,
+            "fecha": "2026-10-02",
+            "numero_orden": "1111",
+            "compania": "RUMN",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-10-02T00:26:31.041570",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "68345896",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 12000.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20261002001145]\r\nREPORTE ORIGINAL DEL CHOFER: N",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1790925991019_0_WhatsApp_Image_2026-10-01_at_12.25.08_AM.jpeg"
+                    ],
+                    "pdf_cotizacion": "1790925991019_0_Meta_2.1._Analisis_del_Modulo_4_Seguridad_en_la_nube.pdf",
+                    "numero_orden": "1111",
+                    "numero_cotizacion_asignacion": "1112",
+                    "factura_folio": "111",
+                    "factura_pdf": "FACTURA_FINAL_20261002002631_0_Meta_2.1._Analisis_del_Modulo_4_Seguridad_en_la_nube.pdf",
+                    "numero_doc50": "5092312312"
+                }
+            ],
+            "reactivado_desde_caras": false,
+            "numero_cotizacion_asignacion": "1112",
+            "aprobado_admin_10k": true,
+            "liberado_admin": true,
+            "factura_folio": "111",
+            "factura_pdf": "FACTURA_FINAL_20261002002631_0_Meta_2.1._Analisis_del_Modulo_4_Seguridad_en_la_nube.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "5092312312",
+            "estado": "Archivado",
+            "fecha_cierre": "2026-10-02 00:49:18"
         }
     ]
 }

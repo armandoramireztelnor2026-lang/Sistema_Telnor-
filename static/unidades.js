@@ -21,6 +21,9 @@ async function cargarUnidades() {
             let juridicoBtnText = isJuridico ? 'Quitar Jurídicos' : 'Jurídicos';
             let juridicoBtnColor = isJuridico ? '#6d28d9' : '#8b5cf6';
             
+            let juridicoDisabledAttr = isInShop ? 'disabled' : '';
+            let juridicoStyleOpacity = isInShop ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
+            
             rows += `
                 <tr>
                     <td style="font-weight:bold; color:#0ea5e9;">${idUnidad}</td>
@@ -33,7 +36,7 @@ async function cargarUnidades() {
                             ? `<button ${disabledAttr} ${tooltip} onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; margin-right:5px; ${styleOpacity}">Activar</button>`
                             : `<button ${disabledAttr} ${tooltip} onclick="toggleEstadoUnidad('${idUnidad}')" style="background:#f59e0b; color:white; border:none; padding:5px 10px; border-radius:5px; margin-right:5px; ${styleOpacity}">Desactivar</button>`
                         }
-                        <button onclick="verJuridicos('${idUnidad}')" style="background:${juridicoBtnColor}; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">${juridicoBtnText}</button>
+                        <button ${juridicoDisabledAttr} ${tooltip} onclick="verJuridicos('${idUnidad}')" style="background:${juridicoBtnColor}; color:white; border:none; padding:5px 10px; border-radius:5px; ${juridicoStyleOpacity}">${juridicoBtnText}</button>
                     </td>
                 </tr>
             `;

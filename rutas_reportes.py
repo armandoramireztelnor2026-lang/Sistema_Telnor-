@@ -418,6 +418,9 @@ def toggle_juridicos_unidad():
     if not numero:
         return jsonify({"status": "error", "message": "Falta el numero de la unidad"})
         
+    if is_unidad_active(numero):
+        return jsonify({"status": "error", "message": "No puedes mandar a Jurídicos esta unidad porque actualmente tiene un ticket activo en el taller o en asignación."})
+        
     try:
         data = leer_json("unidades.json")
         if not data:
