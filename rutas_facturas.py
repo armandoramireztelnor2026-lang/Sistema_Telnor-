@@ -481,6 +481,7 @@ def confirmar_admin():
     for f in data.get("facturas", []):
         if str(f["id"]) == str(factura_id):
             f["aprobado_admin"] = True
+            f["timestamp_aprobacion"] = datetime.datetime.now().isoformat()
             f["estado_custom"] = ""
             
             # Guardamos los primeros datos en la raiz por compatibilidad vieja
@@ -930,6 +931,7 @@ def confirmar_corp():
                     return jsonify({"status": "error", "message": "Esta cotización debe ser aprobada por Administración primero."})
 
             f["aprobado_corp"] = True
+            f["timestamp_aprobacion"] = datetime.datetime.now().isoformat()
             f["estado_custom"] = ""
 
             # ===== NUEVA LOGICA DE BLOQUEO PARA DOC 50 =====

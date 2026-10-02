@@ -214,22 +214,26 @@ function renderizarTablaReportes(lista) {
         let fechaSalida = f.fecha_cierre || pendienteHTML;
         let tiempoTaller = pendienteHTML;
         // CALCULO DE TIEMPO EN TALLER
-        // Inicio: timestamp (cuando el taller recibió el ticket). Fin: fecha_cierre si existe, si no => ahora
-        // Sólo aplica si el ticket ya fue asignado a un taller (no is_unassigned)
+        // Inicio: timestamp_aprobacion (cuando el supervisor aprobó la cotización). Fin: fecha_cierre si existe, si no => ahora
         f.dias_taller = 0;
-        let fechaInicioTaller = f.timestamp || f.fecha; // timestamp = cuando se creó la factura (asignación al taller)
-        if (!f.is_unassigned && fechaInicioTaller) {
-            let f1 = f.timestamp ? new Date(fechaInicioTaller) : new Date(fechaInicioTaller + "T00:00:00");
-            let f2 = f.fecha_cierre ? new Date(f.fecha_cierre) : new Date();
-            if (!isNaN(f1) && !isNaN(f2) && f2 >= f1) {
-                let diffMs = f2 - f1;
-                let diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                f.dias_taller = diffDays;
-                let diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                let diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                let sufijo = f.fecha_cierre ? '' : ' ⏱️';
-                tiempoTaller = `${diffDays}d ${diffHours}h ${diffMinutes}m${sufijo}`;
+        if (!f.is_unassigned && (f.aprobado_admin || f.aprobado_corp)) {
+            let fechaInicioTaller = f.timestamp_aprobacion || f.timestamp || f.fecha; 
+            if (fechaInicioTaller) {
+                let f1 = new Date(fechaInicioTaller);
+                if (isNaN(f1)) f1 = new Date(fechaInicioTaller + "T00:00:00");
+                let f2 = f.fecha_cierre ? new Date(f.fecha_cierre) : new Date();
+                if (!isNaN(f1) && !isNaN(f2) && f2 >= f1) {
+                    let diffMs = f2 - f1;
+                    let diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    f.dias_taller = diffDays;
+                    let diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    let diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    let sufijo = f.fecha_cierre ? '' : ' ⏱️';
+                    tiempoTaller = `${diffDays}d ${diffHours}h ${diffMinutes}m${sufijo}`;
+                }
             }
+        } else if (!f.is_unassigned) {
+            tiempoTaller = `<span style="color:#f59e0b; font-size: 0.9em;">Esperando Aprobación</span>`;
         }
 
         let isOperando = true;
