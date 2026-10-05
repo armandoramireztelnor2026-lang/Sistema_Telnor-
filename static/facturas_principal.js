@@ -3174,6 +3174,13 @@ function renderizarArchivados() {
         
         let doc50 = f.numero_doc50 || 'N/A';
         
+        let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+        let rolUsuario = document.getElementById('rol-usuario-global') ? document.getElementById('rol-usuario-global').value : '';
+        let btnEliminar = '';
+        if (rolUsuario === 'administracion' && subrolAct === 'Jefatura') {
+            btnEliminar = `<button class="btn-danger-sm" style="width:100%; font-size:0.85em; padding:6px 10px; background:#ef4444; border:none; color:white; margin-top:8px; border-radius:4px;" onclick="eliminarFacturaSilenciosa('${f.id}')">🗑️ Eliminar Permanente</button>`;
+        }
+        
         tbody.innerHTML += `
             <tr style="border-bottom:1px solid #e2e8f0; transition:background 0.2s;">
                 <td style="padding:12px; font-weight:bold; color:#0ea5e9;">${ticketId}</td>
@@ -3185,8 +3192,29 @@ function renderizarArchivados() {
                 <td style="padding:12px; text-align:right;">
                     <button class="btn-info" style="width:100%; font-size:0.85em; padding:6px 10px; background:#0284c7; border:none; color:white; margin:0;" onclick="abrirDetalles('${f.id}')">👁️ Ver Detalles</button>
                     ${pdfLinks}
+                    ${btnEliminar}
                 </td>
             </tr>
         `;
     });
+}
+
+async function eliminarFacturaSilenciosa(id) {
+    if (!confirm("⚠️ ADVERTENCIA: Esta acción eliminará permanentemente todos los datos de este ticket. ¿Estás absolutamente seguro?")) return;
+    try {
+        const resp = await fetch('/api/facturas/eliminar_permanente', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: id})
+        });
+        const res = await resp.json();
+        if (res.status === 'success') {
+            mostrarToast("Ticket eliminado permanentemente.", "success");
+            abrirTicketsArchivados(); // recargar
+        } else {
+            mostrarToast("Error: " + res.message, "error");
+        }
+    } catch (e) {
+        mostrarToast("Error de conexión.", "error");
+    }
 }

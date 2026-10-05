@@ -2203,3 +2203,52 @@ def descargar_zip(factura_id):
         as_attachment=True,
         download_name=nombre_zip
     )
+
+@facturas_bp.route('/api/facturas/eliminar_permanente', methods=['POST'])
+def eliminar_permanente():
+    if 'usuario' not in session:
+        return jsonify({"status": "error", "message": "No autorizado"}), 401
+    
+    # Validar que sea Jefatura
+    rol = session.get('rol', '')
+    subrol = session.get('subrol', '')
+    if rol != 'administracion' or subrol != 'Jefatura':
+        return jsonify({"status": "error", "message": "No tienes permisos para realizar esta acción. Solo Jefatura puede eliminar permanentemente."}), 403
+
+    req_data = request.json or {}
+    factura_id = str(req_data.get('id', ''))
+    if not factura_id:
+        return jsonify({"status": "error", "message": "ID no proporcionado"}), 400
+
+    data = leer_json('facturas.json')
+    factura_target = None
+    
+    # Encontrar y extraer
+    for idx, f in enumerate(data.get('facturas', [])):
+        if str(f['id']) == factura_id:
+            factura_target = f
+            del data['facturas'][idx]
+            break
+
+    if not factura_target:
+        return jsonify({"status": "error", "message": "Factura no encontrada."}), 404
+
+    # Extraer el ID de reporte asociado
+    ticket_id = factura_target.get("id_reporte") or factura_target.get("numero_reporte")
+    if not ticket_id:
+        match = re.search(r"\[TICKET:(.*?)\]", factura_target.get("retro", ""))
+        if match: ticket_id = match.group(1).strip()
+
+    # Guardar cambios en facturas.json
+    guardar_json('facturas.json', data)
+
+    # También eliminar el reporte original de reportes.json para borrar todo rastro
+    if ticket_id:
+        reportes_data = leer_json('reportes.json')
+        for idx, r in enumerate(reportes_data.get('reportes', [])):
+            if str(r.get('id')) == str(ticket_id):
+                del reportes_data['reportes'][idx]
+                guardar_json('reportes.json', reportes_data)
+                break
+
+    return jsonify({"status": "success", "message": "Ticket y reporte eliminados permanentemente."})
