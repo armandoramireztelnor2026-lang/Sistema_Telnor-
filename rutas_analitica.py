@@ -1,6 +1,9 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 import json
 import os
+import datetime
+from collections import Counter
+import re
 
 analitica_bp = Blueprint("analitica_bp", __name__)
 
@@ -8,11 +11,47 @@ def leer_json(archivo):
     if not os.path.exists(archivo): return {}
     with open(archivo, 'r', encoding='utf-8') as f: return json.load(f)
 
+def filtrar_por_anio(reportes, facturas, year_str):
+    if not year_str or year_str == 'Todos' or year_str == '':
+        return reportes, facturas
+        
+    rep_filtrados = []
+    ticket_years = {}
+    
+    for r in reportes:
+        y = str(r.get('fecha', ''))[:4]
+        if not y and r.get('timestamp'):
+            y = str(r.get('timestamp', ''))[:4]
+            
+        ticket_id = str(r.get('id', ''))
+        ticket_years[ticket_id] = y
+        
+        if y == year_str:
+            rep_filtrados.append(r)
+            
+    fact_filtradas = []
+    for f in facturas:
+        ticket_id = str(f.get('id_reporte', f.get('numero_reporte', 'N/A')))
+        match = re.search(r"\[TICKET:(.*?)\]", f.get('retro', ''))
+        if match: ticket_id = match.group(1).strip()
+        
+        y = ticket_years.get(ticket_id)
+        if not y and f.get('timestamp'):
+            y = str(f.get('timestamp', ''))[:4]
+            
+        if y == year_str:
+            fact_filtradas.append(f)
+            
+    return rep_filtrados, fact_filtradas
+
 @analitica_bp.route('/api/analitica/ultimos', methods=['GET'])
 def analitica_ultimos():
+    year = request.args.get('year', 'Todos')
     usuarios_data = leer_json('usuarios.json').get('usuarios', [])
-    reportes = leer_json('reportes.json').get('reportes', [])
-    facturas = leer_json('facturas.json').get('facturas', [])
+    reportes_raw = leer_json('reportes.json').get('reportes', [])
+    facturas_raw = leer_json('facturas.json').get('facturas', [])
+    
+    reportes, facturas = filtrar_por_anio(reportes_raw, facturas_raw, year)
 
     cope_map = {}
     for u in usuarios_data:
@@ -49,7 +88,6 @@ def analitica_ultimos():
         }
 
     def extract_factura_info(f):
-        import re
         retro = f.get('retro', '')
         ticket_id = f.get('id_reporte', f.get('numero_reporte', 'N/A'))
         match = re.search(r"\[TICKET:(.*?)\]", retro)
@@ -57,7 +95,7 @@ def analitica_ultimos():
         
         chofer = 'N/A'
         resp = {'Administrador': 'N/A', 'Supervisor': 'N/A', 'Jefatura': 'N/A'}
-        for r in reportes:
+        for r in reportes_raw:
             if str(r.get('id')) == str(ticket_id):
                 chofer = r.get('empleado', 'N/A')
                 resp = get_responsables(r.get('cope', ''))
@@ -89,28 +127,24 @@ def analitica_ultimos():
             ultimo_caro = extract_factura_info(f)
             break
 
-    # Ultima Unidad Reparada
     ultima_reparada = None
     for f in reversed(facturas):
         if f.get('estado') == 'Reparado' or f.get('entregado') == 'Sí':
             ultima_reparada = extract_factura_info(f)
             break
             
-    # Ultima Unidad Entregada
     ultima_entregada = None
     for f in reversed(facturas):
         if f.get('entregado') == 'Sí':
             ultima_entregada = extract_factura_info(f)
             break
             
-    # Ultima Cotizacion Rechazada / Cancelada
     ultima_rechazada = None
     for f in reversed(facturas):
         if 'Rechazad' in f.get('estado', '') or 'Cancelado' in f.get('estado', ''):
             ultima_rechazada = extract_factura_info(f)
             break
             
-    # Ultima Factura Fiscal Cargada
     ultima_fiscal = None
     for f in reversed(facturas):
         if f.get('factura_cargada') == True:
@@ -131,14 +165,12 @@ def analitica_ultimos():
 
 @analitica_bp.route('/api/analitica/tops', methods=['GET'])
 def analitica_tops():
-    from collections import Counter
-    import datetime
+    year = request.args.get('year', 'Todos')
+    reportes_raw = leer_json('reportes.json').get('reportes', [])
+    facturas_raw = leer_json('facturas.json').get('facturas', [])
     
-    reportes = leer_json('reportes.json').get('reportes', [])
-    facturas = leer_json('facturas.json').get('facturas', [])
+    reportes, facturas = filtrar_por_anio(reportes_raw, facturas_raw, year)
     
-    # 1. Top 5 unidades con mas tiempo en taller
-    # (estado no archivado y entregado != 'Sí' y no cancelado)
     unidades_tiempo = []
     now = datetime.datetime.now()
     for f in facturas:
@@ -159,9 +191,8 @@ def analitica_tops():
             days = (now - dt).days
             if days < 0: days = 0
             
-            # Find unity eco
             unidad_eco = "N/A"
-            for r in reportes:
+            for r in reportes_raw:
                 ticket_id = f.get('id_reporte', f.get('numero_reporte', ''))
                 if str(r.get('id')) == str(ticket_id):
                     unidad_eco = r.get('unidad', 'N/A')
@@ -176,7 +207,6 @@ def analitica_tops():
     unidades_tiempo.sort(key=lambda x: x['dias'], reverse=True)
     top_tiempo_taller = unidades_tiempo[:5]
     
-    # 2. Top 5 Choferes con más reportes
     choferes_count = Counter()
     for r in reportes:
         e = r.get('empleado')
@@ -184,7 +214,6 @@ def analitica_tops():
             choferes_count[e] += 1
     top_choferes = [{"nombre": k, "cantidad": v} for k, v in choferes_count.most_common(5)]
     
-    # 3. Top 5 Unidades con más averías (reportes)
     unidades_count = Counter()
     for r in reportes:
         u = r.get('unidad')
@@ -192,7 +221,6 @@ def analitica_tops():
             unidades_count[u] += 1
     top_unidades_averias = [{"unidad": k, "cantidad": v} for k, v in unidades_count.most_common(5)]
     
-    # 4. Top 5 COPEs con más reportes
     copes_count = Counter()
     for r in reportes:
         c = r.get('cope')
@@ -200,7 +228,6 @@ def analitica_tops():
             copes_count[c] += 1
     top_copes = [{"cope": k, "cantidad": v} for k, v in copes_count.most_common(5)]
     
-    # 5. Top 5 Talleres que más facturan (Suma de precios)
     talleres_dinero = {}
     for f in facturas:
         p = f.get('proveedor')
@@ -222,38 +249,33 @@ def analitica_tops():
 
 @analitica_bp.route('/api/analitica/charts', methods=['GET'])
 def analitica_charts():
-    from collections import Counter
+    year = request.args.get('year', 'Todos')
+    reportes_raw = leer_json('reportes.json').get('reportes', [])
+    facturas_raw = leer_json('facturas.json').get('facturas', [])
     
-    reportes = leer_json('reportes.json').get('reportes', [])
-    facturas = leer_json('facturas.json').get('facturas', [])
+    reportes, facturas = filtrar_por_anio(reportes_raw, facturas_raw, year)
     
-    # --- PIE CHARTS ---
-    # 1. Estados de Tickets
     estados_count = Counter()
     for f in facturas:
         st = f.get('estado', 'Desconocido')
         if st == 'Pendiente de Revisión': st = 'Pendiente'
         estados_count[st] += 1
-    # Check reports that are not in facturas yet
+        
     factura_ids = {str(f.get('id_reporte', f.get('numero_reporte'))) for f in facturas}
     for r in reportes:
         if str(r.get('id')) not in factura_ids:
             estados_count['Sin Asignar'] += 1
             
-    # 2. Tipos de Mantenimiento
     mant_count = Counter()
     for r in reportes:
         m = r.get('mantenimiento', 'Desconocido')
         mant_count[m] += 1
         
-    # 3. Distribucion por COPE
     copes_count = Counter()
     for r in reportes:
         c = r.get('cope', 'Desconocido')
         copes_count[c] += 1
 
-    # --- BAR CHARTS ---
-    # 1. Tickets por Mes
     meses_count = Counter()
     for r in reportes:
         fecha = r.get('fecha', '')
@@ -261,7 +283,6 @@ def analitica_charts():
             mes = fecha[:7] # YYYY-MM
             meses_count[mes] += 1
     
-    # 2. Facturacion por Taller (Top 5)
     talleres_dinero = {}
     for f in facturas:
         p = f.get('proveedor')
@@ -270,7 +291,6 @@ def analitica_charts():
             talleres_dinero[p] = talleres_dinero.get(p, 0) + precio
     top_dinero = sorted(talleres_dinero.items(), key=lambda x: x[1], reverse=True)[:5]
     
-    # 3. Marcas de Unidad con más Fallas (Top 5)
     marcas_count = Counter()
     for r in reportes:
         m = r.get('marca', 'Desconocido')

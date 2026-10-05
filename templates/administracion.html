@@ -849,10 +849,19 @@
             </div>
 
             <div id="vista-analitica" style="display: none;">
-                <div class="top-bar">
+                <div class="top-bar" style="display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; flex-direction: column;">
                         <h2 style="margin: 0;">Analítica Global del Sistema</h2>
                         <p style="color: #64748b; font-size: 0.95em; margin: 5px 0 0 0;">Monitor en tiempo real de los últimos movimientos, eventos y estados operativos.</p>
+                    </div>
+                    <div style="background: white; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px;">
+                        <span style="font-weight: bold; color: #1e293b;">📅 Año:</span>
+                        <select id="analitica-year-select" style="padding: 5px 10px; border-radius: 5px; border: 1px solid #cbd5e1; outline: none; font-size: 1em; cursor: pointer;" onchange="cargarAnalitica()">
+                            <option value="Todos">Histórico Total</option>
+                            <option value="2026" selected>2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                        </select>
                     </div>
                 </div>
                 <div class="admin-container" style="background: transparent; box-shadow: none; padding: 0;">

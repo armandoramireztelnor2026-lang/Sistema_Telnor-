@@ -10,12 +10,15 @@ async function cargarAnalitica() {
         fiscal: document.getElementById('analitica-fiscal')
     };
 
+    const yearSelect = document.getElementById('analitica-year-select');
+    const year = yearSelect ? yearSelect.value : 'Todos';
+
     for (let key in divs) {
         if (divs[key]) divs[key].innerHTML = 'Cargando...';
     }
 
     try {
-        const response = await fetch('/api/analitica/ultimos');
+        const response = await fetch(`/api/analitica/ultimos?year=${year}`);
         const data = await response.json();
 
         if (data.status === 'success') {
@@ -62,7 +65,7 @@ async function cargarAnalitica() {
             if (topDivs[key]) topDivs[key].innerHTML = 'Cargando...';
         }
 
-        const responseTops = await fetch('/api/analitica/tops');
+        const responseTops = await fetch(`/api/analitica/tops?year=${year}`);
         const dataTops = await responseTops.json();
 
         if (dataTops.status === 'success') {
@@ -94,7 +97,7 @@ async function cargarAnalitica() {
         }
 
         // Fetch Charts
-        const responseCharts = await fetch('/api/analitica/charts');
+        const responseCharts = await fetch(`/api/analitica/charts?year=${year}`);
         const dataCharts = await responseCharts.json();
 
         if (dataCharts.status === 'success') {
