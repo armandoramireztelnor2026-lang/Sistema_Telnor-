@@ -278,3 +278,4 @@ def cambiar_subrol():
             print(f"Error al enviar correo: {e}")
 
     return jsonify({"status": "success", "message": f"{nombre_destino} ha sido cambiado a {nuevo_subrol} exitosamente."})
+
