@@ -830,7 +830,7 @@ function eliminarReporteDefinitivo(idReporte) { abrirModalRechazo(idReporte, 're
 
 function abrirModalEditarAdmin(idFactura, seccionId = null) {
     try {
-        const f = facturasGlobal.find(x => String(x.id) === String(idFactura)); if (!f) return;
+        let f = facturasGlobal.find(x => String(x.id) === String(idFactura)); if (!f && typeof datosArchivados !== 'undefined') f = datosArchivados.find(x => String(x.id) === String(idFactura)); if (!f) return;
         document.getElementById('edit_id_factura').value = f.id;
         document.getElementById('edit_unidad').value = f.unidad.replace('8090-', '');
         document.getElementById('edit_responsable').value = f.responsable;
@@ -1543,7 +1543,7 @@ function notificarCorp10k(idFactura) {
     });
 }
 
-function abrirRevisionCorp(idFactura) { const f = facturasGlobal.find(x => String(x.id) === String(idFactura)); if (!f) return; document.getElementById('rev-id-corp').value = f.id; document.getElementById('revision-contenido-corp').innerHTML = generarHtmlDetalles(f, 'lectura', formatearMoneda(f.precio)); document.getElementById('modal-revision-corp').style.display = 'flex'; }
+function abrirRevisionCorp(idFactura) { let f = facturasGlobal.find(x => String(x.id) === String(idFactura)); if (!f && typeof datosArchivados !== 'undefined') f = datosArchivados.find(x => String(x.id) === String(idFactura)); if (!f) return; document.getElementById('rev-id-corp').value = f.id; document.getElementById('revision-contenido-corp').innerHTML = generarHtmlDetalles(f, 'lectura', formatearMoneda(f.precio)); document.getElementById('modal-revision-corp').style.display = 'flex'; }
 
 function confirmarFacturaCorp() {
     let id_fac = document.getElementById('rev-id-corp').value;
@@ -1637,14 +1637,14 @@ function enviarRechazoCorp() {
 }
 
 function abrirDetalles(idFactura) {
-    const f = facturasGlobal.find(x => String(x.id) === String(idFactura)); if (!f) return;
+    let f = facturasGlobal.find(x => String(x.id) === String(idFactura)); if (!f && typeof datosArchivados !== 'undefined') f = datosArchivados.find(x => String(x.id) === String(idFactura)); if (!f) return;
     document.getElementById('detalles-contenido').innerHTML = generarHtmlDetalles(f, 'lectura', formatearMoneda(f.precio));
     document.getElementById('btn-descargar-pdf').onclick = () => generarPDFSilencioso(f.id);
     document.getElementById('modal-detalles-general').style.display = 'flex';
 }
 
 function generarPDFSilencioso(idFactura) {
-    const f = facturasGlobal.find(x => String(x.id) === String(idFactura)); if (!f) return;
+    let f = facturasGlobal.find(x => String(x.id) === String(idFactura)); if (!f && typeof datosArchivados !== 'undefined') f = datosArchivados.find(x => String(x.id) === String(idFactura)); if (!f) return;
     let idReporte = obtenerIdReporte(f);
 
     if (idReporte && document.getElementById('pdf-seccion-reporte')) {
@@ -3151,7 +3151,7 @@ function renderizarArchivados() {
     });
     
     if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">No se encontraron tickets con esos filtros.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">No se encontraron tickets con esos filtros.</td></tr>';
         return;
     }
     
@@ -3170,7 +3170,7 @@ function renderizarArchivados() {
         }
         
         // Find pdf link for 'Descargar'
-        let pdfLinks = `<a href="/api/facturas/descargar_zip/${f.id}" style="display:block; padding:8px 10px; background:#10b981; color:white; text-decoration:none; border-radius:4px; font-size:0.85em; margin-top:8px; text-align:center; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1);">📦 Descargar Expediente ZIP</a>`;
+        let pdfLinks = `<a href="/api/facturas/descargar_zip/${f.id}" onclick="return confirm('¿Confirmas que deseas descargar el expediente en formato ZIP? Esta acción empaquetará todas las fotos, videos y PDFs.');" style="display:block; padding:8px 10px; background:#10b981; color:white; text-decoration:none; border-radius:4px; font-size:0.85em; margin-top:8px; text-align:center; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1);">📦 Descargar Expediente ZIP</a>`;
         
         let doc50 = f.numero_doc50 || 'N/A';
         
@@ -3182,15 +3182,15 @@ function renderizarArchivados() {
         }
         
         tbody.innerHTML += `
-            <tr style="border-bottom:1px solid #e2e8f0; transition:background 0.2s;">
-                <td style="padding:12px; font-weight:bold; color:#0ea5e9;">${ticketId}</td>
-                <td style="padding:12px;">${f.unidad || 'N/A'}</td>
-                <td style="padding:12px; font-weight:bold;">${f.proveedor || 'S/T'}</td>
-                <td style="padding:12px; color:#15803d; font-weight:bold;">$${prFmt} MXN</td>
-                <td style="padding:12px; font-weight:bold;">${doc50}</td>
-                <td style="padding:12px; font-size:0.9em; color:#64748b;">${f.fecha_cierre || 'N/A'}</td>
+            <tr style="border-bottom:1px solid #1f395a; transition:background 0.2s;" onmouseover="this.style.background='#162e4d'" onmouseout="this.style.background='transparent'">
+                <td style="padding:12px; font-weight:bold; color:#38bdf8;">${ticketId}</td>
+                <td style="padding:12px; color:#cbd5e1;">${f.unidad || 'N/A'}</td>
+                <td style="padding:12px; font-weight:bold; color:#cbd5e1;">${f.proveedor || 'S/T'}</td>
+                <td style="padding:12px; color:#4ade80; font-weight:bold;">$${prFmt} MXN</td>
+                <td style="padding:12px; font-weight:bold; color:#e2e8f0;">${doc50}</td>
+                <td style="padding:12px; font-size:0.9em; color:#94a3b8;">${f.fecha_cierre || 'N/A'}</td>
                 <td style="padding:12px; text-align:right;">
-                    <button class="btn-info" style="width:100%; font-size:0.85em; padding:6px 10px; background:#0284c7; border:none; color:white; margin:0;" onclick="abrirDetalles('${f.id}')">👁️ Ver Detalles</button>
+                    <button class="btn-info" style="width:100%; font-size:0.85em; padding:6px 10px; background:#0284c7; border:none; color:white; margin:0; border-radius:4px;" onclick="abrirDetalles('${f.id}')">👁️ Ver Detalles</button>
                     ${pdfLinks}
                     ${btnEliminar}
                 </td>

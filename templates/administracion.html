@@ -1154,7 +1154,7 @@
                     onclick="descargarPDFUsuario()">Descargar Perfil (PDF)</button></div>
         </div>
     </div>
-    <div id="modal-detalles" class="modal-overlay">
+    <div id="modal-detalles" class="modal-overlay" style="z-index: 10005;">
         <div class="modal-box"><button class="btn-close-modal" onclick="cerrarModal('modal-detalles')">×</button>
             <h3 class="modal-header">Detalles de Solicitud</h3>
             <div id="modal-contenido"></div>
@@ -1432,7 +1432,7 @@
         </div>
     </div>
 
-    <div id="modal-detalles-general" class="modal-overlay">
+    <div id="modal-detalles-general" class="modal-overlay" style="z-index: 10005;">
         <div class="modal-box large">
             <button class="btn-close-modal" onclick="cerrarModal('modal-detalles-general')">×</button>
             <h3 class="modal-header">Detalles de Cotización Emitida</h3>
@@ -1498,39 +1498,39 @@
     </div>
 
     <!-- Modal Tickets Archivados -->
-    <div id="modal-tickets-archivados" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999;">
-        <div style="background:white; padding:30px; border-radius:15px; width:90%; max-width:1100px; height:85vh; display:flex; flex-direction:column; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #e2e8f0; padding-bottom:15px;">
-                <h2 style="margin:0; color:#1e293b; display:flex; align-items:center; gap:10px;">
+    <div id="modal-tickets-archivados" class="modal-overlay">
+        <div class="modal-box" style="width:95%; max-width:1200px; height:85vh; display:flex; flex-direction:column; padding:30px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #1f395a; padding-bottom:15px;">
+                <h3 class="modal-header" style="margin:0; border:none; padding:0; display:flex; align-items:center; gap:10px;">
                     🗄️ Historial de Tickets Archivados
-                </h2>
-                <button onclick="document.getElementById('modal-tickets-archivados').style.display='none'" style="background:none; border:none; font-size:1.5em; cursor:pointer; color:#ef4444;">&times;</button>
+                </h3>
+                <button class="btn-close-modal" onclick="document.getElementById('modal-tickets-archivados').style.display='none'" style="position:relative; top:0; right:0;">×</button>
             </div>
             
-            <div style="display:flex; gap:15px; margin-bottom:20px; background:#f8fafc; padding:15px; border-radius:8px;">
+            <div style="display:flex; gap:15px; margin-bottom:20px; background:#162e4d; padding:15px; border-radius:8px; border:1px solid #1f395a;">
                 <div style="flex:1;">
-                    <label style="display:block; font-weight:bold; color:#475569; margin-bottom:5px; font-size:0.9em;">Buscador Rápido:</label>
-                    <input type="text" id="filtro-buscar-archivados" placeholder="Buscar ticket, eco, proveedor o importe..." style="width:100%; padding:8px 12px; border:1px solid #cbd5e1; border-radius:5px; outline:none;" oninput="renderizarArchivados()">
+                    <label style="display:block; font-weight:bold; color:#94a3b8; margin-bottom:5px; font-size:0.9em;">Buscador Rápido:</label>
+                    <input type="text" id="filtro-buscar-archivados" placeholder="Buscar ticket, eco, proveedor o importe..." style="width:100%; padding:8px 12px; border:1px solid #1f395a; border-radius:5px; outline:none; background:#0b182b; color:#cbd5e1;" oninput="renderizarArchivados()">
                 </div>
                 <div>
-                    <label style="display:block; font-weight:bold; color:#475569; margin-bottom:5px; font-size:0.9em;">Filtrar por Año:</label>
-                    <select id="filtro-year-archivados" style="padding:8px 12px; border:1px solid #cbd5e1; border-radius:5px; outline:none; min-width:150px; cursor:pointer;" onchange="renderizarArchivados()">
+                    <label style="display:block; font-weight:bold; color:#94a3b8; margin-bottom:5px; font-size:0.9em;">Filtrar por Año:</label>
+                    <select id="filtro-year-archivados" style="padding:8px 12px; border:1px solid #1f395a; border-radius:5px; outline:none; min-width:150px; cursor:pointer; background:#0b182b; color:#cbd5e1;" onchange="renderizarArchivados()">
                         <option value="Todos">Todos los Años</option>
                     </select>
                 </div>
             </div>
 
-            <div style="flex:1; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
-                <table style="width:100%; border-collapse:collapse; text-align:left;">
-                    <thead style="background:#f1f5f9; position:sticky; top:0; z-index:10;">
+            <div style="flex:1; overflow-y:auto; border:1px solid #1f395a; border-radius:8px; background:#0b182b;">
+                <table style="width:100%; border-collapse:collapse; text-align:left; color:#cbd5e1;">
+                    <thead style="background:#162e4d; position:sticky; top:0; z-index:10;">
                         <tr>
-                            <th style="padding:12px; border-bottom:2px solid #cbd5e1; color:#334155;">Ticket</th>
-                            <th style="padding:12px; border-bottom:2px solid #cbd5e1; color:#334155;">Unidad / Eco</th>
-                            <th style="padding:12px; border-bottom:2px solid #cbd5e1; color:#334155;">Proveedor</th>
-                            <th style="padding:12px; border-bottom:2px solid #cbd5e1; color:#334155;">Costo Total</th>
-                            <th style="padding:12px; border-bottom:2px solid #cbd5e1; color:#334155;">Doc. 50</th>
-                            <th style="padding:12px; border-bottom:2px solid #cbd5e1; color:#334155;">Fecha de Cierre</th>
-                            <th style="padding:12px; border-bottom:2px solid #cbd5e1; color:#334155; text-align:right;">Acciones</th>
+                            <th style="padding:12px; border-bottom:2px solid #1f395a; color:#94a3b8;">Ticket</th>
+                            <th style="padding:12px; border-bottom:2px solid #1f395a; color:#94a3b8;">Unidad / Eco</th>
+                            <th style="padding:12px; border-bottom:2px solid #1f395a; color:#94a3b8;">Proveedor</th>
+                            <th style="padding:12px; border-bottom:2px solid #1f395a; color:#94a3b8;">Costo Total</th>
+                            <th style="padding:12px; border-bottom:2px solid #1f395a; color:#94a3b8;">Doc. 50</th>
+                            <th style="padding:12px; border-bottom:2px solid #1f395a; color:#94a3b8;">Fecha de Cierre</th>
+                            <th style="padding:12px; border-bottom:2px solid #1f395a; color:#94a3b8; text-align:right;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tbody-archivados">

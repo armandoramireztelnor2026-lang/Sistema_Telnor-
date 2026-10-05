@@ -1705,7 +1705,7 @@ def archivar_final():
     factura_id = request.json.get('id')
     data = leer_json('facturas.json')
     
-    for f in data.get('facturas', []):
+    for i, f in enumerate(data.get('facturas', [])):
         if str(f['id']) == str(factura_id):
             f['estado'] = 'Archivado_Final'
             f['fecha_archivado'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -1727,8 +1727,19 @@ def archivar_final():
                             f['cope_origen'] = r_arch.get('cope', 'N/A')
                             break
             
+            # Mover a tickets_archivados.json
+            archivados_data = leer_json('tickets_archivados.json')
+            if 'facturas' not in archivados_data:
+                archivados_data['facturas'] = []
+            
+            archivados_data['facturas'].append(f)
+            escribir_json('tickets_archivados.json', archivados_data)
+            
+            # Eliminar de facturas.json original
+            del data['facturas'][i]
             escribir_json('facturas.json', data)
-            return jsonify({"status": "success", "message": "Ticket movido a Tickets Archivados."})
+            
+            return jsonify({"status": "success", "message": "Ticket archivado y movido exitosamente a tickets_archivados.json."})
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
 
@@ -1737,8 +1748,8 @@ def lista_archivados():
     if 'usuario' not in session or session['usuario']['rol'] != 'administracion':
         return jsonify({"status": "error", "message": "No autorizado"})
         
-    data = leer_json('facturas.json')
-    archivados = [f for f in data.get('facturas', []) if f.get('estado') == 'Archivado_Final']
+    data = leer_json('tickets_archivados.json')
+    archivados = data.get('facturas', [])
     
     # BUG #2 FIX: Enrich with unidad data - priorizar unidad_eco guardada en el momento de archivar
     reportes = leer_json('reportes.json').get('reportes', [])
