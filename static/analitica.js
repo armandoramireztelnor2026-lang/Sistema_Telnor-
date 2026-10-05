@@ -93,6 +93,112 @@ async function cargarAnalitica() {
             }
         }
 
+        // Fetch Charts
+        const responseCharts = await fetch('/api/analitica/charts');
+        const dataCharts = await responseCharts.json();
+
+        if (dataCharts.status === 'success') {
+            const chartColors = [
+                '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+                '#06b6d4', '#f97316', '#14b8a6', '#6366f1', '#ec4899'
+            ];
+
+            // Destroy existing charts if they exist to prevent hover issues on reload
+            if(window.chartPieEstados) window.chartPieEstados.destroy();
+            if(window.chartPieMant) window.chartPieMant.destroy();
+            if(window.chartPieCopes) window.chartPieCopes.destroy();
+            if(window.chartBarMeses) window.chartBarMeses.destroy();
+            if(window.chartBarTalleres) window.chartBarTalleres.destroy();
+            if(window.chartBarMarcas) window.chartBarMarcas.destroy();
+
+            // Pie 1: Estados
+            const ctxPieEstados = document.getElementById('chart-pie-estados').getContext('2d');
+            window.chartPieEstados = new Chart(ctxPieEstados, {
+                type: 'pie',
+                data: {
+                    labels: dataCharts.pie_estados.labels,
+                    datasets: [{
+                        data: dataCharts.pie_estados.data,
+                        backgroundColor: chartColors
+                    }]
+                }
+            });
+
+            // Pie 2: Mantenimiento
+            const ctxPieMant = document.getElementById('chart-pie-mant').getContext('2d');
+            window.chartPieMant = new Chart(ctxPieMant, {
+                type: 'doughnut',
+                data: {
+                    labels: dataCharts.pie_mantenimiento.labels,
+                    datasets: [{
+                        data: dataCharts.pie_mantenimiento.data,
+                        backgroundColor: chartColors.slice(2).concat(chartColors)
+                    }]
+                }
+            });
+
+            // Pie 3: COPEs
+            const ctxPieCopes = document.getElementById('chart-pie-copes').getContext('2d');
+            window.chartPieCopes = new Chart(ctxPieCopes, {
+                type: 'pie',
+                data: {
+                    labels: dataCharts.pie_copes.labels,
+                    datasets: [{
+                        data: dataCharts.pie_copes.data,
+                        backgroundColor: chartColors.slice(4).concat(chartColors)
+                    }]
+                }
+            });
+
+            // Bar 1: Meses
+            const ctxBarMeses = document.getElementById('chart-bar-meses').getContext('2d');
+            window.chartBarMeses = new Chart(ctxBarMeses, {
+                type: 'bar',
+                data: {
+                    labels: dataCharts.bar_meses.labels,
+                    datasets: [{
+                        label: 'Tickets',
+                        data: dataCharts.bar_meses.data,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true } } }
+            });
+
+            // Bar 2: Talleres Dinero
+            const ctxBarTalleres = document.getElementById('chart-bar-talleres').getContext('2d');
+            window.chartBarTalleres = new Chart(ctxBarTalleres, {
+                type: 'bar',
+                data: {
+                    labels: dataCharts.bar_talleres.labels,
+                    datasets: [{
+                        label: 'Facturación ($)',
+                        data: dataCharts.bar_talleres.data,
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true } } }
+            });
+
+            // Bar 3: Marcas/Modelos Fallas
+            const ctxBarMarcas = document.getElementById('chart-bar-marcas').getContext('2d');
+            window.chartBarMarcas = new Chart(ctxBarMarcas, {
+                type: 'bar',
+                data: {
+                    labels: dataCharts.bar_marcas.labels,
+                    datasets: [{
+                        label: 'Tickets',
+                        data: dataCharts.bar_marcas.data,
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 6
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true } }, indexAxis: 'y' }
+            });
+        }
+
     } catch (error) {
         console.error("Error cargando analitica:", error);
         for (let key in divs) {

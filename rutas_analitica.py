@@ -219,3 +219,69 @@ def analitica_tops():
         "top_copes": top_copes,
         "top_talleres_dinero": top_talleres_dinero
     })
+
+@analitica_bp.route('/api/analitica/charts', methods=['GET'])
+def analitica_charts():
+    from collections import Counter
+    
+    reportes = leer_json('reportes.json').get('reportes', [])
+    facturas = leer_json('facturas.json').get('facturas', [])
+    
+    # --- PIE CHARTS ---
+    # 1. Estados de Tickets
+    estados_count = Counter()
+    for f in facturas:
+        st = f.get('estado', 'Desconocido')
+        if st == 'Pendiente de Revisión': st = 'Pendiente'
+        estados_count[st] += 1
+    # Check reports that are not in facturas yet
+    factura_ids = {str(f.get('id_reporte', f.get('numero_reporte'))) for f in facturas}
+    for r in reportes:
+        if str(r.get('id')) not in factura_ids:
+            estados_count['Sin Asignar'] += 1
+            
+    # 2. Tipos de Mantenimiento
+    mant_count = Counter()
+    for r in reportes:
+        m = r.get('mantenimiento', 'Desconocido')
+        mant_count[m] += 1
+        
+    # 3. Distribucion por COPE
+    copes_count = Counter()
+    for r in reportes:
+        c = r.get('cope', 'Desconocido')
+        copes_count[c] += 1
+
+    # --- BAR CHARTS ---
+    # 1. Tickets por Mes
+    meses_count = Counter()
+    for r in reportes:
+        fecha = r.get('fecha', '')
+        if len(fecha) >= 7:
+            mes = fecha[:7] # YYYY-MM
+            meses_count[mes] += 1
+    
+    # 2. Facturacion por Taller (Top 5)
+    talleres_dinero = {}
+    for f in facturas:
+        p = f.get('proveedor')
+        if p and p != 'N/A':
+            precio = float(f.get('precio_estimado', f.get('precio', 0)))
+            talleres_dinero[p] = talleres_dinero.get(p, 0) + precio
+    top_dinero = sorted(talleres_dinero.items(), key=lambda x: x[1], reverse=True)[:5]
+    
+    # 3. Marcas de Unidad con más Fallas (Top 5)
+    marcas_count = Counter()
+    for r in reportes:
+        m = r.get('marca', 'Desconocido')
+        marcas_count[m] += 1
+
+    return jsonify({
+        "status": "success",
+        "pie_estados": {"labels": list(estados_count.keys()), "data": list(estados_count.values())},
+        "pie_mantenimiento": {"labels": list(mant_count.keys()), "data": list(mant_count.values())},
+        "pie_copes": {"labels": list(copes_count.keys()), "data": list(copes_count.values())},
+        "bar_meses": {"labels": list(meses_count.keys()), "data": list(meses_count.values())},
+        "bar_talleres": {"labels": [k for k, v in top_dinero], "data": [v for k, v in top_dinero]},
+        "bar_marcas": {"labels": [k for k, v in marcas_count.most_common(5)], "data": [v for k, v in marcas_count.most_common(5)]}
+    })

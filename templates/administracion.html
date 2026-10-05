@@ -850,7 +850,10 @@
 
             <div id="vista-analitica" style="display: none;">
                 <div class="top-bar">
-                    <h2>Analítica Global del Sistema</h2>
+                    <div style="display: flex; flex-direction: column;">
+                        <h2 style="margin: 0;">Analítica Global del Sistema</h2>
+                        <p style="color: #64748b; font-size: 0.95em; margin: 5px 0 0 0;">Monitor en tiempo real de los últimos movimientos, eventos y estados operativos.</p>
+                    </div>
                 </div>
                 <div class="admin-container" style="background: transparent; box-shadow: none; padding: 0;">
                     
@@ -963,7 +966,10 @@
                     </div>
                     
                     <div class="top-bar" style="margin-top: 40px; margin-bottom: 20px;">
-                        <h2>Rankings / Tops Principales</h2>
+                        <div style="display: flex; flex-direction: column;">
+                            <h2 style="margin: 0;">Rankings / Tops Principales</h2>
+                            <p style="color: #64748b; font-size: 0.95em; margin: 5px 0 0 0;">Clasificación de los indicadores clave de desempeño (KPIs) con mayor impacto logístico y financiero.</p>
+                        </div>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-bottom: 30px;">
@@ -1006,6 +1012,53 @@
                                 <span style="margin-right: 10px;">🏢</span> Top 5 COPEs (+ Reportes)
                             </h3>
                             <div id="analitica-top-copes" style="color: #475569; font-size: 0.9em; line-height: 1.6;">Cargando...</div>
+                        </div>
+
+                    </div>
+
+                    <div class="top-bar" style="margin-top: 40px; margin-bottom: 20px;">
+                        <div style="display: flex; flex-direction: column;">
+                            <h2 style="margin: 0;">Gráficas Analíticas</h2>
+                            <p style="color: #64748b; font-size: 0.95em; margin: 5px 0 0 0;">Visualización de tendencias, proporciones y volumen histórico de la flotilla.</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-bottom: 30px;">
+                        
+                        <!-- Pie 1 -->
+                        <div style="background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; align-items: center;">
+                            <h3 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 1.1em; text-align: center;">Estado Global de Tickets</h3>
+                            <div style="width: 100%; max-width: 300px;"><canvas id="chart-pie-estados"></canvas></div>
+                        </div>
+
+                        <!-- Pie 2 -->
+                        <div style="background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; align-items: center;">
+                            <h3 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 1.1em; text-align: center;">Tipos de Mantenimiento</h3>
+                            <div style="width: 100%; max-width: 300px;"><canvas id="chart-pie-mant"></canvas></div>
+                        </div>
+
+                        <!-- Pie 3 -->
+                        <div style="background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; align-items: center;">
+                            <h3 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 1.1em; text-align: center;">Distribución por COPE</h3>
+                            <div style="width: 100%; max-width: 300px;"><canvas id="chart-pie-copes"></canvas></div>
+                        </div>
+
+                        <!-- Bar 1 -->
+                        <div style="background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px;">
+                            <h3 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 1.1em; text-align: center;">Tickets Generados por Mes</h3>
+                            <div style="width: 100%;"><canvas id="chart-bar-meses"></canvas></div>
+                        </div>
+
+                        <!-- Bar 2 -->
+                        <div style="background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px;">
+                            <h3 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 1.1em; text-align: center;">Facturación por Taller (Top 5)</h3>
+                            <div style="width: 100%;"><canvas id="chart-bar-talleres"></canvas></div>
+                        </div>
+
+                        <!-- Bar 3 -->
+                        <div style="background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px;">
+                            <h3 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 1.1em; text-align: center;">Modelos de Unidad (+ Fallas)</h3>
+                            <div style="width: 100%;"><canvas id="chart-bar-marcas"></canvas></div>
                         </div>
 
                     </div>
@@ -1961,11 +2014,10 @@
             </div>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/static/panel_control.js?v=1"></script>
     <script src="/static/ciudades_copes.js?v=1"></script>
     <script src="/static/analitica.js?v=1"></script>
-
     <!-- FOOLPROOF FALLBACK -->
     <script>
         setTimeout(function() {
