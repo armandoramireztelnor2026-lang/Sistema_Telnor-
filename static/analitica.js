@@ -1,4 +1,31 @@
 async function cargarAnalitica() {
+    const periodSelect = document.getElementById('analitica-period-select');
+    
+    // Si está vacío, poblar dinámicamente desde 2026 hasta el semestre actual
+    if (periodSelect && periodSelect.options.length === 0) {
+        const startYear = 2026;
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentSemester = (currentDate.getMonth() + 1) <= 6 ? 'S1' : 'S2';
+        
+        let html = '<option value="Todos">Histórico Total</option>';
+        for (let y = startYear; y <= currentYear; y++) {
+            // Siempre agrega el primer semestre del año
+            html += `<option value="${y}-S1">${y} - 1er Semestre (Ene-Jun)</option>`;
+            
+            // Agrega el segundo semestre solo si ya es un año pasado, o si estamos en el año actual y ya empezó Julio
+            if (y < currentYear || (y === currentYear && currentSemester === 'S2')) {
+                html += `<option value="${y}-S2">${y} - 2do Semestre (Jul-Dic)</option>`;
+            }
+        }
+        periodSelect.innerHTML = html;
+        
+        // Seleccionar por defecto el semestre actual
+        periodSelect.value = `${currentYear}-${currentSemester}`;
+    }
+
+    const period = periodSelect ? periodSelect.value : 'Todos';
+
     const divs = {
         llegado: document.getElementById('analitica-llegado'),
         finalizado: document.getElementById('analitica-finalizado'),
@@ -10,20 +37,32 @@ async function cargarAnalitica() {
         fiscal: document.getElementById('analitica-fiscal')
     };
 
-    const yearSelect = document.getElementById('analitica-year-select');
-    const year = yearSelect ? yearSelect.value : 'Todos';
-
     for (let key in divs) {
         if (divs[key]) divs[key].innerHTML = 'Cargando...';
     }
 
     try {
-        const response = await fetch(`/api/analitica/ultimos?year=${year}`);
+        const response = await fetch(`/api/analitica/ultimos?period=${period}`);
         const data = await response.json();
 
         if (data.status === 'success') {
             const formatData = (item, includeTaller = false) => {
                 if (!item) return '<strong style="color:#ef4444;">Sin datos registrados</strong>';
+                
+                let fechaFormateada = '';
+                if (item.fecha && item.fecha !== 'N/A') {
+                    try {
+                        const d = new Date(item.fecha);
+                        if (!isNaN(d.getTime())) {
+                            fechaFormateada = `<div style="margin-top:8px; font-size:0.85em; color:#64748b; font-style:italic; border-top: 1px dashed #cbd5e1; padding-top: 8px;">📅 Registrado: ${d.toLocaleString('es-MX', {dateStyle: 'medium', timeStyle: 'short'})}</div>`;
+                        } else {
+                            fechaFormateada = `<div style="margin-top:8px; font-size:0.85em; color:#64748b; font-style:italic; border-top: 1px dashed #cbd5e1; padding-top: 8px;">📅 Registrado: ${item.fecha}</div>`;
+                        }
+                    } catch(e) {
+                        fechaFormateada = `<div style="margin-top:8px; font-size:0.85em; color:#64748b; font-style:italic; border-top: 1px dashed #cbd5e1; padding-top: 8px;">📅 Registrado: ${item.fecha}</div>`;
+                    }
+                }
+
                 let html = `
                     <div style="margin-bottom:5px;"><strong>🎟️ Ticket:</strong> <span style="color:#0ea5e9; font-weight:bold;">${item.ticket}</span></div>
                     <div style="margin-bottom:5px;"><strong>👨‍✈️ Chofer:</strong> ${item.chofer}</div>
@@ -35,6 +74,7 @@ async function cargarAnalitica() {
                     <div style="margin-bottom:5px;"><strong>👔 Admin:</strong> ${item.administrador}</div>
                     <div style="margin-bottom:5px;"><strong>📋 Super:</strong> ${item.supervisor}</div>
                     <div style="margin-bottom:5px;"><strong>🏢 Jefatura:</strong> ${item.jefatura}</div>
+                    ${fechaFormateada}
                 `;
                 return html;
             };
@@ -65,7 +105,7 @@ async function cargarAnalitica() {
             if (topDivs[key]) topDivs[key].innerHTML = 'Cargando...';
         }
 
-        const responseTops = await fetch(`/api/analitica/tops?year=${year}`);
+        const responseTops = await fetch(`/api/analitica/tops?period=${period}`);
         const dataTops = await responseTops.json();
 
         if (dataTops.status === 'success') {
@@ -97,7 +137,7 @@ async function cargarAnalitica() {
         }
 
         // Fetch Charts
-        const responseCharts = await fetch(`/api/analitica/charts?year=${year}`);
+        const responseCharts = await fetch(`/api/analitica/charts?period=${period}`);
         const dataCharts = await responseCharts.json();
 
         if (dataCharts.status === 'success') {
@@ -110,9 +150,11 @@ async function cargarAnalitica() {
             if(window.chartPieEstados) window.chartPieEstados.destroy();
             if(window.chartPieMant) window.chartPieMant.destroy();
             if(window.chartPieCopes) window.chartPieCopes.destroy();
+            if(window.chartPieDeptos) window.chartPieDeptos.destroy();
             if(window.chartBarMeses) window.chartBarMeses.destroy();
             if(window.chartBarTalleres) window.chartBarTalleres.destroy();
             if(window.chartBarMarcas) window.chartBarMarcas.destroy();
+            if(window.chartBarUnidadesDinero) window.chartBarUnidadesDinero.destroy();
 
             // Pie 1: Estados
             const ctxPieEstados = document.getElementById('chart-pie-estados').getContext('2d');
@@ -149,6 +191,19 @@ async function cargarAnalitica() {
                     datasets: [{
                         data: dataCharts.pie_copes.data,
                         backgroundColor: chartColors.slice(4).concat(chartColors)
+                    }]
+                }
+            });
+
+            // Pie 4: Departamentos
+            const ctxPieDeptos = document.getElementById('chart-pie-deptos').getContext('2d');
+            window.chartPieDeptos = new Chart(ctxPieDeptos, {
+                type: 'doughnut',
+                data: {
+                    labels: dataCharts.pie_deptos.labels,
+                    datasets: [{
+                        data: dataCharts.pie_deptos.data,
+                        backgroundColor: chartColors.slice(5).concat(chartColors)
                     }]
                 }
             });
@@ -195,6 +250,22 @@ async function cargarAnalitica() {
                         label: 'Tickets',
                         data: dataCharts.bar_marcas.data,
                         backgroundColor: '#f59e0b',
+                        borderRadius: 6
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true } }, indexAxis: 'y' }
+            });
+
+            // Bar 4: Unidades que mas gastan
+            const ctxBarUnidadesDinero = document.getElementById('chart-bar-unidades-dinero').getContext('2d');
+            window.chartBarUnidadesDinero = new Chart(ctxBarUnidadesDinero, {
+                type: 'bar',
+                data: {
+                    labels: dataCharts.bar_unidades_dinero.labels,
+                    datasets: [{
+                        label: 'Gasto Total ($)',
+                        data: dataCharts.bar_unidades_dinero.data,
+                        backgroundColor: '#ef4444',
                         borderRadius: 6
                     }]
                 },
