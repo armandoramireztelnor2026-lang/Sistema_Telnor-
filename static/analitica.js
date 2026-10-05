@@ -49,10 +49,54 @@ async function cargarAnalitica() {
                 if (divs[key]) divs[key].innerHTML = '<span style="color:#ef4444;">Error al cargar datos</span>';
             }
         }
+
+        // Fetch Tops
+        const topDivs = {
+            tiempo: document.getElementById('analitica-top-tiempo'),
+            averias: document.getElementById('analitica-top-averias'),
+            choferes: document.getElementById('analitica-top-choferes'),
+            dinero: document.getElementById('analitica-top-dinero'),
+            copes: document.getElementById('analitica-top-copes')
+        };
+        for (let key in topDivs) {
+            if (topDivs[key]) topDivs[key].innerHTML = 'Cargando...';
+        }
+
+        const responseTops = await fetch('/api/analitica/tops');
+        const dataTops = await responseTops.json();
+
+        if (dataTops.status === 'success') {
+            const renderList = (list, formatItem) => {
+                if (!list || list.length === 0) return '<div style="color:#94a3b8; font-style:italic;">No hay datos suficientes</div>';
+                let html = '<ol style="padding-left: 20px; margin: 0;">';
+                list.forEach((item, index) => {
+                    html += `<li style="margin-bottom: 8px;">${formatItem(item, index)}</li>`;
+                });
+                html += '</ol>';
+                return html;
+            };
+
+            if (topDivs.tiempo) {
+                topDivs.tiempo.innerHTML = renderList(dataTops.top_tiempo_taller, (item) => `<strong>Eco: ${item.unidad}</strong> - ${item.dias} días (${item.taller})`);
+            }
+            if (topDivs.averias) {
+                topDivs.averias.innerHTML = renderList(dataTops.top_unidades_averias, (item) => `<strong>Eco: ${item.unidad}</strong> - ${item.cantidad} tickets`);
+            }
+            if (topDivs.choferes) {
+                topDivs.choferes.innerHTML = renderList(dataTops.top_choferes, (item) => `<strong>${item.nombre}</strong> - ${item.cantidad} reportes`);
+            }
+            if (topDivs.dinero) {
+                topDivs.dinero.innerHTML = renderList(dataTops.top_talleres_dinero, (item) => `<strong>${item.nombre}</strong> - $${item.total.toLocaleString('es-MX')}`);
+            }
+            if (topDivs.copes) {
+                topDivs.copes.innerHTML = renderList(dataTops.top_copes, (item) => `<strong>${item.cope}</strong> - ${item.cantidad} reportes`);
+            }
+        }
+
     } catch (error) {
         console.error("Error cargando analitica:", error);
         for (let key in divs) {
-            if (divs[key]) divs[key].innerHTML = '<span style="color:#ef4444;">Error de red</span>';
+            if (divs[key] && divs[key].innerHTML === 'Cargando...') divs[key].innerHTML = '<span style="color:#ef4444;">Error de red</span>';
         }
     }
 }
