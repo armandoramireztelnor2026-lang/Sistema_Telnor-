@@ -52,6 +52,9 @@ def leer_json(archivo):
 def escribir_json(archivo, data):
     with open(archivo, "w", encoding="utf-8") as f: json.dump(data, f, indent=4)
 
+# BUG #10 FIX: alias para compatibilidad entre módulos
+guardar_json = escribir_json
+
 def procesar_liberacion_si_aplica(f):
     precio_float = float(f.get("precio_estimado", f.get("precio", 0)))
 
@@ -62,7 +65,9 @@ def procesar_liberacion_si_aplica(f):
 
     corp_ok = f.get("aprobado_corp", False)
 
-    if admin_ok and corp_ok and "liberado_admin" not in f:
+    # BUG #9 FIX: verificar que liberado_admin no esté definido aún (ni True ni False)
+    # Usamos is None check en lugar de "not in" para no bloquear tickets +10k
+    if admin_ok and corp_ok and f.get("liberado_admin") is None:
         cope_real = obtener_cope_de_factura(f)
         correo_admin, nombre_admin = encontrar_admin_por_cope(cope_real)
 
@@ -437,7 +442,8 @@ def encontrar_admin_por_cope(cope):
                 if not fallback_admin[0]:
                     fallback_admin = (correo, nombre)
                 
-                copes_adicionales = dp.get("copes_adicionales", [])
+                # BUG #8 FIX: el campo correcto es copes_asignados, no copes_adicionales
+                copes_adicionales = dp.get("copes_asignados", dp.get("copes_adicionales", []))
                 if dp.get("cope") == cope or cope in copes_adicionales:
                     return (correo, nombre)
     
@@ -455,7 +461,8 @@ def encontrar_supervisor_por_cope(cope):
                 if not fallback_sup[0]:
                     fallback_sup = (correo, nombre)
                 
-                copes_adicionales = dp.get("copes_adicionales", [])
+                # BUG #8 FIX: el campo correcto es copes_asignados
+                copes_adicionales = dp.get("copes_asignados", dp.get("copes_adicionales", []))
                 if dp.get("cope") == cope or cope in copes_adicionales:
                     return (correo, nombre)
     return fallback_sup
@@ -513,8 +520,14 @@ def confirmar_admin():
                 return jsonify({"status": "error", "message": f"Error: No hay un Administrador registrado para el COPE/Edificio '{obtener_cope_de_factura(f)}'. Es obligatorio contar con un Administrador para liberar el documento contable. No se puede avanzar."})
 
             reportes_data = leer_json("reportes.json")
+            # BUG #5 FIX: el campo correcto es id_reporte, no reporte_id
+            ticket_id_sync = f.get("id_reporte") or f.get("numero_reporte", "")
+            if not ticket_id_sync:
+                import re as _re
+                m = _re.search(r"\[TICKET:(.*?)\]", f.get("retro", ""))
+                if m: ticket_id_sync = m.group(1).strip()
             for r in reportes_data.get("reportes", []):
-                if str(r.get("id")) == str(f.get("reporte_id", "")):
+                if str(r.get("id")) == str(ticket_id_sync):
                     if nums_cotizacion: r["numero_cotizacion_asignacion"] = nums_cotizacion[0]
                     if f.get("pdf_cotizacion_asignacion"): r["pdf_cotizacion_asignacion"] = f["pdf_cotizacion_asignacion"]
                     escribir_json("reportes.json", reportes_data)
@@ -609,8 +622,14 @@ def actualizar_ordenes_admin():
                     cot["numero_cotizacion_asignacion"] = nums_cotizacion[i]
                     
             reportes_data = leer_json("reportes.json")
+            # BUG #6 FIX: usar id_reporte en lugar de reporte_id
+            ticket_id_sync2 = f.get("id_reporte") or f.get("numero_reporte", "")
+            if not ticket_id_sync2:
+                import re as _re2
+                m2 = _re2.search(r"\[TICKET:(.*?)\]", f.get("retro", ""))
+                if m2: ticket_id_sync2 = m2.group(1).strip()
             for r in reportes_data.get("reportes", []):
-                if str(r.get("id")) == str(f.get("reporte_id", "")):
+                if str(r.get("id")) == str(ticket_id_sync2):
                     if nums_cotizacion: r["numero_cotizacion_asignacion"] = nums_cotizacion[0]
                     escribir_json("reportes.json", reportes_data)
                     break
@@ -845,12 +864,24 @@ def aprobar_10k():
                     else:
                         nuevas_facturas.append(f2)
                 
-                data["facturas"] = nuevas_facturas
+                datos_factura_rechazada = data['facturas']
                 escribir_json("facturas.json", data)
 
                 usuarios_data = leer_json("usuarios.json")
-                supervisores = [u for u in usuarios_data.get("usuarios", [])
-                               if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
+                # BUG #7 FIX: filtrar supervisores por COPE de la factura rechazada
+                cope_rechazada = obtener_cope_de_factura(f)
+                supervisores = [
+                    u for u in usuarios_data.get("usuarios", [])
+                    if u["rol"] == "administracion"
+                    and u.get("datos_perfil", {}).get("subrol") == "Supervisor"
+                    and (
+                        u.get("datos_perfil", {}).get("cope") == cope_rechazada
+                        or cope_rechazada in u.get("datos_perfil", {}).get("copes_asignados", [])
+                    )
+                ]
+                # Si no hay supervisores del COPE, enviar a todos como fallback
+                if not supervisores:
+                    supervisores = [u for u in usuarios_data.get("usuarios", []) if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
 
                 for sup in supervisores:
                     correo = sup["datos_perfil"].get("correo")
@@ -1161,6 +1192,17 @@ def rechazar_corp():
 
                 data["facturas"] = nuevas_facturas
                 escribir_json("facturas.json", data)
+
+                # BUG #4 FIX: También eliminar el reporte vinculado para que no regrese como ticket huérfano
+                reporte_id_corp = f.get("id_reporte") or f.get("numero_reporte", "")
+                if not reporte_id_corp:
+                    import re as re_corp
+                    mc = re_corp.search(r"\[TICKET:(.*?)\]", f.get("retro", ""))
+                    if mc: reporte_id_corp = mc.group(1).strip()
+                if reporte_id_corp:
+                    rep_data_corp = leer_json("reportes.json")
+                    rep_data_corp["reportes"] = [r for r in rep_data_corp.get("reportes", []) if str(r.get("id")) != str(reporte_id_corp)]
+                    escribir_json("reportes.json", rep_data_corp)
 
                 proveedor_nombre = f.get('proveedor', '')
                 unidad_texto = str(f.get('unidad', '')).replace('8090-', '')
@@ -1654,6 +1696,11 @@ def doc50():
 def archivar_final():
     if 'usuario' not in session or session['usuario']['rol'] != 'administracion':
         return jsonify({"status": "error", "message": "No autorizado"})
+    
+    # BUG #1 FIX: verificar que sea Supervisor para poder archivar
+    subrol = session['usuario'].get('datos_perfil', {}).get('subrol', '')
+    if subrol != 'Supervisor':
+        return jsonify({"status": "error", "message": "Solo los Supervisores pueden archivar tickets."}), 403
         
     factura_id = request.json.get('id')
     data = leer_json('facturas.json')
@@ -1661,6 +1708,25 @@ def archivar_final():
     for f in data.get('facturas', []):
         if str(f['id']) == str(factura_id):
             f['estado'] = 'Archivado_Final'
+            f['fecha_archivado'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            f['archivado_por'] = f"{session['usuario'].get('datos_perfil', {}).get('nombres', '')} {session['usuario'].get('datos_perfil', {}).get('apellido_paterno', '')}".strip()
+            
+            # BUG #2 FIX: guardar la unidad directamente en la factura al archivar
+            # para que no se pierda si el reporte es eliminado en el futuro
+            if not f.get('unidad_eco'):
+                ticket_id_arch = f.get('id_reporte') or f.get('numero_reporte', '')
+                if not ticket_id_arch:
+                    m_arch = re.search(r"\[TICKET:(.*?)\]", f.get('retro', ''))
+                    if m_arch: ticket_id_arch = m_arch.group(1).strip()
+                if ticket_id_arch:
+                    rep_arch = leer_json('reportes.json').get('reportes', [])
+                    for r_arch in rep_arch:
+                        if str(r_arch.get('id')) == str(ticket_id_arch):
+                            f['unidad_eco'] = r_arch.get('unidad', f.get('unidad', 'N/A'))
+                            f['chofer_nombre'] = r_arch.get('empleado', 'N/A')
+                            f['cope_origen'] = r_arch.get('cope', 'N/A')
+                            break
+            
             escribir_json('facturas.json', data)
             return jsonify({"status": "success", "message": "Ticket movido a Tickets Archivados."})
             
@@ -1674,16 +1740,22 @@ def lista_archivados():
     data = leer_json('facturas.json')
     archivados = [f for f in data.get('facturas', []) if f.get('estado') == 'Archivado_Final']
     
-    # Enrich with unidad data
+    # BUG #2 FIX: Enrich with unidad data - priorizar unidad_eco guardada en el momento de archivar
     reportes = leer_json('reportes.json').get('reportes', [])
     for f in archivados:
+        # Si ya tiene unidad_eco guardada al momento de archivar, usarla
+        if f.get('unidad_eco'):
+            if not f.get('unidad') or f.get('unidad') == 'N/A':
+                f['unidad'] = f['unidad_eco']
+            continue
+        
         ticket_id = str(f.get('id_reporte', f.get('numero_reporte', 'N/A')))
         match = re.search(r"\[TICKET:(.*?)\]", f.get('retro', ''))
         if match: ticket_id = match.group(1).strip()
         
         for r in reportes:
             if str(r.get('id')) == ticket_id:
-                f['unidad'] = r.get('unidad', 'N/A')
+                f['unidad'] = r.get('unidad', f.get('unidad', 'N/A'))
                 break
                 
     return jsonify({"status": "success", "archivados": archivados})
@@ -1838,6 +1910,11 @@ def reactivar_desde_caras():
 def eliminar_silencioso():
     if "usuario" not in session or session["usuario"]["rol"] != "administracion":
         return jsonify({"status": "error", "message": "No autorizado"})
+    
+    # BUG #3 FIX: solo Jefatura o Administrador pueden eliminar silenciosamente
+    subrol_eli = session["usuario"].get("datos_perfil", {}).get("subrol", "")
+    if subrol_eli not in ["Jefatura", "Administrador"]:
+        return jsonify({"status": "error", "message": "Permiso denegado. Solo Administrador o Jefatura pueden eliminar registros."}), 403
 
     factura_id = request.json.get("id")
     data = leer_json("facturas.json")
