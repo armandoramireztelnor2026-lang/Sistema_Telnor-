@@ -1739,6 +1739,16 @@ def archivar_final():
             del data['facturas'][i]
             escribir_json('facturas.json', data)
             
+            # Eliminar el reporte original de reportes.json para que ya no regrese como ticket fantasma
+            if ticket_id_arch:
+                rep_data_full = leer_json('reportes.json')
+                reportes_list = rep_data_full.get('reportes', [])
+                for idx_r, r_obj in enumerate(reportes_list):
+                    if str(r_obj.get('id')) == str(ticket_id_arch):
+                        del reportes_list[idx_r]
+                        escribir_json('reportes.json', rep_data_full)
+                        break
+                        
             return jsonify({"status": "success", "message": "Ticket archivado y movido exitosamente a tickets_archivados.json."})
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
