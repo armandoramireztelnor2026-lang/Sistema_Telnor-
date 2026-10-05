@@ -10,8 +10,10 @@ async function cargarAnalitica() {
         
         let html = '<option value="Todos">Histórico Total</option>';
         for (let y = startYear; y <= currentYear; y++) {
-            // Siempre agrega el primer semestre del año
-            html += `<option value="${y}-S1">${y} - 1er Semestre (Ene-Jun)</option>`;
+            // Siempre agrega el primer semestre del año, excepto para 2026 según solicitud
+            if (y !== 2026) {
+                html += `<option value="${y}-S1">${y} - 1er Semestre (Ene-Jun)</option>`;
+            }
             
             // Agrega el segundo semestre solo si ya es un año pasado, o si estamos en el año actual y ya empezó Julio
             if (y < currentYear || (y === currentYear && currentSemester === 'S2')) {

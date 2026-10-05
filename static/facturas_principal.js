@@ -164,7 +164,7 @@ async function cargarFacturas() {
 
                     if (f.estado === 'Archivado' && tbodyArchivo && rolUsuario === 'administracion') {
                         let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
-                        let btnArchivar = subrolAct === 'Supervisor' ? `<button class="btn-info" style="width:100%; background:#8b5cf6; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="alert('Función Archivar pendiente')">Archivar</button>` : '';
+                        let btnArchivar = subrolAct === 'Supervisor' ? `<button class="btn-info" style="width:100%; background:#8b5cf6; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="archivarFinal('${f.id}')">Archivar</button>` : '';
                         let btnVerExp = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
                             <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; color:white; margin:0; width:100%;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>
                             <button class="btn-danger-sm" style="width:100%; background:#ef4444; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar</button>
@@ -3060,4 +3060,133 @@ function enviarRecordatorioCorp() {
             console.error(err);
             alert('Error al conectar con el servidor.');
         });
+}
+
+async function archivarFinal(id) {
+    if (!confirm("¿Seguro que deseas mandar este ticket a Tickets Archivados? Ya no aparecerá en el Archivo General.")) return;
+    try {
+        const res = await fetch('/api/facturas/archivar_final', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+        const d = await res.json();
+        if (d.status === 'success') {
+            alert(d.message);
+            cargarFacturas();
+        } else {
+            alert("Error: " + d.message);
+        }
+    } catch (e) {
+        alert("Error de conexión: " + e);
+    }
+}
+
+let datosArchivados = [];
+
+async function abrirTicketsArchivados() {
+    document.getElementById('modal-tickets-archivados').style.display = 'flex';
+    document.getElementById('tbody-archivados').innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Cargando...</td></tr>';
+    
+    try {
+        const res = await fetch('/api/facturas/lista_archivados');
+        const data = await res.json();
+        if (data.status === 'success') {
+            datosArchivados = data.archivados;
+            
+            // Llenar selector de años
+            const selectYear = document.getElementById('filtro-year-archivados');
+            const currentYear = new Date().getFullYear();
+            let years = new Set();
+            datosArchivados.forEach(f => {
+                if (f.fecha_cierre) years.add(f.fecha_cierre.split('-')[0]);
+                else if (f.timestamp) years.add(f.timestamp.split('-')[0]);
+            });
+            years.add(currentYear.toString());
+            
+            let optionsHtml = '<option value="Todos">Todos los Años</option>';
+            Array.from(years).sort().reverse().forEach(y => {
+                optionsHtml += `<option value="${y}">${y}</option>`;
+            });
+            selectYear.innerHTML = optionsHtml;
+            selectYear.value = currentYear.toString();
+            
+            renderizarArchivados();
+        } else {
+            alert("Error: " + data.message);
+        }
+    } catch (e) {
+        alert("Error: " + e);
+    }
+}
+
+function renderizarArchivados() {
+    const tbody = document.getElementById('tbody-archivados');
+    const filterText = document.getElementById('filtro-buscar-archivados').value.toLowerCase();
+    const filterYear = document.getElementById('filtro-year-archivados').value;
+    
+    tbody.innerHTML = '';
+    
+    let filtrados = datosArchivados.filter(f => {
+        let textMatch = false;
+        let searchString = `${f.id_reporte || f.numero_reporte || ''} ${f.unidad || ''} ${f.proveedor || ''} ${f.precio || f.precio_estimado || ''} ${f.numero_doc50 || ''} ${f.factura_folio || ''}`.toLowerCase();
+        
+        // Extraer ticket ID de retro si existe
+        if (f.retro && f.retro.includes('[TICKET:')) {
+            let match = f.retro.match(/\[TICKET:(.*?)\]/);
+            if (match) searchString += ' ' + match[1].toLowerCase();
+        }
+        
+        if (searchString.includes(filterText)) textMatch = true;
+        
+        let yearMatch = false;
+        if (filterYear === 'Todos') {
+            yearMatch = true;
+        } else {
+            let yearTarget = f.fecha_cierre ? f.fecha_cierre.split('-')[0] : (f.timestamp ? f.timestamp.split('-')[0] : '');
+            if (yearTarget === filterYear) yearMatch = true;
+        }
+        
+        return textMatch && yearMatch;
+    });
+    
+    if (filtrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">No se encontraron tickets con esos filtros.</td></tr>';
+        return;
+    }
+    
+    // Sort desc by id or timestamp
+    filtrados.sort((a, b) => b.id - a.id);
+    
+    filtrados.forEach(f => {
+        let prRaw = f.precio || f.precio_estimado || 0;
+        let prFmt = parseFloat(prRaw).toLocaleString('en-US');
+        let ticketId = 'N/A';
+        if (f.retro && f.retro.includes('[TICKET:')) {
+            let match = f.retro.match(/\[TICKET:(.*?)\]/);
+            if (match) ticketId = match[1];
+        } else if (f.id_reporte) {
+            ticketId = f.id_reporte;
+        }
+        
+        // Find pdf link for 'Descargar'
+        let pdfLinks = `<a href="/api/facturas/descargar_zip/${f.id}" style="display:block; padding:8px 10px; background:#10b981; color:white; text-decoration:none; border-radius:4px; font-size:0.85em; margin-top:8px; text-align:center; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1);">📦 Descargar Expediente ZIP</a>`;
+        
+        let doc50 = f.numero_doc50 || 'N/A';
+        
+        tbody.innerHTML += `
+            <tr style="border-bottom:1px solid #e2e8f0; transition:background 0.2s;">
+                <td style="padding:12px; font-weight:bold; color:#0ea5e9;">${ticketId}</td>
+                <td style="padding:12px;">${f.unidad || 'N/A'}</td>
+                <td style="padding:12px; font-weight:bold;">${f.proveedor || 'S/T'}</td>
+                <td style="padding:12px; color:#15803d; font-weight:bold;">$${prFmt} MXN</td>
+                <td style="padding:12px; font-weight:bold;">${doc50}</td>
+                <td style="padding:12px; font-size:0.9em; color:#64748b;">${f.fecha_cierre || 'N/A'}</td>
+                <td style="padding:12px; text-align:right;">
+                    <button class="btn-info" style="width:100%; font-size:0.85em; padding:6px 10px; background:#0284c7; border:none; color:white; margin:0;" onclick="abrirDetalles('${f.id}')">👁️ Ver Detalles</button>
+                    ${pdfLinks}
+                </td>
+            </tr>
+        `;
+    });
 }

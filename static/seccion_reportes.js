@@ -196,21 +196,25 @@ function renderizarTablaReportes(lista) {
         let nombreSup = f.supervisor_nombre || "No asignado";
         let nombreAdmin = f.administrador_nombre || "No asignado";
         let nombreJefatura = f.jefatura_nombre || "No asignado";
-        
-        let fechaEntradaBase = f.fecha || pendienteHTML;
-        let fechaEntrada = fechaEntradaBase;
-        if (fechaEntrada !== pendienteHTML && f.timestamp) {
-            let dt = new Date(f.timestamp);
-            if (!isNaN(dt)) {
-                let yyyy = dt.getFullYear();
-                let mm = String(dt.getMonth() + 1).padStart(2, '0');
-                let dd = String(dt.getDate()).padStart(2, '0');
-                let hh = String(dt.getHours()).padStart(2, '0');
-                let min = String(dt.getMinutes()).padStart(2, '0');
-                fechaEntrada = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+        let fechaEntrada = pendienteHTML;
+        if (!f.is_unassigned) {
+            if (f.timestamp_aprobacion) {
+                let dt = new Date(f.timestamp_aprobacion);
+                if (!isNaN(dt)) {
+                    let yyyy = dt.getFullYear();
+                    let mm = String(dt.getMonth() + 1).padStart(2, '0');
+                    let dd = String(dt.getDate()).padStart(2, '0');
+                    let hh = String(dt.getHours()).padStart(2, '0');
+                    let min = String(dt.getMinutes()).padStart(2, '0');
+                    fechaEntrada = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+                } else {
+                    fechaEntrada = f.timestamp_aprobacion;
+                }
+            } else {
+                fechaEntrada = `<span style="color:#f59e0b; font-size: 0.9em; font-weight:bold;">Esperando Aprobación</span>`;
             }
         }
-        
+
         let fechaSalida = f.fecha_cierre || pendienteHTML;
         let tiempoTaller = pendienteHTML;
         // CALCULO DE TIEMPO EN TALLER

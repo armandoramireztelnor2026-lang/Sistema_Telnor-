@@ -1,3 +1,62 @@
 {
-    "facturas": []
+    "facturas": [
+        {
+            "id": "20261004230359",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1133",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "n",
+            "retro": "[TICKET:REP-20261002133906]\r\nREPORTE ORIGINAL DEL CHOFER: N",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 4600.0,
+            "fecha": "2026-10-04",
+            "numero_orden": "112",
+            "compania": "RUMN",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-10-04T23:03:59.471591",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "93774736",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 4600.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20261002133906]\r\nREPORTE ORIGINAL DEL CHOFER: N",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1791180239415_0_WhatsApp_Image_2026-10-01_at_12.25.08_AM.jpeg",
+                        "evidencia_1791180239415_0_WhatsApp_Image_2026-10-01_at_12.25.07_AM.jpeg"
+                    ],
+                    "pdf_cotizacion": "1791180239415_0_2200607_RamirezCardenasLuisArmando_Actividad_2.4._Auditoria_de_servicios_de_la_nube.pdf",
+                    "numero_orden": "112",
+                    "numero_cotizacion_asignacion": "113",
+                    "factura_folio": "82721",
+                    "factura_pdf": "FACTURA_FINAL_20261004230359_0_Meta_2.1.1_Evaluacion_de_Conocimientos_del_Modulo_4_Seguridad_en_la_nube.pdf",
+                    "numero_doc50": "50112"
+                }
+            ],
+            "reactivado_desde_caras": false,
+            "comentarios": "",
+            "autor_comentario": "",
+            "eliminado_por": "",
+            "timestamp_aprobacion": "2026-10-04T23:05:34.960042",
+            "numero_cotizacion_asignacion": "113",
+            "liberado_admin": true,
+            "factura_folio": "82721",
+            "factura_pdf": "FACTURA_FINAL_20261004230359_0_Meta_2.1.1_Evaluacion_de_Conocimientos_del_Modulo_4_Seguridad_en_la_nube.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "50112",
+            "estado": "Archivado",
+            "fecha_cierre": "2026-10-04 23:11:26"
+        }
+    ]
 }
