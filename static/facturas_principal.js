@@ -3178,7 +3178,7 @@ function renderizarArchivados() {
         let rolUsuario = document.getElementById('rol-usuario-global') ? document.getElementById('rol-usuario-global').value : '';
         let btnEliminar = '';
         if (rolUsuario === 'administracion' && subrolAct === 'Jefatura') {
-            btnEliminar = `<button class="btn-danger-sm" style="width:100%; font-size:0.85em; padding:6px 10px; background:#ef4444; border:none; color:white; margin-top:8px; border-radius:4px;" onclick="eliminarFacturaSilenciosa('${f.id}')">🗑️ Eliminar Permanente</button>`;
+            btnEliminar = `<button class="btn-danger-sm" style="width:100%; font-size:0.85em; padding:6px 10px; background:#ef4444; border:none; color:white; margin-top:8px; border-radius:4px;" onclick="eliminarArchivadoPermanente('${f.id}')">🗑️ Eliminar Permanente</button>`;
         }
         
         tbody.innerHTML += `
@@ -3199,7 +3199,7 @@ function renderizarArchivados() {
     });
 }
 
-async function eliminarFacturaSilenciosa(id) {
+async function eliminarArchivadoPermanente(id) {
     if (!confirm("⚠️ ADVERTENCIA: Esta acción eliminará permanentemente todos los datos de este ticket. ¿Estás absolutamente seguro?")) return;
     try {
         const resp = await fetch('/api/facturas/eliminar_permanente', {
