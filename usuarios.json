@@ -18,13 +18,13 @@
             }
         },
         {
-            "usuario": "JoseAlejandro_Pe\u00f1u\u00f1uri -RUMN-2026-admin",
+            "usuario": "JoseAlejandro_Peñuñuri -RUMN-2026-admin",
             "password": "AIw5Wipg",
             "rol": "administracion",
             "datos_perfil": {
                 "rol": "administracion",
                 "cope": "PE CALLE 10",
-                "apellido_paterno": "Pe\u00f1u\u00f1uri ",
+                "apellido_paterno": "Peñuñuri ",
                 "apellido_materno": "Rivas",
                 "nombres": "Jose Alejandro ",
                 "ciudad": "Tijuana",
@@ -68,7 +68,11 @@
                 "area": "Automotriz",
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "subrol": "Administrador",
-                "foto_ruta": "temp_20260929140200_Administrador.png"
+                "foto_ruta": "temp_20260929140200_Administrador.png",
+                "copes_asignados": [
+                    "PE ROSARITO",
+                    "PE PLAYAS"
+                ]
             }
         },
         {

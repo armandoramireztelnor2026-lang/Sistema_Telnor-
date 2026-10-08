@@ -8,7 +8,6 @@ import os
 
 from notificaciones import (
     enviar_correo_ciudad_asignada,
-    enviar_correo_ciudad_removida,
     enviar_correo_cambio_subrol
 )
 
@@ -206,12 +205,6 @@ def quitar_cope():
         return jsonify({"status": "error", "message": "Usuario no encontrado."})
 
     escribir_json('usuarios.json', usuarios_data)
-
-    if correo_destino:
-        try:
-            enviar_correo_ciudad_removida(correo_destino, nombre_destino, cope, obtener_nombre_sesion())
-        except Exception as e:
-            print(f"Error al enviar correo: {e}")
 
     return jsonify({"status": "success", "message": f"COPE '{cope}' removido de {nombre_destino}."})
 

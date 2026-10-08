@@ -16,6 +16,26 @@ def generar_codigo_liberacion():
     return str(random.randint(10000000, 99999999))
 
 def disparar_correo(destino, asunto, cuerpo_html, adjuntos=None):
+    # --- Inyección de "Proceso generado por:" ---
+    generado_por = None
+    try:
+        from flask import session, has_request_context
+        if has_request_context() and 'usuario' in session:
+            perf = session['usuario'].get('datos_perfil', {})
+            nombre = f"{perf.get('nombres', '')} {perf.get('apellido_paterno', '')}".strip()
+            rol = perf.get('subrol') or session['usuario'].get('rol', '')
+            if rol and nombre:
+                generado_por = f"{str(rol).capitalize()}: {nombre}"
+            elif nombre:
+                generado_por = nombre
+    except Exception as e:
+        print(f"Error obteniendo usuario para correo: {e}")
+
+    if generado_por and '</body>' in cuerpo_html:
+        footer = f'<div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 0.85em; color: #6b7280; border-top: 1px solid #e5e7eb; margin-top: 20px; font-family: Arial, sans-serif;">Acción realizada por: <strong style="color: #374151;">{generado_por}</strong></div>'
+        cuerpo_html = cuerpo_html.replace('</body>', f'{footer}\n</body>')
+    # --------------------------------------------
+
     msg = MIMEMultipart()
     msg['From'] = CORREO_REMITENTE
     msg['To'] = destino
@@ -76,32 +96,6 @@ def enviar_correo_liberacion_doc50_supervisor(correo_destino, nombre_supervisor,
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
 
-def enviar_correo_ticket_finalizado_supervisor(correo_destino, nombre_supervisor, unidad, ticket, nums_doc50):
-    if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
-        return False, "Sin correo"
-
-    asunto = f"TICKET FINALIZADO Y ARCHIVADO (Unidad 8090-{str(unidad).replace('8090-', '')})"
-    cuerpo_html = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-            <div style="background-color: #2d6a4f; padding: 20px; text-align: center;">
-                <h2 style="color: #ffffff; margin: 0;">TICKET FINALIZADO CON ÉXITO</h2>
-            </div>
-            <div style="padding: 20px;">
-                <p>Hola <strong>{nombre_supervisor}</strong>,</p>
-                <p>Te notificamos que el proceso administrativo para el ticket <strong>{ticket}</strong> ha concluido satisfactoriamente.</p>
-                <p>El Documento Contable 50 ha sido capturado en el sistema, por lo que este reporte pasa al estado <strong>Archivado</strong> y se da por cerrado definitivamente.</p>
-                <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
-                    <li style="margin-bottom: 10px;"><strong>Folio(s) Doc 50 Capturado(s):</strong> {', '.join(nums_doc50) if isinstance(nums_doc50, list) else nums_doc50}</li>
-                </ul>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return disparar_correo(correo_destino, asunto, cuerpo_html)
 
 def enviar_correo_liberacion(correo_destino, ticket, unidad, codigo, nombre_chofer, telefono_chofer):
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
@@ -219,35 +213,6 @@ def enviar_correo_nueva_factura(lista_admins, proveedor, unidad, precio, titulo=
         disparar_correo(admin['correo'], asunto, cuerpo_html, adjuntos=adjuntos)
     return True, "Enviado"
 
-def enviar_correo_nueva_factura_corp(lista_corps, proveedor, unidad, precio, titulo=None):
-    if not lista_corps:
-        return False, "No hay correos"
-
-    asunto = f"Solicitud de Autorización Financiera - {proveedor} (Unidad 8090-{str(unidad).replace('8090-', '')})"
-    for corp in lista_corps:
-        cuerpo_html = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-            <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-                <div style="background-color: #0284c7; padding: 20px; text-align: center;">
-                    <h2 style="color: #ffffff; margin: 0;">REVISIÓN DE GASTO MAYOR (COTIZACIÓN)</h2>
-                </div>
-                <div style="padding: 20px;">
-                    <p>Hola <strong>{corp['nombre']}</strong>,</p>
-                    <p>Se le notifica que se requiere su autorización financiera para procesar una cotización que supera los $10,000 MXN establecidos.</p>
-                    <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
-                        <li style="margin-bottom: 8px;"><strong>Taller Emisor:</strong> {proveedor}</li>
-                        <li style="margin-bottom: 8px;"><strong>Unidad atendida:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
-                        <li style="margin-bottom: 8px;"><strong>Monto por autorizar:</strong> ${precio:,.2f} MXN (Sin IVA)</li>
-                    </ul>
-                    <p>Ingrese al portal corporativo para analizar la cotización anexada y emitir la autorización correspondiente.</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
-        disparar_correo(corp['correo'], asunto, cuerpo_html)
-    return True, "Enviado"
 
 def enviar_correo_nuevo_ticket(lista_admins, ticket, unidad, ciudad, falla, empleado):
     if not lista_admins:
@@ -309,32 +274,6 @@ def enviar_correo_confirmacion_reporte(correo_destino, nombre_empleado, ticket, 
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
 
-def enviar_correo_confirmacion_factura(correo_destino, nombre_proveedor, unidad, precio):
-    if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
-        return False, "Sin correo"
-
-    asunto = f"📄 Confirmación de Recepción de Cotización - Unidad 8090-{str(unidad).replace('8090-', '')}"
-    cuerpo_html = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-            <div style="background-color: #112641; padding: 20px; text-align: center;">
-                <h2 style="color: #10b981; margin: 0;">COTIZACIÓN ENVIADA CON ÉXITO</h2>
-            </div>
-            <div style="padding: 20px;">
-                <p>Hola <strong>{nombre_proveedor}</strong>,</p>
-                <p>Le confirmamos que su cotización ha sido cargada al sistema exitosamente y ya se encuentra en la bandeja del departamento Automotriz para su revisión técnica y financiera.</p>
-                <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
-                    <li style="margin-bottom: 8px;"><strong>Unidad Atendida:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
-                    <li style="margin-bottom: 8px;"><strong>Costo Estimado:</strong> ${precio:,.2f} MXN (Sin IVA)</li>
-                </ul>
-                <p>El sistema le notificará cuando la orden sea aprobada para que inicie la reparación.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return disparar_correo(correo_destino, asunto, cuerpo_html)
 
 def enviar_correo_factura_rechazada(correo_destino, nombre_proveedor, unidad, motivo):
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
@@ -528,33 +467,6 @@ def enviar_correo_ticket_rechazado(correo_destino, nombre_empleado, ticket, unid
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
 
-def enviar_correo_confirmacion_factura_fiscal(correo_destino, proveedor, unidad, titulo, folio):
-    if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
-        return False, "Sin correo"
-
-    asunto = f"Confirmación de subida de Comprobante Fiscal (CFDI) - Folio {folio}"
-    cuerpo_html = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-            <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
-                <h2 style="color: #ffffff; margin: 0;">FACTURA FISCAL SUBIDA EXITOSAMENTE</h2>
-            </div>
-            <div style="padding: 20px;">
-                <p>Hola <strong>{proveedor}</strong>,</p>
-                <p>Tu factura final (CFDI) se ha subido de forma correcta al sistema.</p>
-                <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 10px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
-                    <li style="margin-bottom: 10px;"><strong>Concepto:</strong> {titulo}</li>
-                    <li style="margin-bottom: 10px;"><strong>Folio Fiscal:</strong> {folio}</li>
-                </ul>
-                <p style="margin-top: 20px;">Tu factura pasará ahora al proceso de revisión por parte del equipo de Administración para proceder con el trámite de pago correspondiente.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return disparar_correo(correo_destino, asunto, cuerpo_html)
 
 def enviar_correo_factura_fiscal_subida(correo_destino, proveedor, unidad, titulo, folio, nombre_supervisor="Supervisor"):
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
@@ -640,46 +552,6 @@ def enviar_correo_esperando_liberacion(correo_destino, nombre_admin, ticket, uni
     return disparar_correo(correo_destino, asunto, cuerpo_html)
 
 
-def enviar_correo_notificacion_corp_documentos(lista_corps, proveedor, unidad, precio, ticket, supervisor_nombre):
-    """Envía correo a corporativos solicitando la liberación de documentos para cotizaciones mayores a $10,001."""
-    precio_fmt = f"{float(precio):,.2f}"
-    asunto = f"Solicitud de Aprobación de Presupuesto Extraordinario - Unidad 8090-{str(unidad).replace('8090-', '')} (${precio_fmt} MXN)"
-    cuerpo_html = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-            <div style="background: linear-gradient(135deg, #7c3aed, #4f46e5); padding: 20px; text-align: center;">
-                <h2 style="color: #ffffff; margin: 0;">AUTORIZACIÓN REQUERIDA</h2>
-                <p style="color: #e0e7ff; margin: 5px 0 0 0; font-size: 0.95em;">Cotización que excede el límite de $10,001 MXN</p>
-            </div>
-            <div style="padding: 20px;">
-                <p>Estimado(a) miembro de <strong>Corporativos</strong>,</p>
-                <p>El Supervisor <strong>{supervisor_nombre}</strong> le solicita su autorización para liberar los documentos de la siguiente cotización que supera el monto permitido:</p>
-                <ul style="background-color: #f9fafb; padding: 15px 30px; border-radius: 8px; border: 1px solid #e5e7eb; list-style-type: none; margin-left: 0;">
-                    <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
-                    <li style="margin-bottom: 8px;"><strong>Taller/Proveedor:</strong> {proveedor}</li>
-                    <li style="margin-bottom: 8px;"><strong>Monto Total:</strong> <span style="color: #dc2626; font-weight: bold; font-size: 1.1em;">${precio_fmt} MXN</span></li>
-                </ul>
-                <p style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b; color: #92400e;">
-                    <strong>Acción requerida:</strong> Por favor ingrese al sistema, revise la cotización y apruebe o rechace el gasto desde su panel de <strong>Corporativos</strong>.
-                </p>
-            </div>
-            <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 0.85em; color: #6b7280;">
-                Sistema de Gestión Automotriz
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    enviados = 0
-    for corp in lista_corps:
-        correo = corp.get("correo")
-        if correo and correo.strip():
-            exito, _ = disparar_correo(correo, asunto, cuerpo_html)
-            if exito:
-                enviados += 1
-    return enviados
 
 def enviar_correo_recordatorio_doc_contable(lista_corps, ticket, unidad, proveedor, orden, pedido, factura, supervisor, ciudad):
     if not lista_corps:
@@ -744,26 +616,6 @@ def enviar_correo_ciudad_asignada(correo, nombre, ciudad, asignado_por):
     """
     disparar_correo(correo, asunto, cuerpo_html)
 
-def enviar_correo_ciudad_removida(correo, nombre, ciudad, removido_por):
-    asunto = f"⚠️ Remoción de Jurisdicción Operativa - Ciudad: {ciudad}"
-    cuerpo_html = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-            <div style="background-color: #f59e0b; padding: 20px; text-align: center;">
-                <h2 style="color: #ffffff; margin: 0;">CIUDAD REMOVIDA</h2>
-            </div>
-            <div style="padding: 20px;">
-                <p>Hola <strong>{nombre}</strong>,</p>
-                <p>Se le notifica que <strong>{removido_por}</strong> (Jefatura) ha <strong>removido</strong> la ciudad <strong style="color: #ef4444;">{ciudad}</strong> de su perfil en el Sistema Automotriz.</p>
-                <p>Ya no recibirá ni gestionará tickets de esa ciudad.</p>
-                <p style="color: #64748b; font-size: 0.9em;">Si tiene alguna duda, contacte a su Jefatura directa.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    disparar_correo(correo, asunto, cuerpo_html)
 
 def enviar_correo_cambio_subrol(correo, nombre, nuevo_subrol, modificado_por):
     asunto = f"🔄 Actualización de Funciones y Permisos - Rol: {nuevo_subrol}"
@@ -1184,71 +1036,7 @@ def enviar_correo_liberacion_supervisor(correo_supervisor, nombre_supervisor, ti
     """
     return disparar_correo(correo_supervisor, asunto, cuerpo_html)
 
-def enviar_correo_factura_fiscal_aprobada(correo_proveedor, nombre_proveedor, unidad, ticket):
-    """Notifica al Taller/Proveedor que su factura fiscal fue aprobada por Administración."""
-    if not correo_proveedor or correo_proveedor.strip() in ["", "No proporcionado"]:
-        return False, "Sin correo"
 
-    asunto = f"✅ Validación Exitosa de Comprobante Fiscal - Unidad 8090-{str(unidad).replace('8090-', '')} (Folio {ticket})"
-    cuerpo_html = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-            <div style="background-color: #10b981; padding: 20px; text-align: center;">
-                <h2 style="color: #ffffff; margin: 0;">FACTURA FISCAL APROBADA</h2>
-            </div>
-            <div style="padding: 20px;">
-                <p>Hola <strong>{nombre_proveedor}</strong>,</p>
-                <p>Te informamos que la factura o facturas fiscales que subiste para el siguiente ticket han sido <strong>APROBADAS</strong> y el proceso avanza a la sección de documentos contables para programación de pago.</p>
-
-                <ul style="background-color: #f0fdf4; padding: 15px 30px; border-radius: 8px; border: 1px solid #86efac; list-style-type: none; margin-left: 0;">
-                    <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
-                </ul>
-
-                <p style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b; color: #92400e;">
-                    <strong>Nota:</strong> Tu trámite sigue su curso normal. Se te notificará cualquier novedad.
-                </p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return disparar_correo(correo_proveedor, asunto, cuerpo_html)
-
-def enviar_correo_doc50_proveedor(correo_proveedor, nombre_proveedor, unidad, ticket, nums_doc50):
-    """Notifica al Taller/Proveedor que su ticket recibió el Número de Documento Contable 50."""
-    if not correo_proveedor or correo_proveedor.strip() in ["", "No proporcionado"]:
-        return False, "Sin correo"
-
-    asunto = f"💰 Notificación de Trámite de Pago en Proceso (Doc 50) - Unidad 8090-{str(unidad).replace('8090-', '')} (Folio {ticket})"
-    cuerpo_html = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-            <div style="background-color: #2563eb; padding: 20px; text-align: center;">
-                <h2 style="color: #ffffff; margin: 0;">PAGO EN PROCESO</h2>
-                <p style="color: #bfdbfe; margin: 5px 0 0 0;">Documento Contable 50 Asignado</p>
-            </div>
-            <div style="padding: 20px;">
-                <p>Hola <strong>{nombre_proveedor}</strong>,</p>
-                <p>Te informamos que el siguiente ticket ha concluido todas sus revisiones y <strong>el trámite de pago ya se encuentra en proceso.</strong></p>
-
-                <ul style="background-color: #eff6ff; padding: 15px 30px; border-radius: 8px; border: 1px solid #bfdbfe; list-style-type: none; margin-left: 0;">
-                    <li style="margin-bottom: 8px;"><strong>Ticket:</strong> {ticket}</li>
-                    <li style="margin-bottom: 8px;"><strong>Unidad:</strong> 8090-{str(unidad).replace('8090-', '')}</li>
-                    <li style="margin-bottom: 8px;"><strong>Documentos 50 Asignados:</strong> {', '.join(nums_doc50) if isinstance(nums_doc50, list) else nums_doc50}</li>
-                </ul>
-
-                <p style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 4px solid #16a34a; color: #166534;">
-                    <strong>¡Gracias por tu excelente servicio!</strong> El proceso interno ha concluido para este ticket.
-                </p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return disparar_correo(correo_proveedor, asunto, cuerpo_html)
 
 def enviar_correo_confirmacion_aprobacion_actor(correo_destino, actor, unidad, precio, rol_aprobador="Supervisor"):
     if not correo_destino or correo_destino.strip() in ["", "No proporcionado"]:
@@ -1300,37 +1088,3 @@ def enviar_correo_correccion_orden(correo_destino, supervisor, unidad):
     """
     return disparar_correo(correo_destino, asunto, cuerpo_html)
 
-def enviar_correo_admin_rechazo_fiscal(lista_admins, ticket, unidad, motivo, nombre_supervisor="Supervisor"):
-    asunto = f"Revisión Requerida - Factura Fiscal Rechazada: {unidad}"
-    
-    for admin in lista_admins:
-        correo = admin.get('correo')
-        nombre_admin = admin.get('nombre', 'Administrador')
-        
-        if not correo:
-            continue
-
-        cuerpo_html = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-            <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-                <div style="background-color: #ef4444; padding: 20px; text-align: center;">
-                    <h2 style="color: #ffffff; margin: 0;">FACTURA FISCAL RECHAZADA</h2>
-                </div>
-                <div style="padding: 20px;">
-                    <p>Hola <strong>{nombre_admin}</strong>,</p>
-                    <p>El supervisor <strong>{nombre_supervisor}</strong> ha rechazado la validación de la factura fiscal para la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong> (Ticket: <strong>{ticket}</strong>).</p>
-                    <p><strong>Motivo del rechazo:</strong></p>
-                    <blockquote style="border-left: 4px solid #ef4444; padding-left: 10px; margin-left: 0; color: #4b5563; font-style: italic;">
-                        {motivo}
-                    </blockquote>
-                    <p><strong>El proceso de liberación del documento contable ha sido reiniciado (deshecho).</strong></p>
-                    <p>Por favor, revisa si es necesario que el supervisor corrija los datos (mediante actualizar datos de pedido/orden) o realiza las validaciones pertinentes para que en su momento vuelva a liberar el número de documento contable (Doc50).</p>
-                    <br>
-                    <p style="font-size: 0.9em; color: #6b7280;">Este es un mensaje automático del sistema.</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
-        disparar_correo(correo, asunto, cuerpo_html)

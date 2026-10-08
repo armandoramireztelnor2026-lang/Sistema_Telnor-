@@ -303,42 +303,90 @@ async function cargarFacturas() {
 
                     btnAccion += `</div>`;
                 } else {
-                    btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; align-items:stretch; width:100%;">
-                        <span style="font-size:0.9em; font-weight:bold; color:#a3b1c6; margin-bottom: 2px;">${ordStr !== 'Pendiente' ? 'Orden Oficial: <span style="color:#f59e0b;">' + ordStr + '</span>' : 'En revisión...'}</span>
-                        <button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box;" onclick="abrirDetalles('${f.id}')">Ver Detalles (PDF)</button>`;
+                    // --- BLOQUE TALLER (PROVEEDOR) ---
 
-                    if (confirmadaTotal && entregadoTexto !== 'Sí') {
-                        if (!f.codigo_liberacion) {
-                            if (rolUsuario === 'proveedores') {
-                                btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; background:#10b981; border:none;" onclick="marcarUnidadLista('${f.id}')">✔️ Marcar Unidad Lista</button>`;
-                            }
+                    // ⚠️ CASO ESPECIAL: Cotización rechazada con recomendaciones
+                    if (f.estado === 'Rechazado_Con_Recomendaciones') {
+                        let motivo = f.motivo_rechazo || 'Sin motivo especificado.';
+                        let rechazadoPor = f.rechazado_por || 'Supervisión';
+                        let precsRec = f.precios_recomendados || [];
+                        let numCots = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones.length : 1;
+                        let formCots = '';
+
+                        if (f.cotizaciones && f.cotizaciones.length > 0) {
+                            f.cotizaciones.forEach((cot, idx) => {
+                                let precRec = precsRec[idx] ? precsRec[idx].precio_recomendado : '';
+                                let labelRec = precRec ? `<span style="color:#f59e0b;font-size:0.78em;">💡 Sugerido: $${precRec}</span>` : '';
+                                formCots += `<div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;margin-bottom:6px;">
+                                    <div style="color:#94a3b8;font-size:0.78em;">Cotización ${idx + 1}: <strong style="color:#e2e8f0;">${cot.titulo || ''}</strong></div>
+                                    ${labelRec}
+                                    <input type="number" id="precio-corr-${f.id}-${idx}" value="${cot.precio || ''}"
+                                        style="width:100%;padding:6px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:white;font-size:0.85em;box-sizing:border-box;margin-top:4px;" placeholder="Precio corregido...">
+                                    <input type="file" id="pdf-corr-${f.id}-${idx}" accept=".pdf"
+                                        style="width:100%;font-size:0.72em;color:#94a3b8;margin-top:4px;">
+                                </div>`;
+                            });
                         } else {
-                            if (rolUsuario === 'proveedores') {
-                                btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px;">⌛ Esperando al chofer... (PIN enviado)</span>`;
-                            } else if (rolUsuario === 'supervision') {
-                                btnAccion += `<button class="btn-info" onclick="abrirModalValidacion('${f.id}', '${f.unidad.replace('8090-', '')}')" style="background:#0284c7; width:100%; margin:0; border:none;">🔑 Validar PIN Chofer</button>`;
-                            }
-                        }
-                    } else if (confirmadaTotal && entregadoTexto === 'Sí') {
-                        if (f.liberado_admin === false) {
-                            // 🔒 Bloqueado — Admin aún no ha liberado el ticket
-                            btnAccion += `<div style="background:#1e293b; border:1px solid #f59e0b; border-radius:8px; padding:10px; margin-top:5px; text-align:center;">
-                                <div style="color:#f59e0b; font-weight:bold; font-size:0.85em;">🔒 Ticket en revisión</div>
-                                <div style="color:#94a3b8; font-size:0.78em; margin-top:4px;">El Administrador debe liberar este ticket antes de que puedas subir tu factura.</div>
+                            let precRec = precsRec[0] ? precsRec[0].precio_recomendado : '';
+                            let labelRec = precRec ? `<span style="color:#f59e0b;font-size:0.78em;">💡 Sugerido: $${precRec}</span>` : '';
+                            formCots = `<div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;margin-bottom:6px;">
+                                ${labelRec}
+                                <input type="number" id="precio-corr-${f.id}-0" value="${f.precio || ''}"
+                                    style="width:100%;padding:6px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:white;font-size:0.85em;box-sizing:border-box;margin-top:4px;" placeholder="Precio corregido...">
+                                <input type="file" id="pdf-corr-${f.id}-0" accept=".pdf"
+                                    style="width:100%;font-size:0.72em;color:#94a3b8;margin-top:4px;">
                             </div>`;
-                        } else if (f.liberado_admin === true && !f.factura_folio) {
-                            // ✅ Liberado por Admin — puede subir factura
-                            btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; margin-top:5px; width:100%;" onclick="abrirModalSubirFactura('${f.id}')">🧾 Subir Factura Final (PDF)</button>`;
-                        } else if (f.factura_folio) {
-                            // Factura ya subida — mostrar botón de ver
-                            if (f.cotizaciones && f.cotizaciones.length > 1) {
-                                btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Facturas Subidas</button>`;
+                        }
+
+                        btnAccion = `<div style="display:flex;flex-direction:column;gap:6px;width:100%;">
+                            <div style="background:#7f1d1d;border:1px solid #ef4444;border-radius:6px;padding:8px;">
+                                <div style="color:#fca5a5;font-weight:bold;font-size:0.85em;">⛔ Cotización Rechazada por ${rechazadoPor}</div>
+                                <div style="color:#fde68a;font-size:0.78em;margin-top:4px;font-style:italic;">"${motivo}"</div>
+                            </div>
+                            <div style="color:#94a3b8;font-size:0.8em;font-weight:bold;">Corrige los precios y vuelve a enviar:</div>
+                            ${formCots}
+                            <button onclick="enviarCorreccionCotizacion('${f.id}', ${numCots})"
+                                style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:6px;padding:10px;cursor:pointer;font-weight:bold;font-size:0.85em;width:100%;">
+                                ✅ Enviar Corrección
+                            </button>
+                        </div>`;
+
+                    } else {
+                        // --- Botones normales del taller ---
+                        btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; align-items:stretch; width:100%;">
+                            <span style="font-size:0.9em; font-weight:bold; color:#a3b1c6; margin-bottom: 2px;">${ordStr !== 'Pendiente' ? 'Orden Oficial: <span style="color:#f59e0b;">' + ordStr + '</span>' : 'En revisión...'}</span>
+                            <button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box;" onclick="abrirDetalles('${f.id}')">Ver Detalles (PDF)</button>`;
+
+                        if (confirmadaTotal && entregadoTexto !== 'Sí') {
+                            if (!f.codigo_liberacion) {
+                                if (rolUsuario === 'proveedores') {
+                                    btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; background:#10b981; border:none;" onclick="marcarUnidadLista('${f.id}')">✔️ Marcar Unidad Lista</button>`;
+                                }
                             } else {
-                                btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Factura Subida</button>`;
+                                if (rolUsuario === 'proveedores') {
+                                    btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px;">⌛ Esperando al chofer... (PIN enviado)</span>`;
+                                } else if (rolUsuario === 'supervision') {
+                                    btnAccion += `<button class="btn-info" onclick="abrirModalValidacion('${f.id}', '${f.unidad.replace('8090-', '')}')">🔑 Validar PIN Chofer</button>`;
+                                }
+                            }
+                        } else if (confirmadaTotal && entregadoTexto === 'Sí') {
+                            if (f.liberado_admin === false) {
+                                btnAccion += `<div style="background:#1e293b; border:1px solid #f59e0b; border-radius:8px; padding:10px; margin-top:5px; text-align:center;">
+                                    <div style="color:#f59e0b; font-weight:bold; font-size:0.85em;">🔒 Ticket en revisión</div>
+                                    <div style="color:#94a3b8; font-size:0.78em; margin-top:4px;">El Administrador debe liberar este ticket antes de que puedas subir tu factura.</div>
+                                </div>`;
+                            } else if (f.liberado_admin === true && !f.factura_folio) {
+                                btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; margin-top:5px; width:100%;" onclick="abrirModalSubirFactura('${f.id}')">🧾 Subir Factura Final (PDF)</button>`;
+                            } else if (f.factura_folio) {
+                                if (f.cotizaciones && f.cotizaciones.length > 1) {
+                                    btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Facturas Subidas</button>`;
+                                } else {
+                                    btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Factura Subida</button>`;
+                                }
                             }
                         }
+                        btnAccion += `</div>`;
                     }
-                    btnAccion += `</div>`;
                 }
 
                 let ciaExtra = f.compania ? ` | Cia: <strong style="color:white;">${f.compania}</strong>` : ``;
@@ -3175,7 +3223,7 @@ function renderizarArchivados() {
         let doc50 = f.numero_doc50 || 'N/A';
         
         let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
-        let rolUsuario = document.getElementById('rol-usuario-global') ? document.getElementById('rol-usuario-global').value : '';
+        let rolUsuario = document.getElementById('rol-actual') ? document.getElementById('rol-actual').value : '';
         let btnEliminar = '';
         if (rolUsuario === 'administracion' && subrolAct === 'Jefatura') {
             btnEliminar = `<button class="btn-danger-sm" style="width:100%; font-size:0.85em; padding:6px 10px; background:#ef4444; border:none; color:white; margin-top:8px; border-radius:4px;" onclick="eliminarArchivadoPermanente('${f.id}')">🗑️ Eliminar Permanente</button>`;
@@ -3216,5 +3264,39 @@ async function eliminarArchivadoPermanente(id) {
         }
     } catch (e) {
         mostrarToast("Error de conexión.", "error");
+    }
+}
+
+
+async function enviarCorreccionCotizacion(id, numCots) {
+    if (!confirm('confirmas que deseas enviar la cotizacion corregida para revision?')) return;
+
+    const fd = new FormData();
+    fd.append('id', id);
+
+    let preciosArray = [];
+    for (let i = 0; i < numCots; i++) {
+        let precioInput = document.getElementById('precio-corr-' + id + '-' + i);
+        let pdfInput = document.getElementById('pdf-corr-' + id + '-' + i);
+        if (precioInput) preciosArray.push({ precio: precioInput.value });
+        if (pdfInput && pdfInput.files.length > 0) fd.append('pdf_cotizacion_' + i, pdfInput.files[0]);
+    }
+    fd.append('precios_cotizaciones', JSON.stringify(preciosArray));
+
+    if (typeof mostrarLoaderDinamico === 'function') mostrarLoaderDinamico('Enviando correccion...', 'Actualizando precios');
+
+    try {
+        const resp = await fetch('/api/facturas/corregir_cotizacion_rechazada', { method: 'POST', body: fd });
+        const res = await resp.json();
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
+        if (res.status === 'success') {
+            mostrarToast(res.message, 'success');
+            cargarFacturas();
+        } else {
+            mostrarToast(res.message, 'error');
+        }
+    } catch (e) {
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
+        mostrarToast('Error de conexion.', 'error');
     }
 }
