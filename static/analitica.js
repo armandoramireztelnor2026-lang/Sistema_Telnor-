@@ -40,7 +40,24 @@ async function cargarAnalitica() {
     };
 
     for (let key in divs) {
-        if (divs[key]) divs[key].innerHTML = 'Cargando...';
+        if (divs[key]) divs[key].innerHTML = '<span style="color:#94a3b8; font-style:italic;">Cargando datos...</span>';
+    }
+
+    // Configuración global de Chart.js para el lenguaje de diseño del sistema
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.font.family = "'Poppins', sans-serif";
+        Chart.defaults.color = '#cbd5e1';
+        if (Chart.defaults.plugins && Chart.defaults.plugins.tooltip) {
+            Chart.defaults.plugins.tooltip.backgroundColor = '#0b1c30';
+            Chart.defaults.plugins.tooltip.titleColor = '#40916c';
+            Chart.defaults.plugins.tooltip.titleFont = { family: "'Poppins', sans-serif", weight: '600', size: 13 };
+            Chart.defaults.plugins.tooltip.bodyColor = '#ffffff';
+            Chart.defaults.plugins.tooltip.bodyFont = { family: "'Poppins', sans-serif", size: 12 };
+            Chart.defaults.plugins.tooltip.borderColor = '#1f395a';
+            Chart.defaults.plugins.tooltip.borderWidth = 1;
+            Chart.defaults.plugins.tooltip.padding = 10;
+            Chart.defaults.plugins.tooltip.cornerRadius = 8;
+        }
     }
 
     try {
@@ -49,33 +66,52 @@ async function cargarAnalitica() {
 
         if (data.status === 'success') {
             const formatData = (item, includeTaller = false) => {
-                if (!item) return '<strong style="color:#ef4444;">Sin datos registrados</strong>';
+                if (!item) return '<div style="color:#ef4444; font-weight:500; font-style:italic; padding: 10px 0;">Sin datos registrados en el periodo</div>';
                 
                 let fechaFormateada = '';
                 if (item.fecha && item.fecha !== 'N/A') {
                     try {
                         const d = new Date(item.fecha);
-                        if (!isNaN(d.getTime())) {
-                            fechaFormateada = `<div style="margin-top:8px; font-size:0.85em; color:#64748b; font-style:italic; border-top: 1px dashed #cbd5e1; padding-top: 8px;">📅 Registrado: ${d.toLocaleString('es-MX', {dateStyle: 'medium', timeStyle: 'short'})}</div>`;
-                        } else {
-                            fechaFormateada = `<div style="margin-top:8px; font-size:0.85em; color:#64748b; font-style:italic; border-top: 1px dashed #cbd5e1; padding-top: 8px;">📅 Registrado: ${item.fecha}</div>`;
-                        }
+                        const fechaTxt = !isNaN(d.getTime()) 
+                            ? d.toLocaleString('es-MX', {dateStyle: 'medium', timeStyle: 'short'})
+                            : item.fecha;
+                        fechaFormateada = `<div style="margin-top:10px; font-size:0.8rem; color:#94a3b8; border-top: 1px dashed #1f395a; padding-top: 8px;">📅 <span style="color:#cbd5e1;">${fechaTxt}</span></div>`;
                     } catch(e) {
-                        fechaFormateada = `<div style="margin-top:8px; font-size:0.85em; color:#64748b; font-style:italic; border-top: 1px dashed #cbd5e1; padding-top: 8px;">📅 Registrado: ${item.fecha}</div>`;
+                        fechaFormateada = `<div style="margin-top:10px; font-size:0.8rem; color:#94a3b8; border-top: 1px dashed #1f395a; padding-top: 8px;">📅 <span style="color:#cbd5e1;">${item.fecha}</span></div>`;
                     }
                 }
 
                 let html = `
-                    <div style="margin-bottom:5px;"><strong>🎟️ Ticket:</strong> <span style="color:#0ea5e9; font-weight:bold;">${item.ticket}</span></div>
-                    <div style="margin-bottom:5px;"><strong>👨‍✈️ Chofer:</strong> ${item.chofer}</div>
+                    <div style="margin-bottom:7px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#94a3b8; font-size:0.85em;">🎟️ Ticket:</span>
+                        <span style="color:#38bdf8; font-weight:700; background:rgba(14,165,233,0.12); padding:2px 8px; border-radius:6px; border:1px solid rgba(14,165,233,0.25);">${item.ticket}</span>
+                    </div>
+                    <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
+                        <span style="color:#94a3b8; font-size:0.85em;">👨‍✈️ Chofer:</span>
+                        <span style="color:#ffffff; font-weight:500; text-align:right;">${item.chofer}</span>
+                    </div>
                 `;
                 if (includeTaller) {
-                    html += `<div style="margin-bottom:5px;"><strong>🔧 Taller:</strong> ${item.taller}</div>`;
+                    html += `
+                        <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
+                            <span style="color:#94a3b8; font-size:0.85em;">🔧 Taller:</span>
+                            <span style="color:#ffffff; font-weight:500; text-align:right;">${item.taller}</span>
+                        </div>
+                    `;
                 }
                 html += `
-                    <div style="margin-bottom:5px;"><strong>👔 Admin:</strong> ${item.administrador}</div>
-                    <div style="margin-bottom:5px;"><strong>📋 Super:</strong> ${item.supervisor}</div>
-                    <div style="margin-bottom:5px;"><strong>🏢 Jefatura:</strong> ${item.jefatura}</div>
+                    <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
+                        <span style="color:#94a3b8; font-size:0.85em;">👔 Admin:</span>
+                        <span style="color:#e0e6ed; font-weight:500; text-align:right;">${item.administrador}</span>
+                    </div>
+                    <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
+                        <span style="color:#94a3b8; font-size:0.85em;">📋 Super:</span>
+                        <span style="color:#e0e6ed; font-weight:500; text-align:right;">${item.supervisor}</span>
+                    </div>
+                    <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
+                        <span style="color:#94a3b8; font-size:0.85em;">🏢 Jefatura:</span>
+                        <span style="color:#e0e6ed; font-weight:500; text-align:right;">${item.jefatura}</span>
+                    </div>
                     ${fechaFormateada}
                 `;
                 return html;
@@ -104,7 +140,7 @@ async function cargarAnalitica() {
             copes: document.getElementById('analitica-top-copes')
         };
         for (let key in topDivs) {
-            if (topDivs[key]) topDivs[key].innerHTML = 'Cargando...';
+            if (topDivs[key]) topDivs[key].innerHTML = '<span style="color:#94a3b8; font-style:italic;">Cargando rankings...</span>';
         }
 
         const responseTops = await fetch(`/api/analitica/tops?period=${period}`);
@@ -112,29 +148,60 @@ async function cargarAnalitica() {
 
         if (dataTops.status === 'success') {
             const renderList = (list, formatItem) => {
-                if (!list || list.length === 0) return '<div style="color:#94a3b8; font-style:italic;">No hay datos suficientes</div>';
-                let html = '<ol style="padding-left: 20px; margin: 0;">';
+                if (!list || list.length === 0) return '<div style="color:#64748b; font-style:italic; padding:10px 0;">No hay datos registrados</div>';
+                let html = '<div class="analitica-rank-list">';
                 list.forEach((item, index) => {
-                    html += `<li style="margin-bottom: 8px;">${formatItem(item, index)}</li>`;
+                    let medalla = index === 0 ? '🥇' : (index === 1 ? '🥈' : (index === 2 ? '🥉' : `#${index + 1}`));
+                    html += `
+                        <div class="analitica-rank-item">
+                            <div style="display:flex; align-items:center; gap:8px; width:100%; justify-content:space-between;">
+                                <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+                                    <span style="font-size:0.95em; min-width:22px; text-align:center;">${medalla}</span>
+                                    <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${formatItem(item).label}</span>
+                                </div>
+                                <span class="analitica-rank-badge" style="${formatItem(item).badgeStyle}">${formatItem(item).valor}</span>
+                            </div>
+                        </div>
+                    `;
                 });
-                html += '</ol>';
+                html += '</div>';
                 return html;
             };
 
             if (topDivs.tiempo) {
-                topDivs.tiempo.innerHTML = renderList(dataTops.top_tiempo_taller, (item) => `<strong>Eco: ${item.unidad}</strong> - ${item.dias} días (${item.taller})`);
+                topDivs.tiempo.innerHTML = renderList(dataTops.top_tiempo_taller, (item) => ({
+                    label: `<strong>Eco: ${item.unidad}</strong> <span style="color:#94a3b8; font-size:0.85em;">(${item.taller})</span>`,
+                    valor: `${item.dias} días`,
+                    badgeStyle: 'background:rgba(249,115,22,0.15); color:#fb923c; border:1px solid rgba(249,115,22,0.3);'
+                }));
             }
             if (topDivs.averias) {
-                topDivs.averias.innerHTML = renderList(dataTops.top_unidades_averias, (item) => `<strong>Eco: ${item.unidad}</strong> - ${item.cantidad} tickets`);
+                topDivs.averias.innerHTML = renderList(dataTops.top_unidades_averias, (item) => ({
+                    label: `<strong>Eco: ${item.unidad}</strong>`,
+                    valor: `${item.cantidad} tickets`,
+                    badgeStyle: 'background:rgba(234,179,8,0.15); color:#facc15; border:1px solid rgba(234,179,8,0.3);'
+                }));
             }
             if (topDivs.choferes) {
-                topDivs.choferes.innerHTML = renderList(dataTops.top_choferes, (item) => `<strong>${item.nombre}</strong> - ${item.cantidad} reportes`);
+                topDivs.choferes.innerHTML = renderList(dataTops.top_choferes, (item) => ({
+                    label: `<strong>${item.nombre}</strong>`,
+                    valor: `${item.cantidad} reps`,
+                    badgeStyle: 'background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3);'
+                }));
             }
             if (topDivs.dinero) {
-                topDivs.dinero.innerHTML = renderList(dataTops.top_talleres_dinero, (item) => `<strong>${item.nombre}</strong> - $${item.total.toLocaleString('es-MX')}`);
+                topDivs.dinero.innerHTML = renderList(dataTops.top_talleres_dinero, (item) => ({
+                    label: `<strong>${item.nombre}</strong>`,
+                    valor: `$${item.total.toLocaleString('es-MX')}`,
+                    badgeStyle: 'background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3);'
+                }));
             }
             if (topDivs.copes) {
-                topDivs.copes.innerHTML = renderList(dataTops.top_copes, (item) => `<strong>${item.cope}</strong> - ${item.cantidad} reportes`);
+                topDivs.copes.innerHTML = renderList(dataTops.top_copes, (item) => ({
+                    label: `<strong>${item.cope}</strong>`,
+                    valor: `${item.cantidad} reps`,
+                    badgeStyle: 'background:rgba(139,92,246,0.15); color:#a78bfa; border:1px solid rgba(139,92,246,0.3);'
+                }));
             }
         }
 
@@ -143,12 +210,21 @@ async function cargarAnalitica() {
         const dataCharts = await responseCharts.json();
 
         if (dataCharts.status === 'success') {
-            const chartColors = [
-                '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
-                '#06b6d4', '#f97316', '#14b8a6', '#6366f1', '#ec4899'
+            // Paleta corporativa armonizada con Telnor Green y acentos del sistema
+            const corporatePalette = [
+                '#40916c', // Telnor Green
+                '#0ea5e9', // Sky Blue
+                '#f59e0b', // Amber
+                '#8b5cf6', // Purple
+                '#ef4444', // Red
+                '#06b6d4', // Cyan
+                '#10b981', // Emerald
+                '#f97316', // Orange
+                '#14b8a6', // Teal
+                '#ec4899'  // Pink
             ];
 
-            // Destroy existing charts if they exist to prevent hover issues on reload
+            // Destruir instancias previas para evitar memory leaks y parpadeos
             if(window.chartPieEstados) window.chartPieEstados.destroy();
             if(window.chartPieMant) window.chartPieMant.destroy();
             if(window.chartPieCopes) window.chartPieCopes.destroy();
@@ -158,6 +234,44 @@ async function cargarAnalitica() {
             if(window.chartBarMarcas) window.chartBarMarcas.destroy();
             if(window.chartBarUnidadesDinero) window.chartBarUnidadesDinero.destroy();
 
+            // Opciones comunes para gráficos circulares
+            const pieChartOptions = {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#cbd5e1',
+                            font: { family: "'Poppins', sans-serif", size: 11, weight: '500' },
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 12
+                        }
+                    }
+                }
+            };
+
+            // Opciones comunes para gráficos de barras
+            const barChartOptions = (isHoriz = false) => ({
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(31, 57, 90, 0.45)', borderColor: '#1f395a' },
+                        ticks: { color: '#94a3b8', font: { family: "'Poppins', sans-serif", size: 11 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(31, 57, 90, 0.45)', borderColor: '#1f395a' },
+                        ticks: { color: '#94a3b8', font: { family: "'Poppins', sans-serif", size: 11 } }
+                    }
+                }
+            });
+
             // Pie 1: Estados
             const ctxPieEstados = document.getElementById('chart-pie-estados').getContext('2d');
             window.chartPieEstados = new Chart(ctxPieEstados, {
@@ -166,9 +280,13 @@ async function cargarAnalitica() {
                     labels: dataCharts.pie_estados.labels,
                     datasets: [{
                         data: dataCharts.pie_estados.data,
-                        backgroundColor: chartColors
+                        backgroundColor: corporatePalette,
+                        borderColor: '#112641',
+                        borderWidth: 2,
+                        hoverOffset: 6
                     }]
-                }
+                },
+                options: pieChartOptions
             });
 
             // Pie 2: Mantenimiento
@@ -179,9 +297,13 @@ async function cargarAnalitica() {
                     labels: dataCharts.pie_mantenimiento.labels,
                     datasets: [{
                         data: dataCharts.pie_mantenimiento.data,
-                        backgroundColor: chartColors.slice(2).concat(chartColors)
+                        backgroundColor: corporatePalette.slice(2).concat(corporatePalette),
+                        borderColor: '#112641',
+                        borderWidth: 2,
+                        hoverOffset: 6
                     }]
-                }
+                },
+                options: pieChartOptions
             });
 
             // Pie 3: COPEs
@@ -192,9 +314,13 @@ async function cargarAnalitica() {
                     labels: dataCharts.pie_copes.labels,
                     datasets: [{
                         data: dataCharts.pie_copes.data,
-                        backgroundColor: chartColors.slice(4).concat(chartColors)
+                        backgroundColor: corporatePalette.slice(4).concat(corporatePalette),
+                        borderColor: '#112641',
+                        borderWidth: 2,
+                        hoverOffset: 6
                     }]
-                }
+                },
+                options: pieChartOptions
             });
 
             // Pie 4: Departamentos
@@ -205,9 +331,13 @@ async function cargarAnalitica() {
                     labels: dataCharts.pie_deptos.labels,
                     datasets: [{
                         data: dataCharts.pie_deptos.data,
-                        backgroundColor: chartColors.slice(5).concat(chartColors)
+                        backgroundColor: corporatePalette.slice(5).concat(corporatePalette),
+                        borderColor: '#112641',
+                        borderWidth: 2,
+                        hoverOffset: 6
                     }]
-                }
+                },
+                options: pieChartOptions
             });
 
             // Bar 1: Meses
@@ -219,11 +349,13 @@ async function cargarAnalitica() {
                     datasets: [{
                         label: 'Tickets',
                         data: dataCharts.bar_meses.data,
-                        backgroundColor: '#3b82f6',
+                        backgroundColor: '#40916c',
+                        borderColor: '#2d6a4f',
+                        borderWidth: 1,
                         borderRadius: 6
                     }]
                 },
-                options: { scales: { y: { beginAtZero: true } } }
+                options: barChartOptions(false)
             });
 
             // Bar 2: Talleres Dinero
@@ -235,14 +367,16 @@ async function cargarAnalitica() {
                     datasets: [{
                         label: 'Facturación ($)',
                         data: dataCharts.bar_talleres.data,
-                        backgroundColor: '#10b981',
+                        backgroundColor: '#0ea5e9',
+                        borderColor: '#0284c7',
+                        borderWidth: 1,
                         borderRadius: 6
                     }]
                 },
-                options: { scales: { y: { beginAtZero: true } } }
+                options: barChartOptions(false)
             });
 
-            // Bar 3: Marcas/Modelos Fallas
+            // Bar 3: Marcas/Modelos Fallas (Horizontal)
             const ctxBarMarcas = document.getElementById('chart-bar-marcas').getContext('2d');
             window.chartBarMarcas = new Chart(ctxBarMarcas, {
                 type: 'bar',
@@ -252,13 +386,18 @@ async function cargarAnalitica() {
                         label: 'Tickets',
                         data: dataCharts.bar_marcas.data,
                         backgroundColor: '#f59e0b',
+                        borderColor: '#d97706',
+                        borderWidth: 1,
                         borderRadius: 6
                     }]
                 },
-                options: { scales: { y: { beginAtZero: true } }, indexAxis: 'y' }
+                options: {
+                    ...barChartOptions(true),
+                    indexAxis: 'y'
+                }
             });
 
-            // Bar 4: Unidades que mas gastan
+            // Bar 4: Unidades que mas gastan (Horizontal)
             const ctxBarUnidadesDinero = document.getElementById('chart-bar-unidades-dinero').getContext('2d');
             window.chartBarUnidadesDinero = new Chart(ctxBarUnidadesDinero, {
                 type: 'bar',
@@ -268,17 +407,23 @@ async function cargarAnalitica() {
                         label: 'Gasto Total ($)',
                         data: dataCharts.bar_unidades_dinero.data,
                         backgroundColor: '#ef4444',
+                        borderColor: '#dc2626',
+                        borderWidth: 1,
                         borderRadius: 6
                     }]
                 },
-                options: { scales: { y: { beginAtZero: true } }, indexAxis: 'y' }
+                options: {
+                    ...barChartOptions(true),
+                    indexAxis: 'y'
+                }
             });
         }
 
     } catch (error) {
         console.error("Error cargando analitica:", error);
         for (let key in divs) {
-            if (divs[key] && divs[key].innerHTML === 'Cargando...') divs[key].innerHTML = '<span style="color:#ef4444;">Error de red</span>';
+            if (divs[key] && divs[key].innerHTML.includes('Cargando')) divs[key].innerHTML = '<span style="color:#ef4444;">Error de conexión</span>';
         }
     }
 }
+
