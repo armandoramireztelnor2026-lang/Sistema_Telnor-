@@ -297,7 +297,7 @@ def generar_plantilla_base(
             <td style="background-color: #0b1c30; padding: 28px 24px 24px 24px; text-align: center; border-bottom: 3px solid {tema['borde_header']};">
               <div style="display: inline-block; background-color: rgba(2, 132, 199, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; padding: 3px 12px; margin-bottom: 10px;">
                 <span style="font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #38bdf8; text-transform: uppercase;">
-                  TELNOR • FACTURACIÓN CENTRAL
+                  Sistema de Facturacion Central
                 </span>
               </div>
               {badge_html}
@@ -341,6 +341,7 @@ def generar_plantilla_base(
 
     # Regla: Eliminar cualquier aparición de la frase 'Telnor - Rumn' al final o en cualquier parte del correo
     html_limpio = re.sub(r'(?i)telnor\s*[-–—]\s*rumn', '', html_template)
+    html_limpio = html_limpio.replace("TELNOR • FACTURACIÓN CENTRAL", "Sistema de Facturacion Central")
     html_limpio = html_limpio.replace(
         "Sistema de Gestión Vehicular • <strong>Telnor</strong>",
         "Sistema de Facturacion Central"
@@ -355,6 +356,7 @@ def disparar_correo(destino, asunto, cuerpo_html, adjuntos=None):
     # Sanitización: eliminar 'Telnor - Rumn' y normalizar nombre del sistema
     if cuerpo_html:
         cuerpo_html = re.sub(r'(?i)telnor\s*[-–—]\s*rumn', '', cuerpo_html)
+        cuerpo_html = cuerpo_html.replace("TELNOR • FACTURACIÓN CENTRAL", "Sistema de Facturacion Central")
         cuerpo_html = cuerpo_html.replace(
             "Sistema de Gestión Vehicular • <strong>Telnor</strong>",
             "Sistema de Facturacion Central"

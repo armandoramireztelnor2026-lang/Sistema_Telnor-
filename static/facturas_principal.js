@@ -2113,7 +2113,18 @@ async function cargarReportesProv() {
         reportesPendientes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
         reportesPendientes.forEach(r => {
-            let btnAccion = `<button class="btn-info" style="background:#0284c7;" onclick="abrirReporteProv('${r.id}')">Ver Detalle</button>`;
+            let estadoNorm = String(r.estado || '').toLowerCase().trim();
+            let asignadoNorm = String(r.asignado_a || r.taller || r.proveedor || '').toLowerCase().trim();
+            let esRecienAsignado = estadoNorm.includes('recién asignado') || 
+                                   estadoNorm.includes('recien asignado') || 
+                                   estadoNorm.startsWith('asignado') || 
+                                   estadoNorm.includes('asignado a');
+            let esTaller = asignadoNorm !== '' && 
+                           asignadoNorm !== 'sin asignar' && 
+                           asignadoNorm !== 'n/a' && 
+                           asignadoNorm !== 'ninguno';
+            let textoBoton = (esRecienAsignado && esTaller) ? 'Revisar/Crear Cotizacion' : 'Ver Detalle';
+            let btnAccion = `<button class="btn-info" style="background:#0284c7;" onclick="abrirReporteProv('${r.id}')">${textoBoton}</button>`;
             tbody.innerHTML += `<tr><td><strong>${r.id}</strong></td><td>${r.fecha}</td><td>8090-${r.unidad}</td><td>${r.falla.substring(0, 30)}...</td><td>${r.mantenimiento}</td><td>${btnAccion}</td></tr>`;
         });
     } catch (err) { console.error(err); }
