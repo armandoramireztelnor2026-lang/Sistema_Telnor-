@@ -582,20 +582,26 @@
                                 style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
                                 onkeyup="aplicarFiltrosReportes()">
                         </div>
-                        <div style="flex:1; min-width:150px;">
+                        <div style="flex:1; min-width:180px;">
                             <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Estado del
                                 Ticket</label>
                             <select id="filtro-estado-reportes"
                                 style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
                                 onchange="aplicarFiltrosReportes()">
-                                <option value="">Todos</option>
-                                <option value="Pendiente de Cotizacion">Pendiente de Cotización</option>
-                                <option value="Esperando Aprobacion">Esperando Aprobación</option>
-                                <option value="Esperando Reparacion">Esperando Reparación</option>
-                                <option value="Validacion y PIN">Validación y PIN</option>
-                                <option value="Liberacion de Documentos">Liberación Doc</option>
-                                <option value="Cierre Interno">Cierre Interno (Doc 50)</option>
-                                <option value="Finalizado">Finalizado / Histórico</option>
+                                <option value="">Todos los Estados</option>
+                                <option value="Pendiente / Asig. Taller">Pendiente / Asig. Taller</option>
+                                <option value="Pendiente de Cotización">Pendiente de Cotización</option>
+                                <option value="Correcciones/Taller">Correcciones/Taller</option>
+                                <option value="Esperando / Aprob. Cotizacion (Supervisor)">Esperando / Aprob. Cotizacion (Supervisor)</option>
+                                <option value="Esperando / Aprob. Cotizacion (Admin)">Esperando / Aprob. Cotizacion (Admin)</option>
+                                <option value="Esperando / Aprob. Cotizacion (Corp)">Esperando / Aprob. Cotizacion (Corp)</option>
+                                <option value="En Reparación (Taller)">En Reparación (Taller)</option>
+                                <option value="Validación / Pin (Chofer)">Validación / Pin (Chofer)</option>
+                                <option value="Esperando Facturación (Taller)">Esperando Facturación (Taller)</option>
+                                <option value="Esperando Rev/Factura">Esperando Rev/Factura</option>
+                                <option value="Esperando Num. Contable">Esperando Num. Contable</option>
+                                <option value="Finalizado / Histórico">Finalizado / Histórico</option>
+                                <option value="Incosteable">Incosteable</option>
                             </select>
                         </div>
                         <div style="flex:1; min-width:150px;">
@@ -611,6 +617,12 @@
                             <input type="text" id="filtro-ciudad-reportes" placeholder="Ciudad..."
                                 style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
                                 onkeyup="aplicarFiltrosReportes()">
+                        </div>
+                        <div style="flex:1; min-width:140px;">
+                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Fecha Ticket</label>
+                            <input type="date" id="filtro-fecha-reportes"
+                                style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
+                                onchange="aplicarFiltrosReportes()">
                         </div>
                         <div>
                             <button onclick="limpiarFiltrosReportes()"

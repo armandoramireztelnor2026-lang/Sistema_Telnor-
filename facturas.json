@@ -11,7 +11,7 @@
             "diagnostico": "n",
             "trabajo_realizar": "n",
             "mantenimiento": "Correctivo",
-            "precio": 10996.0,
+            "precio": 11000.0,
             "fecha": "2026-10-08",
             "numero_orden": "",
             "compania": "RUMN",
@@ -23,7 +23,7 @@
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
-                    "precio": 10996.0,
+                    "precio": 11000.0,
                     "titulo": "n",
                     "mantenimiento": "Correctivo",
                     "retro": "[TICKET:REP-20261006123116]\r\nREPORTE ORIGINAL DEL CHOFER: Sobre calentamiento ",
@@ -32,24 +32,14 @@
                     "fotos_evidencia": [
                         "evidencia_1791485214782_0_supervisor.jpg"
                     ],
-                    "pdf_cotizacion": "pdf_cot_20261008114654_0_134543_certificate_UKDAUABC4455TIJ.pdf"
+                    "pdf_cotizacion": "pdf_cot_20261008114654_0_110306_Meta_3.1_Formato_de_Matriz_de_Planteamiento_del_Problema.docx.pdf"
                 }
             ],
             "reactivado_desde_caras": false,
             "comentarios": "HOLA ES UNA PRUEBA",
             "autor_comentario": "Samuel Giron",
             "eliminado_por": "",
-            "estado": "Rechazado_Con_Recomendaciones",
-            "motivo_rechazo": "Haber como funciona esto xd",
-            "precios_recomendados": [
-                {
-                    "idx": "0",
-                    "precio_recomendado": "11111"
-                }
-            ],
-            "rechazado_por": "Supervisor",
-            "fecha_rechazo": "2026-10-09 13:50:27",
-            "nombre_rechazador": "Samuel Giron"
+            "estado": "pendiente"
         },
         {
             "id": "20261008133951",
@@ -203,6 +193,49 @@
             "validacion_fiscal": "Aprobada",
             "numero_doc50": "5092312",
             "estado": "Archivado"
+        },
+        {
+            "id": "20261012110411",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1133",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "n",
+            "retro": "[TICKET:REP-20261012102345]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 2123.0,
+            "fecha": "2026-10-12",
+            "numero_orden": "",
+            "compania": "Telnor",
+            "aprobado_admin": false,
+            "aprobado_corp": true,
+            "timestamp": "2026-10-12T11:04:11.067954",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "",
+            "entregado": "No",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 2123.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20261012102345]\r\nREPORTE ORIGINAL DEL CHOFER: n",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1791828251058_0_Credencial_1.jpeg"
+                    ],
+                    "pdf_cotizacion": "1791828251058_0_Meta_2.3.1_Evaluacion_de_Conocimiento_del_Modulo_6_Servicios_de_informatica_en_la_nube.pdf"
+                }
+            ],
+            "reactivado_desde_caras": false,
+            "comentarios": "",
+            "autor_comentario": "",
+            "eliminado_por": ""
         }
     ]
 }

@@ -4,6 +4,63 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicialización si es necesaria
 });
 
+const ESTADOS_OFICIALES_SISTEMA = [
+    "Pendiente / Asig. Taller",
+    "Pendiente de Cotización",
+    "Correcciones/Taller",
+    "Esperando / Aprob. Cotizacion (Supervisor)",
+    "Esperando / Aprob. Cotizacion (Admin)",
+    "Esperando / Aprob. Cotizacion (Corp)",
+    "En Reparación (Taller)",
+    "Validación / Pin (Chofer)",
+    "Esperando Facturación (Taller)",
+    "Esperando Rev/Factura",
+    "Esperando Num. Contable",
+    "Finalizado / Histórico",
+    "Incosteable"
+];
+
+function normalizarCadenaReportes(str) {
+    if (!str) return '';
+    return str.toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+}
+
+function poblarFiltroEstadosReportes(estadosServidor, listaTickets) {
+    const selectEstado = document.getElementById('filtro-estado-reportes');
+    if (!selectEstado) return;
+
+    let valorActual = selectEstado.value;
+    let conjuntoEstados = new Set(ESTADOS_OFICIALES_SISTEMA);
+
+    if (Array.isArray(estadosServidor)) {
+        estadosServidor.forEach(e => {
+            if (e && typeof e === 'string') conjuntoEstados.add(e.trim());
+        });
+    }
+
+    if (Array.isArray(listaTickets)) {
+        listaTickets.forEach(t => {
+            let st = t.estado_calculado || t.estado;
+            if (st && typeof st === 'string' && st !== 'Eliminado' && st !== 'Rechazado') {
+                conjuntoEstados.add(st.trim());
+            }
+        });
+    }
+
+    selectEstado.innerHTML = '<option value="">Todos los Estados</option>';
+    Array.from(conjuntoEstados).sort().forEach(estado => {
+        let opt = document.createElement('option');
+        opt.value = estado;
+        opt.textContent = estado;
+        if (estado === valorActual) opt.selected = true;
+        selectEstado.appendChild(opt);
+    });
+}
+
 let reportesCombinadosGlobal = []; // Para tener acceso a todos los datos sin recargar
 
 async function cargarSeccionReportes() {
@@ -33,11 +90,9 @@ async function cargarSeccionReportes() {
 
         let listaCombinada = [...facturas];
 
-        // Filtrar tickets eliminados, rechazados o cancelados y evitar duplicados
+        // Filtrar tickets eliminados y evitar duplicados
         let idsProcesados = new Set();
         listaCombinada = listaCombinada.filter(t => {
-            if (t.estado === 'Cancelado_Cotizacion_Cara') return false;
-            if (t.estado === 'Rechazado') return false;
             if (t.estado === 'Eliminado') return false;
 
             let tId = typeof obtenerIdReporte === 'function' ? obtenerIdReporte(t) : (t.id_reporte || t.id);
@@ -51,6 +106,9 @@ async function cargarSeccionReportes() {
         // Ordenamos del más reciente al más antiguo
         listaCombinada.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         reportesCombinadosGlobal = listaCombinada;
+
+        // Poblar las opciones del selector de estados asegurando todos los estados del sistema y de la BD
+        poblarFiltroEstadosReportes(data.estados_disponibles, reportesCombinadosGlobal);
 
         renderizarTablaReportes(reportesCombinadosGlobal);
 
@@ -86,8 +144,9 @@ function renderizarTablaReportes(lista) {
         let numEco = f.unidad ? `8090-${f.unidad.replace('8090-', '')}` : pendienteHTML;
         let fechaTicketBase = reporteOrig.fecha || f.fecha || pendienteHTML;
         let fechaTicket = fechaTicketBase;
+        let fechaISO = '';
         
-        // Agregar hora si es posible
+        // Agregar hora si es posible y extraer fecha ISO (YYYY-MM-DD)
         if (fechaTicket !== pendienteHTML) {
             let ts = reporteOrig.timestamp || f.timestamp;
             if (ts) {
@@ -99,7 +158,11 @@ function renderizarTablaReportes(lista) {
                     let hh = String(dt.getHours()).padStart(2, '0');
                     let min = String(dt.getMinutes()).padStart(2, '0');
                     fechaTicket = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+                    fechaISO = `${yyyy}-${mm}-${dd}`;
                 }
+            }
+            if (!fechaISO && typeof fechaTicketBase === 'string' && fechaTicketBase.length >= 10) {
+                fechaISO = fechaTicketBase.substring(0, 10);
             }
         }
 
@@ -139,7 +202,7 @@ function renderizarTablaReportes(lista) {
             estado = "Incosteable";
         } else if (f.estado === 'Rechazado_Con_Recomendaciones') {
             estado = "Correcciones/Taller";
-        } else if (f.estado === 'Archivado') {
+        } else if (f.estado === 'Archivado' || f.estado === 'Archivado_Final') {
             estado = "Finalizado / Histórico";
         } else if (f.is_unassigned) {
             if (!f.asignado_a) {
@@ -268,6 +331,8 @@ function renderizarTablaReportes(lista) {
         
         let numCotizaciones = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones.length : 1;
         let costoTotalRow = 0;
+        let isRowPendOC = false;
+        let isRowPendDoc50 = false;
 
         for (let idx = 0; idx < numCotizaciones; idx++) {
             let cot = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones[idx] : null;
@@ -285,13 +350,12 @@ function renderizarTablaReportes(lista) {
             let costoNum = cot ? parseFloat(cot.precio || 0) : (f.precio ? parseFloat(f.precio) : 0);
             let costoStr = costoNum > 0 ? costoNum.toLocaleString('en-US') : '0.00';
             htmlCosto += `<div style="${bStyle}">${label}$${costoStr}</div>`;
-            costoTotalRow += costoNum; // Only add one of them if we are summing total gasto? Actually, total gasto should only sum the winning one or the first one if multiple.
-            // If multiple, normally only ONE is approved. Let's just sum all for now, or just the main `f.precio`.
+            costoTotalRow += costoNum;
             
             // Num Pedido
             let nPedido = cot ? (cot.numero_cotizacion_asignacion || pendienteHTML) : (f.numero_cotizacion_asignacion || pendienteHTML);
             htmlNumPedido += `<div style="${bStyle}">${label}${nPedido}</div>`;
-            if(nPedido === pendienteHTML) pendientesOC++;
+            if(nPedido === pendienteHTML) isRowPendOC = true;
 
             // PDF Pedido
             let pPedido = cot ? (cot.pdf_cotizacion_asignacion || cot.pdf_cotizacion) : (f.pdf_cotizacion_asignacion || f.pdf_cotizacion);
@@ -314,8 +378,11 @@ function renderizarTablaReportes(lista) {
             // Num Contable (Doc 50)
             let nContable = cot ? (cot.numero_doc50 || pendienteHTML) : (f.numero_doc50 || pendienteHTML);
             htmlNumContable += `<div style="${bStyle}">${label}${nContable}</div>`;
-            if(nContable === pendienteHTML) pendientesDoc50++;
+            if(nContable === pendienteHTML) isRowPendDoc50 = true;
         }
+
+        if (isRowPendOC) pendientesOC++;
+        if (isRowPendDoc50) pendientesDoc50++;
 
         // For KPI Gasto, use the main ticket price (the winning one)
         let ticketGasto = f.precio ? parseFloat(f.precio) : 0;
@@ -340,12 +407,13 @@ function renderizarTablaReportes(lista) {
         // Clean values for data attributes to prevent HTML breaking the attributes
         let cleanProv = proveedor === pendienteHTML ? 'pendiente' : proveedor.toLowerCase().replace(/<[^>]*>?/gm, '');
         let cleanCiudad = ciudad === pendienteHTML ? 'pendiente' : ciudad.toLowerCase().replace(/<[^>]*>?/gm, '');
+        let cleanCope = cope === pendienteHTML ? 'pendiente' : cope.toLowerCase().replace(/<[^>]*>?/gm, '');
         let cleanEco = numEco === pendienteHTML ? 'pendiente' : numEco.replace(/<[^>]*>?/gm, '');
 
         // Set row info for filtering
         let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
         let rowHtml = `
-            <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-estado="${estado}">
+            <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-cope="${cleanCope}" data-estado="${estado}" data-fecha="${fechaISO}" data-costo="${ticketGasto}" data-pend-doc50="${isRowPendDoc50 ? '1' : '0'}" data-pend-oc="${isRowPendOC ? '1' : '0'}">
                 <td style="vertical-align:top; padding-top:15px;"><input type="checkbox" class="chk-reporte" value="${ticket}"></td>
                 <td style="vertical-align:top; padding-top:15px;"><span style="color:#0ea5e9; font-weight:bold;">${ticket}</span>${badgeCaras}</td>
                 <td style="vertical-align:top; padding-top:15px;">${numEco}</td>
@@ -391,72 +459,140 @@ function renderizarTablaReportes(lista) {
 // ==========================================
 
 function aplicarFiltrosReportes() {
-    let texto = document.getElementById('filtro-texto-reportes').value.toLowerCase();
-    let estado = document.getElementById('filtro-estado-reportes').value;
-    let prov = document.getElementById('filtro-proveedor-reportes').value.toLowerCase();
-    let ciudad = document.getElementById('filtro-ciudad-reportes').value.toLowerCase();
+    let elTexto = document.getElementById('filtro-texto-reportes');
+    let elEstado = document.getElementById('filtro-estado-reportes');
+    let elProv = document.getElementById('filtro-proveedor-reportes');
+    let elCiudad = document.getElementById('filtro-ciudad-reportes');
+    let elFecha = document.getElementById('filtro-fecha-reportes');
+
+    let texto = elTexto ? normalizarCadenaReportes(elTexto.value) : '';
+    let estado = elEstado ? elEstado.value.trim() : '';
+    let estadoNorm = normalizarCadenaReportes(estado);
+    let prov = elProv ? normalizarCadenaReportes(elProv.value) : '';
+    let ciudad = elCiudad ? normalizarCadenaReportes(elCiudad.value) : '';
+    let fecha = elFecha ? elFecha.value.trim() : '';
 
     let tbody = document.getElementById('tabla-seccion-reportes');
+    if (!tbody) return;
     let trs = tbody.getElementsByTagName('tr');
     
     let totalGasto = 0;
+    let pendientesDoc50 = 0;
+    let pendientesOC = 0;
+    let filasVisibles = 0;
     
     for(let i=0; i<trs.length; i++) {
         let tr = trs[i];
-        // Skip if it's the "No data" row
-        if(tr.cells.length === 1) continue;
+        // Omitir fila de mensaje o sin datos
+        if (tr.id === 'fila-sin-resultados-reportes') continue;
+        if (tr.cells.length <= 1) continue;
         
         let match = true;
         
-        // Texto general (Ticket, Num Eco)
-        if(texto) {
-            let trText = tr.innerText.toLowerCase();
-            if(!trText.includes(texto)) match = false;
-        }
-        
-        // Estado
-        if(estado) {
-            let trEstado = tr.getAttribute('data-estado');
-            if(estado === 'Pendiente de Cotizacion' && trEstado !== 'Pendiente de Cotización') match = false;
-            else if(estado === 'Esperando Aprobacion' && trEstado !== 'Esperando Aprobación') match = false;
-            else if(estado === 'Esperando Reparacion' && trEstado !== 'Esperando Reparación') match = false;
-            else if(estado === 'Validacion y PIN' && trEstado !== 'Validación y PIN') match = false;
-            else if(estado === 'Liberacion de Documentos' && trEstado !== 'Liberación Doc') match = false;
-            else if(estado === 'Cierre Interno' && trEstado !== 'Cierre Interno') match = false;
-            else if(estado === 'Finalizado' && trEstado !== 'Finalizado / Histórico') match = false;
-        }
-        
-        // Proveedor
-        if(prov) {
-            let trProv = tr.getAttribute('data-prov');
-            if(!trProv || !trProv.includes(prov)) match = false;
-        }
-        
-        // Ciudad
-        if(ciudad) {
-            let trCiudad = tr.getAttribute('data-ciudad');
-            if(!trCiudad || !trCiudad.includes(ciudad)) match = false;
-        }
-        
-        tr.style.display = match ? '' : 'none';
-        
-        if(match) {
-            let costoCell = tr.querySelector('td[data-costo]');
-            if(costoCell) {
-                totalGasto += parseFloat(costoCell.getAttribute('data-costo') || 0);
+        // 1. Filtro Texto General (Ticket, Eco, o contenido textual)
+        if (texto) {
+            let trText = normalizarCadenaReportes(tr.innerText);
+            let trTicket = normalizarCadenaReportes(tr.getAttribute('data-ticket') || '');
+            let trEco = normalizarCadenaReportes(tr.getAttribute('data-eco') || '');
+            if (!trText.includes(texto) && !trTicket.includes(texto) && !trEco.includes(texto)) {
+                match = false;
             }
+        }
+        
+        // 2. Filtro Estado (exacto o normalizado con el valor del estado)
+        if (match && estado) {
+            let trEstado = (tr.getAttribute('data-estado') || '').trim();
+            let trEstadoNorm = normalizarCadenaReportes(trEstado);
+            if (trEstadoNorm !== estadoNorm) {
+                match = false;
+            }
+        }
+        
+        // 3. Filtro Proveedor
+        if (match && prov) {
+            let trProv = normalizarCadenaReportes(tr.getAttribute('data-prov') || '');
+            let cellProv = normalizarCadenaReportes(tr.cells[15] ? tr.cells[15].innerText : '');
+            if (!trProv.includes(prov) && !cellProv.includes(prov)) {
+                match = false;
+            }
+        }
+        
+        // 4. Filtro Ciudad Base / COPE
+        if (match && ciudad) {
+            let trCiudad = normalizarCadenaReportes(tr.getAttribute('data-ciudad') || '');
+            let trCope = normalizarCadenaReportes(tr.getAttribute('data-cope') || '');
+            let cellCiudad = normalizarCadenaReportes(tr.cells[12] ? tr.cells[12].innerText : '');
+            let cellCope = normalizarCadenaReportes(tr.cells[11] ? tr.cells[11].innerText : '');
+            if (!trCiudad.includes(ciudad) && !trCope.includes(ciudad) && !cellCiudad.includes(ciudad) && !cellCope.includes(ciudad)) {
+                match = false;
+            }
+        }
+
+        // 5. Filtro Fecha (ej. Estado + Fecha)
+        if (match && fecha) {
+            let trFecha = (tr.getAttribute('data-fecha') || '').trim();
+            let cellFecha = (tr.cells[3] ? tr.cells[3].innerText : '').trim();
+            if (!trFecha.startsWith(fecha) && !trFecha.includes(fecha) && !cellFecha.startsWith(fecha) && !cellFecha.includes(fecha)) {
+                match = false;
+            }
+        }
+        
+        // Aplicar estado de visibilidad y clase de filtro para paginación
+        if (match) {
+            tr.classList.remove('oculto-por-filtro');
+            tr.style.display = '';
+            
+            // Recalcular métricas y KPIs solo sobre registros coincidentes
+            let costo = parseFloat(tr.getAttribute('data-costo') || 0);
+            if (!isNaN(costo)) totalGasto += costo;
+            
+            if (tr.getAttribute('data-pend-doc50') === '1') pendientesDoc50++;
+            if (tr.getAttribute('data-pend-oc') === '1') pendientesOC++;
+            
+            filasVisibles++;
+        } else {
+            tr.classList.add('oculto-por-filtro');
+            tr.style.display = 'none';
         }
     }
     
-    let elGasto = document.getElementById('kpi-total-gasto');
-    if (elGasto) elGasto.innerText = '$' + totalGasto.toLocaleString('en-US', {minimumFractionDigits: 2});
+    // Actualizar todos los indicadores KPI con los datos filtrados
+    actualizarKPIs(totalGasto, pendientesDoc50, pendientesOC);
+
+    // Mensaje visual si no hay resultados coincidentes
+    let filaSinResultados = document.getElementById('fila-sin-resultados-reportes');
+    if (filasVisibles === 0) {
+        if (!filaSinResultados) {
+            filaSinResultados = document.createElement('tr');
+            filaSinResultados.id = 'fila-sin-resultados-reportes';
+            filaSinResultados.innerHTML = `<td colspan="28" style="text-align: center; color: #a3b1c6; padding: 25px; font-weight: bold; background: #0f172a;">🔍 No se encontraron tickets con los filtros seleccionados.</td>`;
+            tbody.appendChild(filaSinResultados);
+        } else {
+            filaSinResultados.style.display = '';
+        }
+    } else if (filaSinResultados) {
+        filaSinResultados.style.display = 'none';
+    }
+
+    // Reajustar la paginación según las filas que quedaron visibles
+    if (typeof aplicarPaginacion === 'function') {
+        aplicarPaginacion('tabla-seccion-reportes', 20, true);
+    }
 }
 
 function limpiarFiltrosReportes() {
-    document.getElementById('filtro-texto-reportes').value = '';
-    document.getElementById('filtro-estado-reportes').value = '';
-    document.getElementById('filtro-proveedor-reportes').value = '';
-    document.getElementById('filtro-ciudad-reportes').value = '';
+    let elTexto = document.getElementById('filtro-texto-reportes');
+    let elEstado = document.getElementById('filtro-estado-reportes');
+    let elProv = document.getElementById('filtro-proveedor-reportes');
+    let elCiudad = document.getElementById('filtro-ciudad-reportes');
+    let elFecha = document.getElementById('filtro-fecha-reportes');
+
+    if (elTexto) elTexto.value = '';
+    if (elEstado) elEstado.value = '';
+    if (elProv) elProv.value = '';
+    if (elCiudad) elCiudad.value = '';
+    if (elFecha) elFecha.value = '';
+
     aplicarFiltrosReportes();
 }
 
@@ -579,17 +715,17 @@ function imprimirSeleccion() {
     
     rows.forEach(tr => {
         // Extraemos el texto de las celdas relevantes
-        // td[1]=Ticket, td[2]=Eco, td[3]=Fecha, td[4]=Estado, td[10]=Ciudad, td[12]=Costo, td[13]=Proveedor
+        // td[1]=Ticket, td[2]=Eco, td[3]=Fecha, td[6]=Estado, td[12]=Ciudad, td[14]=Costo, td[15]=Proveedor
         let c = tr.cells;
         html += `
             <tr>
-                <td>${c[1].innerText}</td>
-                <td>${c[2].innerText}</td>
-                <td>${c[3].innerText}</td>
-                <td class="estado">${c[4].innerText}</td>
-                <td>${c[10].innerText}</td>
-                <td>${c[12].innerText}</td>
-                <td>${c[13].innerText}</td>
+                <td>${c[1] ? c[1].innerText : ''}</td>
+                <td>${c[2] ? c[2].innerText : ''}</td>
+                <td>${c[3] ? c[3].innerText : ''}</td>
+                <td class="estado">${c[6] ? c[6].innerText : ''}</td>
+                <td>${c[12] ? c[12].innerText : ''}</td>
+                <td>${c[14] ? c[14].innerText : ''}</td>
+                <td>${c[15] ? c[15].innerText : ''}</td>
             </tr>
         `;
     });
