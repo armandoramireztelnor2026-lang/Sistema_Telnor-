@@ -68,13 +68,15 @@ def procesar_liberacion_si_aplica(f):
             f["liberado_admin"] = False
             try:
                 num_orden = f.get("numero_orden") or f.get("numero_cotizacion_asignacion", "N/A")
+                nombre_sup_asignador = f.get("supervisor_aprobador") or f.get("responsable")
                 enviar_correo_esperando_liberacion(
                     correo_admin,
                     nombre_admin,
                     f.get("id_reporte", f.get("id", "N/A")),
                     f.get("unidad", ""),
                     num_orden,
-                    num_orden
+                    num_orden,
+                    nombre_supervisor=nombre_sup_asignador
                 )
             except Exception as e:
                 print("Error al enviar correo de liberación admin:", e)
@@ -525,6 +527,11 @@ def confirmar_admin():
                     break
             precio_float = float(f.get("precio", 0))
 
+            # Capturar nombre del supervisor que realiza la aprobación
+            perf_sup = session.get("usuario", {}).get("datos_perfil", {})
+            nombre_sup_aprobador = f"{perf_sup.get('nombres', '')} {perf_sup.get('apellido_paterno', '')}".strip() or "Supervisor"
+            f["supervisor_aprobador"] = nombre_sup_aprobador
+
             if precio_float >= 10001.0:
                 escribir_json("facturas.json", data)
                 msg_base = "Órdenes asignadas por el Supervisor. Enviando a Administrador para revisión..."
@@ -544,7 +551,8 @@ def confirmar_admin():
                             f.get("unidad", "S/N"),
                             f.get("proveedor", "Sin especificar"),
                             precio_float,
-                            nums_orden_txt
+                            nums_orden_txt,
+                            nombre_supervisor=nombre_sup_aprobador
                         )
             else:
                 # ===== NUEVA LOGICA DE BLOQUEO PARA DOC 50 =====
@@ -553,7 +561,15 @@ def confirmar_admin():
                     f["liberado_admin"] = False
                     try:
                         from notificaciones import enviar_correo_esperando_liberacion
-                        enviar_correo_esperando_liberacion(correo_admin, nombre_admin, f.get("id_reporte", f.get("id", "N/A")), f.get("unidad", ""), nums_orden[0] if nums_orden else "N/A", nums_orden[0] if nums_orden else "N/A")
+                        enviar_correo_esperando_liberacion(
+                            correo_admin, 
+                            nombre_admin, 
+                            f.get("id_reporte", f.get("id", "N/A")), 
+                            f.get("unidad", ""), 
+                            nums_orden[0] if nums_orden else "N/A", 
+                            nums_orden[0] if nums_orden else "N/A",
+                            nombre_supervisor=nombre_sup_aprobador
+                        )
                     except Exception as e:
                         print("Error al enviar correo: ", e)
                 # ===============================================
@@ -574,8 +590,9 @@ def confirmar_admin():
                         correo_prov, 
                         proveedor_nombre, 
                         f.get("id", "N/A"), 
-                        f.get("unidad", "S/N"),
-                        vehiculo_info
+                        f.get("unidad", "S/N"), 
+                        vehiculo_info,
+                        nombre_supervisor=nombre_sup_aprobador
                     )
 
             # Enviar correo de confirmación al actor
@@ -645,7 +662,9 @@ def solicitar_correccion_orden():
             if not correo_supervisor:
                 return jsonify({"status": "error", "message": "No se encontró el correo del supervisor para este ticket."})
             
-            enviar_correo_correccion_orden(correo_supervisor, supervisor, unidad)
+            perf_adm = session.get("usuario", {}).get("datos_perfil", {})
+            nombre_adm = f"{perf_adm.get('nombres', '')} {perf_adm.get('apellido_paterno', '')}".strip() or "Administrador"
+            enviar_correo_correccion_orden(correo_supervisor, supervisor, unidad, nombre_admin=nombre_adm)
             return jsonify({"status": "success", "message": "Notificación enviada al supervisor."})
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
@@ -668,6 +687,9 @@ def notificar_admin_10k():
             
             orden = f.get("numero_orden") or f.get("numero_cotizacion_asignacion") or "Pendiente"
 
+            perf_sup = session.get("usuario", {}).get("datos_perfil", {})
+            nombre_sup = f"{perf_sup.get('nombres', '')} {perf_sup.get('apellido_paterno', '')}".strip() or f.get("supervisor_aprobador") or "Supervisor"
+
             usuarios_data = leer_json("usuarios.json")
             admins = [u for u in usuarios_data.get("usuarios", [])
                     if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Administrador"]
@@ -677,7 +699,10 @@ def notificar_admin_10k():
                 correo = adm.get("datos_perfil", {}).get("correo")
                 nombre = adm.get("datos_perfil", {}).get("nombres", "Administrador")
                 if correo:
-                    enviar_correo_admin_revisa_10k(correo, nombre, ticket_id, unidad, proveedor, precio_float, orden)
+                    enviar_correo_admin_revisa_10k(
+                        correo, nombre, ticket_id, unidad, proveedor, precio_float, orden,
+                        nombre_supervisor=nombre_sup
+                    )
             
             return jsonify({"status": "success", "message": "Notificación enviada al administrador exitosamente."})
             
@@ -706,12 +731,21 @@ def notificar_admin_liberar_manual():
                         if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Administrador"]
                 
                 from notificaciones import enviar_correo_esperando_liberacion
+                nombre_sup_asignador = f.get("supervisor_aprobador") or f.get("responsable")
                 enviados = 0
                 for adm in admins:
                     correo = adm.get("datos_perfil", {}).get("correo")
                     nombre = adm.get("datos_perfil", {}).get("nombres", "Administrador")
                     if correo:
-                        enviar_correo_esperando_liberacion(correo, nombre, ticket_id, unidad, num_orden, num_pedido)
+                        enviar_correo_esperando_liberacion(
+                            correo,
+                            nombre,
+                            ticket_id,
+                            unidad,
+                            num_orden,
+                            num_pedido,
+                            nombre_supervisor=nombre_sup_asignador
+                        )
                         enviados += 1
                 
                 if enviados == 0:
@@ -754,6 +788,11 @@ def notificar_corp_10k():
                     lista_corps_para_correo.append({"correo": correo, "nombre": nombre})
             
             admin_nombres = "Administrador"
+            if "usuario" in session and "datos_perfil" in session["usuario"]:
+                admin_perf = session["usuario"]["datos_perfil"]
+                admin_nombres = f"{admin_perf.get('nombres', '')} {admin_perf.get('apellido_paterno', '')}".strip() or "Administrador"
+            
+            supervisor_nombre_guardado = f.get("supervisor_aprobador") or "Supervisor"
             
             from notificaciones import enviar_correo_admin_aprobado_a_corp
             if lista_corps_para_correo:
@@ -763,7 +802,8 @@ def notificar_corp_10k():
                     unidad,
                     proveedor,
                     precio_float,
-                    admin_nombres
+                    admin_nombres,
+                    nombre_supervisor=supervisor_nombre_guardado
                 )
             
             return jsonify({"status": "success", "message": "Recordatorio enviado a corporativos exitosamente."})
@@ -800,7 +840,10 @@ def aprobar_10k():
                 
                 admin_nombres = "Administrador"
                 if "usuario" in session and "datos_perfil" in session["usuario"]:
-                    admin_nombres = session["usuario"]["datos_perfil"].get("nombres", "Administrador")
+                    admin_perf = session["usuario"]["datos_perfil"]
+                    admin_nombres = f"{admin_perf.get('nombres', '')} {admin_perf.get('apellido_paterno', '')}".strip() or "Administrador"
+
+                supervisor_nombre_guardado = f.get("supervisor_aprobador") or "Supervisor"
 
                 if lista_corps_para_correo:
                     enviar_correo_admin_aprobado_a_corp(
@@ -809,7 +852,8 @@ def aprobar_10k():
                         f.get("unidad", "S/N"),
                         f.get("proveedor", "Sin especificar"),
                         precio_float,
-                        admin_nombres
+                        admin_nombres,
+                        nombre_supervisor=supervisor_nombre_guardado
                     )
 
                 # Enviar correo de confirmación al actor
@@ -874,6 +918,9 @@ def aprobar_10k():
                 if not supervisores:
                     supervisores = [u for u in usuarios_data.get("usuarios", []) if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
 
+                perf_admin_act = session.get("usuario", {}).get("datos_perfil", {})
+                nombre_admin_act = f"{perf_admin_act.get('nombres', '')} {perf_admin_act.get('apellido_paterno', '')}".strip() or "Administrador"
+
                 for sup in supervisores:
                     correo = sup["datos_perfil"].get("correo")
                     nombre = sup["datos_perfil"].get("nombres", "Supervisor")
@@ -885,7 +932,8 @@ def aprobar_10k():
                             f.get("unidad", "S/N"),
                             f.get("proveedor", "Sin especificar"),
                             mensaje,
-                            precios_recomendados
+                            precios_recomendados,
+                            nombre_admin=nombre_admin_act
                         )
 
                 proveedor_nombre = f.get('proveedor', '')
@@ -898,7 +946,10 @@ def aprobar_10k():
                         break
 
                 if correo_prov:
-                    enviar_correo_factura_rechazada_admin(correo_prov, proveedor_nombre, unidad_texto, mensaje, precios_recomendados)
+                    enviar_correo_factura_rechazada_admin(
+                        correo_prov, proveedor_nombre, unidad_texto, mensaje, precios_recomendados,
+                        nombre_admin=nombre_admin_act
+                    )
 
                 return jsonify({"status": "success", "message": "Cotización rechazada. El ticket se eliminó y se notificó al Taller y al Supervisor con recomendaciones de precio."})
 
@@ -922,6 +973,9 @@ def aprobar_10k():
                 supervisores = [u for u in usuarios_data.get("usuarios", [])
                                if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
 
+                perf_admin_act = session.get("usuario", {}).get("datos_perfil", {})
+                nombre_admin_act = f"{perf_admin_act.get('nombres', '')} {perf_admin_act.get('apellido_paterno', '')}".strip() or "Administrador"
+
                 for sup in supervisores:
                     correo = sup["datos_perfil"].get("correo")
                     nombre = sup["datos_perfil"].get("nombres", "Supervisor")
@@ -931,7 +985,8 @@ def aprobar_10k():
                             nombre,
                             f.get("id", "N/A"),
                             f.get("unidad", "S/N"),
-                            mensaje
+                            mensaje,
+                            nombre_admin=nombre_admin_act
                         )
 
                 return jsonify({"status": "success", "message": "Cotización movida a Cotizaciones Caras."})
@@ -966,7 +1021,16 @@ def confirmar_corp():
                 f["liberado_admin"] = False
                 try:
                     from notificaciones import enviar_correo_esperando_liberacion
-                    enviar_correo_esperando_liberacion(correo_admin, nombre_admin, f.get("id_reporte", f.get("id", "N/A")), f.get("unidad", ""), f.get("numero_orden", "N/A"), f.get("numero_cotizacion_asignacion", "N/A"))
+                    nombre_sup_asignador = f.get("supervisor_aprobador") or f.get("responsable")
+                    enviar_correo_esperando_liberacion(
+                        correo_admin,
+                        nombre_admin,
+                        f.get("id_reporte", f.get("id", "N/A")),
+                        f.get("unidad", ""),
+                        f.get("numero_orden", "N/A"),
+                        f.get("numero_cotizacion_asignacion", "N/A"),
+                        nombre_supervisor=nombre_sup_asignador
+                    )
                 except Exception as e:
                     print("Error al enviar correo doc 50: ", e)
             # ===============================================
@@ -977,10 +1041,14 @@ def confirmar_corp():
             supervisores = [u for u in usuarios_data.get("usuarios", [])
                            if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
 
+            perf_corp_act = session.get("usuario", {}).get("datos_perfil", {})
+            nombre_corp_act = f"{perf_corp_act.get('nombres', '')} {perf_corp_act.get('apellido_paterno', '')}".strip() or "Corporativo"
+            nombre_sup_guardado = f.get("supervisor_aprobador") or "Supervisor"
+
             responsable_factura = f.get("responsable", "").strip()
             for sup in supervisores:
                 nombre_sup = f"{sup['datos_perfil'].get('nombres', '').strip()} {sup['datos_perfil'].get('apellido_paterno', '').strip()}".strip()
-                if nombre_sup == responsable_factura:
+                if nombre_sup == responsable_factura or not responsable_factura:
                     correo = sup["datos_perfil"].get("correo")
                     nombre = sup["datos_perfil"].get("nombres", "Supervisor")
                     if correo:
@@ -990,7 +1058,8 @@ def confirmar_corp():
                             f.get("id", "N/A"),
                             f.get("unidad", "S/N"),
                             f.get("proveedor", "Sin especificar"),
-                            precio_float
+                            precio_float,
+                            nombre_corp=nombre_corp_act
                         )
             
             proveedor_nombre = f.get('proveedor', '')
@@ -1006,8 +1075,9 @@ def confirmar_corp():
                     correo_prov, 
                     proveedor_nombre, 
                     f.get("id", "N/A"), 
-                    f.get("unidad", "S/N"),
-                    vehiculo_info
+                    f.get("unidad", "S/N"), 
+                    vehiculo_info,
+                    nombre_supervisor=nombre_sup_guardado
                 )
 
             # Enviar correo de confirmación al actor
@@ -1083,7 +1153,9 @@ def rechazar_factura():
                 break
                 
         if correo_prov:
-            enviar_correo_factura_rechazada(correo_prov, proveedor_nombre, unidad_texto, motivo)
+            perf_act = session.get("usuario", {}).get("datos_perfil", {})
+            nombre_actor_cancela = f"{perf_act.get('nombres', '')} {perf_act.get('apellido_paterno', '')}".strip() or session.get("usuario", {}).get("usuario", "Administración")
+            enviar_correo_factura_rechazada(correo_prov, proveedor_nombre, unidad_texto, motivo, nombre_admin=nombre_actor_cancela)
             
         return jsonify({"status": "success", "message": "Cotización marcada como rechazada. El taller puede corregir sus precios sin crearla de nuevo."})
     return jsonify({"status": "error", "message": "Registro no encontrado."})
@@ -1132,6 +1204,9 @@ def rechazar_corp():
 
                 num_orden = f.get("numero_orden", f.get("numero_cotizacion_asignacion", "N/A"))
                 
+                perf_corp_act = session.get("usuario", {}).get("datos_perfil", {})
+                nombre_corp_act = f"{perf_corp_act.get('nombres', '')} {perf_corp_act.get('apellido_paterno', '')}".strip() or "Corporativo"
+
                 for admin in admins_10k:
                     correo = admin["datos_perfil"].get("correo")
                     nombre = admin["datos_perfil"].get("nombres", "Administrador")
@@ -1144,7 +1219,8 @@ def rechazar_corp():
                             f.get("proveedor", "Sin especificar"),
                             precio_float,
                             motivo,
-                            precios_recomendados
+                            precios_recomendados,
+                            nombre_corp=nombre_corp_act
                         )
                         
                 supervisores = [u for u in usuarios_data.get("usuarios", [])
@@ -1161,7 +1237,8 @@ def rechazar_corp():
                             f.get("unidad", "S/N"),
                             f.get("proveedor", "Sin especificar"),
                             motivo,
-                            precios_recomendados
+                            precios_recomendados,
+                            nombre_corp=nombre_corp_act
                         )
 
                 return jsonify({"status": "success", "message": "Cotización rechazada. El ticket se eliminó y se notificó al Administrador y Supervisor."})
@@ -1196,8 +1273,14 @@ def rechazar_corp():
                         correo_prov = u['datos_perfil'].get('correo', '')
                         break
 
+                perf_corp_act = session.get("usuario", {}).get("datos_perfil", {})
+                nombre_corp_act = f"{perf_corp_act.get('nombres', '')} {perf_corp_act.get('apellido_paterno', '')}".strip() or "Corporativo"
+
                 if correo_prov:
-                    enviar_correo_factura_rechazada_corp(correo_prov, proveedor_nombre, unidad_texto, motivo, precios_recomendados)
+                    enviar_correo_factura_rechazada_corp(
+                        correo_prov, proveedor_nombre, unidad_texto, motivo, precios_recomendados,
+                        nombre_corp=nombre_corp_act
+                    )
 
                 return jsonify({"status": "success", "message": "Gasto rechazado. El ticket fue eliminado y el proveedor fue notificado con tus recomendaciones."})
     return jsonify({"status": "error", "message": "Registro no encontrado."})
@@ -1225,7 +1308,7 @@ def rechazar_super():
             f["precios_recomendados"] = precios_recomendados
             f["rechazado_por"] = "Supervisor"
             f["fecha_rechazo"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            supervisor_nombre = f"{session['usuario'].get('datos_perfil', {}).get('nombres', '')} {session['usuario'].get('datos_perfil', {}).get('apellido_paterno', '')}".strip()
+            supervisor_nombre = f"{session['usuario'].get('datos_perfil', {}).get('nombres', '')} {session['usuario'].get('datos_perfil', {}).get('apellido_paterno', '')}".strip() or "Supervisor"
             f["nombre_rechazador"] = supervisor_nombre
             
             escribir_json("facturas.json", data)
@@ -1241,7 +1324,10 @@ def rechazar_super():
                     break
 
             if correo_prov:
-                enviar_correo_factura_rechazada_super(correo_prov, proveedor_nombre, unidad_texto, motivo, precios_recomendados)
+                enviar_correo_factura_rechazada_super(
+                    correo_prov, proveedor_nombre, unidad_texto, motivo, precios_recomendados,
+                    nombre_supervisor=supervisor_nombre
+                )
 
             return jsonify({"status": "success", "message": "Cotización rechazada con recomendaciones. El taller puede corregir sus precios sin crearla de nuevo."})
 
@@ -1347,7 +1433,15 @@ def marcar_lista():
             es_reactivado = f.get('reactivado_desde_caras', False)
             
             if not es_reactivado:
-                exito, msg_correo = enviar_correo_liberacion(correo_chofer, ticket_id or f.get('id', 'N/A'), unidad_limpia, codigo, nombre_chofer, telefono_chofer)
+                exito, msg_correo = enviar_correo_liberacion(
+                    correo_chofer,
+                    ticket_id or f.get('id', 'N/A'),
+                    unidad_limpia,
+                    codigo,
+                    nombre_chofer,
+                    telefono_chofer,
+                    nombre_taller=f.get('proveedor')
+                )
             
             usuarios_data = leer_json('usuarios.json')
             cope_ticket = obtener_cope_de_factura(f)
@@ -1363,9 +1457,25 @@ def marcar_lista():
                 if correo_sup:
                     if es_reactivado:
                         # Ticket reactivado: el supervisor recibe el PIN directamente
-                        enviar_correo_liberacion_supervisor(correo_sup, nombre_sup, ticket_id or f.get('id', 'N/A'), unidad_limpia, codigo, "Reactivado (sin chofer asignado)")
+                        enviar_correo_liberacion_supervisor(
+                            correo_sup,
+                            nombre_sup,
+                            ticket_id or f.get('id', 'N/A'),
+                            unidad_limpia,
+                            codigo,
+                            "Reactivado (sin chofer asignado)",
+                            nombre_taller=f.get('proveedor')
+                        )
                     else:
-                        enviar_correo_liberacion_supervisor(correo_sup, nombre_sup, ticket_id or f.get('id', 'N/A'), unidad_limpia, codigo, nombre_chofer)
+                        enviar_correo_liberacion_supervisor(
+                            correo_sup,
+                            nombre_sup,
+                            ticket_id or f.get('id', 'N/A'),
+                            unidad_limpia,
+                            codigo,
+                            nombre_chofer,
+                            nombre_taller=f.get('proveedor')
+                        )
             
             escribir_json('facturas.json', data)
             return jsonify({"status": "success", "message": "¡Unidad marcada como lista! El PIN ha sido enviado al chofer."})
@@ -1422,15 +1532,55 @@ def corregir_cotizacion_rechazada():
             if total_nuevo > 0:
                 f['precio'] = total_nuevo
 
-            # Resetear el estado para que vuelva al flujo normal
+            # Resetear el estado para que vuelva al flujo normal y requiera todas las aprobaciones desde cero
             f['estado'] = 'pendiente'
             f.pop('motivo_rechazo', None)
             f.pop('rechazado_por', None)
             f.pop('precios_recomendados', None)
             f.pop('fecha_rechazo', None)
             f.pop('nombre_rechazador', None)
+            f.pop('aprobado_admin', None)
+            f.pop('aprobado_admin_10k', None)
+            f.pop('aprobado_corp', None)
+            f.pop('estado_custom', None)
 
             escribir_json('facturas.json', data)
+
+            # Notificar al Supervisor de la zona sobre la corrección enviada
+            try:
+                from notificaciones import enviar_correo_taller_corrige_cotizacion
+                match_ticket = re.search(r"\[TICKET:(.*?)\]", str(f.get('retroalimentacion', '')))
+                ticket_id = match_ticket.group(1).strip() if match_ticket else f.get('id_reporte', f.get('id'))
+                cope_ticket = obtener_cope_de_factura(f)
+                
+                usuarios_data = leer_json("usuarios.json")
+                supervisores = [u for u in usuarios_data.get("usuarios", [])
+                               if u["rol"] == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"]
+                
+                supervisores_a_notificar = []
+                for sup in supervisores:
+                    cope_sup = sup.get("datos_perfil", {}).get("cope", "")
+                    copes_extra = sup.get("datos_perfil", {}).get("copes_asignados", []) or sup.get("datos_perfil", {}).get("copes_adicionales", [])
+                    if not cope_ticket or cope_sup == cope_ticket or cope_ticket in copes_extra:
+                        supervisores_a_notificar.append(sup)
+                
+                if not supervisores_a_notificar:
+                    supervisores_a_notificar = supervisores
+
+                for sup in supervisores_a_notificar:
+                    correo_sup = sup.get("datos_perfil", {}).get("correo")
+                    nombre_sup = f"{sup.get('datos_perfil', {}).get('nombres', '')} {sup.get('datos_perfil', {}).get('apellido_paterno', '')}".strip() or "Supervisor"
+                    if correo_sup:
+                        enviar_correo_taller_corrige_cotizacion(
+                            correo_sup,
+                            nombre_sup,
+                            proveedor_actual,
+                            ticket_id,
+                            f.get("unidad", "S/N")
+                        )
+            except Exception as e:
+                print("Error notificando corrección de cotización a supervisor:", e)
+
             return jsonify({"status": "success", "message": "Cotización corregida exitosamente. La administración la revisará nuevamente."})
 
     return jsonify({"status": "error", "message": "Ticket no encontrado o no tienes permiso."}), 404
@@ -1622,7 +1772,14 @@ def rechazar_fiscal():
 
             
             if correo_proveedor:
-                enviar_correo_factura_fiscal_rechazada(correo_proveedor, f.get('proveedor'), f.get('unidad'), folio_borrado, motivo)
+                enviar_correo_factura_fiscal_rechazada(
+                    correo_proveedor,
+                    f.get('proveedor'),
+                    f.get('unidad'),
+                    folio_borrado,
+                    motivo,
+                    nombre_supervisor=nombre_supervisor
+                )
             
             return jsonify({"status": "success", "message": "Factura rechazada. Se reinició la liberación contable y se notificó a Administración y al proveedor."})
     return jsonify({"status": "error", "message": "Factura no encontrada."})
@@ -1685,18 +1842,6 @@ def doc50():
 
 
             
-            for u in usuarios_data.get("usuarios", []):
-                if u["rol"] == "administracion":
-                    subrol_u = u["datos_perfil"].get("subrol", "")
-                    cope_admin = u["datos_perfil"].get("cope", "")
-                    copes_extra = u["datos_perfil"].get("copes_asignados", [])
-                    
-                    if subrol_u == "Supervisor" and (cope_admin == cope_ticket or cope_ticket in copes_extra):
-                        correo = u["datos_perfil"].get("correo")
-                        nombre_sup = u["datos_perfil"].get("nombres", "Supervisor")
-                        if correo:
-
-
             return jsonify({'status': 'success', 'message': 'Documentos Contables subidos. El proceso ha concluido para todas las cotizaciones.'})
 
     return jsonify({'status': 'error', 'message': 'Factura no encontrada.'})
@@ -1830,7 +1975,16 @@ def editar_seccion_especifica():
         factura["liberado_admin"] = False
         try:
             from notificaciones import enviar_correo_esperando_liberacion
-            enviar_correo_esperando_liberacion(correo_admin, nombre_admin, factura.get("id_reporte", factura.get("id", "N/A")), factura.get("unidad", ""), identificador, identificador)
+            nombre_sup_asignador = factura.get("supervisor_aprobador") or factura.get("responsable")
+            enviar_correo_esperando_liberacion(
+                correo_admin,
+                nombre_admin,
+                factura.get("id_reporte", factura.get("id", "N/A")),
+                factura.get("unidad", ""),
+                identificador,
+                identificador,
+                nombre_supervisor=nombre_sup_asignador
+            )
         except Exception as e:
             print("Error al enviar correo: ", e)
         # ===============================================
@@ -1928,7 +2082,16 @@ def reactivar_desde_caras():
                     ticket_id = f.get("id_reporte", f.get("id", "N/A"))
                     unidad_txt = f.get("unidad", "S/N")
                     falla_txt = f.get("titulo", "Revisión reactivada desde Cotización Cara")
-                    enviar_correo_nueva_orden(correo_sup, nombre_sup, ticket_id, unidad_txt, falla_txt)
+                    perf_adm = session.get("usuario", {}).get("datos_perfil", {})
+                    nombre_adm = f"{perf_adm.get('nombres', '')} {perf_adm.get('apellido_paterno', '')}".strip() or session.get("usuario", {}).get("usuario", "Administración")
+                    enviar_correo_nueva_orden(
+                        correo_sup,
+                        nombre_sup,
+                        ticket_id,
+                        unidad_txt,
+                        falla_txt,
+                        nombre_supervisor=f"Administrador: {nombre_adm}"
+                    )
             except Exception as e:
                 print("Error enviando correo de reactivación:", str(e))
 
@@ -2025,13 +2188,19 @@ def liberar_doc50():
                     cope_admin = u["datos_perfil"].get("cope", "")
                     copes_extra = u["datos_perfil"].get("copes_asignados", [])
                     
+                    perf_adm_act = session.get("usuario", {}).get("datos_perfil", {})
+                    nombre_adm_act = f"{perf_adm_act.get('nombres', '')} {perf_adm_act.get('apellido_paterno', '')}".strip() or "Administrador"
+
                     if subrol_u == "Supervisor" and (cope_admin == cope_ticket or cope_ticket in copes_extra):
                         correo = u["datos_perfil"].get("correo")
                         nombre_sup = u["datos_perfil"].get("nombres", "Supervisor")
                         if correo:
                             from notificaciones import enviar_correo_liberacion_doc50_supervisor
                             ticket_para_correo = ticket_id if match_ticket else f.get("id", "N/A")
-                            enviar_correo_liberacion_doc50_supervisor(correo, nombre_sup, f.get("unidad", "S/N"), ticket_para_correo)
+                            enviar_correo_liberacion_doc50_supervisor(
+                                correo, nombre_sup, f.get("unidad", "S/N"), ticket_para_correo,
+                                nombre_admin=nombre_adm_act
+                            )
                             
             # Enviar correo al taller de que ya pueden facturar
             proveedor_nombre = f.get('proveedor', '')
@@ -2041,8 +2210,13 @@ def liberar_doc50():
                     correo_prov = u.get('datos_perfil', {}).get('correo', '')
                     break
             if correo_prov:
+                perf_adm_act = session.get("usuario", {}).get("datos_perfil", {})
+                nombre_adm_act = f"{perf_adm_act.get('nombres', '')} {perf_adm_act.get('apellido_paterno', '')}".strip() or "Administrador"
                 from notificaciones import enviar_correo_taller_facturar
-                enviar_correo_taller_facturar(correo_prov, proveedor_nombre, f.get("id", "N/A"), f.get("unidad", "S/N"))
+                enviar_correo_taller_facturar(
+                    correo_prov, proveedor_nombre, f.get("id", "N/A"), f.get("unidad", "S/N"),
+                    nombre_admin=nombre_adm_act
+                )
                 
             return jsonify({"status": "success", "message": "Ticket liberado correctamente para captura de Doc Contable. Se ha notificado al Supervisor."})
             

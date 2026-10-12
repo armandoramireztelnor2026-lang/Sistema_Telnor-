@@ -137,6 +137,8 @@ function renderizarTablaReportes(lista) {
 
         if (f.estado === 'Cancelado_Cotizacion_Cara') {
             estado = "Incosteable";
+        } else if (f.estado === 'Rechazado_Con_Recomendaciones') {
+            estado = "Correcciones/Taller";
         } else if (f.estado === 'Archivado') {
             estado = "Finalizado / Histórico";
         } else if (f.is_unassigned) {

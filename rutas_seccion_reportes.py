@@ -24,9 +24,10 @@ def obtener_lista_seccion_reportes():
 
     reportes_data = leer_json('reportes.json')
     facturas_data = leer_json('facturas.json')
+    archivados_data = leer_json('tickets_archivados.json')
     
     todos_reportes = reportes_data.get("reportes", [])
-    todas_facturas = facturas_data.get("facturas", [])
+    todas_facturas = facturas_data.get("facturas", []) + archivados_data.get("facturas", [])
     
     # Set of report IDs that have a corresponding factura
     facturas_ids = set()

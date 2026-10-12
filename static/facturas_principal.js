@@ -217,6 +217,10 @@ async function cargarFacturas() {
                     }
                 }
                 let estadoBadge = `<span style="background:${badgeColor}; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">${textoEstado}</span>`;
+                if (f.estado === 'Rechazado_Con_Recomendaciones') {
+                    let rechazadoPor = f.rechazado_por || 'Supervisión';
+                    estadoBadge += `<br><span style="color:#ef4444; font-size:0.8em; font-weight:bold; display:block; margin-top:4px;">Rechazada por ${rechazadoPor}</span>`;
+                }
 
                 let entregadoTexto = f.entregado || 'No';
                 let entregadoBadge = entregadoTexto === 'Sí'
@@ -255,7 +259,9 @@ async function cargarFacturas() {
                 if (rolUsuario === 'administracion') {
                     btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">`;
 
-                    if (!apAdmin) {
+                    if (f.estado === 'Rechazado_Con_Recomendaciones') {
+                        btnAccion += `<button disabled class="btn-info" style="background:#475569; color:#94a3b8; border:none; width:100%; margin:0; cursor:not-allowed;">⛔ Esperando Corrección del Taller</button>`;
+                    } else if (!apAdmin) {
                         btnAccion += `<button class="btn-success" onclick="abrirRevisionAdmin('${f.id}')" style="display:block; width:100%; margin:0;">Aprobar y Asignar Orden</button>`;
                     } else {
                         btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
@@ -295,7 +301,9 @@ async function cargarFacturas() {
                 } else if (rolUsuario === 'corporativos') {
                     btnAccion = `<div style="display:flex; flex-direction:column; gap:8px; width:100%;">`;
 
-                    if (!apCorp) {
+                    if (f.estado === 'Rechazado_Con_Recomendaciones') {
+                        btnAccion += `<button disabled class="btn-info" style="background:#475569; color:#94a3b8; border:none; width:100%; margin:0; cursor:not-allowed;">⛔ Esperando Corrección del Taller</button>`;
+                    } else if (!apCorp) {
                         btnAccion += `<button class="btn-success" onclick="abrirRevisionCorp('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; transition:all 0.3s;">✅ Aprobar</button>`;
                     } else {
                         btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color:white; transition:all 0.3s;">📄 Ver Detalles</button>`;
@@ -307,50 +315,16 @@ async function cargarFacturas() {
 
                     // ⚠️ CASO ESPECIAL: Cotización rechazada con recomendaciones
                     if (f.estado === 'Rechazado_Con_Recomendaciones') {
-                        let motivo = f.motivo_rechazo || 'Sin motivo especificado.';
-                        let rechazadoPor = f.rechazado_por || 'Supervisión';
-                        let precsRec = f.precios_recomendados || [];
-                        let numCots = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones.length : 1;
-                        let formCots = '';
-
-                        if (f.cotizaciones && f.cotizaciones.length > 0) {
-                            f.cotizaciones.forEach((cot, idx) => {
-                                let precRec = precsRec[idx] ? precsRec[idx].precio_recomendado : '';
-                                let labelRec = precRec ? `<span style="color:#f59e0b;font-size:0.78em;">💡 Sugerido: $${precRec}</span>` : '';
-                                formCots += `<div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;margin-bottom:6px;">
-                                    <div style="color:#94a3b8;font-size:0.78em;">Cotización ${idx + 1}: <strong style="color:#e2e8f0;">${cot.titulo || ''}</strong></div>
-                                    ${labelRec}
-                                    <input type="number" id="precio-corr-${f.id}-${idx}" value="${cot.precio || ''}"
-                                        style="width:100%;padding:6px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:white;font-size:0.85em;box-sizing:border-box;margin-top:4px;" placeholder="Precio corregido...">
-                                    <input type="file" id="pdf-corr-${f.id}-${idx}" accept=".pdf"
-                                        style="width:100%;font-size:0.72em;color:#94a3b8;margin-top:4px;">
-                                </div>`;
-                            });
-                        } else {
-                            let precRec = precsRec[0] ? precsRec[0].precio_recomendado : '';
-                            let labelRec = precRec ? `<span style="color:#f59e0b;font-size:0.78em;">💡 Sugerido: $${precRec}</span>` : '';
-                            formCots = `<div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;margin-bottom:6px;">
-                                ${labelRec}
-                                <input type="number" id="precio-corr-${f.id}-0" value="${f.precio || ''}"
-                                    style="width:100%;padding:6px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:white;font-size:0.85em;box-sizing:border-box;margin-top:4px;" placeholder="Precio corregido...">
-                                <input type="file" id="pdf-corr-${f.id}-0" accept=".pdf"
-                                    style="width:100%;font-size:0.72em;color:#94a3b8;margin-top:4px;">
-                            </div>`;
-                        }
-
                         btnAccion = `<div style="display:flex;flex-direction:column;gap:6px;width:100%;">
-                            <div style="background:#7f1d1d;border:1px solid #ef4444;border-radius:6px;padding:8px;">
-                                <div style="color:#fca5a5;font-weight:bold;font-size:0.85em;">⛔ Cotización Rechazada por ${rechazadoPor}</div>
-                                <div style="color:#fde68a;font-size:0.78em;margin-top:4px;font-style:italic;">"${motivo}"</div>
-                            </div>
-                            <div style="color:#94a3b8;font-size:0.8em;font-weight:bold;">Corrige los precios y vuelve a enviar:</div>
-                            ${formCots}
-                            <button onclick="enviarCorreccionCotizacion('${f.id}', ${numCots})"
-                                style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:6px;padding:10px;cursor:pointer;font-weight:bold;font-size:0.85em;width:100%;">
-                                ✅ Enviar Corrección
+                            <button onclick="abrirDetalles('${f.id}')"
+                                style="background:#0284c7;color:white;border:none;border-radius:6px;padding:8px 10px;cursor:pointer;font-weight:bold;font-size:0.85em;width:100%;">
+                                📄 Ver Detalles (PDF)
+                            </button>
+                            <button onclick="abrirModalRecomendaciones('${f.id}')"
+                                style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;border:none;border-radius:6px;padding:10px;cursor:pointer;font-weight:bold;font-size:0.85em;width:100%;">
+                                🔍 Ver Recomendaciones
                             </button>
                         </div>`;
-
                     } else {
                         // --- Botones normales del taller ---
                         btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; align-items:stretch; width:100%;">
@@ -3298,5 +3272,175 @@ async function enviarCorreccionCotizacion(id, numCots) {
     } catch (e) {
         if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
         mostrarToast('Error de conexion.', 'error');
+    }
+}
+
+
+window.previewFileModal = function(input, previewId) {
+    const container = document.getElementById(previewId);
+    if (!container) return;
+    
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const fileURL = URL.createObjectURL(file);
+        container.style.display = 'block';
+        
+        if (file.type === 'application/pdf') {
+            container.innerHTML = `<iframe src="${fileURL}" style="width:100%; height:400px; border:none;"></iframe>`;
+        } else if (file.type.startsWith('image/')) {
+            container.innerHTML = `<img src="${fileURL}" style="width:100%; height:auto; display:block;">`;
+        } else {
+            container.innerHTML = `<div style="padding:10px; color:#cbd5e1; text-align:center;">Archivo no soportado para vista previa.</div>`;
+        }
+    } else {
+        container.style.display = 'none';
+        container.innerHTML = '';
+    }
+};
+
+window.abrirModalRecomendaciones = function(id) {
+    const f = facturasGlobal.find(x => String(x.id) === String(id));
+    if (!f) return;
+    
+    let motivo = f.motivo_rechazo || 'Sin motivo especificado.';
+    let rechazadoPor = f.rechazado_por || 'Supervisión';
+    let precsRec = f.precios_recomendados || [];
+    let numCots = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones.length : 1;
+    let formCots = '';
+
+    if (f.cotizaciones && f.cotizaciones.length > 0) {
+        f.cotizaciones.forEach((cot, idx) => {
+            let precRec = precsRec[idx] ? precsRec[idx].precio_recomendado : '';
+            let labelRec = precRec ? `<div style="color:#f59e0b;font-size:0.9em;font-weight:bold;margin-bottom:4px;">💡 Precio Sugerido: $${parseFloat(precRec).toLocaleString('en-US')}</div>` : '';
+            formCots += `<div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:12px;margin-bottom:10px;">
+                <div style="color:#94a3b8;font-size:0.85em;margin-bottom:8px;">Cotización ${idx + 1}: <strong style="color:#e2e8f0;">${cot.titulo || ''}</strong></div>
+                ${labelRec}
+                <label style="color:#cbd5e1;font-size:0.8em;margin-top:5px;display:block;">Tu Nuevo Precio:</label>
+                <input type="number" id="precio-corr-mod-${f.id}-${idx}" value="${cot.precio || ''}"
+                    style="width:100%;padding:10px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:white;font-size:0.95em;box-sizing:border-box;margin-top:4px;" placeholder="Ingresa precio corregido...">
+                <label style="color:#cbd5e1;font-size:0.8em;margin-top:10px;display:block;">Nuevo Documento (PDF o Foto):</label>
+                <input type="file" id="pdf-corr-mod-${f.id}-${idx}" accept=".pdf, image/jpeg, image/png, image/jpg"
+                    style="width:100%;font-size:0.85em;color:#94a3b8;margin-top:4px;"
+                    onchange="previewFileModal(this, 'preview-doc-${f.id}-${idx}')">
+                <div id="preview-doc-${f.id}-${idx}" style="margin-top:10px; width:100%; display:none; border:1px solid #475569; border-radius:4px; overflow:hidden;"></div>
+            </div>`;
+        });
+    } else {
+        let precRec = precsRec[0] ? precsRec[0].precio_recomendado : '';
+        let labelRec = precRec ? `<div style="color:#f59e0b;font-size:0.9em;font-weight:bold;margin-bottom:4px;">💡 Precio Sugerido: $${parseFloat(precRec).toLocaleString('en-US')}</div>` : '';
+        formCots = `<div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:12px;margin-bottom:10px;">
+            ${labelRec}
+            <label style="color:#cbd5e1;font-size:0.8em;margin-top:5px;display:block;">Tu Nuevo Precio:</label>
+            <input type="number" id="precio-corr-mod-${f.id}-0" value="${f.precio || ''}"
+                style="width:100%;padding:10px;background:#0f172a;border:1px solid #475569;border-radius:4px;color:white;font-size:0.95em;box-sizing:border-box;margin-top:4px;" placeholder="Ingresa precio corregido...">
+            <label style="color:#cbd5e1;font-size:0.8em;margin-top:10px;display:block;">Nuevo Documento (PDF o Foto):</label>
+            <input type="file" id="pdf-corr-mod-${f.id}-0" accept=".pdf, image/jpeg, image/png, image/jpg"
+                style="width:100%;font-size:0.85em;color:#94a3b8;margin-top:4px;"
+                onchange="previewFileModal(this, 'preview-doc-${f.id}-0')">
+            <div id="preview-doc-${f.id}-0" style="margin-top:10px; width:100%; display:none; border:1px solid #475569; border-radius:4px; overflow:hidden;"></div>
+        </div>`;
+    }
+
+    let modalHtml = `
+    <div id="modal-recomendaciones-dinamico" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+        <div style="background:#0f172a;border:1px solid #334155;border-radius:12px;width:90%;max-width:500px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 10px 25px rgba(0,0,0,0.5);overflow:hidden;">
+            <div style="background:#7f1d1d;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ef4444;">
+                <h3 style="margin:0;color:white;font-size:1.1em;">⛔ Rechazada por ${rechazadoPor}</h3>
+                <button onclick="document.getElementById('modal-recomendaciones-dinamico').remove()" style="background:transparent;border:none;color:white;font-size:1.5em;cursor:pointer;">&times;</button>
+            </div>
+            <div style="padding:20px;overflow-y:auto;flex:1;">
+                <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:12px;margin-bottom:20px;border-radius:4px;color:#991b1b;">
+                    <strong style="display:block;margin-bottom:4px;">Motivo del Rechazo:</strong>
+                    <span style="font-style:italic;">"${motivo}"</span>
+                </div>
+                <h4 style="color:white;margin-bottom:10px;font-size:1em;">Corrige los precios y vuelve a enviar:</h4>
+                <div style="max-height: 400px; overflow-y: auto; padding-right: 5px;" class="custom-scrollbar">
+                ${formCots}
+                </div>
+            </div>
+            <div style="padding:15px 20px;background:#1e293b;border-top:1px solid #334155;display:flex;justify-content:flex-end;gap:10px;">
+                <button onclick="document.getElementById('modal-recomendaciones-dinamico').remove()" style="padding:10px 15px;background:#475569;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">Cancelar</button>
+                <button onclick="enviarCorreccionCotizacionModal('${f.id}', ${numCots})" style="padding:10px 20px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">✅ Enviar Corrección</button>
+            </div>
+        </div>
+    </div>
+    <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+    `;
+    
+    let existing = document.getElementById('modal-recomendaciones-dinamico');
+    if(existing) existing.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+window.enviarCorreccionCotizacionModal = async function(idFactura, numCots) {
+    let fd = new FormData();
+    fd.append('id', idFactura);
+    let error = false;
+    let cambioPrecio = false;
+    let subioPDF = false;
+
+    const f = facturasGlobal.find(x => String(x.id) === String(idFactura));
+
+    let preciosArray = [];
+    for (let i = 0; i < numCots; i++) {
+        let precioInput = document.getElementById(`precio-corr-mod-${idFactura}-${i}`).value.trim();
+        let pdfInput = document.getElementById(`pdf-corr-mod-${idFactura}-${i}`).files[0];
+        
+        if (!precioInput) {
+            alert(`Debe ingresar un precio para la cotización ${i+1}`);
+            error = true;
+            break;
+        }
+        
+        let precioAntiguo = (f && f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones[i].precio : (f ? f.precio : '');
+        if (String(precioInput) !== String(precioAntiguo)) {
+            cambioPrecio = true;
+        }
+        
+        preciosArray.push({ precio: precioInput });
+        if (pdfInput) {
+            fd.append(`pdf_cotizacion_${i}`, pdfInput);
+            subioPDF = true;
+        }
+    }
+    
+    fd.append('precios_cotizaciones', JSON.stringify(preciosArray));
+
+    if (error) return;
+    
+    if (!cambioPrecio || !subioPDF) {
+        alert("Debes realizar AMBOS cambios (modificar al menos un precio Y subir un nuevo PDF) para poder enviar la corrección.");
+        return;
+    }
+    
+    if (!confirm("¿Estás seguro de enviar estas correcciones al Supervisor?")) {
+        return;
+    }
+    
+    if (typeof mostrarLoaderDinamico === 'function') mostrarLoaderDinamico('Enviando corrección...', 'Actualizando precios');
+
+    try {
+        let resp = await fetch('/api/facturas/corregir_cotizacion_rechazada', { method: 'POST', body: fd });
+        let resJson = await resp.json();
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
+        if (resJson.status === 'success') {
+            document.getElementById('modal-recomendaciones-dinamico').remove();
+            if (typeof mostrarToast === 'function') {
+                mostrarToast("Cotización corregida y enviada exitosamente.", 'success');
+            } else { alert("Cotización corregida y enviada exitosamente."); }
+            cargarFacturas();
+        } else {
+            if (typeof mostrarToast === 'function') { mostrarToast(resJson.message, 'error'); } else { alert(resJson.message); }
+        }
+    } catch (e) {
+        console.error(e);
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
+        if (typeof mostrarToast === 'function') { mostrarToast("Error al enviar la corrección.", 'error'); } else { alert("Error al enviar la corrección."); }
     }
 }

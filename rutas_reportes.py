@@ -209,7 +209,18 @@ def asignar_reporte():
             r["compania"] = compania
             
             escribir_json("reportes.json", data)
-            enviar_correo_nueva_orden(correo_proveedor, nombre_proveedor, reporte_id, r.get("unidad", ""), r.get("falla", ""))
+            nombre_supervisor_actor = None
+            if "usuario" in session:
+                dp_act = session["usuario"].get("datos_perfil", {})
+                nombre_supervisor_actor = f"{dp_act.get('nombres', '')} {dp_act.get('apellido_paterno', '')}".strip() or session["usuario"].get("usuario")
+            enviar_correo_nueva_orden(
+                correo_proveedor,
+                nombre_proveedor,
+                reporte_id,
+                r.get("unidad", ""),
+                r.get("falla", ""),
+                nombre_supervisor=nombre_supervisor_actor
+            )
             return jsonify({"status": "success", "message": f"Reporte asignado exitosamente al taller {proveedor}."})
 
     return jsonify({"status": "error", "message": f"Reporte no encontrado. DEBUG ID req: {reporte_id}, Type: {type(reporte_id)}, req_data: {req_data}"})
@@ -242,7 +253,18 @@ def eliminar_reporte():
         
         correo_chofer = reporte_a_eliminar.get('email')
         if correo_chofer and correo_chofer.strip() not in ["", "No proporcionado"]:
-            enviar_correo_ticket_rechazado(correo_chofer, reporte_a_eliminar.get('empleado', 'Operador'), reporte_a_eliminar.get('id'), reporte_a_eliminar.get('unidad'), motivo)
+            nombre_admin_actor = None
+            if "usuario" in session:
+                dp_act = session["usuario"].get("datos_perfil", {})
+                nombre_admin_actor = f"{dp_act.get('nombres', '')} {dp_act.get('apellido_paterno', '')}".strip() or session["usuario"].get("usuario")
+            enviar_correo_ticket_rechazado(
+                correo_chofer,
+                reporte_a_eliminar.get('empleado', 'Operador'),
+                reporte_a_eliminar.get('id'),
+                reporte_a_eliminar.get('unidad'),
+                motivo,
+                nombre_admin=nombre_admin_actor
+            )
         
         return jsonify({"status": "success", "message": "Reporte eliminado y usuario notificado."})
 

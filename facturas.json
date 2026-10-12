@@ -1,3 +1,208 @@
 {
-    "facturas": []
+    "facturas": [
+        {
+            "id": "20261008114654",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1867",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "n",
+            "retro": "[TICKET:REP-20261006123116]\r\nREPORTE ORIGINAL DEL CHOFER: Sobre calentamiento ",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Correctivo",
+            "precio": 10996.0,
+            "fecha": "2026-10-08",
+            "numero_orden": "",
+            "compania": "RUMN",
+            "timestamp": "2026-10-08T11:46:54.800717",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "",
+            "entregado": "No",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 10996.0,
+                    "titulo": "n",
+                    "mantenimiento": "Correctivo",
+                    "retro": "[TICKET:REP-20261006123116]\r\nREPORTE ORIGINAL DEL CHOFER: Sobre calentamiento ",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1791485214782_0_supervisor.jpg"
+                    ],
+                    "pdf_cotizacion": "pdf_cot_20261008114654_0_134543_certificate_UKDAUABC4455TIJ.pdf"
+                }
+            ],
+            "reactivado_desde_caras": false,
+            "comentarios": "HOLA ES UNA PRUEBA",
+            "autor_comentario": "Samuel Giron",
+            "eliminado_por": "",
+            "estado": "Rechazado_Con_Recomendaciones",
+            "motivo_rechazo": "Haber como funciona esto xd",
+            "precios_recomendados": [
+                {
+                    "idx": "0",
+                    "precio_recomendado": "11111"
+                }
+            ],
+            "rechazado_por": "Supervisor",
+            "fecha_rechazo": "2026-10-09 13:50:27",
+            "nombre_rechazador": "Samuel Giron"
+        },
+        {
+            "id": "20261008133951",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1212",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "n (+1 m\u00e1s)",
+            "retro": "[TICKET:REP-20261008131643]\r\nREPORTE ORIGINAL DEL CHOFER: Cambio de wipers",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 7600.0,
+            "fecha": "2026-10-08",
+            "numero_orden": "112",
+            "compania": "Telnor",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-10-08T13:39:51.269558",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "75437069",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 4600.0,
+                    "titulo": "n",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20261008131643]\r\nREPORTE ORIGINAL DEL CHOFER: Cambio de wipers",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1791491991233_0_Jefatura.png"
+                    ],
+                    "pdf_cotizacion": "1791491991233_0_2200607_RamirezCardenasLuisArmando_Actividad_2.4._Auditoria_de_servicios_de_la_nube.pdf",
+                    "numero_orden": "112",
+                    "numero_cotizacion_asignacion": "113",
+                    "factura_folio": "11111",
+                    "factura_pdf": "FACTURA_FINAL_20261008133951_0_Meta_2.3_Resolucion_de_casos_practicos_de_analisis_espacial.docx.pdf",
+                    "numero_doc50": "500000012"
+                },
+                {
+                    "id_cotizacion": "2",
+                    "precio": 3000.0,
+                    "titulo": "n",
+                    "mantenimiento": "Correctivo",
+                    "retro": "Llantas",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1791491991233_1_Meta_1.4__Ecosistema_de_Innovacion.png"
+                    ],
+                    "pdf_cotizacion": "1791491991233_1_Meta_2.2._Analisis_del_Modulo_5_Redes_y_entrega_de_contenido.pdf",
+                    "numero_orden": "114",
+                    "numero_cotizacion_asignacion": "115",
+                    "factura_folio": "111112",
+                    "factura_pdf": "FACTURA_FINAL_20261008133951_1_2200607_RamirezCardenasLuisArmando_Actividad_2.2._Auditoria_Base_de_datos.pdf",
+                    "numero_doc50": "5000000123"
+                }
+            ],
+            "reactivado_desde_caras": false,
+            "comentarios": "Este fue otra prueba para la presentacion con perusquia",
+            "autor_comentario": "Jose Alejandro  Pe\u00f1u\u00f1uri",
+            "eliminado_por": "",
+            "timestamp_aprobacion": "2026-10-08T13:43:48.008320",
+            "numero_cotizacion_asignacion": "113",
+            "liberado_admin": true,
+            "fecha_cierre": "2026-10-08 13:58:28",
+            "factura_folio": "11111",
+            "factura_pdf": "FACTURA_FINAL_20261008133951_0_Meta_2.3_Resolucion_de_casos_practicos_de_analisis_espacial.docx.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "500000012",
+            "estado": "Archivado"
+        },
+        {
+            "id": "20261009110502",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1857",
+            "responsable": "Luis Ramirez",
+            "telefono": "6634041184",
+            "titulo": "n (+1 m\u00e1s)",
+            "retro": "[TICKET:REP-20261009105612]\r\nREPORTE ORIGINAL DEL CHOFER: Tira agua del tanque del limpiaparabrisas ",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Correctivo",
+            "precio": 1100.0,
+            "fecha": "2026-10-09",
+            "numero_orden": "1000",
+            "compania": "RUMN",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-10-09T11:05:03.585197",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "21412154",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 100.0,
+                    "titulo": "n",
+                    "mantenimiento": "Correctivo",
+                    "retro": "[TICKET:REP-20261009105612]\r\nREPORTE ORIGINAL DEL CHOFER: Tira agua del tanque del limpiaparabrisas ",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1791569102067_0_proveedores.jpg",
+                        "evidencia_1791569102067_0_Jefatura.png",
+                        "evidencia_1791569102067_0_Administrador.png"
+                    ],
+                    "pdf_cotizacion": "1791569102067_0_2200607_RamirezCardenasLuisArmando_Actividad_2.4._Auditoria_de_servicios_de_la_nube.pdf",
+                    "numero_orden": "1000",
+                    "numero_cotizacion_asignacion": "290000012",
+                    "factura_folio": "21231",
+                    "factura_pdf": "FACTURA_FINAL_20261009110502_0_Meta_2.1._Analisis_del_Modulo_4_Seguridad_en_la_nube.pdf",
+                    "numero_doc50": "5092312"
+                },
+                {
+                    "id_cotizacion": "2",
+                    "precio": 1000.0,
+                    "titulo": "cambio de llantas",
+                    "mantenimiento": "Correctivo",
+                    "retro": "Cambio de llantas",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1791569102067_1_Administrador.png",
+                        "evidencia_1791569102067_1_Supervisor.png"
+                    ],
+                    "pdf_cotizacion": "1791569102067_1_2200607_RamirezCardenasLuisArmando_Actividad_2.3._Auditoria_de_calidad_de_datos.pdf",
+                    "numero_orden": "1001",
+                    "numero_cotizacion_asignacion": "2900000013",
+                    "factura_folio": "4444",
+                    "factura_pdf": "FACTURA_FINAL_20261009110502_1_Meta_1.5_Analisis_del_Modulo_3_Infraestructura_global_de_AWS.pdf",
+                    "numero_doc50": "50000012"
+                }
+            ],
+            "reactivado_desde_caras": false,
+            "comentarios": "Hola este ticket fue utilizado para la prueba del jefe de servicios generales",
+            "autor_comentario": "Manuel Alejandro  Marquez",
+            "eliminado_por": "",
+            "timestamp_aprobacion": "2026-10-09T11:10:59.975432",
+            "numero_cotizacion_asignacion": "290000012",
+            "liberado_admin": true,
+            "fecha_cierre": "2026-10-09 11:31:09",
+            "factura_folio": "21231",
+            "factura_pdf": "FACTURA_FINAL_20261009110502_0_Meta_2.1._Analisis_del_Modulo_4_Seguridad_en_la_nube.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "5092312",
+            "estado": "Archivado"
+        }
+    ]
 }
