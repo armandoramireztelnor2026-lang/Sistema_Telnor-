@@ -33,6 +33,48 @@ function liberarTicketAdmin(facturaId) {
         });
 }
 
+function esTicketCorporativo(f) {
+    if (!f) return false;
+    let cia = String(f.compania || '').toLowerCase();
+    if (cia.includes('corporativo')) return true;
+    let cli = String(f.cliente || '').toLowerCase();
+    if (cli.includes('corporativo')) return true;
+    let dep = String(f.departamento || '').toLowerCase();
+    if (dep.includes('corporativo')) return true;
+    if (f.reporte_inicial) {
+        let rCia = String(f.reporte_inicial.compania || '').toLowerCase();
+        let rCli = String(f.reporte_inicial.cliente || '').toLowerCase();
+        let rDep = String(f.reporte_inicial.departamento || '').toLowerCase();
+        if (rCia.includes('corporativo') || rCli.includes('corporativo') || rDep.includes('corporativo')) return true;
+    }
+    let retro = String(f.retro || '').toLowerCase();
+    if (retro.includes('corporativo')) return true;
+    return false;
+}
+
+function asumirLiberacionAdmin(facturaId) {
+    if (!confirm('⚠️ ¿Deseas ASUMIR EL PROCESO (Autorizar por Ausencia) para liberar este ticket en suplencia del Administrador?\n\nEsta acción notificará al taller proveedor para que proceda a subir su factura fiscal.')) return;
+    mostrarLoaderDinamico('Procesando Cobertura...', 'Liberando ticket por ausencia ⏳');
+    fetch('/api/facturas/liberar_doc50', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: facturaId, es_suplencia: true })
+    })
+        .then(r => r.json())
+        .then(data => {
+            ocultarLoaderDinamico();
+            alert(data.message || (data.status === 'success' ? 'Ticket liberado exitosamente por suplencia.' : 'Error al liberar.'));
+            if (data.status === 'success') {
+                if (typeof cargarFacturas === 'function') cargarFacturas();
+            }
+        })
+        .catch(err => {
+            ocultarLoaderDinamico();
+            console.error(err);
+            alert('Error al conectar con el servidor.');
+        });
+}
+
 document.addEventListener('click', function (e) {
     const buscador = document.getElementById('buscador-proveedor');
     const lista = document.getElementById('lista-proveedores-flotante');
@@ -164,7 +206,9 @@ async function cargarFacturas() {
 
                     if (f.estado === 'Archivado' && tbodyArchivo && rolUsuario === 'administracion') {
                         let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
-                        let btnArchivar = subrolAct === 'Supervisor' ? `<button class="btn-info" style="width:100%; background:#8b5cf6; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="archivarFinal('${f.id}')">Archivar</button>` : '';
+                        let btnArchivar = subrolAct === 'Supervisor'
+                            ? `<button class="btn-info" style="width:100%; background:#8b5cf6; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="archivarFinal('${f.id}')">Archivar</button>`
+                            : `<button class="btn-cobertura" style="font-size:0.8em; padding:8px 10px; margin:0; width:100%;" onclick="archivarFinal('${f.id}')">🛡️ Asumir Archivo (Cobertura)</button>`;
                         let btnVerExp = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
                             <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; color:white; margin:0; width:100%;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>
                             <button class="btn-danger-sm" style="width:100%; background:#ef4444; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar</button>
@@ -262,7 +306,16 @@ async function cargarFacturas() {
                     if (f.estado === 'Rechazado_Con_Recomendaciones') {
                         btnAccion += `<button disabled class="btn-info" style="background:#475569; color:#94a3b8; border:none; width:100%; margin:0; cursor:not-allowed;">⛔ Esperando Corrección del Taller</button>`;
                     } else if (!apAdmin) {
-                        btnAccion += `<button class="btn-success" onclick="abrirRevisionAdmin('${f.id}')" style="display:block; width:100%; margin:0;">Aprobar y Asignar Orden</button>`;
+                        if (subrolAct === 'Administrador') {
+                            let esCorp = esTicketCorporativo(f);
+                            if (precioParaAp >= 10001 && esCorp) {
+                                btnAccion += `<button class="btn-cobertura-disabled" disabled style="display:block; width:100%; margin:0;" title="Excepción Corporativa: Prohibida suplencia en cotizaciones > $10,000 de Corporativos. Requiere Supervisor titular.">🔒 Flujo Estricto Corp (Sin Cobertura)</button><span class="badge-estricto-corp">Requiere Supervisor Titular</span>`;
+                            } else {
+                                btnAccion += `<button class="btn-cobertura" onclick="abrirRevisionAdmin('${f.id}')" style="display:block; width:100%; margin:0;">🛡️ Asumir Proceso (Autorizar por Ausencia)</button>`;
+                            }
+                        } else {
+                            btnAccion += `<button class="btn-success" onclick="abrirRevisionAdmin('${f.id}')" style="display:block; width:100%; margin:0;">Aprobar y Asignar Orden</button>`;
+                        }
                     } else {
                         btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
 
@@ -279,14 +332,19 @@ async function cargarFacturas() {
                         btnAccion += `<button disabled class="btn-info" style="background:#475569; color:#94a3b8; border:none; width:100%; margin:0; cursor:not-allowed;">🔒 Esperando Confirmación</button>`;
                     } else if (confirmadaTotal && entregadoTexto !== 'Sí') {
                         if (f.codigo_liberacion) {
-                            btnAccion += `<button class="btn-info" onclick="abrirModalValidacion('${f.id}', '${f.unidad.replace('8090-', '')}')" style="background:#0284c7; width:100%; margin:0; border:none;">🔑 Validar PIN Chofer</button>`;
+                            if (subrolAct === 'Administrador') {
+                                btnAccion += `<button class="btn-cobertura" onclick="abrirModalValidacion('${f.id}', '${f.unidad.replace('8090-', '')}')" style="width:100%; margin:0;">🛡️ Asumir PIN por Ausencia</button>`;
+                            } else {
+                                btnAccion += `<button class="btn-info" onclick="abrirModalValidacion('${f.id}', '${f.unidad.replace('8090-', '')}')" style="background:#0284c7; width:100%; margin:0; border:none;">🔑 Validar PIN Chofer</button>`;
+                            }
                         } else {
                             btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px; text-align:center;">⌛ Esperando unidad lista...</span>`;
                         }
                     } else if (confirmadaTotal && entregadoTexto === 'Sí' && f.liberado_admin === false) {
                         // Unidad entregada, pendiente de liberación por Admin
                         if (subrolAct === 'Supervisor') {
-                            btnAccion += `<button class="btn-info" style="background:#f59e0b; color:white; font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; border:none; margin-top:5px; font-weight:bold; cursor:pointer; border-radius:4px;" onclick="notificarAdminLiberacion('${f.id}')">🔔 Notificar al Administrador</button>`;
+                            btnAccion += `<button class="btn-cobertura" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; border:none; margin-top:2px; font-weight:bold; cursor:pointer; border-radius:6px;" onclick="asumirLiberacionAdmin('${f.id}')">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
+                            btnAccion += `<button class="btn-info" style="background:#f59e0b; color:white; font-size:0.75em; padding:6px 10px; width:100%; box-sizing: border-box; border:none; margin-top:3px; font-weight:bold; cursor:pointer; border-radius:4px;" onclick="notificarAdminLiberacion('${f.id}')">🔔 Notificar al Administrador</button>`;
                         } else {
                             btnAccion += `<button onclick="liberarTicketAdmin('${f.id}')"
                                 style="background:linear-gradient(135deg,#10b981,#059669); color:white; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; font-weight:bold; font-size:0.85em; width:100%; margin-top:2px;">
@@ -392,7 +450,7 @@ async function cargarFacturas() {
                     let showInDoc = false;
 
                     // Mostrar si está esperando liberación del Administrador
-                    if (subrolAct === 'Administrador' && f.liberado_admin === false) {
+                    if (f.liberado_admin === false) {
                         showInDoc = true;
                     }
                     // O si ya llegó al final (Factura aprobada) para que la Jefatura suba el Doc 50
@@ -413,7 +471,7 @@ async function cargarFacturas() {
                             }
                         } else {
                             if (f.liberado_admin === false) {
-                                btnDoc += `<button class="btn-success" disabled style="display:block; width:100%; margin:0; background-color:#475569; cursor:not-allowed;">🔒 Esperando liberación</button>`;
+                                btnDoc += `<button class="btn-cobertura" style="display:block; width:100%; margin:0;" onclick="asumirLiberacionAdmin('${f.id}')">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
                             } else {
                                 btnDoc += `<button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalDocContable('${f.id}')">Ingresar Número de Doc. Contable</button>`;
                             }
@@ -443,7 +501,7 @@ async function cargarFacturas() {
                         countDocContables++;
 
                         if (subrolAct === 'Administrador') {
-                            return; // Skip rendering elsewhere for admin if it's already here
+                            // Suplencia: Permitir que el Administrador continúe renderizando para bandejas de cobertura
                         }
                     }
                 }
@@ -451,7 +509,7 @@ async function cargarFacturas() {
 
                 // ADMINISTRADOR HARD BLOCK: El Administrador SOLO ve tickets en tbodyDocContables (o Archivo).
                 // No debe ver tickets en facturas o facturas_finales.
-                if (subrolAct === 'Administrador') return;
+                // Suplencia: Administrador puede ver y operar en facturas y facturas_finales en cobertura
 
                 if ((rolUsuario === 'proveedores' || rolUsuario === 'administracion') && entregadoTexto === 'Sí') {
                     if (tbodyFinales) {
@@ -476,7 +534,11 @@ async function cargarFacturas() {
                             
                             // Nuevo botón manual para notificar al Admin
                             if (f.liberado_admin === false) {
-                                btnAdminExtra += `<button class="btn-info" onclick="notificarAdminLiberacion('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#f59e0b; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:0.9em; font-weight:bold; cursor:pointer;">🔔 Notificar Admin (Liberar)</button>`;
+                                if (subrolAct === 'Supervisor') {
+                                    btnAdminExtra += `<button class="btn-cobertura" onclick="asumirLiberacionAdmin('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px;">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
+                                } else {
+                                    btnAdminExtra += `<button class="btn-success" onclick="liberarTicketAdmin('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; padding:8px 12px; font-weight:bold;">🔓 Liberar Facturación</button>`;
+                                }
                             }
 
 
@@ -495,7 +557,7 @@ async function cargarFacturas() {
                                     if (subrolAct === 'Supervisor') {
                                         btnAdminExtra += `<button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalValidacionFiscal('${f.id}', '${f.factura_folio}', '${f.pdf_fiscal || f.factura_pdf}', '${f.unidad}')">Revisar y Validar</button>`;
                                     } else {
-                                        btnAdminExtra += `<span style="color:#b45309; font-size:0.85em; display:block; text-align:center; margin-bottom:5px;">Esperando validación del Supervisor</span>`;
+                                        btnAdminExtra += `<button class="btn-cobertura" style="display:block; width:100%; margin:0;" onclick="abrirModalValidacionFiscal('${f.id}', '${f.factura_folio}', '${f.pdf_fiscal || f.factura_pdf}', '${f.unidad}')">🛡️ Asumir Proceso (Validar por Ausencia)</button>`;
                                     }
                                 } else if (valFiscal === 'Aprobada') {
                                     estadoFiscalBadge = `<span style="background:#2d6a4f; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">Factura Aprobada</span>`;
@@ -2321,7 +2383,10 @@ function mostrarRechazoFiscal() {
 }
 
 function validarFacturaFiscalModal() {
-    if (!confirm("¿Estás seguro de que deseas APROBAR esta factura fiscal? Esta acción notificará al proveedor y finalizará el proceso.")) return;
+    let msgConfirm = (typeof subrolAct !== 'undefined' && subrolAct === 'Administrador')
+        ? "⚠️ ¿Deseas ASUMIR EL PROCESO (Autorizar por Ausencia) para APROBAR esta factura fiscal en suplencia del Supervisor?\n\nEsta acción notificará al proveedor y finalizará el proceso."
+        : "¿Estás seguro de que deseas APROBAR esta factura fiscal? Esta acción notificará al proveedor y finalizará el proceso.";
+    if (!confirm(msgConfirm)) return;
 
     let id = document.getElementById('val-factura-id').value;
     document.getElementById('modal-validacion-fiscal').style.display = 'none';

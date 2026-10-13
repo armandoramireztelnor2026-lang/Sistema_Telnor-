@@ -50,7 +50,15 @@
                 "area": "Automotriz",
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "subrol": "Supervisor",
-                "foto_ruta": "temp_20260929140101_Supervisor.png"
+                "foto_ruta": "temp_20260929140101_Supervisor.png",
+                "copes_asignados": [
+                    "PIO PICO",
+                    "CALLE QUINTA",
+                    "RIO",
+                    "LIBERTAD",
+                    "METRO",
+                    "PE OTAY INDUSTRIAL"
+                ]
             }
         },
         {
@@ -71,7 +79,23 @@
                 "foto_ruta": "temp_20260929140200_Administrador.png",
                 "copes_asignados": [
                     "PE ROSARITO",
-                    "PE PLAYAS"
+                    "PE PLAYAS",
+                    "ANAHUAC",
+                    "CALLE 14",
+                    "CALLE QUINTA",
+                    "LIBERTAD",
+                    "METRO",
+                    "PE ENSENADA",
+                    "PE OTAY INDUSTRIAL",
+                    "PE PERIFERICO",
+                    "PE PIONEROS",
+                    "PE SAN LUIS RC",
+                    "PE SAN QUINTIN",
+                    "PE SEMINARIO",
+                    "PE TECATE",
+                    "PIO PICO",
+                    "REFORMA",
+                    "RIO"
                 ]
             }
         },
@@ -90,7 +114,12 @@
                 "area": "Automotriz",
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "subrol": "Supervisor",
-                "foto_ruta": "temp_20260929140729_Supervisor.png"
+                "foto_ruta": "temp_20260929140729_Supervisor.png",
+                "copes_asignados": [
+                    "PE PLAYAS",
+                    "PE ROSARITO",
+                    "PE TECATE"
+                ]
             }
         },
         {
@@ -108,7 +137,15 @@
                 "area": "Automotriz",
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "subrol": "Supervisor",
-                "foto_ruta": "temp_20260929140908_Supervisor.png"
+                "foto_ruta": "temp_20260929140908_Supervisor.png",
+                "copes_asignados": [
+                    "PE SAN LUIS RC",
+                    "CALLE 14",
+                    "PE PIONEROS",
+                    "ANAHUAC",
+                    "REFORMA",
+                    "CALLE QUINTA"
+                ]
             }
         },
         {

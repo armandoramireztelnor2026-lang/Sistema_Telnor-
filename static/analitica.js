@@ -65,7 +65,7 @@ async function cargarAnalitica() {
         const data = await response.json();
 
         if (data.status === 'success') {
-            const formatData = (item, includeTaller = false) => {
+            const formatData = (item, includeTaller = true) => {
                 if (!item) return '<div style="color:#ef4444; font-weight:500; font-style:italic; padding: 10px 0;">Sin datos registrados en el periodo</div>';
                 
                 let fechaFormateada = '';
@@ -84,14 +84,27 @@ async function cargarAnalitica() {
                 let html = `
                     <div style="margin-bottom:7px; display:flex; justify-content:space-between; align-items:center;">
                         <span style="color:#94a3b8; font-size:0.85em;">🎟️ Ticket:</span>
-                        <span style="color:#38bdf8; font-weight:700; background:rgba(14,165,233,0.12); padding:2px 8px; border-radius:6px; border:1px solid rgba(14,165,233,0.25);">${item.ticket}</span>
-                    </div>
-                    <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
-                        <span style="color:#94a3b8; font-size:0.85em;">👨‍✈️ Chofer:</span>
-                        <span style="color:#ffffff; font-weight:500; text-align:right;">${item.chofer}</span>
+                        <span style="color:#38bdf8; font-weight:700; background:rgba(14,165,233,0.12); padding:2px 8px; border-radius:6px; border:1px solid rgba(14,165,233,0.25);">${item.ticket || 'N/A'}</span>
                     </div>
                 `;
-                if (includeTaller) {
+
+                if (item.unidad) {
+                    html += `
+                        <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
+                            <span style="color:#94a3b8; font-size:0.85em;">🚗 Unidad:</span>
+                            <span style="color:#ffffff; font-weight:600; text-align:right;">Eco #${item.unidad}</span>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
+                        <span style="color:#94a3b8; font-size:0.85em;">👨‍✈️ Chofer:</span>
+                        <span style="color:#ffffff; font-weight:500; text-align:right;">${item.chofer || 'Personal Operativo'}</span>
+                    </div>
+                `;
+
+                if (includeTaller && item.taller) {
                     html += `
                         <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
                             <span style="color:#94a3b8; font-size:0.85em;">🔧 Taller:</span>
@@ -99,26 +112,27 @@ async function cargarAnalitica() {
                         </div>
                     `;
                 }
+
                 html += `
                     <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
                         <span style="color:#94a3b8; font-size:0.85em;">👔 Admin:</span>
-                        <span style="color:#e0e6ed; font-weight:500; text-align:right;">${item.administrador}</span>
+                        <span style="color:#e0e6ed; font-weight:500; text-align:right;">${item.administrador || 'Administrador General'}</span>
                     </div>
                     <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
                         <span style="color:#94a3b8; font-size:0.85em;">📋 Super:</span>
-                        <span style="color:#e0e6ed; font-weight:500; text-align:right;">${item.supervisor}</span>
+                        <span style="color:#e0e6ed; font-weight:500; text-align:right;">${item.supervisor || 'Supervisor Central'}</span>
                     </div>
                     <div style="margin-bottom:7px; display:flex; justify-content:space-between;">
                         <span style="color:#94a3b8; font-size:0.85em;">🏢 Jefatura:</span>
-                        <span style="color:#e0e6ed; font-weight:500; text-align:right;">${item.jefatura}</span>
+                        <span style="color:#e0e6ed; font-weight:500; text-align:right;">${item.jefatura || 'Jefatura de Operaciones'}</span>
                     </div>
                     ${fechaFormateada}
                 `;
                 return html;
             };
 
-            if (divs.llegado) divs.llegado.innerHTML = formatData(data.ultimo_llegado, false);
-            if (divs.finalizado) divs.finalizado.innerHTML = formatData(data.ultimo_finalizado, false);
+            if (divs.llegado) divs.llegado.innerHTML = formatData(data.ultimo_llegado, true);
+            if (divs.finalizado) divs.finalizado.innerHTML = formatData(data.ultimo_finalizado, true);
             if (divs.asignado) divs.asignado.innerHTML = formatData(data.ultimo_asignado, true);
             if (divs.caro) divs.caro.innerHTML = formatData(data.ultimo_caro, true);
             if (divs.reparada) divs.reparada.innerHTML = formatData(data.ultima_reparada, true);
@@ -426,4 +440,34 @@ async function cargarAnalitica() {
         }
     }
 }
+
+/**
+ * Exporta todos los datos consolidados y métricas visualizadas en la sección
+ * de analítica hacia un archivo Excel (.xlsx) estructurado y estilizado.
+ */
+function descargarExcelAnalitica() {
+    const periodSelect = document.getElementById('analitica-period-select');
+    const period = periodSelect ? encodeURIComponent(periodSelect.value) : 'Todos';
+    const btn = document.getElementById('btn-exportar-analitica-excel');
+    
+    if (btn) {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+            <span>Generando Excel...</span>
+        `;
+        btn.style.pointerEvents = 'none';
+        btn.style.opacity = '0.85';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.style.pointerEvents = 'auto';
+            btn.style.opacity = '1';
+        }, 3000);
+    }
+    
+    // Iniciar descarga directa del libro de trabajo .xlsx generado por el backend
+    window.location.href = `/api/analitica/exportar_excel?period=${period}`;
+}
+
 

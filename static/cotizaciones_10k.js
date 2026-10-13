@@ -1,4 +1,23 @@
 // cotizaciones_10k.js
+function esTicketCorporativo(f) {
+    if (!f) return false;
+    let cia = String(f.compania || '').toLowerCase();
+    if (cia.includes('corporativo')) return true;
+    let cli = String(f.cliente || '').toLowerCase();
+    if (cli.includes('corporativo')) return true;
+    let dep = String(f.departamento || '').toLowerCase();
+    if (dep.includes('corporativo')) return true;
+    if (f.reporte_inicial) {
+        let rCia = String(f.reporte_inicial.compania || '').toLowerCase();
+        let rCli = String(f.reporte_inicial.cliente || '').toLowerCase();
+        let rDep = String(f.reporte_inicial.departamento || '').toLowerCase();
+        if (rCia.includes('corporativo') || rCli.includes('corporativo') || rDep.includes('corporativo')) return true;
+    }
+    let retro = String(f.retro || '').toLowerCase();
+    if (retro.includes('corporativo')) return true;
+    return false;
+}
+
 function verCotizacionesMas10000() {
     cambiarVistaAdmin('cotizaciones-10k');
     cargarCotizaciones10k();
@@ -32,6 +51,8 @@ async function cargarCotizaciones10k() {
                 return;
             }
 
+            let subrolActual = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value.trim() : '';
+
             tbody.innerHTML = '';
             pendientes.forEach(f => {
                 let pFormat = f.precio ? parseFloat(f.precio).toLocaleString('en-US') : '0';
@@ -44,7 +65,27 @@ async function cargarCotizaciones10k() {
                 let hoverStr = `onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'"`;
 
                 let btnVerDetalles = `<button style="${btnStyle} background:#0ea5e9 !important;" ${hoverStr} onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                let btnAprobar = `<button style="${btnStyle} background:#10b981 !important;" ${hoverStr} onclick="accion10k('${f.id}', 'aprobar')">✔️ Aprobar a Corporativos</button>`;
+                
+                // --- LÓGICA DE SUPLENCIA Y EXCEPCIÓN CORPORATIVA ---
+                let esCorp = esTicketCorporativo(f);
+                let pNum = parseFloat(f.precio_estimado || f.precio || 0);
+                let btnAprobar = '';
+
+                if (subrolActual === 'Supervisor') {
+                    // El Supervisor actúa bajo cobertura de ausencia del Administrador
+                    if (pNum >= 10001 && esCorp) {
+                        // REGLA DE COTIZACIONES (EXCEPCIÓN CORPORATIVA):
+                        // Si la cotización es > 10,000 y pertenece a 'Corporativos', la cobertura se deshabilita/oculta
+                        btnAprobar = `<button class="btn-cobertura-disabled" disabled style="${btnStyle}" title="Excepción Corporativa: Prohibida suplencia en cotizaciones > $10,000 de Corporativos. Requiere Administrador titular.">🔒 Flujo Estricto Corp (Sin Cobertura)</button>
+                        <span class="badge-estricto-corp">Requiere Admin Titular</span>`;
+                    } else {
+                        btnAprobar = `<button class="btn-cobertura" style="${btnStyle}" ${hoverStr} onclick="accion10k('${f.id}', 'aprobar', true)">🛡️ Asumir Proceso (Aprobar a Corp)</button>`;
+                    }
+                } else {
+                    // Administrador titular (o Jefatura)
+                    btnAprobar = `<button style="${btnStyle} background:#10b981 !important;" ${hoverStr} onclick="accion10k('${f.id}', 'aprobar', false)">✔️ Aprobar a Corporativos</button>`;
+                }
+
                 let btnRechazar = `<button style="${btnStyle} background:#ef4444 !important;" ${hoverStr} onclick="abrirModalRechazo10kDinamico('${f.id}')">✖ Rechazar (Sugerir Precios)</button>`;
                 let btnCaras = `<button style="${btnStyle} background:#b91c1c !important;" ${hoverStr} onclick="abrirCancelacion10k('${f.id}')">Cancelar Ticket (Cara)</button>`;
                 let acciones = `<div style="display:flex; flex-direction:column;">${btnVerDetalles}${btnAprobar}${btnRechazar}${btnCaras}</div>`;
@@ -62,9 +103,12 @@ async function cargarCotizaciones10k() {
     }
 }
 
-function accion10k(id, accion) {
+function accion10k(id, accion, esSuplencia = false) {
     if (accion === 'aprobar') {
-        if (!confirm("¿Seguro que deseas APROBAR esta cotización? Pasará a Corporativos.")) return;
+        let msgConfirm = esSuplencia
+            ? "⚠️ ¿Deseas ASUMIR EL PROCESO (Autorizar por Ausencia) para aprobar esta cotización en suplencia del Administrador?\n\nLa cotización pasará formalmente a Corporativos."
+            : "¿Seguro que deseas APROBAR esta cotización? Pasará a Corporativos.";
+        if (!confirm(msgConfirm)) return;
         if (typeof mostrarLoaderDinamico === 'function') mostrarLoaderDinamico("Procesando...", "Enviando a Corporativos...");
         enviarDecision10k(id, accion, "");
     }

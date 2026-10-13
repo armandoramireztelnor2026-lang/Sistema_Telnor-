@@ -1635,6 +1635,13 @@ tbody tr.selected-row {
     font-family: 'Poppins', sans-serif;
 }
 
+.analitica-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
 .analitica-period-box {
     background: #112641;
     border: 1px solid #1f395a;
@@ -1669,6 +1676,43 @@ tbody tr.selected-row {
 .analitica-period-select:focus {
     border-color: #40916c;
     box-shadow: 0 0 8px rgba(64, 145, 108, 0.35);
+}
+
+.analitica-btn-excel {
+    background: linear-gradient(135deg, #40916c 0%, #2d6a4f 100%);
+    color: #ffffff;
+    border: 1px solid #52b788;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(64, 145, 108, 0.3);
+    transition: all 0.25s ease;
+}
+
+.analitica-btn-excel:hover {
+    background: linear-gradient(135deg, #52b788 0%, #40916c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(64, 145, 108, 0.45);
+    color: #ffffff;
+}
+
+.analitica-btn-excel:active {
+    transform: translateY(0);
+}
+
+.analitica-btn-excel svg {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.analitica-btn-excel:hover svg {
+    transform: translateY(1px);
 }
 
 .analitica-section-header {
@@ -1886,8 +1930,13 @@ tbody tr.selected-row {
         align-items: flex-start;
     }
     
-    .analitica-period-box {
+    .analitica-actions-group {
         width: 100%;
+        justify-content: space-between;
+    }
+
+    .analitica-period-box {
+        flex: 1;
         justify-content: space-between;
     }
 
@@ -1905,6 +1954,17 @@ tbody tr.selected-row {
 }
 
 @media (max-width: 640px) {
+    .analitica-actions-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .analitica-period-box,
+    .analitica-btn-excel {
+        width: 100%;
+        justify-content: center;
+    }
+
     .analitica-grid-events {
         grid-template-columns: 1fr;
     }
@@ -1925,3 +1985,71 @@ tbody tr.selected-row {
         font-size: 1.2rem;
     }
 }
+
+/* =========================================================
+   BOTONES DE COBERTURA Y SUPLENCIA (ASUMIR PROCESO)
+   ========================================================= */
+.btn-cobertura {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(251, 191, 36, 0.4) !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    padding: 8px 12px !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    text-align: center !important;
+    transition: all 0.25s ease !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+}
+
+.btn-cobertura:hover {
+    background: linear-gradient(135deg, #fbbf24 0%, #b45309 100%) !important;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-cobertura:active {
+    transform: translateY(0) !important;
+}
+
+.btn-cobertura-disabled {
+    background: #334155 !important;
+    color: #94a3b8 !important;
+    border: 1px solid #475569 !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    padding: 8px 12px !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    opacity: 0.85 !important;
+}
+
+.badge-estricto-corp {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.5) !important;
+    color: #f87171 !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    padding: 3px 8px !important;
+    border-radius: 6px !important;
+    text-align: center !important;
+    display: block !important;
+    margin-top: 4px !important;
+    letter-spacing: 0.3px !important;
+}
+
