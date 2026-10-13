@@ -94,6 +94,15 @@ def nuevo_reporte():
             
         return jsonify({"status": "error", "message": msg})
 
+    # 4. Validar que el correo electrónico sea obligatorio y tenga formato válido
+    import re as re_email
+    email_req = (request.form.get("email") or "").strip()
+    if not email_req or email_req.lower() == "no proporcionado":
+        return jsonify({"status": "error", "message": "El correo electrónico es obligatorio para generar el reporte."})
+    email_pattern = re_email.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+    if not email_pattern.match(email_req):
+        return jsonify({"status": "error", "message": "El correo electrónico ingresado no tiene un formato válido (ej. usuario@correo.com)."})
+
     nuevo_id = f"REP-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
     reporte = {
         "id": nuevo_id,

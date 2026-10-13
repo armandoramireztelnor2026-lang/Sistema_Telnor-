@@ -81,7 +81,11 @@
                 <div class="input-group"><label>Celular</label><input type="text" name="celular" placeholder="Número de contacto" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="15" required></div>
                 <div class="input-group"><label>Nombre del Empleado (Completo)</label><input type="text" name="empleado" placeholder="Escriba su nombre completo" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
                 
-                <div class="input-group full-width-smart"><label>Email <span style="color:#a3b1c6; font-size:12px;">(Opcional)</span></label><input type="email" name="email" placeholder="usuario@correo.com"></div>
+                <div class="input-group full-width-smart">
+                    <label>Email <span style="color:#ef4444; font-size:14px; font-weight:bold;"> *</span></label>
+                    <input type="email" name="email" id="email-input" placeholder="usuario@correo.com" required>
+                    <span id="email-error" style="display:none; color:#ef4444; font-size:12px; margin-top:4px;">⚠️ El correo electrónico es obligatorio y debe tener un formato válido.</span>
+                </div>
                 
                 <!-- ¡NUEVOS CAMPOS EN CASCADA PARA EL CHOFER! -->
                 <div class="input-group">
@@ -288,6 +292,23 @@
                 return;
             }
 
+            // ---- VALIDACIÓN OBLIGATORIA: CORREO ELECTRÓNICO ----
+            const emailInput = document.getElementById('email-input');
+            const emailError = document.getElementById('email-error');
+            const emailVal = emailInput ? emailInput.value.trim() : '';
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailVal || !emailRegex.test(emailVal)) {
+                emailError.style.display = 'block';
+                emailInput.focus();
+                emailInput.style.borderColor = '#ef4444';
+                alert('⚠️ El correo electrónico es obligatorio. Por favor ingrese un correo válido antes de enviar.');
+                return;
+            } else {
+                emailError.style.display = 'none';
+                emailInput.style.borderColor = '';
+            }
+            // -----------------------------------------------------
+
             if(!confirm("¿Estás seguro de enviar este reporte de falla/mantenimiento al sistema?")) {
                 return; 
             }
@@ -300,7 +321,6 @@
             btn.disabled = true;
 
             const formData = new FormData(document.getElementById('form-reporte-externo'));
-            if(!formData.get('email')) formData.set('email', 'No proporcionado');
             
             document.getElementById('loader-reporte').style.display = 'flex';
 
