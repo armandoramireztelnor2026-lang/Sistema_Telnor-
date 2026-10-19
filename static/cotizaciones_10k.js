@@ -40,7 +40,7 @@ async function cargarCotizaciones10k() {
                 const p = parseFloat(f.precio_estimado || f.precio || 0);
                 let ap10k = f.aprobado_admin_10k !== undefined ? f.aprobado_admin_10k : false;
                 let supAsignado = f.aprobado_admin === true;
-                let cancelado = f.estado === 'Cancelado_Cotizacion_Cara' || f.estado === 'Archivado';
+                let cancelado = f.estado === 'Cancelado_Cotizacion_Cara' || f.estado === 'Archivado' || f.estado === 'Rechazado_Con_Recomendaciones';
                 return p >= 10001 && ap10k === false && supAsignado && !cancelado;
             });
 
@@ -86,9 +86,8 @@ async function cargarCotizaciones10k() {
                     btnAprobar = `<button style="${btnStyle} background:#10b981 !important;" ${hoverStr} onclick="accion10k('${f.id}', 'aprobar', false)">✔️ Aprobar a Corporativos</button>`;
                 }
 
-                let btnRechazar = `<button style="${btnStyle} background:#ef4444 !important;" ${hoverStr} onclick="abrirModalRechazo10kDinamico('${f.id}')">✖ Rechazar (Sugerir Precios)</button>`;
                 let btnCaras = `<button style="${btnStyle} background:#b91c1c !important;" ${hoverStr} onclick="abrirCancelacion10k('${f.id}')">Cancelar Ticket (Cara)</button>`;
-                let acciones = `<div style="display:flex; flex-direction:column;">${btnVerDetalles}${btnAprobar}${btnRechazar}${btnCaras}</div>`;
+                let acciones = `<div style="display:flex; flex-direction:column;">${btnVerDetalles}${btnAprobar}${btnCaras}</div>`;
 
                 let idRepForTable = typeof obtenerIdReporte === 'function' ? obtenerIdReporte(f) : (f.id || 'S/T');
                 let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
@@ -105,16 +104,124 @@ async function cargarCotizaciones10k() {
 
 function accion10k(id, accion, esSuplencia = false) {
     if (accion === 'aprobar') {
-        let msgConfirm = esSuplencia
-            ? "⚠️ ¿Deseas ASUMIR EL PROCESO (Autorizar por Ausencia) para aprobar esta cotización en suplencia del Administrador?\n\nLa cotización pasará formalmente a Corporativos."
-            : "¿Seguro que deseas APROBAR esta cotización? Pasará a Corporativos.";
-        if (!confirm(msgConfirm)) return;
-        if (typeof mostrarLoaderDinamico === 'function') mostrarLoaderDinamico("Procesando...", "Enviando a Corporativos...");
-        enviarDecision10k(id, accion, "");
+        abrirModalAprobar10k(id, esSuplencia);
     }
 }
 
+function abrirModalAprobar10k(id, esSuplencia = false) {
+    const f = facturas10kGlobal.find(x => String(x.id) === String(id));
+    if (!f) return;
+
+    let cots = f.cotizaciones && f.cotizaciones.length > 0 ? f.cotizaciones : [{ precio: f.precio, titulo: f.titulo }];
+    const fmt = (val) => parseFloat(val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    let html = `
+        <div style="font-size:13px; color:#94a3b8; margin-bottom:15px; border-bottom:1px solid #1f395a; padding-bottom:10px;">
+            Unidad: <strong style="color:#0ea5e9;">${f.unidad || 'S/N'}</strong> &nbsp;|&nbsp; 
+            Proveedor: <strong style="color:#e2e8f0;">${f.proveedor || 'N/A'}</strong>
+        </div>
+    `;
+
+    if (cots.length === 1) {
+        let c = cots[0];
+        let precio = fmt(c.precio !== undefined ? c.precio : f.precio);
+        let titulo = c.titulo || f.titulo || 'General';
+        html += `
+            <div style="background:#112641; border:1px solid #1f395a; border-radius:8px; padding:15px; margin-bottom:20px;">
+                <div style="color:#94a3b8; font-size:13px; margin-bottom:8px;">Cotización: <strong style="color:#e2e8f0;">${titulo}</strong></div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#cbd5e1; font-weight:bold; font-size:14px;">Precio Cotizado (Sin IVA):</span>
+                    <span style="color:#10b981; font-weight:bold; font-size:18px;">$${precio} MXN</span>
+                </div>
+            </div>
+        `;
+    } else {
+        let total = 0;
+        let cotsHtml = cots.map((c, idx) => {
+            let pNum = parseFloat(c.precio || 0);
+            total += pNum;
+            let precio = fmt(pNum);
+            let titulo = c.titulo || `Cotización ${idx + 1}`;
+            return `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed #1f395a;">
+                    <span style="color:#cbd5e1; font-size:13px;">Cotización ${idx + 1}: <strong style="color:#e2e8f0;">${titulo}</strong></span>
+                    <span style="color:#f59e0b; font-weight:bold; font-size:14px;">$${precio} MXN</span>
+                </div>
+            `;
+        }).join('');
+
+        html += `
+            <div style="background:#112641; border:1px solid #1f395a; border-radius:8px; padding:15px; margin-bottom:20px;">
+                <div style="color:#94a3b8; font-size:13px; margin-bottom:8px; font-weight:bold; border-bottom:1px solid #1f395a; padding-bottom:5px;">Desglose de Cotizaciones:</div>
+                ${cotsHtml}
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:8px; border-top:1px solid #334155;">
+                    <span style="color:#e2e8f0; font-weight:bold; font-size:15px;">Precio Total:</span>
+                    <span style="color:#10b981; font-weight:bold; font-size:19px;">$${fmt(total || f.precio)} MXN</span>
+                </div>
+            </div>
+        `;
+    }
+
+    let textoBoton = esSuplencia ? '🛡️ Asumir Proceso y Aprobar a Corp' : '✔️ Aprobar a Corporativos';
+
+    html += `
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-danger" style="flex:1; padding:12px; font-size:13px; font-weight:bold; background:#ef4444 !important; color:white; border:none; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="rechazarDesdeModalAprobar10k('${f.id}')">
+                ✖ Rechazar y Sugerir Precios
+            </button>
+            <button class="btn-success" style="flex:1; padding:12px; font-size:13px; font-weight:bold; background:#10b981 !important; color:white; border:none; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="confirmarAprobacion10k('${f.id}', ${esSuplencia})">
+                ${textoBoton}
+            </button>
+        </div>
+    `;
+
+    let modal = document.getElementById('modal-aprobar-10k');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-aprobar-10k';
+        modal.className = 'modal-overlay';
+        modal.style.zIndex = '9999999';
+        modal.innerHTML = `
+            <div class="modal-box" style="max-width: 480px; background: #0b1c30; border: 1px solid #1f395a; border-radius: 12px; padding: 25px;">
+                <button class="btn-close-modal" onclick="cerrarModalAprobar10k()">×</button>
+                <h3 class="modal-header" style="color: #10b981; margin-top: 0; margin-bottom: 15px; font-size: 1.25em;">Aprobar a Corporativos</h3>
+                <div id="contenido-aprobar-10k-dinamico"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    document.getElementById('contenido-aprobar-10k-dinamico').innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+function cerrarModalAprobar10k() {
+    let modal = document.getElementById('modal-aprobar-10k');
+    if (modal) modal.style.display = 'none';
+}
+
+function rechazarDesdeModalAprobar10k(id) {
+    cerrarModalAprobar10k();
+    abrirModalRechazo10kDinamico(id);
+}
+
+function confirmarAprobacion10k(id, esSuplencia = false) {
+    let msgConfirm = esSuplencia
+        ? "⚠️ ¿Deseas ASUMIR EL PROCESO (Autorizar por Ausencia) para aprobar esta cotización en suplencia del Administrador?\n\nLa cotización pasará formalmente a Corporativos."
+        : "¿Seguro que deseas APROBAR esta cotización? Pasará a Corporativos.";
+    
+    if (!confirm(msgConfirm)) return;
+
+    cerrarModalAprobar10k();
+
+    if (typeof mostrarLoaderDinamico === 'function') {
+        mostrarLoaderDinamico("Procesando...", "Enviando a Corporativos...");
+    }
+    enviarDecision10k(id, 'aprobar', "");
+}
+
 function abrirModalRechazo10kDinamico(id) {
+    cerrarModalAprobar10k();
     const f = facturas10kGlobal.find(x => String(x.id) === String(id));
     if (!f) return;
 
@@ -152,7 +259,14 @@ function enviarRechazo10k() {
         }
     });
 
-    if (typeof mostrarLoaderDinamico === 'function') mostrarLoaderDinamico("Procesando...", "Notificando al Supervisor...");
+    if (!confirm("¿Estás seguro de que deseas rechazar esta cotización y enviar los nuevos precios recomendados al taller?")) {
+        return;
+    }
+
+    const modalRechazo = document.getElementById('modal-rechazar-10k');
+    if (modalRechazo) modalRechazo.style.display = 'none';
+
+    if (typeof mostrarLoaderDinamico === 'function') mostrarLoaderDinamico("Procesando...", "Notificando al Supervisor y Taller...");
     enviarDecision10k(id, 'rechazar', motivo, preciosRec);
 }
 

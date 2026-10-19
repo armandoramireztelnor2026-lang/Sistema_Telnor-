@@ -136,7 +136,8 @@ async function cargarFacturas() {
         if (tbodyArchivoCorp) tbodyArchivoCorp.innerHTML = '';
 
         if (facturasGlobal.length === 0) {
-            if (tbody) tbody.innerHTML = `<tr><td colspan="${rolUsuario === 'administracion' ? '8' : '7'}" style="text-align:center;">No hay cotizaciones registradas</td></tr>`;
+            let colSpanCot = rolUsuario === 'corporativos' ? '9' : (rolUsuario === 'administracion' ? '8' : '7');
+            if (tbody) tbody.innerHTML = `<tr><td colspan="${colSpanCot}" style="text-align:center;">No hay cotizaciones registradas</td></tr>`;
             if (tbodyFinales) tbodyFinales.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay facturas registradas</td></tr>`;
         }
         else {
@@ -229,16 +230,37 @@ async function cargarFacturas() {
                     }
 
                     if (tbodyArchivoCorp && rolUsuario === 'corporativos') {
-                        let idRepArchCorp = obtenerIdReporte(f) || 'S/T';
-                        let badgeCarasArchCorp = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-                        let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                        tbodyArchivoCorp.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idRepArchCorp}</span>${badgeCarasArchCorp}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
-                        countArchivoCorp++;
+                        let esMas10kArch = precioParaAp >= 10001;
+                        if (!esMas10kArch && f.cotizaciones && f.cotizaciones.length > 0) {
+                            esMas10kArch = f.cotizaciones.some(c => parseFloat(c.precio || 0) >= 10001);
+                        }
+                        if (esMas10kArch) {
+                            let idRepArchCorp = obtenerIdReporte(f) || 'S/T';
+                            let badgeCarasArchCorp = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                            let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
+                            tbodyArchivoCorp.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idRepArchCorp}</span>${badgeCarasArchCorp}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
+                            countArchivoCorp++;
+                        }
                     }
                     return; // Skip rendering in active trays
                 }
 
-
+                // ==========================================
+                // REGLA PARA CORPORATIVOS:
+                // En cotizaciones +$10,000, Corporativos es el ÚLTIMO en aprobar.
+                // NO debe salir el ticket en la bandeja activa de Corporativos hasta que llegue
+                // formalmente su turno de aprobar (debe estar aprobado por Supervisión Y por Administración).
+                // ==========================================
+                if (rolUsuario === 'corporativos') {
+                    let esMas10k = precioParaAp >= 10001;
+                    if (!esMas10k && f.cotizaciones && f.cotizaciones.length > 0) {
+                        esMas10k = f.cotizaciones.some(c => parseFloat(c.precio || 0) >= 10001);
+                    }
+                    let turnoCorp = esMas10k && (f.aprobado_admin === true) && (f.aprobado_admin_10k === true);
+                    if (!turnoCorp || f.estado === 'Rechazado_Con_Recomendaciones') {
+                        return; // Ocultar ticket hasta que le toque el turno formal de aprobar a Corporativos
+                    }
+                }
 
                 let badgeColor, textoEstado;
 
@@ -362,7 +384,8 @@ async function cargarFacturas() {
                     if (f.estado === 'Rechazado_Con_Recomendaciones') {
                         btnAccion += `<button disabled class="btn-info" style="background:#475569; color:#94a3b8; border:none; width:100%; margin:0; cursor:not-allowed;">⛔ Esperando Corrección del Taller</button>`;
                     } else if (!apCorp) {
-                        btnAccion += `<button class="btn-success" onclick="abrirRevisionCorp('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; transition:all 0.3s;">✅ Aprobar</button>`;
+                        btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="width:100%; padding:8px 10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color:white; font-size:0.85em; transition:all 0.3s;">📄 Ver Detalles</button>`;
+                        btnAccion += `<button class="btn-success" onclick="abrirModalAprobarCorp('${f.id}')" style="width:100%; padding:8px 10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; font-size:0.85em; transition:all 0.3s;">✔️ Aprobar Cotización</button>`;
                     } else {
                         btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="width:100%; padding:10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color:white; transition:all 0.3s;">📄 Ver Detalles</button>`;
                     }
@@ -593,7 +616,8 @@ async function cargarFacturas() {
             });
 
 
-            if (tbody && countCotizaciones === 0) tbody.innerHTML = `<tr><td colspan="${rolUsuario === 'administracion' ? '8' : '7'}" style="text-align:center;">No hay cotizaciones registradas</td></tr>`;
+            let colSpanCot = rolUsuario === 'corporativos' ? '9' : (rolUsuario === 'administracion' ? '8' : '7');
+            if (tbody && countCotizaciones === 0) tbody.innerHTML = `<tr><td colspan="${colSpanCot}" style="text-align:center;">No hay cotizaciones registradas</td></tr>`;
             if (tbodyFinales && countFacturas === 0) tbodyFinales.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay facturas registradas</td></tr>`;
             if (tbodyDocContables && countDocContables === 0) tbodyDocContables.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay documentos contables pendientes</td></tr>`;
             if (tbodyArchivo && countArchivo === 0) tbodyArchivo.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay registros archivados</td></tr>`;
@@ -1272,7 +1296,8 @@ function generarHtmlDetalles(f, modo, precioBonito) {
             if (fLower.endsWith('.mp4') || fLower.endsWith('.mov') || fLower.endsWith('.webm') || fLower.endsWith('.avi')) {
                 return `<div style="height:70px; width:70px; border-radius:5px; border:2px solid #0284c7; background:#1b4332; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')" title="Ver Video"><div style="font-size:24px;">🎥</div><div style="font-size:9px; color:#fff;">Ver</div></div>`;
             } else {
-                return `<img src="/static/facturas_archivos/${foto}" style="height:70px; border-radius:5px; border:2px solid #eab308; cursor:zoom-in; flex-shrink:0;" onclick="abrirLightbox('/static/facturas_archivos/${foto}')">`;
+                let srcFoto = foto.startsWith('/') ? foto : (foto.startsWith('static/') ? `/${foto}` : `/static/facturas_archivos/${foto}`);
+                return `<img src="${srcFoto}" alt="Evidencia" style="height:70px; border-radius:5px; border:2px solid #eab308; cursor:zoom-in; flex-shrink:0; object-fit:cover;" onclick="abrirLightbox('${srcFoto}')" onerror="this.onerror=null; this.style.display='none'; this.insertAdjacentHTML('afterend', '<div style=\\'height:70px; padding:5px 8px; border:1px dashed #ef4444; border-radius:5px; color:#ef4444; font-size:11px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; flex-shrink:0;\\'><span>⚠️</span><span>No disponible</span></div>');">`;
             }
         }).join('')}
                     ${!(c.fotos_evidencia && c.fotos_evidencia.length > 0) ? '<span style="color:#9ca3af; font-style:italic;">Sin evidencias adjuntas.</span>' : ''}
@@ -1629,6 +1654,120 @@ function notificarCorp10k(idFactura) {
 
 function abrirRevisionCorp(idFactura) { let f = facturasGlobal.find(x => String(x.id) === String(idFactura)); if (!f && typeof datosArchivados !== 'undefined') f = datosArchivados.find(x => String(x.id) === String(idFactura)); if (!f) return; document.getElementById('rev-id-corp').value = f.id; document.getElementById('revision-contenido-corp').innerHTML = generarHtmlDetalles(f, 'lectura', formatearMoneda(f.precio)); document.getElementById('modal-revision-corp').style.display = 'flex'; }
 
+function abrirModalAprobarCorp(idFactura) {
+    let f = facturasGlobal.find(x => String(x.id) === String(idFactura));
+    if (!f && typeof datosArchivados !== 'undefined') f = datosArchivados.find(x => String(x.id) === String(idFactura));
+    if (!f) return;
+
+    let cots = f.cotizaciones && f.cotizaciones.length > 0 ? f.cotizaciones : [{ precio: f.precio, titulo: f.titulo }];
+
+    let html = `
+        <div style="font-size:13px; color:#94a3b8; margin-bottom:15px; border-bottom:1px solid #1f395a; padding-bottom:10px;">
+            Unidad: <strong style="color:#0ea5e9;">${f.unidad || 'S/N'}</strong> &nbsp;|&nbsp; 
+            Proveedor: <strong style="color:#e2e8f0;">${f.proveedor || 'N/A'}</strong>
+        </div>
+    `;
+
+    if (cots.length === 1) {
+        let c = cots[0];
+        let precio = formatearMoneda(c.precio !== undefined ? c.precio : f.precio);
+        let titulo = c.titulo || f.titulo || 'General';
+        html += `
+            <div style="background:#112641; border:1px solid #1f395a; border-radius:8px; padding:15px; margin-bottom:20px;">
+                <div style="color:#94a3b8; font-size:13px; margin-bottom:8px;">Cotización: <strong style="color:#e2e8f0;">${titulo}</strong></div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:#cbd5e1; font-weight:bold; font-size:14px;">Precio Cotizado (Sin IVA):</span>
+                    <span style="color:#10b981; font-weight:bold; font-size:18px;">$${precio} MXN</span>
+                </div>
+            </div>
+        `;
+    } else {
+        let total = 0;
+        let cotsHtml = cots.map((c, idx) => {
+            let pNum = parseFloat(c.precio || 0);
+            total += pNum;
+            let precio = formatearMoneda(pNum);
+            let titulo = c.titulo || `Cotización ${idx + 1}`;
+            return `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed #1f395a;">
+                    <span style="color:#cbd5e1; font-size:13px;">Cotización ${idx + 1}: <strong style="color:#e2e8f0;">${titulo}</strong></span>
+                    <span style="color:#f59e0b; font-weight:bold; font-size:14px;">$${precio} MXN</span>
+                </div>
+            `;
+        }).join('');
+
+        html += `
+            <div style="background:#112641; border:1px solid #1f395a; border-radius:8px; padding:15px; margin-bottom:20px;">
+                <div style="color:#94a3b8; font-size:13px; margin-bottom:8px; font-weight:bold; border-bottom:1px solid #1f395a; padding-bottom:5px;">Desglose de Cotizaciones:</div>
+                ${cotsHtml}
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:8px; border-top:1px solid #334155;">
+                    <span style="color:#e2e8f0; font-weight:bold; font-size:15px;">Precio Total:</span>
+                    <span style="color:#10b981; font-weight:bold; font-size:19px;">$${formatearMoneda(total || f.precio)} MXN</span>
+                </div>
+            </div>
+        `;
+    }
+
+    html += `
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-danger" style="flex:1; padding:12px; font-size:13px; font-weight:bold; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer;" onclick="abrirModalRechazoCorp('${f.id}')">
+                ✖ Rechazar y Sugerir Precios
+            </button>
+            <button class="btn-success" style="flex:1; padding:12px; font-size:13px; font-weight:bold; background:#10b981; color:white; border:none; border-radius:6px; cursor:pointer;" onclick="confirmarAprobacionCorpDirecto('${f.id}')">
+                ✔️ Aprobar Cotización
+            </button>
+        </div>
+    `;
+
+    let modal = document.getElementById('modal-aprobar-corp-mini');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-aprobar-corp-mini';
+        modal.className = 'modal-overlay';
+        modal.style.zIndex = '9999999';
+        modal.innerHTML = `
+            <div class="modal-box" style="max-width: 480px; background: #0b1c30; border: 1px solid #1f395a; border-radius: 12px; padding: 25px;">
+                <button class="btn-close-modal" onclick="cerrarModalAprobarCorpMini()">×</button>
+                <h3 class="modal-header" style="color: #10b981; margin-top: 0; margin-bottom: 15px; font-size: 1.25em;">Aprobación Financiera</h3>
+                <div id="contenido-aprobar-corp-dinamico"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    document.getElementById('contenido-aprobar-corp-dinamico').innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+function cerrarModalAprobarCorpMini() {
+    let modal = document.getElementById('modal-aprobar-corp-mini');
+    if (modal) modal.style.display = 'none';
+}
+
+function confirmarAprobacionCorpDirecto(idFactura) {
+    if (!confirm("¿Seguro que deseas APROBAR financieramente esta cotización?")) return;
+
+    cerrarModalAprobarCorpMini();
+
+    mostrarLoaderDinamico("Aprobando factura mayor...", "Generando código oficial 📧");
+
+    fetch('/api/facturas/confirmar_corp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: idFactura })
+    }).then(res => res.json()).then(data => {
+        ocultarLoaderDinamico();
+        alert(data.message);
+        let m1 = document.getElementById('modal-revision-corp');
+        if (m1) m1.style.display = 'none';
+        cargarFacturas();
+    }).catch(err => {
+        ocultarLoaderDinamico();
+        console.error(err);
+        alert("Error de conexión al aprobar la cotización.");
+    });
+}
+
 function confirmarFacturaCorp() {
     let id_fac = document.getElementById('rev-id-corp').value;
     if (!confirm(`¿¿Aprobar financieramente esta factura mayor?`)) return;
@@ -1651,16 +1790,25 @@ function confirmarFacturaCorp() {
 }
 
 function abrirModalRechazoCorp(inputId) {
-    let id_fac = document.getElementById(inputId).value;
+    let id_fac = inputId;
+    let inputEl = document.getElementById(inputId);
+    if (inputEl && inputEl.value) {
+        id_fac = inputEl.value;
+    }
     const f = facturasGlobal.find(x => String(x.id) === String(id_fac));
     if (!f) return;
 
-    document.getElementById('modal-revision-corp').style.display = 'none';
+    let m1 = document.getElementById('modal-revision-corp');
+    if (m1) m1.style.display = 'none';
+    let mMini = document.getElementById('modal-aprobar-corp-mini');
+    if (mMini) mMini.style.display = 'none';
+
     document.getElementById('rechazo-corp-id').value = f.id;
 
     let html = `<div style="color: #94a3b8; margin-bottom:15px; font-size:14px;">Ingresa el precio recomendado para cada cotización (opcional) y el motivo general del rechazo.</div>`;
 
-    f.cotizaciones.forEach((c, idx) => {
+    let cots = f.cotizaciones && f.cotizaciones.length > 0 ? f.cotizaciones : [{ precio: f.precio, titulo: f.titulo }];
+    cots.forEach((c, idx) => {
         let precioActual = formatearMoneda(c.precio);
         let titulo = c.titulo || 'Sin Título';
         html += `
@@ -1697,7 +1845,10 @@ function enviarRechazoCorp() {
         });
     });
 
-    if (!confirm("¿Estás seguro de rechazar el gasto y enviar las recomendaciones? El ticket será eliminado de tu bandeja.")) return;
+    if (!confirm("¿Estás seguro de que deseas rechazar esta cotización y enviar las recomendaciones de precio al taller para su corrección?")) return;
+
+    const modalCorp = document.getElementById('modal-rechazo-corp-dinamico');
+    if (modalCorp) modalCorp.style.display = 'none';
 
     mostrarLoaderDinamico("Procesando rechazo...", "Enviando notificaciones 📧");
 
@@ -1716,6 +1867,7 @@ function enviarRechazoCorp() {
         cargarFacturas();
     }).catch(err => {
         ocultarLoaderDinamico();
+        if (modalCorp) modalCorp.style.display = 'flex';
         console.error(err);
     });
 }
@@ -2778,7 +2930,7 @@ function enviarRechazoSuper() {
         });
     });
 
-    if (!confirm("¿Estás 100% seguro de rechazar la cotización y enviar las recomendaciones? \n\nEl registro actual se ELIMINARÁ y se enviará un correo al taller para que suba uno nuevo.")) return;
+    if (!confirm("¿Estás seguro de que deseas rechazar esta cotización y enviar las recomendaciones de precio al taller para su corrección?")) return;
 
     // Ocultar el modal de inmediato para que no se sigan viendo los inputs
     document.getElementById('modal-rechazo-super').style.display = 'none';

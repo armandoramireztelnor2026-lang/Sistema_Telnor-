@@ -11,20 +11,44 @@ function validarLetras(input) { input.value = input.value.replace(/[^a-zA-Z\sÃ±Ã
 function validarDecimales(input) { input.value = input.value.replace(/[^0-9.]/g, ''); if ((input.value.match(/\./g) || []).length > 1) { input.value = input.value.substring(0, input.value.lastIndexOf('.')); } }
 
 function abrirLightbox(src) { 
+    if (!src) return;
     let fLower = src.toLowerCase();
     let esVideo = fLower.endsWith('.mp4') || fLower.endsWith('.mov') || fLower.endsWith('.webm') || fLower.endsWith('.avi');
     let img = document.getElementById('lightbox-img');
     let vid = document.getElementById('lightbox-vid');
+    let modal = document.getElementById('lightbox-modal');
+    if (modal) {
+        modal.style.zIndex = '20000000';
+    }
     if (esVideo) {
         if (img) img.style.display = 'none';
         if (vid) { vid.style.display = 'block'; vid.src = src; }
     } else {
         if (vid) { vid.style.display = 'none'; vid.src = ''; }
-        if (img) { img.style.display = 'block'; img.src = src; }
+        if (img) { 
+            img.style.display = 'block'; 
+            img.onerror = null;
+            img.src = src; 
+        }
     }
-    document.getElementById('lightbox-modal').style.display = 'flex'; 
+    if (modal) modal.style.display = 'flex'; 
 }
-function cerrarLightbox(event) { if(event.target.id === 'lightbox-modal' || event.target.className === 'lightbox-close') { document.getElementById('lightbox-modal').style.display = 'none'; let img = document.getElementById('lightbox-img'); if (img) img.src = ''; let vid = document.getElementById('lightbox-vid'); if (vid) { vid.pause(); vid.src = ''; } } }
+function cerrarLightbox(event) { 
+    if(event.target.id === 'lightbox-modal' || event.target.className === 'lightbox-close') { 
+        let modal = document.getElementById('lightbox-modal');
+        if (modal) modal.style.display = 'none'; 
+        let img = document.getElementById('lightbox-img'); 
+        if (img) {
+            img.onerror = null;
+            img.src = ''; 
+        }
+        let vid = document.getElementById('lightbox-vid'); 
+        if (vid) { 
+            vid.pause(); 
+            vid.src = ''; 
+        } 
+    } 
+}
 
 function mostrarLoaderDinamico(textoPrincipal, textoSecundario) {
     let loader = document.getElementById('loader-confirmacion');
@@ -42,6 +66,7 @@ function mostrarLoaderDinamico(textoPrincipal, textoSecundario) {
     }
     document.getElementById('loader-txt-main').innerText = textoPrincipal;
     document.getElementById('loader-txt-sub').innerText = textoSecundario;
+    loader.style.zIndex = '99999999';
     loader.style.display = 'flex';
 }
 

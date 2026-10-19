@@ -104,9 +104,9 @@
                 }
             ],
             "reactivado_desde_caras": false,
-            "comentarios": "Este fue otra prueba para la presentacion con perusquia",
-            "autor_comentario": "Jose Alejandro  Pe\u00f1u\u00f1uri",
-            "eliminado_por": "",
+            "comentarios": "",
+            "autor_comentario": "Samuel Giron",
+            "eliminado_por": "Samuel Giron",
             "timestamp_aprobacion": "2026-10-08T13:43:48.008320",
             "numero_cotizacion_asignacion": "113",
             "liberado_admin": true,
@@ -208,9 +208,9 @@
             "mantenimiento": "Preventivo",
             "precio": 2123.0,
             "fecha": "2026-10-12",
-            "numero_orden": "",
+            "numero_orden": "111111",
             "compania": "Telnor",
-            "aprobado_admin": false,
+            "aprobado_admin": true,
             "aprobado_corp": true,
             "timestamp": "2026-10-12T11:04:11.067954",
             "estado_custom": "",
@@ -230,13 +230,19 @@
                     "fotos_evidencia": [
                         "evidencia_1791828251058_0_Credencial_1.jpeg"
                     ],
-                    "pdf_cotizacion": "1791828251058_0_Meta_2.3.1_Evaluacion_de_Conocimiento_del_Modulo_6_Servicios_de_informatica_en_la_nube.pdf"
+                    "pdf_cotizacion": "1791828251058_0_Meta_2.3.1_Evaluacion_de_Conocimiento_del_Modulo_6_Servicios_de_informatica_en_la_nube.pdf",
+                    "numero_orden": "111111",
+                    "numero_cotizacion_asignacion": "222222"
                 }
             ],
             "reactivado_desde_caras": false,
             "comentarios": "",
             "autor_comentario": "",
-            "eliminado_por": ""
+            "eliminado_por": "",
+            "timestamp_aprobacion": "2026-10-15T11:57:24.745829",
+            "numero_cotizacion_asignacion": "222222",
+            "supervisor_aprobador": "Samuel Giron",
+            "liberado_admin": false
         },
         {
             "id": "20261012155417",
@@ -298,6 +304,130 @@
             "validacion_fiscal": "Aprobada",
             "numero_doc50": "500000",
             "estado": "Archivado"
+        },
+        {
+            "id": "20261016113254",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1948",
+            "responsable": "Luis Ramirez",
+            "telefono": "6634041184",
+            "titulo": "Afinacion (+1 m\u00e1s)",
+            "retro": "[TICKET:REP-20261016112042]\r\nREPORTE ORIGINAL DEL CHOFER: Tuneup",
+            "diagnostico": "Afinacion",
+            "trabajo_realizar": "Afinacion",
+            "mantenimiento": "Preventivo",
+            "precio": 7500.0,
+            "fecha": "2026-10-16",
+            "numero_orden": "11111111",
+            "compania": "Telnor",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-10-16T11:32:54.750440",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "42304632",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 3000.0,
+                    "titulo": "Afinacion",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20261016112042]\r\nREPORTE ORIGINAL DEL CHOFER: Tuneup",
+                    "diagnostico": "Afinacion",
+                    "trabajo_realizar": "Afinacion",
+                    "fotos_evidencia": [
+                        "evidencia_1792175574593_0_proveedores.jpg",
+                        "evidencia_1792175574593_0_Jefatura.png",
+                        "evidencia_1792175574593_0_Administrador.png"
+                    ],
+                    "pdf_cotizacion": "1792175574593_0_Reporte_del_Sistema.pdf",
+                    "numero_orden": "11111111",
+                    "numero_cotizacion_asignacion": "2900000012",
+                    "factura_folio": "212311",
+                    "factura_pdf": "FACTURA_FINAL_20261016113254_0_2200607_RamirezCardenasLuisArmando_Actividad_2.5._Auditoria_de_TI_1.pdf",
+                    "numero_doc50": "509231231211"
+                },
+                {
+                    "id_cotizacion": "2",
+                    "precio": 4500.0,
+                    "titulo": "Cambio de balatas",
+                    "mantenimiento": "Correctivo",
+                    "retro": "Cambio",
+                    "diagnostico": "Cambio",
+                    "trabajo_realizar": "Cambio",
+                    "fotos_evidencia": [
+                        "evidencia_1792175574593_1_Supervisor.png"
+                    ],
+                    "pdf_cotizacion": "1792175574593_1_2200607_RamirezCardenasLuisArmando_Actividad_2.6.Auditoria_de_innovacion.pdf",
+                    "numero_orden": "22222222",
+                    "numero_cotizacion_asignacion": "290000000013",
+                    "factura_folio": "444444",
+                    "factura_pdf": "FACTURA_FINAL_20261016113254_1_2200607_RamirezCardenasLuisArmando_Actividad_2.5._Auditoria_de_TI_1.pdf",
+                    "numero_doc50": "509230293231"
+                }
+            ],
+            "reactivado_desde_caras": false,
+            "comentarios": "",
+            "autor_comentario": "",
+            "eliminado_por": "",
+            "timestamp_aprobacion": "2026-10-16T11:39:37.040798",
+            "numero_cotizacion_asignacion": "2900000012",
+            "supervisor_aprobador": "Samuel Giron",
+            "liberado_admin": true,
+            "fecha_cierre": "2026-10-16 12:01:06",
+            "factura_folio": "212311",
+            "factura_pdf": "FACTURA_FINAL_20261016113254_0_2200607_RamirezCardenasLuisArmando_Actividad_2.5._Auditoria_de_TI_1.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "509231231211",
+            "estado": "Archivado"
+        },
+        {
+            "id": "20261019105756",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1570",
+            "responsable": "Dilan Fernandez",
+            "telefono": "6634041184",
+            "titulo": "Cambio de balatas",
+            "retro": "[TICKET:REP-20261016112126]\r\nREPORTE ORIGINAL DEL CHOFER: Fuerte olor a gasolina",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Correctivo",
+            "precio": 10005.0,
+            "fecha": "2026-10-19",
+            "numero_orden": "2111",
+            "compania": "RUMN",
+            "timestamp": "2026-10-19T10:57:56.820351",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "",
+            "entregado": "No",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 10005.0,
+                    "titulo": "Cambio de balatas",
+                    "mantenimiento": "Correctivo",
+                    "retro": "[TICKET:REP-20261016112126]\r\nREPORTE ORIGINAL DEL CHOFER: Fuerte olor a gasolina",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1792432676804_0_Auditoria.drawio.png"
+                    ],
+                    "pdf_cotizacion": "pdf_cot_20261019105756_0_134038_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_3.pdf",
+                    "numero_orden": "2111",
+                    "numero_cotizacion_asignacion": "2900000121221"
+                }
+            ],
+            "reactivado_desde_caras": false,
+            "comentarios": "",
+            "autor_comentario": "",
+            "eliminado_por": "",
+            "estado": "pendiente",
+            "timestamp_aprobacion": "2026-10-19T13:37:42.291399",
+            "numero_cotizacion_asignacion": "2900000121221",
+            "supervisor_aprobador": "Samuel Giron"
         }
     ]
 }

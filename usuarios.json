@@ -18,24 +18,6 @@
             }
         },
         {
-            "usuario": "JoseAlejandro_Peñuñuri -RUMN-2026-admin",
-            "password": "AIw5Wipg",
-            "rol": "administracion",
-            "datos_perfil": {
-                "rol": "administracion",
-                "cope": "PE CALLE 10",
-                "apellido_paterno": "Peñuñuri ",
-                "apellido_materno": "Rivas",
-                "nombres": "Jose Alejandro ",
-                "ciudad": "Tijuana",
-                "num_empleado": "1111113",
-                "area": "Automotriz",
-                "correo": "armandoramireztelnor2026@gmail.com",
-                "subrol": "Jefatura",
-                "foto_ruta": "temp_20260929140529_Jefatura.png"
-            }
-        },
-        {
             "usuario": "Samuel_Giron-RUMN-2026-admin",
             "password": "ReApH6nL",
             "rol": "administracion",
@@ -241,6 +223,24 @@
                 "descripcion": "Taller",
                 "correo": "armandoramireztelnor2026@gmail.com",
                 "foto_ruta": "temp_20260930223024_proveedores.jpg"
+            }
+        },
+        {
+            "usuario": "EfrainHumberto_Perusquia -RUMN-2026-admin",
+            "password": "mTedEsZr",
+            "rol": "administracion",
+            "datos_perfil": {
+                "rol": "administracion",
+                "cope": "PE CALLE 10",
+                "apellido_paterno": "Perusquia ",
+                "apellido_materno": "Velasco",
+                "nombres": "Efrain Humberto",
+                "ciudad": "Tijuana",
+                "num_empleado": "2121211",
+                "area": "Automotriz",
+                "correo": "armandoramireztelnor2026@gmail.com",
+                "subrol": "Jefatura",
+                "foto_ruta": "temp_20261015113812_Jefatura.png"
             }
         }
     ]

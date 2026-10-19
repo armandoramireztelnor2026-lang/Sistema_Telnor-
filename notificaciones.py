@@ -717,8 +717,8 @@ def enviar_correo_factura_rechazada_corp(correo_destino, nombre_proveedor, unida
             ("🔧 Taller Emisor", nombre_proveedor)
         ],
         bloque_destacado=bloque_obs,
-        callout_texto="El ticket original ha sido cancelado en el sistema. Por favor ingrese de nuevo al Portal de Proveedores para crear una cotización ajustada a los precios sugeridos.",
-        callout_tipo="peligro",
+        callout_texto="El ticket se encuentra en estado de corrección. Ingrese al Portal de Proveedores, ubique el ticket y actualice los precios y documentos solicitados.",
+        callout_tipo="alerta",
         autor_proceso=autor
     )
     return disparar_correo(correo_destino, asunto, cuerpo_html)
@@ -772,8 +772,8 @@ def enviar_correo_factura_rechazada_admin(correo_destino, nombre_proveedor, unid
             ("🔧 Taller Emisor", nombre_proveedor)
         ],
         bloque_destacado=bloque_obs,
-        callout_texto="El registro previo ha sido descartado. Por favor ingrese al Portal de Proveedores para capturar una nueva cotización aplicando las recomendaciones descritas.",
-        callout_tipo="peligro",
+        callout_texto="El ticket se encuentra en estado de corrección. Ingrese al Portal de Proveedores, ubique el ticket y actualice los precios y documentos solicitados.",
+        callout_tipo="alerta",
         autor_proceso=autor
     )
     return disparar_correo(correo_destino, asunto, cuerpo_html)
@@ -831,6 +831,61 @@ def enviar_correo_factura_rechazada_super(correo_destino, nombre_proveedor, unid
         autor_proceso=autor
     )
     return disparar_correo(correo_destino, asunto, cuerpo_html)
+
+
+def enviar_correo_super_rechaza_supervisor(correo_supervisor, nombre_supervisor, ticket, unidad, proveedor, motivo, precios_recomendados):
+    if not correo_supervisor or correo_supervisor.strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    autor = formatear_nombre_rol(nombre_supervisor, "Supervisor")
+    asunto = f"❌ Rechazo Técnico Registrado - Se Solicitó Ajuste al Taller (Unidad 8090-{str(unidad).replace('8090-', '')})"
+    
+    precios_html = ""
+    if precios_recomendados and len(precios_recomendados) > 0:
+        lis = []
+        for p in precios_recomendados:
+            lis.append(f"<li>Cotización {int(p.get('idx', 0)) + 1}: <strong style='color: #f59e0b;'>${p.get('precio_recomendado', 'N/A')} MXN</strong></li>")
+        precios_html = (
+            f'<div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px 16px; margin: 12px 0;">'
+            f'<div style="color: #b45309; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">'
+            f'Precios Recomendados al Taller:'
+            f'</div>'
+            f'<ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #92400e;">'
+            f'{"".join(lis)}'
+            f'</ul>'
+            f'</div>'
+        )
+
+    bloque_obs = (
+        f'<div style="background-color: #fef2f2; border-left: 4px solid #dc2626; border-radius: 6px; padding: 13px 16px; margin: 15px 0;">'
+        f'<div style="color: #991b1b; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">'
+        f'Motivo del Rechazo:'
+        f'</div>'
+        f'<div style="color: #7f1d1d; font-size: 14px; font-style: italic;">'
+        f'"{motivo}"'
+        f'</div>'
+        f'</div>'
+        f'{precios_html}'
+    )
+
+    cuerpo_html = generar_plantilla_base(
+        titulo_header="Cotización Rechazada con Recomendaciones",
+        subtitulo_header="Acuse de rechazo y recomendaciones enviadas al taller",
+        categoria_badge="COTIZACIÓN RECHAZADA",
+        color_tema="rojo",
+        saludo=f"Hola <strong>{nombre_supervisor}</strong>,",
+        mensaje_intro=f"Se ha registrado el rechazo de la cotización para la unidad <strong>8090-{str(unidad).replace('8090-', '')}</strong> y se enviaron las recomendaciones de precio al taller mecánico <strong>{proveedor}</strong>:",
+        detalles_items=[
+            ("🎫 Ticket", f"<strong>{ticket}</strong>"),
+            ("🚚 Unidad", f"8090-{str(unidad).replace('8090-', '')}"),
+            ("🔧 Proveedor", proveedor)
+        ],
+        bloque_destacado=bloque_obs,
+        callout_texto="El ticket se encuentra ahora en espera de corrección. El taller mecánico ha sido notificado para que ajuste sus precios y suba la nueva cotización.",
+        callout_tipo="peligro",
+        autor_proceso=autor
+    )
+    return disparar_correo(correo_supervisor, asunto, cuerpo_html)
 
 
 def enviar_correo_ticket_rechazado(correo_destino, nombre_empleado, ticket, unidad, motivo, nombre_admin=None):
