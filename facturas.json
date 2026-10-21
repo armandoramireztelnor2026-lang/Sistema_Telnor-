@@ -429,7 +429,9 @@
                     ],
                     "pdf_cotizacion": "1792521878892_0_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_3.pdf",
                     "numero_orden": "2400012",
-                    "numero_cotizacion_asignacion": "101221212"
+                    "numero_cotizacion_asignacion": "101221212",
+                    "factura_folio": "3334343",
+                    "factura_pdf": "FACTURA_FINAL_20261020114438_0_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_1.pdf"
                 },
                 {
                     "id_cotizacion": "2",
@@ -444,7 +446,9 @@
                     ],
                     "pdf_cotizacion": "1792521878892_1_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_3.pdf",
                     "numero_orden": "290010121",
-                    "numero_cotizacion_asignacion": "001928812"
+                    "numero_cotizacion_asignacion": "001928812",
+                    "factura_folio": "333222",
+                    "factura_pdf": "FACTURA_FINAL_20261020114438_1_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_2.pdf"
                 }
             ],
             "reactivado_desde_caras": false,
@@ -455,8 +459,76 @@
             "numero_cotizacion_asignacion": "101221212",
             "supervisor_aprobador": "Samuel Giron",
             "aprobado_admin_10k": true,
-            "liberado_admin": false,
-            "fecha_cierre": "2026-10-20 21:43:11"
+            "liberado_admin": true,
+            "fecha_cierre": "2026-10-20 21:43:11",
+            "factura_folio": "3334343",
+            "factura_pdf": "FACTURA_FINAL_20261020114438_0_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_1.pdf",
+            "validacion_fiscal": "Pendiente"
+        },
+        {
+            "id": "20261021120545",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1133",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "cambio de balatas",
+            "retro": "[TICKET:REP-20261020133339]\r\nAfinaci\u00f3n completa, cambio de aceite de motor y filtros, revisi\u00f3n de niveles y calibraci\u00f3n de frenos.",
+            "diagnostico": "n",
+            "trabajo_realizar": "n",
+            "mantenimiento": "Preventivo",
+            "precio": 10001.0,
+            "fecha": "2026-10-21",
+            "numero_orden": "1212122222",
+            "compania": "RUMN",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-10-21T12:05:45.716253",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "36637950",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 10001.0,
+                    "titulo": "cambio de balatas",
+                    "mantenimiento": "Preventivo",
+                    "retro": "[TICKET:REP-20261020133339]\r\nAfinaci\u00f3n completa, cambio de aceite de motor y filtros, revisi\u00f3n de niveles y calibraci\u00f3n de frenos.",
+                    "diagnostico": "n",
+                    "trabajo_realizar": "n",
+                    "fotos_evidencia": [
+                        "evidencia_1792609545702_0_Auditoria.drawio.png"
+                    ],
+                    "pdf_cotizacion": "1792609545702_0_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_2.pdf",
+                    "numero_orden": "1212122222",
+                    "numero_cotizacion_asignacion": "29000000212",
+                    "factura_folio": "82721",
+                    "factura_pdf": "FACTURA_FINAL_20261021120545_0_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando.pdf",
+                    "numero_doc50": "50000002233"
+                }
+            ],
+            "reactivado_desde_caras": false,
+            "comentarios": "",
+            "autor_comentario": "",
+            "eliminado_por": "",
+            "timestamp_aprobacion": "2026-10-21T12:43:27.681508",
+            "numero_cotizacion_asignacion": "29000000212",
+            "supervisor_aprobador": "Samuel Giron",
+            "aprobado_por_suplencia": true,
+            "suplente_10k": "Samuel Giron (Supervisor en Cobertura)",
+            "aprobado_admin_10k": true,
+            "liberado_admin": true,
+            "liberado_por_suplencia": true,
+            "liberado_por": "Supervisor en Cobertura: Samuel Giron",
+            "fecha_cierre": "2026-10-21 13:20:42",
+            "factura_folio": "82721",
+            "factura_pdf": "FACTURA_FINAL_20261021120545_0_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando.pdf",
+            "validacion_fiscal": "Aprobada",
+            "validado_fiscal_por_suplencia": true,
+            "validado_fiscal_por": "Administrador en Cobertura: Manuel Alejandro  Marquez",
+            "numero_doc50": "50000002233",
+            "estado": "Archivado"
         }
     ]
 }

@@ -336,7 +336,9 @@ input:focus {
     padding: 12px;
     border-radius: 8px;
     cursor: pointer;
+    font-family: 'Poppins', sans-serif;
     font-size: 1rem;
+    font-weight: 400;
     transition: all 0.3s;
     text-align: left;
     padding-left: 20px;
@@ -346,6 +348,38 @@ input:focus {
     background: #2d6a4f;
     border-color: #2d6a4f;
     color: white;
+}
+
+/* BOTONES DE COBERTURA EN MENU LATERAL (AMARILLO LIGERO) */
+.btn-sidebar-cobertura {
+    background: linear-gradient(135deg, #fef08a 0%, #fde047 100%) !important;
+    color: #0b1c30 !important;
+    border: 1px solid #facc15 !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    padding: 12px !important;
+    padding-left: 20px !important;
+    border-radius: 8px !important;
+    text-align: left !important;
+    box-shadow: 0 2px 6px rgba(253, 224, 71, 0.25) !important;
+    text-shadow: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-sidebar-cobertura:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #fef08a 100%) !important;
+    border-color: #fde047 !important;
+    box-shadow: 0 4px 12px rgba(253, 224, 71, 0.45) !important;
+    transform: translateY(-1px) !important;
+    color: #0b1c30 !important;
+}
+
+.btn-sidebar-cobertura.active {
+    background: linear-gradient(135deg, #facc15 0%, #eab308 100%) !important;
+    border-color: #ca8a04 !important;
+    color: #0b1c30 !important;
+    box-shadow: inset 4px 0 0 #0b1c30, 0 4px 12px rgba(250, 204, 21, 0.35) !important;
 }
 
 .btn-logout-container {
@@ -498,6 +532,7 @@ th {
     padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
+    font-size: 0.85em !important;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
     transition: all 0.25s ease;
@@ -520,6 +555,7 @@ th {
     padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
+    font-size: 0.85em !important;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
     transition: all 0.25s ease;
@@ -699,6 +735,70 @@ th {
 
 .btn-cancelar-modal:active {
     transform: translateY(0) !important;
+}
+
+.btn-actualizar-contable {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-size: 0.85em !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35) !important;
+    transition: all 0.25s ease !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    display: block !important;
+}
+
+.btn-actualizar-contable:hover {
+    background: linear-gradient(135deg, #34d399 0%, #047857 100%) !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.6) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-actualizar-contable:active {
+    transform: translateY(0) !important;
+}
+
+.btn-archivar-final {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-size: 0.85em !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35) !important;
+    transition: all 0.25s ease !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    display: block !important;
+}
+
+.btn-archivar-final:hover {
+    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%) !important;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.6) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-archivar-final:active {
+    transform: translateY(0) !important;
+}
+
+#tabla-archivo button,
+#tabla-archivo-prov button,
+#tabla-archivo-corp button,
+#tabla-archivo-cancelado button {
+    font-size: 0.85em !important;
+    padding: 8px 12px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
 }
 
 .acciones-td {

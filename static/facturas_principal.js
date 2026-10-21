@@ -120,6 +120,7 @@ async function cargarFacturas() {
         const tbody = document.getElementById('tabla-facturas');
         const tbodyFinales = document.getElementById('tabla-facturas-finales');
         const tbodyDocContables = document.getElementById('tabla-doc-contables');
+        const tbodyLiberarDoc = document.getElementById('tabla-liberar-doc');
         const tbodyArchivo = document.getElementById('tabla-archivo');
         const tbodyArchivoProv = document.getElementById('tabla-archivo-prov');
         const tbodyArchivoCorp = document.getElementById('tabla-archivo-corp');
@@ -129,6 +130,7 @@ async function cargarFacturas() {
         if (tbody) tbody.innerHTML = '';
         if (tbodyFinales) tbodyFinales.innerHTML = '';
         if (tbodyDocContables) tbodyDocContables.innerHTML = '';
+        if (tbodyLiberarDoc) tbodyLiberarDoc.innerHTML = '';
         if (tbodyArchivo) tbodyArchivo.innerHTML = '';
         let tbodyArchivoCancelado = document.getElementById('tabla-archivo-cancelado');
         if (tbodyArchivoCancelado) tbodyArchivoCancelado.innerHTML = '';
@@ -145,6 +147,7 @@ async function cargarFacturas() {
             let countCotizaciones = 0;
             let countFacturas = 0;
             let countDocContables = 0;
+            let countLiberarDoc = 0;
             let countArchivo = 0;
             let countArchivoProv = 0;
             let countArchivoCorp = 0;
@@ -208,13 +211,17 @@ async function cargarFacturas() {
 
                     if (f.estado === 'Archivado' && tbodyArchivo && rolUsuario === 'administracion') {
                         let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+                        let btnActualizarContable = subrolAct === 'Supervisor'
+                            ? `<button class="btn-actualizar-contable" style="display:block; width:100%; margin:0;" onclick="abrirActualizarDocContable('${f.id}')">Actualizar Num. Contable</button>`
+                            : '';
                         let btnArchivar = subrolAct === 'Supervisor'
-                            ? `<button class="btn-info" style="width:100%; background:#8b5cf6; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="archivarFinal('${f.id}')">Archivar</button>`
-                            : `<button class="btn-cobertura" style="font-size:0.8em; padding:8px 10px; margin:0; width:100%;" onclick="archivarFinal('${f.id}')">🛡️ Asumir Archivo (Cobertura)</button>`;
+                            ? `<button class="btn-archivar-final" style="display:block; width:100%; margin:0;" onclick="archivarFinal('${f.id}')">Archivar</button>`
+                            : '';
                         let btnVerExp = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
-                            <button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; color:white; margin:0; width:100%;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>
-                            <button class="btn-danger-sm" style="width:100%; background:#ef4444; border:none; color:white; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar</button>
+                            <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles del Ticket</button>
+                            ${btnActualizarContable}
                             ${btnArchivar}
+                            <button class="btn-danger-sm" style="display:block; width:100%; margin:0;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar</button>
                         </div>`;
                         let idReporteAsociado = obtenerIdReporte(f) || 'N/A';
                         let badgeCarasArch = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
@@ -225,7 +232,7 @@ async function cargarFacturas() {
                     if (tbodyArchivoProv && rolUsuario === 'proveedores' && f.proveedor === nombreProveedorActual) {
                         let idRepArchProv = obtenerIdReporte(f) || 'S/T';
                         let badgeCarasArchProv = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-                        let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
+                        let btnVerExp = `<button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
                         tbodyArchivoProv.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idRepArchProv}</span>${badgeCarasArchProv}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                         countArchivoProv++;
                     }
@@ -238,7 +245,7 @@ async function cargarFacturas() {
                         if (esMas10kArch) {
                             let idRepArchCorp = obtenerIdReporte(f) || 'S/T';
                             let badgeCarasArchCorp = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-                            let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
+                            let btnVerExp = `<button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
                             tbodyArchivoCorp.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idRepArchCorp}</span>${badgeCarasArchCorp}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                             countArchivoCorp++;
                         }
@@ -489,42 +496,17 @@ async function cargarFacturas() {
 
 
                 // ==========================================
-                // LÓGICA INDEPENDIENTE PARA DOC CONTABLES
+                // DOCUMENTOS CONTABLES (CAPTURA SAP DOC 50)
                 // ==========================================
                 let valFiscalX = f.validacion_fiscal || 'Pendiente';
 
                 if (tbodyDocContables && rolUsuario === 'administracion') {
-                    let showInDoc = false;
-
-                    // Mostrar si está esperando liberación del Administrador
-                    if (f.liberado_admin === false) {
-                        showInDoc = true;
-                    }
-                    // O si ya llegó al final (Factura aprobada) para que la Jefatura suba el Doc 50
-                    else if (valFiscalX === 'Aprobada' && subrolAct !== 'Administrador') {
-                        showInDoc = true;
-                    }
-
-                    if (showInDoc) {
+                    // En esta vista solo van tickets con factura aprobada y liberados para capturar Doc 50
+                    if (valFiscalX === 'Aprobada' && f.liberado_admin === true) {
                         let btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
-                            <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-
-                        if (subrolAct === 'Administrador') {
-                            if (f.liberado_admin === false) {
-                                btnDoc += `<button class="btn-liberar-ticket-admin" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirModalLiberarTicket('${f.id}')">✔️ Liberar Ticket</button>`;
-                                btnDoc += `<button class="btn-actualizar-orden" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="solicitarCorreccionOrden('${f.id}')">Corrección (Num. Pedido y Orden)</button>`;
-                            } else {
-                                btnDoc += `<button class="btn-esperando-factura" disabled style="display:block; width:100%; margin:0; margin-top:5px;" title="Este ticket ya fue liberado">✔️ Ticket Liberado</button>`;
-                            }
-                        } else {
-                            if (f.liberado_admin === false) {
-                                btnDoc += `<button class="btn-cobertura" style="display:block; width:100%; margin:0;" onclick="asumirLiberacionAdmin('${f.id}')">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
-                            } else {
-                                btnDoc += `<button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalDocContable('${f.id}')">Ingresar Número de Doc. Contable</button>`;
-                            }
-                        }
-
-                        btnDoc += `</div>`;
+                            <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>
+                            <button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalDocContable('${f.id}')">Ingresar Número de Doc. Contable</button>
+                        </div>`;
 
                         let ffStr = '';
                         if (f.cotizaciones && f.cotizaciones.length > 1) {
@@ -546,10 +528,47 @@ async function cargarFacturas() {
 
                         tbodyDocContables.innerHTML += `<tr><td><span style="color:#ffffff; font-weight:bold;">${idRepTable}</span>${badgeCarasDoc}</td><td><span style="color:#10b981; font-weight:bold;">${ffStr}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><span style="color:#a3b1c6;">${indStrLocal}</span></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
                         countDocContables++;
+                    }
+                }
+
+                // ==========================================
+                // LIBERAR DOCUMENTO CONTABLE (ADMIN / COBERTURA)
+                // ==========================================
+                if (tbodyLiberarDoc && rolUsuario === 'administracion') {
+                    // En esta vista solo van tickets pendientes de liberación
+                    if (f.liberado_admin === false) {
+                        let btnLiberar = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                            <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>
+                            <button class="btn-liberar-ticket-admin" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirModalLiberarTicket('${f.id}')">✔️ Liberar Ticket</button>`;
 
                         if (subrolAct === 'Administrador') {
-                            // Suplencia: Permitir que el Administrador continúe renderizando para bandejas de cobertura
+                            btnLiberar += `<button class="btn-actualizar-orden" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="solicitarCorreccionOrden('${f.id}')">Corrección (Num. Pedido y Orden)</button>`;
+                        } else {
+                            btnLiberar += `<button class="btn-actualizar-orden" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirActualizarOrdenes('${f.id}')">Actualizar Pedido/Orden</button>`;
                         }
+
+                        btnLiberar += `</div>`;
+
+                        let ffStrLib = '';
+                        if (f.cotizaciones && f.cotizaciones.length > 1) {
+                            ffStrLib = f.cotizaciones.map((c, i) => `Cotización ${i + 1}: ${c.factura_folio || 'Pendiente'}`).join('<br>');
+                        } else {
+                            ffStrLib = f.factura_folio || "Pendiente";
+                        }
+
+                        let indStrLocalLib = '';
+                        if (f.cotizaciones && f.cotizaciones.length > 1) {
+                            indStrLocalLib = f.cotizaciones.map((c, i) => `Cotización ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
+                        } else {
+                            indStrLocalLib = `$${parseFloat(f.precio || 0).toLocaleString('en-US')}`;
+                        }
+
+                        let idRepTableLib = obtenerIdReporte(f) || 'S/T';
+                        let badgeCarasDocLib = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                        let pFormatLib = f.precio ? parseFloat(f.precio).toLocaleString('en-US') : '0';
+
+                        tbodyLiberarDoc.innerHTML += `<tr><td><span style="color:#ffffff; font-weight:bold;">${idRepTableLib}</span>${badgeCarasDocLib}</td><td><span style="color:#10b981; font-weight:bold;">${ffStrLib}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><span style="color:#a3b1c6;">${indStrLocalLib}</span></td><td><strong>$${pFormatLib} MXN</strong></td><td>${btnLiberar}</td></tr>`;
+                        countLiberarDoc++;
                     }
                 }
                 // ==========================================
@@ -644,7 +663,12 @@ async function cargarFacturas() {
             let colSpanFac = rolUsuario === 'administracion' ? '12' : '10';
             if (tbody && countCotizaciones === 0) tbody.innerHTML = `<tr><td colspan="${colSpanCot}" style="text-align:center;">No hay cotizaciones registradas</td></tr>`;
             if (tbodyFinales && countFacturas === 0) tbodyFinales.innerHTML = `<tr><td colspan="${colSpanFac}" style="text-align:center;">No hay facturas registradas</td></tr>`;
-            if (tbodyDocContables && countDocContables === 0) tbodyDocContables.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay documentos contables pendientes</td></tr>`;
+            if (tbodyDocContables && countDocContables === 0) {
+                tbodyDocContables.innerHTML = `<tr><td colspan="9" style="text-align:center;">No hay documentos contables pendientes</td></tr>`;
+            }
+            if (tbodyLiberarDoc && countLiberarDoc === 0) {
+                tbodyLiberarDoc.innerHTML = `<tr><td colspan="9" style="text-align:center;">No hay tickets pendientes de liberación</td></tr>`;
+            }
             if (tbodyArchivo && countArchivo === 0) tbodyArchivo.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay registros archivados</td></tr>`;
             if (tbodyArchivoCorp && countArchivoCorp === 0) tbodyArchivoCorp.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay registros archivados</td></tr>`;
 
@@ -653,6 +677,7 @@ async function cargarFacturas() {
                 if (tbody) aplicarPaginacion('tabla-facturas', 20, true);
                 if (tbodyFinales) aplicarPaginacion('tabla-facturas-finales', 20, true);
                 if (tbodyDocContables) aplicarPaginacion('tabla-doc-contables', 20, true);
+                if (tbodyLiberarDoc) aplicarPaginacion('tabla-liberar-doc', 20, true);
                 if (tbodyArchivo) aplicarPaginacion('tabla-archivo', 20, true);
                 if (tbodyArchivoProv) aplicarPaginacion('tabla-archivo-prov', 20, true);
                 if (tbodyArchivoCorp) aplicarPaginacion('tabla-archivo-corp', 20, true);
@@ -3530,6 +3555,131 @@ function enviarRecordatorioCorp() {
         });
 }
 
+function abrirActualizarDocContable(idFactura) {
+    let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+    if (subrolAct !== 'Supervisor') {
+        alert("Solo el rol de Supervisor está autorizado para modificar el número de documento contable.");
+        return;
+    }
+
+    const f = (typeof facturasGlobal !== 'undefined')
+        ? facturasGlobal.find(x => String(x.id) === String(idFactura))
+        : null;
+
+    if (!f) {
+        alert("No se encontró la información del ticket.");
+        return;
+    }
+
+    let cots = (f.cotizaciones && f.cotizaciones.length > 0)
+        ? f.cotizaciones
+        : [{
+            titulo: f.titulo || 'Sin Título',
+            factura_folio: f.factura_folio || 'N/A',
+            numero_doc50: f.numero_doc50 || '',
+            precio: f.precio || 0
+        }];
+
+    let unidadLimpia = f.unidad ? `8090-${String(f.unidad).replace('8090-', '')}` : 'N/A';
+    let idReporteAsociado = (typeof obtenerIdReporte === 'function') ? (obtenerIdReporte(f) || f.id) : (f.id_reporte || f.id);
+
+    let html = `
+    <div id="modal-actualizar-doc-contable" onclick="if(event.target === this) cerrarModalActualizarDocContable()" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center; backdrop-filter:blur(6px);">
+        <div style="background:#0b1c30; padding:28px 32px; border-radius:12px; width:95%; max-width:680px; color:white; border:1px solid #1f395a; box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-height:85vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1f395a; padding-bottom:14px; margin-bottom:16px;">
+                <h3 style="color:#10b981; margin:0; font-size:1.3rem; display:flex; align-items:center; gap:8px;">
+                    <span>📑</span> Actualizar Número de Documento Contable
+                </h3>
+                <span style="background:#1e3a8a; color:#93c5fd; padding:4px 12px; border-radius:12px; font-size:0.85rem; font-weight:bold;">Ticket #${idReporteAsociado}</span>
+            </div>
+
+            <p style="color:#94a3b8; font-size:0.92rem; margin-top:0; margin-bottom:18px;">
+                Modifique el número de <strong>Documento Contable (Doc 50)</strong> para la unidad <strong>${unidadLimpia}</strong>:
+            </p>
+
+            <form id="form-actualizar-doc-contable">
+                <input type="hidden" name="id_factura" value="${f.id}">
+                <div style="display:flex; flex-direction:column; gap:14px;">
+    `;
+
+    cots.forEach((cot, idx) => {
+        let doc50Actual = cot.numero_doc50 || f.numero_doc50 || '';
+        let folioFiscal = cot.factura_folio || f.factura_folio || 'N/A';
+        let tituloCot = cot.titulo || `Cotización ${idx + 1}`;
+
+        html += `
+                <div style="background:#112240; padding:16px 20px; border-radius:8px; border:1px solid #1f395a;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:8px; margin-bottom:12px;">
+                        <div style="color:#fcd34d; font-weight:bold; font-size:0.95rem;">
+                            📌 ${cots.length > 1 ? `Cotización ${idx + 1}: ` : ''}${tituloCot}
+                        </div>
+                        <span style="color:#10b981; font-size:0.82rem; font-weight:bold;">Folio Fiscal: ${folioFiscal}</span>
+                    </div>
+
+                    <div>
+                        <label style="display:block; color:#94a3b8; font-size:0.8rem; font-weight:600; text-transform:uppercase; margin-bottom:6px;">
+                            Número de Documento Contable:
+                            <span style="color:#0ea5e9; font-weight:normal; text-transform:none; float:right;">Actual: <strong>${doc50Actual || 'Pendiente'}</strong></span>
+                        </label>
+                        <input type="text" name="numero_doc50[]" value="${doc50Actual && doc50Actual !== 'Pendiente' ? doc50Actual : ''}" placeholder="Ej. DC-908123" style="width:100%; padding:10px 14px; background:#0b1c30; border:1px solid #1f395a; border-radius:6px; color:white; font-size:0.95rem; box-sizing:border-box;">
+                    </div>
+                </div>
+        `;
+    });
+
+    html += `
+                </div>
+            </form>
+
+            <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid #1f395a;">
+                <button type="button" onclick="cerrarModalActualizarDocContable()" class="btn-cancelar-modal">Cancelar</button>
+                <button type="button" onclick="guardarActualizarDocContable()" class="btn-liberar-campo-contable">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>`;
+
+    let prev = document.getElementById('modal-actualizar-doc-contable');
+    if (prev) prev.remove();
+
+    let div = document.createElement('div');
+    div.innerHTML = html;
+    document.body.appendChild(div.firstElementChild);
+}
+
+function cerrarModalActualizarDocContable() {
+    let m = document.getElementById('modal-actualizar-doc-contable');
+    if (m) m.remove();
+}
+
+async function guardarActualizarDocContable() {
+    if (!confirm("¿Deseas guardar los cambios en el número de documento contable?")) return;
+
+    let form = document.getElementById('form-actualizar-doc-contable');
+    let formData = new FormData(form);
+
+    mostrarLoaderDinamico("Guardando cambios...", "Actualizando Documento Contable ⏳");
+
+    try {
+        let res = await fetch('/api/facturas/actualizar_doc50', {
+            method: 'POST',
+            body: formData
+        });
+        let data = await res.json();
+        ocultarLoaderDinamico();
+        alert(data.message);
+        if (data.status === 'success') {
+            cerrarModalActualizarDocContable();
+            if (typeof fetchFacturasGlobal === 'function') await fetchFacturasGlobal();
+            if (typeof renderTabla === 'function') renderTabla();
+            else if (typeof cargarFacturas === 'function') cargarFacturas();
+        }
+    } catch (err) {
+        ocultarLoaderDinamico();
+        console.error(err);
+        alert("Error al actualizar el documento contable.");
+    }
+}
+
 async function archivarFinal(id) {
     if (!confirm("¿Seguro que deseas mandar este ticket a Tickets Archivados? Ya no aparecerá en el Archivo General.")) return;
     try {
@@ -3976,6 +4126,15 @@ window.ejecutarRehacerCotizacion = async function() {
         if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
         console.error("Error al solicitar rehacer cotización:", err);
         alert("Ocurrió un error al procesar la solicitud.");
+    }
+};
+
+// Alias retrocompatible si se llama abrirDocContablesSupervisor
+window.abrirDocContablesSupervisor = function(modo) {
+    if (modo === 'liberar') {
+        if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('liberar-doc-contable');
+    } else {
+        if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('documentos-contables');
     }
 };
 

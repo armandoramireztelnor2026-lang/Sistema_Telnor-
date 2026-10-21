@@ -222,10 +222,11 @@ function marcarBotonActivo(vista) {
         if (onclickAttr) {
             let matchesView = onclickAttr.includes("('" + vista + "')");
             let matches10k = (vista === 'cotizaciones-10k' && onclickAttr.includes("verCotizacionesMas10000"));
-            let matchesDoc = ((vista === 'documentos-contables' || vista === 'documentos_contables') && (onclickAttr.includes("documentos-contables") || onclickAttr.includes("documentos_contables")));
             let matchesFF = ((vista === 'facturas-finales' || vista === 'facturas_finales') && (onclickAttr.includes("facturas-finales") || onclickAttr.includes("facturas_finales")));
+            let matchesDoc = ((vista === 'documentos-contables' || vista === 'documentos_contables') && (onclickAttr.includes("documentos-contables") || onclickAttr.includes("documentos_contables")));
+            let matchesLib = ((vista === 'liberar-doc-contable' || vista === 'liberar_doc_contable') && (onclickAttr.includes("liberar-doc-contable") || onclickAttr.includes("liberar_doc_contable")));
             
-            if (matchesView || matches10k || matchesDoc || matchesFF) {
+            if (matchesView || matches10k || matchesFF || matchesDoc || matchesLib) {
                 let nav = b.closest('.nav-menu') || b.closest('.sidebar');
                 if (nav) {
                     nav.querySelectorAll('.btn-sidebar').forEach(btn => btn.classList.remove('active'));
@@ -239,7 +240,7 @@ function marcarBotonActivo(vista) {
 function cambiarVistaAdmin(vista) {
     localStorage.setItem('activeViewAdmin', vista);
     marcarBotonActivo(vista);
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica'];
+    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';
@@ -248,6 +249,7 @@ function cambiarVistaAdmin(vista) {
     let vistaId = vista;
     if (vista === 'facturas_finales') vistaId = 'facturas-finales';
     if (vista === 'documentos_contables') vistaId = 'documentos-contables';
+    if (vista === 'liberar_doc_contable') vistaId = 'liberar-doc-contable';
 
     let elVista = document.getElementById('vista-' + vistaId);
     if (elVista) elVista.style.display = 'block';
@@ -264,7 +266,7 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'ciudades-copes' && typeof cargarCiudadesCopes === 'function') cargarCiudadesCopes();
     if (vista === 'reportes' && typeof cargarReportesAdmin === 'function') cargarReportesAdmin();
     if (vista === 'analitica' && typeof cargarAnalitica === 'function') cargarAnalitica();
-    if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'facturas-finales' || vista === 'documentos_contables' || vista === 'documentos-contables' || vista === 'archivo') && typeof cargarFacturas === 'function') cargarFacturas();
+    if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'facturas-finales' || vista === 'documentos_contables' || vista === 'documentos-contables' || vista === 'liberar-doc-contable' || vista === 'liberar_doc_contable' || vista === 'archivo') && typeof cargarFacturas === 'function') cargarFacturas();
     if (vista === 'cotizaciones-10k' && typeof cargarCotizaciones10k === 'function') cargarCotizaciones10k();
 }
 
@@ -464,7 +466,7 @@ function abrirModalDetallesUsuario(usuarioId) {
 
     let htmlContent = `
         <div class="pdf-header-doc">
-            <h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2>
+            <h2>EXPEDIENTE DE USUARIO</h2>
             <p>PERFIL DE USUARIO - ${rolTexto}</p>
         </div>
         <div class="pdf-body">
@@ -515,7 +517,7 @@ function descargarPDFUsuario() {
     const elemento = document.getElementById('pdf-perfil-contenido');
     const opciones = {
         margin: 0.4,
-        filename: 'Perfil_Usuario_RUMN.pdf',
+        filename: 'Perfil_Usuario.pdf',
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -735,7 +737,7 @@ function descargarPDF() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expediente de Usuario - RUMN</title>
+    <title>Expediente de Usuario</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
     <style>
@@ -904,7 +906,7 @@ function descargarPDF() {
 <body>
     <div class="toolbar no-print">
         <div class="toolbar-title">
-            <span>📄</span> Expediente Oficial de Usuario - RUMN
+            <span>📄</span> Expediente Oficial de Usuario
         </div>
         <div class="toolbar-actions">
             <button class="btn-tool btn-print" onclick="window.print()">
@@ -930,7 +932,7 @@ function descargarPDF() {
             const elem = document.getElementById('documento-para-descargar');
             const opt = {
                 margin: 0.4,
-                filename: 'Perfil_Usuario_RUMN.pdf',
+                filename: 'Perfil_Usuario.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }

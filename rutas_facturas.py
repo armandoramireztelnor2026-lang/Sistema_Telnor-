@@ -368,8 +368,17 @@ def listar_facturas():
                         return reporte_a_cope.get(m.group(1).strip(), "")
                     return ""
                 
-                # Solo mostrar facturas cuyo COPE coincida con los del Supervisor
-                facturas = [f for f in facturas if get_cope_factura(f) in copes_permitidos]
+                # Solo mostrar facturas cuyo COPE coincida con los del Supervisor (o si son cotizaciones +10,000 pendientes o tickets pendientes de liberación para permitir cobertura de Administrador)
+                facturas = [
+                    f for f in facturas
+                    if get_cope_factura(f) in copes_permitidos or (
+                        float(f.get("precio_estimado") or f.get("precio") or 0) >= 10001.0
+                        and f.get("aprobado_admin") is True
+                        and not f.get("aprobado_admin_10k")
+                    ) or (
+                        f.get("liberado_admin") is False
+                    )
+                ]
 
 
     # INYECTAR DATOS DEL REPORTE INICIAL
@@ -2170,6 +2179,71 @@ def archivar_final():
             return jsonify({"status": "success", "message": "Ticket archivado y movido exitosamente a tickets_archivados.json."})
             
     return jsonify({"status": "error", "message": "Registro no encontrado."})
+
+@facturas_bp.route("/api/facturas/actualizar_doc50", methods=["POST"])
+def actualizar_doc50():
+    if "usuario" not in session or session["usuario"]["rol"] != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    subrol = session["usuario"].get("datos_perfil", {}).get("subrol")
+    if subrol != "Supervisor":
+        return jsonify({"status": "error", "message": "Solo el rol de Supervisor está autorizado para modificar el número de documento contable."}), 403
+
+    factura_id = request.form.get("id_factura") or request.form.get("id")
+    nums_doc50 = request.form.getlist("numero_doc50[]")
+
+    if not factura_id:
+        return jsonify({"status": "error", "message": "Falta el identificador del ticket."})
+
+    actualizado = False
+
+    # 1. Actualizar en facturas.json
+    data = leer_json("facturas.json")
+    for f in data.get("facturas", []):
+        if str(f["id"]) == str(factura_id):
+            cots = f.get("cotizaciones", [])
+            for i, cot in enumerate(cots):
+                if i < len(nums_doc50):
+                    val = nums_doc50[i].strip()
+                    if val:
+                        cot["numero_doc50"] = val
+                    if i == 0 and val:
+                        f["numero_doc50"] = val
+            
+            if not cots and nums_doc50:
+                val = nums_doc50[0].strip()
+                if val:
+                    f["numero_doc50"] = val
+
+            escribir_json("facturas.json", data)
+            actualizado = True
+            break
+
+    # 2. Si está en tickets_archivados.json, actualizar allí también
+    archivados_data = leer_json("tickets_archivados.json")
+    for a in archivados_data.get("facturas", []):
+        if str(a.get("id")) == str(factura_id):
+            cots = a.get("cotizaciones", [])
+            for i, cot in enumerate(cots):
+                if i < len(nums_doc50):
+                    val = nums_doc50[i].strip()
+                    if val:
+                        cot["numero_doc50"] = val
+                    if i == 0 and val:
+                        a["numero_doc50"] = val
+            if not cots and nums_doc50:
+                val = nums_doc50[0].strip()
+                if val:
+                    a["numero_doc50"] = val
+
+            escribir_json("tickets_archivados.json", archivados_data)
+            actualizado = True
+            break
+
+    if actualizado:
+        return jsonify({"status": "success", "message": "Número de Documento Contable actualizado correctamente."})
+    else:
+        return jsonify({"status": "error", "message": "Ticket no encontrado."})
 
 @facturas_bp.route('/api/facturas/lista_archivados', methods=['GET'])
 def lista_archivados():

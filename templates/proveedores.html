@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Portal Proveedores</title>
-    <link rel="stylesheet" href="/static/style.css?v=51057">
+    <link rel="stylesheet" href="/static/style.css?v=51061">
     <link rel="stylesheet" href="/static/manual_sistema.css?v=1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -323,7 +323,7 @@
                 </div>
                 <div>
                     <h3 style="color: #ffffff; margin: 0; font-size: 1.3rem; font-weight: 700;">Perfil de Taller Autorizado</h3>
-                    <p style="color: #94a3b8; margin: 3px 0 0 0; font-size: 0.85rem;">Red Última Milla del Noroeste (RUMN) - Portal Proveedores</p>
+                    <p style="color: #94a3b8; margin: 3px 0 0 0; font-size: 0.85rem;">Portal Proveedores</p>
                 </div>
             </div>
 
@@ -398,7 +398,7 @@
                             <div>
                                 <span style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 2px;">Nivel de Acceso:</span>
                                 <span style="background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; display: inline-block;">
-                                    Taller Autorizado RUMN
+                                    Proveedor
                                 </span>
                             </div>
                         </div>
@@ -408,8 +408,7 @@
             </div>
 
             <!-- Meta / Timestamp -->
-            <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: #64748b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                <span>Sistema Central RUMN | Proveedores Homologados</span>
+            <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: #64748b; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px;">
                 <span>Fecha de consulta: <strong id="perfil-fecha-display" style="color: #94a3b8;">--</strong></span>
             </div>
 
@@ -425,7 +424,7 @@
             <!-- Plantilla Oculta para Renderizar Documento Imprimible en Nueva Pestaña -->
             <div id="pdf-content" class="pdf-document" style="display: none;">
                 <div class="pdf-header-doc">
-                    <h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2>
+                    <h2>EXPEDIENTE DE USUARIO</h2>
                     <p>EXPEDIENTE DE USUARIO - PROVEEDOR</p>
                 </div>
                 <div class="pdf-body">
@@ -454,13 +453,13 @@
     <!-- MODAL DE AYUDA DINÁMICO (MANUAL) -->
     <div id="modal-ayuda" class="manual-overlay"></div>
 
-    <script src="/static/script.js?v=1000002"></script>
+    <script src="/static/script.js?v=1000005"></script>
 
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js?v=6"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
-    <script src="/static/facturas_principal.js?v=47"></script>
+    <script src="/static/facturas_principal.js?v=51"></script>
     <script src="/static/manual_sistema.js?v=1"></script>
 </body>
 
