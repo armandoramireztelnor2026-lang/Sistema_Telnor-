@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel Corporativo</title>
-    <link rel="stylesheet" href="/static/style.css?v=51050">
+    <link rel="stylesheet" href="/static/style.css?v=51057">
     <link rel="stylesheet" href="/static/manual_sistema.css?v=1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -38,7 +38,7 @@
                     </div>
                     <div class="table-responsive">
                         <table>
-                            <thead><tr><th>Ticket</th><th>Fecha</th><th>Proveedor</th><th>Unidad</th><th>Título</th><th>Precio s/IVA (Indiv.)</th><th>Precio s/IVA (Total)</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <thead><tr><th>Ticket</th><th>Fecha</th><th>Proveedor</th><th>Unidad</th><th>Compañía</th><th>Título</th><th>Precio s/IVA (Indiv.)</th><th>Precio s/IVA (Total)</th><th>Estado</th><th>Acciones</th></tr></thead>
                             <tbody id="tabla-facturas"></tbody>
                         </table>
                     </div>
@@ -139,39 +139,132 @@
         <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
     </div>
     
-    <!-- MODAL PDF PERFIL CORPORATIVO -->
+    <!-- MODAL PERFIL CORPORATIVO (ESTILO DEL SISTEMA) -->
     <div id="modal-mi-perfil" class="modal-overlay">
-        <div class="pdf-modal-box">
-            <button class="btn-close-modal" onclick="cerrarModal('modal-mi-perfil')" style="color: #112641;">×</button>
-            <h3 style="color: #112641; margin-bottom: 20px;">Vista Previa del Documento</h3>
-            <div id="pdf-content" class="pdf-document">
+        <div class="modal-box large perfil-sistema-modal">
+            <button class="btn-close-modal" onclick="cerrarModal('modal-mi-perfil')" style="color: #94a3b8; font-size: 24px; top: 15px; right: 20px;">×</button>
+            
+            <!-- Header del Modal -->
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 22px; border-bottom: 1px solid #1f395a; padding-bottom: 16px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(139, 92, 246, 0.2); color: #a855f7; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid rgba(139, 92, 246, 0.4);">
+                    🏛️
+                </div>
+                <div>
+                    <h3 style="color: #ffffff; margin: 0; font-size: 1.3rem; font-weight: 700;">Perfil de Dirección Corporativa</h3>
+                    <p style="color: #94a3b8; margin: 3px 0 0 0; font-size: 0.85rem;">Red Última Milla del Noroeste (RUMN) - Portal Ejecutivo</p>
+                </div>
+            </div>
+
+            <!-- Cuerpo del Perfil -->
+            <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+                
+                <!-- Columna Izquierda: Foto y Estado -->
+                <div style="display: flex; flex-direction: column; align-items: center; min-width: 170px;">
+                    <div style="width: 150px; height: 150px; border-radius: 14px; border: 3px solid #a855f7; box-shadow: 0 8px 24px rgba(0,0,0,0.5); overflow: hidden; background: #081422; position: relative;">
+                        <img src="{% if usuario.datos_perfil.foto_ruta %}/static/foto_corporativos/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/112641/40916c?text=Foto{% endif %}"
+                            style="width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: transform 0.3s;" onclick="abrirLightbox(this.src)" title="Clic para ampliar foto" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    </div>
+                    <div style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; background: rgba(139, 92, 246, 0.15); color: #c084fc; font-size: 0.82rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.3);">
+                        <span style="display: inline-block; width: 8px; height: 8px; background: #a855f7; border-radius: 50%;"></span>
+                        Acceso Ejecutivo
+                    </div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px;">Clic en foto para ampliar</div>
+                </div>
+
+                <!-- Columna Derecha: Tarjetas de Información -->
+                <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px;">
+                    
+                    <!-- Sección 1: Información del Directivo -->
+                    <div style="background: #0d1e33; border: 1px solid #1f395a; border-radius: 10px; padding: 14px 18px;">
+                        <div style="font-size: 0.8rem; text-transform: uppercase; color: #38bdf8; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span>👔</span> INFORMACIÓN DEL DIRECTIVO
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">
+                            <div style="grid-column: span 2;">
+                                <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Nombre Completo:</span>
+                                <strong style="color: #ffffff; font-size: 1.05rem;">{{ usuario.datos_perfil.nombres }} {{ usuario.datos_perfil.apellido_paterno }} {{ usuario.datos_perfil.apellido_materno | default('') }}</strong>
+                            </div>
+                            <div>
+                                <span style="color: #94a3b8; font-size: 0.8rem; display: block;">No. de Empleado:</span>
+                                <strong style="color: #ffffff;">{{ usuario.datos_perfil.num_empleado | default('N/A') }}</strong>
+                            </div>
+                            <div>
+                                <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Ciudad Base:</span>
+                                <strong style="color: #38bdf8;">{{ usuario.datos_perfil.ciudad | default('No especificada') }}</strong>
+                            </div>
+                            <div>
+                                <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Área Asignada:</span>
+                                <strong style="color: #ffffff;">{{ usuario.datos_perfil.area }}</strong>
+                            </div>
+                            <div>
+                                <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Correo Electrónico:</span>
+                                <strong style="color: #e2e8f0;">{{ usuario.datos_perfil.correo | default('N/A') }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección 2: Credenciales de Acceso -->
+                    <div style="background: #0d1e33; border: 1px solid #1f395a; border-radius: 10px; padding: 14px 18px;">
+                        <div style="font-size: 0.8rem; text-transform: uppercase; color: #a855f7; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span>🔐</span> CREDENCIALES DEL SISTEMA
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; align-items: center;">
+                            <div>
+                                <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Usuario Asignado:</span>
+                                <code style="background: rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 4px; color: #e2e8f0; font-size: 0.85rem;">{{ usuario.usuario }}</code>
+                            </div>
+                            <div>
+                                <span style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 2px;">Nivel de Acceso:</span>
+                                <span style="background: rgba(139, 92, 246, 0.18); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.4); padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; display: inline-block;">
+                                    Autorización Financiera y Supervisión
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Meta / Timestamp -->
+            <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: #64748b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <span>Sistema Central RUMN | Supervisión Corporativa</span>
+                <span>Fecha de consulta: <strong id="perfil-fecha-display" style="color: #94a3b8;">--</strong></span>
+            </div>
+
+            <!-- Acciones del Modal -->
+            <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="btn-danger" onclick="cerrarModal('modal-mi-perfil')" style="max-width: 140px; padding: 10px 18px;">Cerrar</button>
+                <button class="btn-success-modal" onclick="descargarPDF()" style="padding: 10px 22px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; cursor: pointer;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Confirmar y Descargar PDF
+                </button>
+            </div>
+
+            <!-- Plantilla Oculta para Renderizar Documento Imprimible en Nueva Pestaña -->
+            <div id="pdf-content" class="pdf-document" style="display: none;">
                 <div class="pdf-header-doc">
                     <h2>RED ULTIMA MILLA DEL NOROESTE (RUMN)</h2>
-                    <p>PERFIL DE USUARIO - DIRECCIÓN CORPORATIVA</p>
+                    <p>EXPEDIENTE DE USUARIO - DIRECCIÓN CORPORATIVA</p>
                 </div>
                 <div class="pdf-body">
-                    <img src="{% if usuario.datos_perfil.foto_ruta %}/static/foto_corporativos/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/ffffff/000000?text=Foto{% endif %}" class="pdf-photo-doc" onclick="abrirLightbox(this.src)">
+                    <img src="{% if usuario.datos_perfil.foto_ruta %}/static/foto_corporativos/{{ usuario.datos_perfil.foto_ruta }}{% else %}https://via.placeholder.com/150/ffffff/000000?text=Foto{% endif %}"
+                        class="pdf-photo-doc">
                     <div class="pdf-details">
                         <div class="pdf-section-title">■ INFORMACIÓN DEL DIRECTIVO</div>
-                        <div class="pdf-line"><strong>Nombre Completo:</strong> {{ usuario.datos_perfil.nombres }} {{ usuario.datos_perfil.apellido_paterno }}</div>
+                        <div class="pdf-line"><strong>Nombre Completo:</strong> {{ usuario.datos_perfil.nombres }} {{ usuario.datos_perfil.apellido_paterno }} {{ usuario.datos_perfil.apellido_materno | default('') }}</div>
                         <div class="pdf-line"><strong>Ciudad Base:</strong> <span style="color:#0284c7; font-weight:bold;">{{ usuario.datos_perfil.ciudad | default('No especificada') }}</span></div>
                         <div class="pdf-line"><strong>Área Asignada:</strong> {{ usuario.datos_perfil.area }}</div>
-                        <div class="pdf-line"><strong>Número de Empleado:</strong> {{ usuario.datos_perfil.num_empleado }}</div>
-                        
-                        <!-- NUEVA LÍNEA DE CORREO CORPORATIVO -->
+                        <div class="pdf-line"><strong>Número de Empleado:</strong> {{ usuario.datos_perfil.num_empleado | default('N/A') }}</div>
                         <div class="pdf-line"><strong>Correo Electrónico:</strong> {{ usuario.datos_perfil.correo | default('N/A') }}</div>
                         <br>
                         <div class="pdf-section-title">■ CREDENCIALES DEL SISTEMA</div>
                         <div class="pdf-line"><strong>Usuario Asignado:</strong> {{ usuario.usuario }}</div>
-                        <div class="pdf-line"><strong>Nivel de Acceso:</strong> Autorización Financiera y Supervisión</div>
+                        <div class="pdf-line"><strong>Nivel de Acceso:</strong> Autorización Financiera y Supervisión Corporativa</div>
                     </div>
                 </div>
                 <div class="pdf-footer">Documento extraído de la Base de Datos Central el: <span id="pdf-fecha"></span></div>
             </div>
-            <div class="modal-actions" style="max-width: 750px; margin-top: 20px;">
-                <button class="btn-danger" onclick="cerrarModal('modal-mi-perfil')">Cancelar</button>
-                <button class="btn-success-modal" onclick="descargarPDF()">Confirmar y Descargar PDF</button>
-            </div>
+
         </div>
     </div>
 
@@ -180,7 +273,7 @@
     <div id="modal-motivo-rechazo" class="modal-overlay">
         <div class="modal-box">
             <button class="btn-close-modal" onclick="cerrarModal('modal-motivo-rechazo')">×</button>
-            <h3 class="modal-header" style="color: #ef4444;">&#x26A0;️ Motivo de Rechazo / Eliminación</h3>
+            <h3 class="modal-header" style="color: #ef4444;">⚠️ Motivo de Rechazo / Eliminación</h3>
             <p style="color: #a3b1c6; margin-bottom: 15px; font-size: 14px;">Escribe la causa exacta. Esta explicación
                 se enviará automáticamente por correo electrónico al usuario afectado.</p>
             <textarea id="input-motivo-rechazo" rows="5"
@@ -197,13 +290,13 @@
         </div>
     </div>
 
-    <script src="/static/script.js?v=999999"></script>
+    <script src="/static/script.js?v=1000002"></script>
 
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js?v=6"></script>
     <script src="/static/facturas_archivos.js?v=999999"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
-    <script src="/static/facturas_principal.js?v=27"></script>
+    <script src="/static/facturas_principal.js?v=47"></script>
 
 
 

@@ -342,7 +342,7 @@ function renderizarTablaReportes(lista) {
             // Retro
             let retroRaw = cot ? (cot.retro || pendienteHTML) : (f.retro || pendienteHTML);
             let tempDiv = document.createElement('div'); tempDiv.innerHTML = retroRaw; let retroText = tempDiv.textContent || tempDiv.innerText || pendienteHTML;
-            retroText = retroText.replace(/\[TICKET:.*?\]\s*REPORTE ORIGINAL DEL CHOFER:\s*/i, '').trim();
+            retroText = retroText.replace(/\[TICKET:.*?\]\s*(REPORTE ORIGINAL DEL CHOFER:\s*)?/i, '').trim();
             if (retroText === 'Pendiente' || retroText === '') retroText = pendienteHTML;
             htmlRetro += `<div style="${bStyle}">${label}${retroText}</div>`;
 

@@ -178,7 +178,7 @@ function imprimirReporteTaller() {
 function descargarPDFOrden() {
     const elemento = document.getElementById('pdf-orden-contenido');
     const r = reporteSeleccionado;
-    if(confirm('¿¿Confirmas que deseas descargar esta Orden de Trabajo en formato PDF?')) {
+    if(confirm('¿Confirmas que deseas descargar esta Orden de Trabajo en formato PDF?')) {
         const opciones = {
             margin:       0.4,
             filename:     `Orden_Trabajo_${r.id}.pdf`,

@@ -831,9 +831,10 @@ def solicitar_correccion_orden():
     
     for f in data.get("facturas", []):
         if str(f["id"]) == str(factura_id):
-            # Buscar el correo del supervisor basado en el COPE del ticket
-            cope_factura = obtener_cope_de_factura(f)
-            correo_supervisor, supervisor = encontrar_supervisor_por_cope(cope_factura)
+            correo_supervisor, supervisor = obtener_supervisor_de_factura(f)
+            if not correo_supervisor:
+                cope_factura = obtener_cope_de_factura(f)
+                correo_supervisor, supervisor = encontrar_supervisor_por_cope(cope_factura)
             unidad = f.get("unidad", "")
             
             if not correo_supervisor:
@@ -1474,6 +1475,132 @@ def rechazar_super():
             return jsonify({"status": "success", "message": "Cotización rechazada con recomendaciones. Se notificó al taller y al supervisor del ticket."})
 
     return jsonify({"status": "error", "message": "Registro no encontrado."})
+
+
+@facturas_bp.route("/api/facturas/rehacer_cotizacion", methods=["POST"])
+def rehacer_cotizacion():
+    if "usuario" not in session or session["usuario"].get("rol") != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"}), 401
+
+    subrol = session["usuario"].get("datos_perfil", {}).get("subrol", "")
+    if subrol != "Supervisor":
+        return jsonify({"status": "error", "message": "Solo el Supervisor tiene permisos para solicitar rehacer una cotización."}), 403
+
+    req_data = request.json or {}
+    factura_id = req_data.get("id")
+    if not factura_id:
+        return jsonify({"status": "error", "message": "ID de cotización no proporcionado."}), 400
+
+    motivo = req_data.get("motivo", "").strip()
+    if not motivo:
+        motivo = "El supervisor detectó errores o problemas en la cotización y solicita que se elabore de nuevo."
+
+    data = leer_json("facturas.json")
+    factura_target = None
+    nuevas_facturas = []
+
+    for f in data.get("facturas", []):
+        if str(f.get("id")) == str(factura_id):
+            factura_target = f
+            # Limpiar archivos subidos si existen
+            for tipo in ["fotos_cotizacion", "fotos_evidencia"]:
+                for foto in f.get(tipo, []):
+                    try:
+                        ruta = os.path.join(CARPETA_FACTURAS, foto)
+                        if os.path.exists(ruta): os.remove(ruta)
+                    except Exception:
+                        pass
+            for cot in f.get("cotizaciones", []):
+                for ev in cot.get("fotos_evidencia", []):
+                    try:
+                        ruta = os.path.join(CARPETA_FACTURAS, ev)
+                        if os.path.exists(ruta): os.remove(ruta)
+                    except Exception:
+                        pass
+                pdf_cot = cot.get("pdf_cotizacion")
+                if pdf_cot:
+                    try:
+                        ruta = os.path.join(CARPETA_FACTURAS, pdf_cot)
+                        if os.path.exists(ruta): os.remove(ruta)
+                    except Exception:
+                        pass
+        else:
+            nuevas_facturas.append(f)
+
+    if not factura_target:
+        return jsonify({"status": "error", "message": "Cotización no encontrada."}), 404
+
+    # Eliminar la cotización de facturas.json
+    data["facturas"] = nuevas_facturas
+    escribir_json("facturas.json", data)
+
+    # Identificar el ID del reporte original asociado
+    ticket_id = factura_target.get("id_reporte") or factura_target.get("numero_reporte")
+    if not ticket_id:
+        import re
+        match = re.search(r"\[TICKET:(.*?)\]", factura_target.get("retro", ""))
+        if match:
+            ticket_id = match.group(1).strip()
+
+    proveedor_nombre = factura_target.get("proveedor", "")
+    unidad_texto = factura_target.get("unidad", "S/N")
+
+    # Restaurar reporte en reportes.json para que vuelva al estado 'Asignado a: [taller]'
+    # y así el taller lo vea disponible para 'Revisar/Crear Cotizacion'
+    if ticket_id:
+        reportes_data = leer_json("reportes.json")
+        for r in reportes_data.get("reportes", []):
+            if str(r.get("id")) == str(ticket_id):
+                if proveedor_nombre:
+                    r["asignado_a"] = proveedor_nombre
+                    r["estado"] = f"Asignado a: {proveedor_nombre}"
+                r.pop("numero_orden", None)
+                r.pop("numero_cotizacion_asignacion", None)
+                r.pop("pdf_cotizacion_asignacion", None)
+                r["motivo_rehacer"] = motivo
+                r["fecha_solicitud_rehacer"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                escribir_json("reportes.json", reportes_data)
+                break
+
+    # Notificar al Taller y al Supervisor
+    perf_sup = session.get("usuario", {}).get("datos_perfil", {})
+    nombre_supervisor = f"{perf_sup.get('nombres', '')} {perf_sup.get('apellido_paterno', '')}".strip() or "Supervisor"
+    correo_supervisor = perf_sup.get("correo", "")
+
+    usuarios_data = leer_json("usuarios.json")
+    correo_prov = ""
+    for u in usuarios_data.get("usuarios", []):
+        if u.get("rol") == "proveedores" and u.get("datos_perfil", {}).get("nombre_proveedor") == proveedor_nombre:
+            correo_prov = u.get("datos_perfil", {}).get("correo", "")
+            break
+
+    try:
+        from notificaciones import enviar_correo_rehacer_cotizacion_taller, enviar_correo_rehacer_cotizacion_supervisor
+        if correo_prov:
+            enviar_correo_rehacer_cotizacion_taller(
+                correo_prov,
+                proveedor_nombre,
+                ticket_id or factura_id,
+                unidad_texto,
+                motivo,
+                nombre_supervisor=nombre_supervisor
+            )
+        if correo_supervisor:
+            enviar_correo_rehacer_cotizacion_supervisor(
+                correo_supervisor,
+                nombre_supervisor,
+                ticket_id or factura_id,
+                unidad_texto,
+                proveedor_nombre,
+                motivo
+            )
+    except Exception as e:
+        print("Error enviando correos de rehacer cotización:", e)
+
+    return jsonify({
+        "status": "success",
+        "message": f"Cotización eliminada exitosamente. El ticket {ticket_id or factura_id} ha regresado a la bandeja del taller para ser elaborado nuevamente."
+    })
 
 
 @facturas_bp.route("/api/facturas/editar", methods=["POST"])

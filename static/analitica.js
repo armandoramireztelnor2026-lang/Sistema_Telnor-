@@ -65,6 +65,22 @@ async function cargarAnalitica() {
         const data = await response.json();
 
         if (data.status === 'success') {
+            if (data.flota_metricas && data.flota_metricas.totales) {
+                const fm = data.flota_metricas;
+                const setTxt = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = val;
+                };
+                setTxt('analitica-flota-circulacion', fm.totales.circulacion);
+                setTxt('analitica-flota-circulacion-pct', fm.porcentajes.circulacion + '%');
+                setTxt('analitica-flota-taller', fm.totales.taller);
+                setTxt('analitica-flota-taller-pct', fm.porcentajes.taller + '%');
+                setTxt('analitica-flota-juridicos', fm.totales.juridicos);
+                setTxt('analitica-flota-juridicos-pct', fm.porcentajes.juridicos + '%');
+                setTxt('analitica-flota-inhabilitadas', fm.totales.inhabilitadas);
+                setTxt('analitica-flota-inhabilitadas-pct', fm.porcentajes.inhabilitadas + '%');
+            }
+
             const formatData = (item, includeTaller = true) => {
                 if (!item) return '<div style="color:#ef4444; font-weight:500; font-style:italic; padding: 10px 0;">Sin datos registrados en el periodo</div>';
                 
@@ -239,6 +255,7 @@ async function cargarAnalitica() {
             ];
 
             // Destruir instancias previas para evitar memory leaks y parpadeos
+            if(window.chartPieFlota) window.chartPieFlota.destroy();
             if(window.chartPieEstados) window.chartPieEstados.destroy();
             if(window.chartPieMant) window.chartPieMant.destroy();
             if(window.chartPieCopes) window.chartPieCopes.destroy();
@@ -285,6 +302,29 @@ async function cargarAnalitica() {
                     }
                 }
             });
+
+            // Pie Flota: Estado Operativo de la Flota
+            const canvasFlota = document.getElementById('chart-pie-flota');
+            if (canvasFlota && dataCharts.pie_flota) {
+                const ctxPieFlota = canvasFlota.getContext('2d');
+                window.chartPieFlota = new Chart(ctxPieFlota, {
+                    type: 'doughnut',
+                    data: {
+                        labels: dataCharts.pie_flota.labels,
+                        datasets: [{
+                            data: dataCharts.pie_flota.data,
+                            backgroundColor: ['#10b981', '#0ea5e9', '#8b5cf6', '#ef4444'],
+                            borderColor: '#112641',
+                            borderWidth: 2,
+                            hoverOffset: 6
+                        }]
+                    },
+                    options: {
+                        ...pieChartOptions,
+                        cutout: '60%'
+                    }
+                });
+            }
 
             // Pie 1: Estados
             const ctxPieEstados = document.getElementById('chart-pie-estados').getContext('2d');

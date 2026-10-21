@@ -280,16 +280,27 @@ def eliminar_reporte():
 
 @reportes_bp.route("/api/unidades", methods=["GET"])
 def obtener_unidades():
-    if not os.path.exists("unidades.json"):
-        return jsonify({})
-    with open("unidades.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-        
-    # Inject flag to know if the unit is actively in the workshop/assigned
+    from rutas_unidades_metricas import obtener_metricas_flota
+    flota = obtener_metricas_flota()
+    data = flota["unidades_data"]
+    estados = flota["estados_por_unidad"]
+
+    # Inject flags to know the exact operational status
     for num, info in data.items():
-        info["activa_en_taller"] = is_unidad_active(num)
-        
+        est = estados.get(num, "En Circulación")
+        info["estado_operativo"] = est
+        info["activa_en_taller"] = (est == "En Taller")
+        info["inhabilitada_caras"] = (est == "Inhabilitada")
+
     return jsonify(data)
+
+@reportes_bp.route("/api/unidades/metricas", methods=["GET"])
+def obtener_unidades_metricas():
+    from rutas_unidades_metricas import obtener_metricas_flota
+    return jsonify({
+        "status": "success",
+        **obtener_metricas_flota()
+    })
 
 def is_unidad_active(numero_unidad):
     if not numero_unidad or len(str(numero_unidad)) < 4:

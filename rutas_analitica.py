@@ -438,10 +438,13 @@ def obtener_datos_auditados(period):
         u = obtener_unidad(f, r)
         p = float(f.get('precio_estimado', f.get('precio', 0)) or 0)
         unidades_dinero[u] = unidades_dinero.get(u, 0) + p
-
     top_unidades_dinero = sorted(unidades_dinero.items(), key=lambda x: x[1], reverse=True)[:5]
 
+    from rutas_unidades_metricas import obtener_metricas_flota
+    flota_metricas = obtener_metricas_flota()
+
     return {
+        "flota_metricas": flota_metricas,
         "events": {
             "ultimo_llegado": ultimo_llegado,
             "ultimo_finalizado": ultimo_finalizado,
@@ -460,6 +463,15 @@ def obtener_datos_auditados(period):
             "top_talleres_dinero": top_talleres_dinero
         },
         "charts": {
+            "pie_flota": {
+                "labels": ["En Circulación", "En Taller", "En Jurídicos", "Inhabilitadas (Caras)"],
+                "data": [
+                    flota_metricas["totales"]["circulacion"],
+                    flota_metricas["totales"]["taller"],
+                    flota_metricas["totales"]["juridicos"],
+                    flota_metricas["totales"]["inhabilitadas"]
+                ]
+            },
             "pie_estados": {"labels": list(estados_count.keys()), "data": list(estados_count.values())},
             "pie_mantenimiento": {"labels": list(mant_count.keys()), "data": list(mant_count.values())},
             "pie_copes": {"labels": list(copes_chart_count.keys()), "data": list(copes_chart_count.values())},
@@ -477,7 +489,16 @@ def analitica_ultimos():
     datos = obtener_datos_auditados(period)
     return jsonify({
         "status": "success",
+        "flota_metricas": datos.get("flota_metricas", {}),
         **datos["events"]
+    })
+
+@analitica_bp.route('/api/analitica/flota', methods=['GET'])
+def analitica_flota():
+    from rutas_unidades_metricas import obtener_metricas_flota
+    return jsonify({
+        "status": "success",
+        **obtener_metricas_flota()
     })
 
 @analitica_bp.route('/api/analitica/tops', methods=['GET'])
@@ -756,6 +777,8 @@ def exportar_analitica_excel():
             
         return r_idx + 1
 
+    if "pie_flota" in charts:
+        cur_r3 = escribir_tabla_metricas(ws3, cur_r3, "🚗 Estado Operativo de la Flota Vehicular", "Estado Operativo", "Cantidad de Unidades", charts["pie_flota"]["labels"], charts["pie_flota"]["data"])
     cur_r3 = escribir_tabla_metricas(ws3, cur_r3, "📊 Distribución por Estado de Tickets", "Estado del Ticket", "Cantidad de Tickets", charts["pie_estados"]["labels"], charts["pie_estados"]["data"])
     cur_r3 = escribir_tabla_metricas(ws3, cur_r3, "🔧 Tipos de Mantenimiento", "Tipo de Mantenimiento", "Cantidad de Tickets", charts["pie_mantenimiento"]["labels"], charts["pie_mantenimiento"]["data"])
     cur_r3 = escribir_tabla_metricas(ws3, cur_r3, "🏢 Distribución por COPE", "COPE", "Cantidad de Tickets", charts["pie_copes"]["labels"], charts["pie_copes"]["data"])

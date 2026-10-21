@@ -57,8 +57,8 @@ async function cargarCotizaciones10k() {
             pendientes.forEach(f => {
                 let pFormat = f.precio ? parseFloat(f.precio).toLocaleString('en-US') : '0';
                 let cots = f.cotizaciones && f.cotizaciones.length > 0 ? f.cotizaciones : [{ precio: f.precio }];
-                let indStr = cots.map((c, i) => `Cot ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
-                let tdPrecioInd = `<td><small style="color:#a3b1c6;">${indStr}</small></td>`;
+                let indStr = cots.map((c, i) => `Cotización ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
+                let tdPrecioInd = `<td><span style="color:#a3b1c6;">${indStr}</span></td>`;
 
                 let btnStyle = "width:100% !important; height:38px !important; min-height:38px !important; max-height:38px !important; font-size:12px !important; font-weight:bold !important; padding:0 !important; margin:0 0 5px 0 !important; border-radius:5px !important; box-sizing:border-box !important; display:flex !important; align-items:center !important; justify-content:center !important; text-align:center !important; border:none !important; cursor:pointer !important; line-height:normal !important; color:white !important; transition: opacity 0.2s !important;";
 

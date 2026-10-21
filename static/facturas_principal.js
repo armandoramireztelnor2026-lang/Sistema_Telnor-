@@ -96,7 +96,7 @@ function obtenerIdReporte(f) {
 }
 function limpiarRetro(retro) {
     if (!retro) return "";
-    return retro.replace(/\[TICKET:.*?\]\n?/, '').trim();
+    return retro.replace(/\[TICKET:.*?\]\s*/g, '').replace(/^REPORTE ORIGINAL DEL CHOFER:\s*/i, '').trim();
 }
 
 async function cargarFacturas() {
@@ -136,9 +136,10 @@ async function cargarFacturas() {
         if (tbodyArchivoCorp) tbodyArchivoCorp.innerHTML = '';
 
         if (facturasGlobal.length === 0) {
-            let colSpanCot = rolUsuario === 'corporativos' ? '9' : (rolUsuario === 'administracion' ? '8' : '7');
+            let colSpanCot = rolUsuario === 'administracion' ? '11' : (rolUsuario === 'corporativos' ? '10' : '9');
+            let colSpanFac = rolUsuario === 'administracion' ? '12' : '10';
             if (tbody) tbody.innerHTML = `<tr><td colspan="${colSpanCot}" style="text-align:center;">No hay cotizaciones registradas</td></tr>`;
-            if (tbodyFinales) tbodyFinales.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay facturas registradas</td></tr>`;
+            if (tbodyFinales) tbodyFinales.innerHTML = `<tr><td colspan="${colSpanFac}" style="text-align:center;">No hay facturas registradas</td></tr>`;
         }
         else {
             let countCotizaciones = 0;
@@ -152,7 +153,7 @@ async function cargarFacturas() {
 
                 let tituloCompleto = f.titulo || 'Sin Título';
                 if (f.cotizaciones && f.cotizaciones.length > 1) {
-                    tituloCompleto = f.cotizaciones.map((c, i) => `Cot ${i + 1}: ${c.titulo || 'Sin Título'}`).join('<br>');
+                    tituloCompleto = f.cotizaciones.map((c, i) => `Cotización ${i + 1}: ${c.titulo || 'Sin Título'}`).join('<br>');
                 }
 
                 let precioParaAp = parseFloat(f.precio_estimado || f.precio || 0);
@@ -216,16 +217,16 @@ async function cargarFacturas() {
                             ${btnArchivar}
                         </div>`;
                         let idReporteAsociado = obtenerIdReporte(f) || 'N/A';
-                        let badgeCarasArch = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-                        tbodyArchivo.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idReporteAsociado}</span>${badgeCarasArch}</td><td style="vertical-align:top;">${doc50Html}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
+                        let badgeCarasArch = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                        tbodyArchivo.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idReporteAsociado}</span>${badgeCarasArch}</td><td style="vertical-align:top;">${doc50Html}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                         countArchivo++;
                     }
 
                     if (tbodyArchivoProv && rolUsuario === 'proveedores' && f.proveedor === nombreProveedorActual) {
                         let idRepArchProv = obtenerIdReporte(f) || 'S/T';
-                        let badgeCarasArchProv = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                        let badgeCarasArchProv = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
                         let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                        tbodyArchivoProv.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idRepArchProv}</span>${badgeCarasArchProv}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
+                        tbodyArchivoProv.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idRepArchProv}</span>${badgeCarasArchProv}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                         countArchivoProv++;
                     }
 
@@ -236,9 +237,9 @@ async function cargarFacturas() {
                         }
                         if (esMas10kArch) {
                             let idRepArchCorp = obtenerIdReporte(f) || 'S/T';
-                            let badgeCarasArchCorp = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                            let badgeCarasArchCorp = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
                             let btnVerExp = `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                            tbodyArchivoCorp.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#0ea5e9; font-weight:bold;">${idRepArchCorp}</span>${badgeCarasArchCorp}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
+                            tbodyArchivoCorp.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idRepArchCorp}</span>${badgeCarasArchCorp}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                             countArchivoCorp++;
                         }
                     }
@@ -282,10 +283,10 @@ async function cargarFacturas() {
                         textoEstado = 'Pendiente: Supervisor';
                     }
                 }
-                let estadoBadge = `<span style="background:${badgeColor}; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">${textoEstado}</span>`;
+                let estadoBadge = `<span style="background:${badgeColor}; color:white; padding:4px 8px; border-radius:12px; white-space:nowrap;">${textoEstado}</span>`;
                 if (f.estado === 'Rechazado_Con_Recomendaciones') {
                     let rechazadoPor = f.rechazado_por || 'Supervisión';
-                    estadoBadge += `<br><span style="color:#ef4444; font-size:0.8em; font-weight:bold; display:block; margin-top:4px;">Rechazada por ${rechazadoPor}</span>`;
+                    estadoBadge += `<br><span style="color:#ef4444; font-weight:bold; display:block; margin-top:4px;">Rechazada por ${rechazadoPor}</span>`;
                 }
 
                 let entregadoTexto = f.entregado || 'No';
@@ -368,8 +369,7 @@ async function cargarFacturas() {
                             btnAccion += `<button class="btn-cobertura" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; border:none; margin-top:2px; font-weight:bold; cursor:pointer; border-radius:6px;" onclick="asumirLiberacionAdmin('${f.id}')">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
                             btnAccion += `<button class="btn-info" style="background:#f59e0b; color:white; font-size:0.75em; padding:6px 10px; width:100%; box-sizing: border-box; border:none; margin-top:3px; font-weight:bold; cursor:pointer; border-radius:4px;" onclick="notificarAdminLiberacion('${f.id}')">🔔 Notificar al Administrador</button>`;
                         } else {
-                            btnAccion += `<button onclick="liberarTicketAdmin('${f.id}')"
-                                style="background:linear-gradient(135deg,#10b981,#059669); color:white; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; font-weight:bold; font-size:0.85em; width:100%; margin-top:2px;">
+                            btnAccion += `<button class="btn-liberar-facturacion" onclick="liberarTicketAdmin('${f.id}')" style="margin-top:2px;">
                                 ✅ Liberar Ticket para Facturación
                             </button>`;
                         }
@@ -408,35 +408,31 @@ async function cargarFacturas() {
                         </div>`;
                     } else {
                         // --- Botones normales del taller ---
-                        btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; align-items:stretch; width:100%;">
-                            <span style="font-size:0.9em; font-weight:bold; color:#a3b1c6; margin-bottom: 2px;">${ordStr !== 'Pendiente' ? 'Orden Oficial: <span style="color:#f59e0b;">' + ordStr + '</span>' : 'En revisión...'}</span>
-                            <button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box;" onclick="abrirDetalles('${f.id}')">Ver Detalles (PDF)</button>`;
+                        btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; align-items:stretch; width:100%; min-width:260px;">
+                            <button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; min-width:260px; min-height:36px; box-sizing: border-box; display:flex; align-items:center; justify-content:center; white-space:nowrap;" onclick="abrirDetalles('${f.id}')">Ver Detalles (PDF)</button>`;
 
                         if (confirmadaTotal && entregadoTexto !== 'Sí') {
                             if (!f.codigo_liberacion) {
                                 if (rolUsuario === 'proveedores') {
-                                    btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; background:#10b981; border:none;" onclick="marcarUnidadLista('${f.id}')">✔️ Marcar Unidad Lista</button>`;
+                                    btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; min-width:260px; min-height:36px; box-sizing: border-box; background:#10b981; border:none; margin-top:5px; display:flex; align-items:center; justify-content:center; white-space:nowrap;" onclick="marcarUnidadLista('${f.id}')">✔️ Marcar Unidad Lista</button>`;
                                 }
                             } else {
                                 if (rolUsuario === 'proveedores') {
-                                    btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px;">⌛ Esperando al chofer... (PIN enviado)</span>`;
+                                    btnAccion += `<span style="color:#0ea5e9; font-size:0.85em; font-weight:bold; margin-top:5px; text-align:center;">⌛ Esperando al chofer... (PIN enviado)</span>`;
                                 } else if (rolUsuario === 'supervision') {
-                                    btnAccion += `<button class="btn-info" onclick="abrirModalValidacion('${f.id}', '${f.unidad.replace('8090-', '')}')">🔑 Validar PIN Chofer</button>`;
+                                    btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; width:100%; min-width:260px; min-height:36px; box-sizing: border-box; margin-top:5px; display:flex; align-items:center; justify-content:center; white-space:nowrap;" onclick="abrirModalValidacion('${f.id}', '${f.unidad.replace('8090-', '')}')">🔑 Validar PIN Chofer</button>`;
                                 }
                             }
                         } else if (confirmadaTotal && entregadoTexto === 'Sí') {
                             if (f.liberado_admin === false) {
-                                btnAccion += `<div style="background:#1e293b; border:1px solid #f59e0b; border-radius:8px; padding:10px; margin-top:5px; text-align:center;">
-                                    <div style="color:#f59e0b; font-weight:bold; font-size:0.85em;">🔒 Ticket en revisión</div>
-                                    <div style="color:#94a3b8; font-size:0.78em; margin-top:4px;">El Administrador debe liberar este ticket antes de que puedas subir tu factura.</div>
-                                </div>`;
+                                btnAccion += `<button disabled class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#475569; color:#cbd5e1; border:none; margin-top:5px; width:100%; min-width:260px; min-height:36px; box-sizing:border-box; cursor:not-allowed; white-space:nowrap; display:flex; align-items:center; justify-content:center;" title="El Administrador debe liberar este ticket antes de que puedas subir tu factura.">🔒 Liberacion pendiente/Administrador</button>`;
                             } else if (f.liberado_admin === true && !f.factura_folio) {
-                                btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; margin-top:5px; width:100%;" onclick="abrirModalSubirFactura('${f.id}')">🧾 Subir Factura Final (PDF)</button>`;
+                                btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#0284c7; border:none; margin-top:5px; width:100%; min-width:260px; min-height:36px; box-sizing:border-box; cursor:pointer; white-space:nowrap; display:flex; align-items:center; justify-content:center;" onclick="abrirModalSubirFactura('${f.id}')">🧾 Subir Factura Final (PDF)</button>`;
                             } else if (f.factura_folio) {
                                 if (f.cotizaciones && f.cotizaciones.length > 1) {
-                                    btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Facturas Subidas</button>`;
+                                    btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%; min-width:260px; min-height:36px; box-sizing:border-box; cursor:pointer; white-space:nowrap; display:flex; align-items:center; justify-content:center;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Facturas Subidas</button>`;
                                 } else {
-                                    btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Factura Subida</button>`;
+                                    btnAccion += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#40916c; border:none; margin-top:5px; width:100%; min-width:260px; min-height:36px; box-sizing:border-box; cursor:pointer; white-space:nowrap; display:flex; align-items:center; justify-content:center;" onclick="abrirModalVerFacturasSubidas('${f.id}')">📄 Ver Factura Subida</button>`;
                                 }
                             }
                         }
@@ -444,24 +440,52 @@ async function cargarFacturas() {
                     }
                 }
 
-                let ciaExtra = f.compania ? ` | Cia: <strong style="color:white;">${f.compania}</strong>` : ``;
-                let infoExtra = `<br><small style="color:#a3b1c6;">Ticket: ${obtenerIdReporte(f) || 'S/T'} | Orden(es): <strong style="color:#f59e0b;">${ordStr}</strong>${ciaExtra}</small>`;
-                if (pedStr) infoExtra += `<br><small style="color:#a3b1c6;">Pedido(s): <strong style="color:#f59e0b;">${pedStr}</strong></small>`;
-                if (folStr) infoExtra += `<br><small style="color:#a3b1c6;">Factura(s): <strong style="color:#f59e0b;">${folStr}</strong></small>`;
-                if (docStr) infoExtra += `<br><small style="color:#a3b1c6;">Doc50(s): <strong style="color:#f59e0b;">${docStr}</strong></small>`;
-                let tdTitulo = `<td>${tituloCompleto}${infoExtra}</td>`;
+                let cotsList = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones : [{
+                    titulo: f.titulo || 'Sin Título',
+                    numero_cotizacion_asignacion: f.numero_cotizacion_asignacion,
+                    numero_orden: f.numero_orden,
+                    factura_folio: f.factura_folio,
+                    numero_doc50: f.numero_doc50
+                }];
+
+                let htmlCots = cotsList.map((c, i) => {
+                    let tit = c.titulo || f.titulo || 'Sin Título';
+                    let ped = c.numero_cotizacion_asignacion || f.numero_cotizacion_asignacion || 'Pendiente';
+                    let ord = c.numero_orden || f.numero_orden || 'Pendiente';
+                    let margin = i > 0 ? 'margin-top: 10px;' : '';
+
+                    let block = `<div style="${margin}">` +
+                        `<div><strong style="color:#ffffff;">Cotización ${i + 1}:</strong> ${tit}</div>` +
+                        `<div style="color:#94a3b8;">Número de Pedido: <strong style="color:#f59e0b;">${ped}</strong></div>` +
+                        `<div style="color:#94a3b8;">Número de Orden: <strong style="color:#f59e0b;">${ord}</strong></div>`;
+
+                    if (c.factura_folio || (cotsList.length === 1 && f.factura_folio)) {
+                        let fol = c.factura_folio || f.factura_folio;
+                        block += `<div style="color:#94a3b8;">Factura: <strong style="color:#f59e0b;">${fol}</strong></div>`;
+                    }
+                    if (c.numero_doc50 || (cotsList.length === 1 && f.numero_doc50)) {
+                        let doc = c.numero_doc50 || f.numero_doc50;
+                        block += `<div style="color:#94a3b8;">Doc50: <strong style="color:#f59e0b;">${doc}</strong></div>`;
+                    }
+
+                    block += `</div>`;
+                    return block;
+                }).join('');
+
+                let tdTitulo = `<td>${htmlCots}</td>`;
 
                 let indStr = '';
                 if (f.cotizaciones && f.cotizaciones.length > 1) {
-                    indStr = f.cotizaciones.map((c, i) => `Cot ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
+                    indStr = f.cotizaciones.map((c, i) => `<div style="${i > 0 ? 'margin-top:10px;' : ''}"><strong style="color:#ffffff;">Cotización ${i + 1}:</strong><br><span style="color:#a3b1c6;">$${parseFloat(c.precio || 0).toLocaleString('en-US')}</span></div>`).join('');
                 } else {
-                    indStr = `$${parseFloat(f.precio || 0).toLocaleString('en-US')}`;
+                    indStr = `<span style="color:#a3b1c6;">$${parseFloat(f.precio || 0).toLocaleString('en-US')}</span>`;
                 }
-                let tdPrecioInd = `<td><small style="color:#a3b1c6;">${indStr}</small></td>`;
+                let tdPrecioInd = `<td>${indStr}</td>`;
 
                 let idRepForTable = obtenerIdReporte(f) || 'S/T';
-                let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-                let tdTicket = `<td><span style="color:#0ea5e9; font-weight:bold;">${idRepForTable}</span>${badgeCaras}</td>`;
+                let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                let tdTicket = `<td><span style="color:#ffffff; font-weight:bold;">${idRepForTable}</span>${badgeCaras}</td>`;
+                let tdCompania = `<td><strong style="color:#ffffff;">${f.compania || 'RUMN'}</strong></td>`;
 
 
                 // ==========================================
@@ -487,10 +511,10 @@ async function cargarFacturas() {
 
                         if (subrolAct === 'Administrador') {
                             if (f.liberado_admin === false) {
-                                btnDoc += `<button class="btn-success" style="display:block; width:100%; margin:0; background-color: #f59e0b;" onclick="liberarDocContable('${f.id}')">✔️ Liberar Ticket</button>`;
-                                btnDoc += `<button class="btn-info" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#1e3a8a; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:0.9em; cursor:pointer;" onclick="solicitarCorreccionOrden('${f.id}')">Corrección (Num. Pedido y Orden)</button>`;
+                                btnDoc += `<button class="btn-liberar-ticket-admin" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirModalLiberarTicket('${f.id}')">✔️ Liberar Ticket</button>`;
+                                btnDoc += `<button class="btn-actualizar-orden" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="solicitarCorreccionOrden('${f.id}')">Corrección (Num. Pedido y Orden)</button>`;
                             } else {
-                                btnDoc += `<button class="btn-info" disabled style="display:block; width:100%; margin:0; background-color:#475569; cursor:not-allowed;">Ticket Liberado</button>`;
+                                btnDoc += `<button class="btn-esperando-factura" disabled style="display:block; width:100%; margin:0; margin-top:5px;" title="Este ticket ya fue liberado">✔️ Ticket Liberado</button>`;
                             }
                         } else {
                             if (f.liberado_admin === false) {
@@ -504,23 +528,23 @@ async function cargarFacturas() {
 
                         let ffStr = '';
                         if (f.cotizaciones && f.cotizaciones.length > 1) {
-                            ffStr = f.cotizaciones.map((c, i) => `Cot ${i + 1}: ${c.factura_folio || 'Pendiente'}`).join('<br>');
+                            ffStr = f.cotizaciones.map((c, i) => `Cotización ${i + 1}: ${c.factura_folio || 'Pendiente'}`).join('<br>');
                         } else {
                             ffStr = f.factura_folio || "Pendiente";
                         }
 
                         let indStrLocal = '';
                         if (f.cotizaciones && f.cotizaciones.length > 1) {
-                            indStrLocal = f.cotizaciones.map((c, i) => `Cot ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
+                            indStrLocal = f.cotizaciones.map((c, i) => `Cotización ${i + 1}: $${parseFloat(c.precio || 0).toLocaleString('en-US')}`).join('<br>');
                         } else {
                             indStrLocal = `$${parseFloat(f.precio || 0).toLocaleString('en-US')}`;
                         }
 
                         let idRepTable = obtenerIdReporte(f) || 'S/T';
-                        let badgeCarasDoc = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                        let badgeCarasDoc = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
                         let pFormat = f.precio ? parseFloat(f.precio).toLocaleString('en-US') : '0';
 
-                        tbodyDocContables.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepTable}</span>${badgeCarasDoc}</td><td><span style="color:#10b981; font-weight:bold;">${ffStr}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><small style="color:#a3b1c6;">${indStrLocal}</small></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
+                        tbodyDocContables.innerHTML += `<tr><td><span style="color:#ffffff; font-weight:bold;">${idRepTable}</span>${badgeCarasDoc}</td><td><span style="color:#10b981; font-weight:bold;">${ffStr}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><span style="color:#a3b1c6;">${indStrLocal}</span></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
                         countDocContables++;
 
                         if (subrolAct === 'Administrador') {
@@ -539,7 +563,7 @@ async function cargarFacturas() {
                         let foliosArr = [];
                         let f_cots = f.cotizaciones && f.cotizaciones.length > 0 ? f.cotizaciones : [f];
                         f_cots.forEach((c, idx) => {
-                            if (c.factura_folio) foliosArr.push(f_cots.length > 1 ? `Cot ${idx + 1}: ${c.factura_folio}` : c.factura_folio);
+                            if (c.factura_folio) foliosArr.push(f_cots.length > 1 ? `Cotización ${idx + 1}: ${c.factura_folio}` : c.factura_folio);
                         });
                         let badgeFolio = foliosArr.length > 0
                             ? `<span style="color:#10b981; font-weight:bold;">${foliosArr.join('<br>')}</span>`
@@ -552,7 +576,7 @@ async function cargarFacturas() {
                             btnAdminExtra += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
                             
                             if (!f.liberado_admin) {
-                                btnAdminExtra += `<button class="btn-info" onclick="abrirActualizarOrdenes('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; background-color:#1e3a8a; color:white; border:none; padding:8px 12px; border-radius:4px; font-size:0.9em; cursor:pointer;">Actualizar Datos(Pedido/Orden)</button>`;
+                                btnAdminExtra += `<button class="btn-actualizar-orden" onclick="abrirActualizarOrdenes('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px;">Actualizar Datos(Pedido/Orden)</button>`;
                             }
                             
                             // Nuevo botón manual para notificar al Admin
@@ -560,7 +584,7 @@ async function cargarFacturas() {
                                 if (subrolAct === 'Supervisor') {
                                     btnAdminExtra += `<button class="btn-cobertura" onclick="asumirLiberacionAdmin('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px;">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
                                 } else {
-                                    btnAdminExtra += `<button class="btn-success" onclick="liberarTicketAdmin('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px; padding:8px 12px; font-weight:bold;">🔓 Liberar Facturación</button>`;
+                                    btnAdminExtra += `<button class="btn-liberar-facturacion" onclick="liberarTicketAdmin('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px;">🔓 Liberar Facturación</button>`;
                                 }
                             }
 
@@ -584,16 +608,16 @@ async function cargarFacturas() {
                                     }
                                 } else if (valFiscal === 'Aprobada') {
                                     estadoFiscalBadge = `<span style="background:#2d6a4f; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">Factura Aprobada</span>`;
-                                    btnAdminExtra += `<button class="btn-info" style="font-size:0.8em; padding:8px 10px; background:#ef4444; border:none; margin:0; width:100%;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.pdf_fiscal || f.factura_pdf}')">📄 Ver Factura PDF</button>`;
+                                    btnAdminExtra += `<button class="btn-ver-factura-pdf" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirVisorPDF('/static/facturas_archivos/${f.pdf_fiscal || f.factura_pdf}')">📄 Ver Factura PDF</button>`;
                                 } else {
                                     estadoFiscalBadge = `<span style="background:#ef4444; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">Rechazada</span>`;
                                 }
                             } else {
                                 estadoFiscalBadge = `<span style="color:#b45309; font-weight:bold;">Esperando Factura</span>`;
-                                btnAdminExtra += `<span style="color:#b45309; font-size:0.85em;">Esperando subida de proveedor</span>`;
+                                btnAdminExtra += `<button disabled class="btn-esperando-factura" style="display:block; width:100%; margin:0; margin-top:5px;" title="Esperando que el taller o proveedor cargue su factura fiscal">⏳ Esperando Factura/Proveedor</button>`;
                             }
 
-                            btnAdminExtra += `<button class="btn-danger-sm" style="display:block; width:100%; margin:0; padding:8px 10px; font-size:0.8em;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar del Sistema</button>`;
+                            btnAdminExtra += `<button class="btn-danger-sm" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="eliminarFacturaSilenciosa('${f.id}')">Eliminar del Sistema</button>`;
                             btnAdminExtra += `</div>`;
                         }
 
@@ -603,22 +627,23 @@ async function cargarFacturas() {
                         let tdEntregadoFinal = rolUsuario === 'administracion' ? `<td>${entregadoBadge}</td>` : '';
                         let acciones = rolUsuario === 'administracion' ? btnAdminExtra : btnAccion;
 
-                        tbodyFinales.innerHTML += `<tr>${tdTicket}<td>${badgeFolio}</td><td>${f.fecha}</td>${tdProv}<td>${f.unidad}</td>${tdTitulo}${tdPrecioInd}<td><strong>$${precioBonito} MXN</strong></td>${tdEstadoFiscal}${tdEstado}${tdEntregadoFinal}<td>${acciones}</td></tr>`;
+                        tbodyFinales.innerHTML += `<tr>${tdTicket}<td>${badgeFolio}</td><td>${f.fecha}</td>${tdProv}<td>${f.unidad}</td>${tdCompania}${tdTitulo}${tdPrecioInd}<td><strong>$${precioBonito} MXN</strong></td>${tdEstadoFiscal}${tdEstado}${tdEntregadoFinal}<td>${acciones}</td></tr>`;
                         countFacturas++;
                     }
                 } else {
                     if (tbody) {
                         let tdEntregado = rolUsuario === 'administracion' ? `<td>${entregadoBadge}</td>` : '';
-                        tbody.innerHTML += `<tr>${tdTicket}<td>${f.fecha}</td>${rolUsuario !== 'proveedores' ? `<td><strong>${f.proveedor}</strong></td>` : ''}<td>${f.unidad}</td>${tdTitulo}${tdPrecioInd}<td><strong>$${precioBonito} MXN</strong></td><td>${estadoBadge}</td>${tdEntregado}<td>${btnAccion}</td></tr>`;
+                        tbody.innerHTML += `<tr>${tdTicket}<td>${f.fecha}</td>${rolUsuario !== 'proveedores' ? `<td><strong>${f.proveedor}</strong></td>` : ''}<td>${f.unidad}</td>${tdCompania}${tdTitulo}${tdPrecioInd}<td><strong>$${precioBonito} MXN</strong></td><td>${estadoBadge}</td>${tdEntregado}<td>${btnAccion}</td></tr>`;
                         countCotizaciones++;
                     }
                 }
             });
 
 
-            let colSpanCot = rolUsuario === 'corporativos' ? '9' : (rolUsuario === 'administracion' ? '8' : '7');
+            let colSpanCot = rolUsuario === 'administracion' ? '11' : (rolUsuario === 'corporativos' ? '10' : '9');
+            let colSpanFac = rolUsuario === 'administracion' ? '12' : '10';
             if (tbody && countCotizaciones === 0) tbody.innerHTML = `<tr><td colspan="${colSpanCot}" style="text-align:center;">No hay cotizaciones registradas</td></tr>`;
-            if (tbodyFinales && countFacturas === 0) tbodyFinales.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay facturas registradas</td></tr>`;
+            if (tbodyFinales && countFacturas === 0) tbodyFinales.innerHTML = `<tr><td colspan="${colSpanFac}" style="text-align:center;">No hay facturas registradas</td></tr>`;
             if (tbodyDocContables && countDocContables === 0) tbodyDocContables.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay documentos contables pendientes</td></tr>`;
             if (tbodyArchivo && countArchivo === 0) tbodyArchivo.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay registros archivados</td></tr>`;
             if (tbodyArchivoCorp && countArchivoCorp === 0) tbodyArchivoCorp.innerHTML = `<tr><td colspan="7" style="text-align:center;">No hay registros archivados</td></tr>`;
@@ -639,7 +664,7 @@ async function cargarFacturas() {
 }
 
 function marcarUnidadLista(idFactura) {
-    if (!confirm("¿¿Confirmas que la reparación terminóó?\n\nAl aceptar, se enviaráá un correo automático al chofer con su PIN para que pase a recoger la unidad en este momento.")) return;
+    if (!confirm("¿Confirmas que la reparación de la unidad ha concluido con éxito?\n\nAl confirmar, se enviará un correo automático al chofer con su código PIN para que pase a recoger la unidad al taller.")) return;
     mostrarLoaderDinamico("Generando código PIN...", "Notificando al chofer 📧");
 
     fetch('/api/facturas/marcar_lista', {
@@ -648,11 +673,12 @@ function marcarUnidadLista(idFactura) {
         body: JSON.stringify({ id: idFactura })
     }).then(res => res.json()).then(data => {
         ocultarLoaderDinamico();
-        alert(data.message);
+        alert(data.message || "¡Unidad marcada como lista! El PIN ha sido enviado al chofer.");
         cargarFacturas();
     }).catch(err => {
         ocultarLoaderDinamico();
         console.error(err);
+        alert("Ocurrió un error al marcar la unidad como lista.");
     });
 }
 
@@ -767,7 +793,7 @@ function abrirModalVerFacturasSubidas(idFactura) {
 
     let folioText = "";
     if (f.cotizaciones && f.cotizaciones.length > 1) {
-        folioText = allFacturas.map((c, i) => `Cot ${i + 1}: ${c.factura_folio || 'N/A'}`).join(' | ');
+        folioText = allFacturas.map((c, i) => `Cotización ${i + 1}: ${c.factura_folio || 'N/A'}`).join(' | ');
     } else {
         folioText = f.factura_folio || 'N/A';
     }
@@ -1014,7 +1040,7 @@ function abrirModalEditarAdmin(idFactura, seccionId = null) {
 }
 
 function actualizarFacturaAdmin() {
-    if (!confirm("¿¿Confirmas la actualización de datos? (Si el precio es >= $10,001 se enviaráá al corporativo).")) return;
+    if (!confirm("¿Confirmas la actualización de datos? (Si el precio es >= $10,001 se enviará al corporativo).")) return;
     let inputPrecio = document.getElementById('edit_precio'); inputPrecio.value = inputPrecio.value.replace(/[^0-9.]/g, '');
     let formData = new FormData(document.getElementById('form-editar-admin'));
 
@@ -1043,6 +1069,19 @@ function abrirModalNuevaFactura() {
 
     if (document.getElementById('hidden_numero_reporte')) document.getElementById('hidden_numero_reporte').value = '';
     if (document.getElementById('etiqueta-reporte-vinculado')) document.getElementById('etiqueta-reporte-vinculado').style.display = 'none';
+
+    let inputUnidad = document.getElementById('input_nueva_unidad');
+    if (inputUnidad) {
+        inputUnidad.readOnly = false;
+        inputUnidad.style.backgroundColor = '';
+        inputUnidad.style.color = '';
+        inputUnidad.style.cursor = '';
+        inputUnidad.style.borderColor = '';
+        inputUnidad.title = '';
+    }
+    let badgeUnidad = document.getElementById('badge-unidad-bloqueada');
+    if (badgeUnidad) badgeUnidad.style.display = 'none';
+
     document.getElementById('modal-nueva-factura').style.display = 'flex';
 }
 
@@ -1393,6 +1432,12 @@ function abrirRevisionAdmin(idFactura) {
             `;
         });
         container.innerHTML = inputsHtml;
+    }
+
+    let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+    let btnRehacer = document.getElementById('btn-rehacer-cotizacion');
+    if (btnRehacer) {
+        btnRehacer.style.display = (subrolAct === 'Supervisor') ? 'block' : 'none';
     }
 
     validarOrden();
@@ -1770,7 +1815,7 @@ function confirmarAprobacionCorpDirecto(idFactura) {
 
 function confirmarFacturaCorp() {
     let id_fac = document.getElementById('rev-id-corp').value;
-    if (!confirm(`¿¿Aprobar financieramente esta factura mayor?`)) return;
+    if (!confirm(`¿Aprobar financieramente esta factura mayor?`)) return;
 
     mostrarLoaderDinamico("Aprobando factura mayor...", "Generando código oficial 📧");
 
@@ -2157,20 +2202,32 @@ async function cargarReportesAdmin() {
 
         reportesGlobal = todosReportes;
 
-        if (reportesNoFacturados.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay reportes ni tickets de mantenimiento pendientes</td></tr>'; return; }
+        if (reportesNoFacturados.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No hay reportes ni tickets de mantenimiento pendientes</td></tr>'; return; }
 
         reportesNoFacturados.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         reportesNoFacturados.forEach(r => {
             let badgeColor = r.estado === 'Pendiente de Revisión' ? '#b45309' : '#2d6a4f';
-            let estadoBadge = `<span style="background:${badgeColor}; color:white; padding:4px 8px; border-radius:12px; font-size:0.85em; white-space:nowrap;">${r.estado}</span>`;
+            let estadoBadge = `<span style="background:${badgeColor}; color:white; padding:4px 8px; border-radius:12px; white-space:nowrap;">${r.estado}</span>`;
             let btnAsignar = r.estado === 'Pendiente de Revisión' ? `<button class="btn-success" onclick="abrirAsignacionReporte('${r.id}')">Asignar a Taller</button>` : `<button class="btn-info" onclick="abrirAsignacionReporte('${r.id}')">Ver Asignación</button>`;
             let btnAccion = `<div style="display:flex; gap:5px;">${btnAsignar}<button class="btn-danger-sm" onclick="eliminarReporteDefinitivo('${r.id}')">Eliminar</button></div>`;
 
-            let ciaBadge = r.compania ? `Cia: <strong>${r.compania}</strong> | ` : ``;
-            let tdUnidadChofer = `<td>8090-${r.unidad}<br><small style="color:#a3b1c6;">${ciaBadge}Op: ${r.empleado}</small></td>`;
+            let unidadStr = r.unidad ? (r.unidad.startsWith('8090-') ? r.unidad : `8090-${r.unidad}`) : 'S/U';
+            let choferStr = r.empleado || 'Sin Chofer';
+            let deptoStr = r.departamento || 'Sin Depto';
+            let rawFalla = (r.falla || 'Sin descripción').trim();
+            let fallaTexto = rawFalla
+                .replace(/^(servicio|mantenimiento)\s+(preventivo|correctivo)(\s+(mayor|menor))?\s*[:\-\.]?\s*/i, '')
+                .replace(/^(servicio\s+(mayor|menor))\s*[:\-\.]?\s*/i, '')
+                .replace(/^(preventivo|correctivo)(\s+(mayor|menor))?\s*[:\-\.]?\s*/i, '')
+                .trim();
+            if (fallaTexto.length > 0) {
+                fallaTexto = fallaTexto.charAt(0).toUpperCase() + fallaTexto.slice(1);
+            }
+            if (!fallaTexto) fallaTexto = rawFalla;
+            let tdFalla = `<td style="white-space: normal; min-width: 260px; max-width: 400px; line-height: 1.4; word-break: break-word;">${fallaTexto}</td>`;
 
-            let badgeCaras = r.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-            tbody.innerHTML += `<tr><td><strong>${r.id}</strong>${badgeCaras}</td><td>${r.fecha}</td>${tdUnidadChofer}<td>${r.falla.substring(0, 30)}...</td><td>${r.mantenimiento}</td><td>${estadoBadge}</td><td>${btnAccion}</td></tr>`;
+            let badgeCaras = r.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+            tbody.innerHTML += `<tr><td><span style="color:#ffffff; font-weight:bold;">${r.id}</span>${badgeCaras}</td><td>${r.fecha}</td><td><strong>${unidadStr}</strong></td><td><strong>${choferStr}</strong></td><td><strong>${deptoStr}</strong></td>${tdFalla}<td>${r.mantenimiento}</td><td>${estadoBadge}</td><td>${btnAccion}</td></tr>`;
         });
     } catch (err) { console.error(err); }
 }
@@ -2339,7 +2396,16 @@ async function cargarReportesProv() {
                            asignadoNorm !== 'ninguno';
             let textoBoton = (esRecienAsignado && esTaller) ? 'Revisar/Crear Cotizacion' : 'Ver Detalle';
             let btnAccion = `<button class="btn-info" style="background:#0284c7;" onclick="abrirReporteProv('${r.id}')">${textoBoton}</button>`;
-            tbody.innerHTML += `<tr><td><strong>${r.id}</strong></td><td>${r.fecha}</td><td>8090-${r.unidad}</td><td>${r.falla.substring(0, 30)}...</td><td>${r.mantenimiento}</td><td>${btnAccion}</td></tr>`;
+            let rawFallaP = (r.falla || 'Sin descripción').trim();
+            let fallaP = rawFallaP
+                .replace(/^(servicio|mantenimiento)\s+(preventivo|correctivo)(\s+(mayor|menor))?\s*[:\-\.]?\s*/i, '')
+                .replace(/^(servicio\s+(mayor|menor))\s*[:\-\.]?\s*/i, '')
+                .replace(/^(preventivo|correctivo)(\s+(mayor|menor))?\s*[:\-\.]?\s*/i, '')
+                .trim();
+            if (fallaP.length > 0) fallaP = fallaP.charAt(0).toUpperCase() + fallaP.slice(1);
+            if (!fallaP) fallaP = rawFallaP;
+            let fallaSub = fallaP.length > 35 ? (fallaP.substring(0, 35) + '...') : fallaP;
+            tbody.innerHTML += `<tr><td><strong>${r.id}</strong></td><td>${r.fecha}</td><td>8090-${r.unidad}</td><td>${fallaSub}</td><td>${r.mantenimiento}</td><td>${btnAccion}</td></tr>`;
         });
     } catch (err) { console.error(err); }
 }
@@ -2358,14 +2424,42 @@ function iniciarFacturaDesdeReporte() {
     document.getElementById('hidden_numero_reporte').value = reporteSeleccionado.id;
     document.getElementById('etiqueta-reporte-vinculado').style.display = 'block';
     document.getElementById('span-ticket-vinculado').innerText = reporteSeleccionado.id;
-    document.getElementById('input_nueva_unidad').value = reporteSeleccionado.unidad;
+
+    let inputUnidad = document.getElementById('input_nueva_unidad');
+    if (inputUnidad) {
+        inputUnidad.value = reporteSeleccionado.unidad || '';
+        inputUnidad.readOnly = true;
+        inputUnidad.style.backgroundColor = '#0b1c30';
+        inputUnidad.style.color = '#cbd5e1';
+        inputUnidad.style.cursor = 'not-allowed';
+        inputUnidad.style.borderColor = '#1f395a';
+        inputUnidad.title = 'El número de unidad proviene del reporte original y no se puede modificar.';
+    }
+    let badgeUnidad = document.getElementById('badge-unidad-bloqueada');
+    if (badgeUnidad) badgeUnidad.style.display = 'inline';
 
     // Autocompletar la primera fila dinámica
     setTimeout(() => {
         let mant = document.querySelector('select[name="mantenimiento[]"]');
-        if (mant) mant.value = reporteSeleccionado.mantenimiento;
+        if (mant && reporteSeleccionado.mantenimiento) {
+            mant.value = reporteSeleccionado.mantenimiento;
+        }
         let retro = document.querySelector('textarea[name="retro[]"]');
-        if (retro) retro.value = `REPORTE ORIGINAL DEL CHOFER: ${reporteSeleccionado.falla}`;
+        if (retro) {
+            let fallaLimpia = (reporteSeleccionado.falla || '').replace(/^REPORTE ORIGINAL DEL CHOFER:\s*/i, '').trim();
+            retro.value = fallaLimpia || 'Sin descripción de falla';
+            retro.readOnly = true;
+            retro.style.backgroundColor = '#081422';
+            retro.style.color = '#cbd5e1';
+            retro.style.cursor = 'not-allowed';
+            retro.style.borderColor = '#1f395a';
+            retro.title = 'El problema o situación proviene del reporte original y no se puede modificar.';
+
+            let labelRetro = retro.previousElementSibling;
+            if (labelRetro && !labelRetro.querySelector('.badge-bloqueado')) {
+                labelRetro.innerHTML += ` <span class="badge-bloqueado" style="color:#0ea5e9; font-size:0.85em; font-weight:normal;">🔒 (Reporte Original - No editable)</span>`;
+            }
+        }
     }, 100);
 }
 
@@ -3259,7 +3353,131 @@ function abrirVisorArchivoLocal(previewId) {
 
 
 
+function abrirModalLiberarTicket(idFactura) {
+    const f = (typeof facturasGlobal !== 'undefined')
+        ? facturasGlobal.find(x => String(x.id) === String(idFactura))
+        : null;
+
+    if (!f) {
+        liberarDocContable(idFactura);
+        return;
+    }
+
+    let cots = (f.cotizaciones && f.cotizaciones.length > 0)
+        ? f.cotizaciones
+        : [{
+            titulo: f.titulo || 'Cotización Principal',
+            numero_orden: f.numero_orden || '',
+            numero_cotizacion_asignacion: f.numero_cotizacion_asignacion || ''
+        }];
+
+    let unidadLimpia = f.unidad ? `8090-${String(f.unidad).replace('8090-', '')}` : 'N/A';
+    let idReporteDisplay = (typeof obtenerIdReporte === 'function') ? (obtenerIdReporte(f) || f.id) : (f.id_reporte || f.id);
+
+    let html = `
+    <div id="modal-liberar-ticket-admin" onclick="if(event.target === this) cerrarModalLiberarTicket()" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center; backdrop-filter:blur(6px);">
+        <div style="background:#0b1c30; padding:28px 32px; border-radius:12px; width:95%; max-width:680px; color:white; border:1px solid #1f395a; box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-height:85vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1f395a; padding-bottom:14px; margin-bottom:16px;">
+                <h3 style="color:#f59e0b; margin:0; font-size:1.3rem; display:flex; align-items:center; gap:8px;">
+                    <span>📑</span> Liberar Ticket - Datos Contables
+                </h3>
+                <span style="background:#1e3a8a; color:#93c5fd; padding:4px 12px; border-radius:12px; font-size:0.85rem; font-weight:bold;">Ticket #${idReporteDisplay}</span>
+            </div>
+
+            <p style="color:#94a3b8; font-size:0.92rem; margin-top:0; margin-bottom:18px;">
+                Verifica los datos de <strong>Número de Pedido</strong> y <strong>Número de Orden</strong> correspondientes a la unidad <strong>${unidadLimpia}</strong>:
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:14px;">
+    `;
+
+    cots.forEach((cot, idx) => {
+        let numOrd = (cot.numero_orden && String(cot.numero_orden).trim() !== '' && cot.numero_orden !== 'Pendiente')
+            ? `<span style="color:#10b981; font-weight:bold; font-size:1.1em;">${cot.numero_orden}</span>`
+            : `<span style="color:#ef4444; font-weight:bold; font-style:italic;">No asignado / Pendiente</span>`;
+
+        let numPed = (cot.numero_cotizacion_asignacion && String(cot.numero_cotizacion_asignacion).trim() !== '' && cot.numero_cotizacion_asignacion !== 'Pendiente')
+            ? `<span style="color:#0ea5e9; font-weight:bold; font-size:1.1em;">${cot.numero_cotizacion_asignacion}</span>`
+            : `<span style="color:#ef4444; font-weight:bold; font-style:italic;">No asignado / Pendiente</span>`;
+
+        let tituloCot = cot.titulo || `Cotización ${idx + 1}`;
+
+        html += `
+                <div style="background:#112240; padding:16px 20px; border-radius:8px; border:1px solid #1f395a;">
+                    <div style="color:#fcd34d; font-weight:bold; font-size:0.95rem; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:6px;">
+                        📌 ${cots.length > 1 ? `Cotización ${idx + 1}: ` : ''}${tituloCot}
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div style="background:#0b1c30; padding:12px 16px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
+                            <div style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; margin-bottom:6px; font-weight:600;">Número de Orden</div>
+                            <div>${numOrd}</div>
+                        </div>
+                        <div style="background:#0b1c30; padding:12px 16px; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
+                            <div style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; margin-bottom:6px; font-weight:600;">Número de Pedido</div>
+                            <div>${numPed}</div>
+                        </div>
+                    </div>
+                </div>
+        `;
+    });
+
+    html += `
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid #1f395a;">
+                <button type="button" onclick="cerrarModalLiberarTicket()" class="btn-cancelar-modal">Cancelar</button>
+                <button type="button" onclick="ejecutarLiberacionCampoContable('${f.id}')" class="btn-liberar-campo-contable">Liberar Campo/Contable</button>
+            </div>
+        </div>
+    </div>`;
+
+    let prev = document.getElementById('modal-liberar-ticket-admin');
+    if (prev) prev.remove();
+
+    let div = document.createElement('div');
+    div.innerHTML = html;
+    document.body.appendChild(div.firstElementChild);
+}
+
+function cerrarModalLiberarTicket() {
+    let m = document.getElementById('modal-liberar-ticket-admin');
+    if (m) m.remove();
+}
+
+async function ejecutarLiberacionCampoContable(idFactura) {
+    if (!confirm("¿Confirmas la liberación del Campo/Contable para este ticket?")) {
+        return;
+    }
+
+    cerrarModalLiberarTicket();
+
+    try {
+        mostrarLoaderDinamico("Liberando ticket...", "Actualizando permisos");
+        let res = await fetch('/api/facturas/liberar_doc50', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: idFactura })
+        });
+        let data = await res.json();
+        ocultarLoaderDinamico();
+        alert(data.message);
+        if (data.status === 'success') {
+            if (typeof fetchFacturasGlobal === 'function') await fetchFacturasGlobal();
+            if (typeof renderTabla === 'function') renderTabla();
+            else if (typeof cargarFacturas === 'function') cargarFacturas();
+        }
+    } catch (e) {
+        console.error(e);
+        ocultarLoaderDinamico();
+        alert("Error al liberar el ticket.");
+    }
+}
+
 async function liberarDocContable(idFactura) {
+    abrirModalLiberarTicket(idFactura);
+}
+
+async function liberarDocContableDirecto(idFactura) {
     if (!confirm("¿Estás seguro que deseas liberar este ticket? Una vez liberado, el Supervisor podrá subir el Documento Contable.")) return;
 
     try {
@@ -3671,4 +3889,93 @@ window.enviarCorreccionCotizacionModal = async function(idFactura, numCots) {
         if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
         if (typeof mostrarToast === 'function') { mostrarToast("Error al enviar la corrección.", 'error'); } else { alert("Error al enviar la corrección."); }
     }
-}
+};
+
+window.abrirModalRehacer = function(idFactura) {
+    let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
+    if (subrolAct !== 'Supervisor') {
+        alert("Esta acción solo está permitida para Supervisores.");
+        return;
+    }
+    let targetId = idFactura || (document.getElementById('rev-id-admin') ? document.getElementById('rev-id-admin').value : '');
+    if (!targetId) {
+        alert("No se identificó la cotización a rehacer.");
+        return;
+    }
+    let inputHidden = document.getElementById('rehacer-factura-id');
+    if (inputHidden) inputHidden.value = targetId;
+
+    let inputMotivo = document.getElementById('motivo-rehacer-input');
+    if (inputMotivo) inputMotivo.value = '';
+
+    let modalRev = document.getElementById('modal-revision-admin');
+    if (modalRev) modalRev.style.display = 'none';
+
+    let modalRehacer = document.getElementById('modal-rehacer-cotizacion');
+    if (modalRehacer) modalRehacer.style.display = 'flex';
+};
+
+window.cerrarModalRehacer = function() {
+    let modalRehacer = document.getElementById('modal-rehacer-cotizacion');
+    if (modalRehacer) modalRehacer.style.display = 'none';
+    let revId = document.getElementById('rev-id-admin') ? document.getElementById('rev-id-admin').value : '';
+    let modalRev = document.getElementById('modal-revision-admin');
+    if (modalRev && revId) {
+        modalRev.style.display = 'flex';
+    }
+};
+
+window.ejecutarRehacerCotizacion = async function() {
+    let inputHidden = document.getElementById('rehacer-factura-id');
+    let facturaId = inputHidden ? inputHidden.value : '';
+    let inputMotivo = document.getElementById('motivo-rehacer-input');
+    let motivo = inputMotivo ? inputMotivo.value.trim() : '';
+
+    if (!facturaId) {
+        alert("No se encontró el ID de la cotización a rehacer.");
+        return;
+    }
+
+    if (!motivo) {
+        alert("Por favor escribe el motivo o error detectado para que el taller sepa qué debe corregir al elaborar la nueva cotización.");
+        return;
+    }
+
+    if (!confirm("⚠️ ¿Estás completamente seguro de que deseas eliminar la cotización actual para que el taller la rehaga desde cero?")) {
+        return;
+    }
+
+    let modalRehacer = document.getElementById('modal-rehacer-cotizacion');
+    if (modalRehacer) modalRehacer.style.display = 'none';
+
+    if (typeof mostrarLoaderDinamico === 'function') {
+        mostrarLoaderDinamico("Procesando...", "Eliminando cotización y regresando ticket al taller 🔄");
+    }
+
+    try {
+        const res = await fetch('/api/facturas/rehacer_cotizacion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id: facturaId,
+                motivo: motivo
+            })
+        });
+
+        const data = await res.json();
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
+
+        if (data.status === 'success') {
+            alert("✅ " + data.message);
+            if (typeof cargarFacturas === 'function') cargarFacturas();
+            if (typeof cargarCotizaciones10k === 'function') cargarCotizaciones10k();
+        } else {
+            alert("❌ Error: " + data.message);
+        }
+    } catch (err) {
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
+        console.error("Error al solicitar rehacer cotización:", err);
+        alert("Ocurrió un error al procesar la solicitud.");
+    }
+};
+

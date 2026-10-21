@@ -222,9 +222,10 @@ function marcarBotonActivo(vista) {
         if (onclickAttr) {
             let matchesView = onclickAttr.includes("('" + vista + "')");
             let matches10k = (vista === 'cotizaciones-10k' && onclickAttr.includes("verCotizacionesMas10000"));
-            let matchesDoc = (vista === 'documentos-contables' && onclickAttr.includes("documentos-contables"));
+            let matchesDoc = ((vista === 'documentos-contables' || vista === 'documentos_contables') && (onclickAttr.includes("documentos-contables") || onclickAttr.includes("documentos_contables")));
+            let matchesFF = ((vista === 'facturas-finales' || vista === 'facturas_finales') && (onclickAttr.includes("facturas-finales") || onclickAttr.includes("facturas_finales")));
             
-            if (matchesView || matches10k || matchesDoc) {
+            if (matchesView || matches10k || matchesDoc || matchesFF) {
                 let nav = b.closest('.nav-menu') || b.closest('.sidebar');
                 if (nav) {
                     nav.querySelectorAll('.btn-sidebar').forEach(btn => btn.classList.remove('active'));
@@ -263,7 +264,7 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'ciudades-copes' && typeof cargarCiudadesCopes === 'function') cargarCiudadesCopes();
     if (vista === 'reportes' && typeof cargarReportesAdmin === 'function') cargarReportesAdmin();
     if (vista === 'analitica' && typeof cargarAnalitica === 'function') cargarAnalitica();
-    if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'documentos_contables') && typeof cargarFacturas === 'function') cargarFacturas();
+    if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'facturas-finales' || vista === 'documentos_contables' || vista === 'documentos-contables' || vista === 'archivo') && typeof cargarFacturas === 'function') cargarFacturas();
     if (vista === 'cotizaciones-10k' && typeof cargarCotizaciones10k === 'function') cargarCotizaciones10k();
 }
 
@@ -444,7 +445,7 @@ function procesarAccion(identificador, accion) {
         return;
     }
 
-    let mensaje = '¿¿Aceptar usuario y generar credenciales?';
+    let mensaje = '¿Aceptar usuario y generar credenciales?';
     if (confirm(mensaje)) {
         fetch(`/api/${accion}`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ identificador: identificador })
@@ -571,7 +572,7 @@ function cargarListaUsuarios(rolBuscado, idTabla) {
 }
 
 function eliminarUsuario(usuarioId, rol) {
-    if (confirm(`⚠️ ATENCIÓN ⚠️\n¿¿Eliminar COMPLETAMENTE a este usuario? Esta acción no se puede deshacer.`)) {
+    if (confirm(`⚠️ ATENCIÓN ⚠️\n¿Eliminar COMPLETAMENTE a este usuario? Esta acción no se puede deshacer.`)) {
         fetch('/api/eliminar_usuario', {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: usuarioId })
         }).then(res => res.json()).then(data => { alert(data.message); cargarListaUsuarios(rol, 'tabla-lista-' + (rol === 'proveedores' ? 'prov' : (rol === 'administracion' ? 'admin' : 'corp'))); cargarAccesos(); });
@@ -697,45 +698,274 @@ function renovarPassword(usuarioId) {
 }
 
 function abrirMiPerfil() {
+    const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
+    const fechaTexto = new Date().toLocaleDateString('es-MX', opciones);
+    
     const dateSpan = document.getElementById('pdf-fecha');
-    if (dateSpan) {
-        const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
-        dateSpan.innerText = new Date().toLocaleDateString('es-MX', opciones);
-    }
-    document.getElementById('modal-mi-perfil').style.display = 'flex';
+    const displaySpan = document.getElementById('perfil-fecha-display');
+    if (dateSpan) dateSpan.innerText = fechaTexto;
+    if (displaySpan) displaySpan.innerText = fechaTexto;
+    
+    const modal = document.getElementById('modal-mi-perfil');
+    if (modal) modal.style.display = 'flex';
 }
 
 function descargarPDF() {
-    if (confirm('¿¿Confirmas que deseas descargar este perfil en formato PDF?')) {
-        const elemento = document.getElementById('pdf-content');
-        const opciones = {
-            margin: 0.4,
-            filename: 'Perfil_Usuario_RUMN.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-        html2pdf().set(opciones).from(elemento).save();
+    const elemento = document.getElementById('pdf-content');
+    if (!elemento) return;
+    
+    // Abrir una nueva pestaña para visualizar y descargar el documento oficial
+    const nuevaPestana = window.open('', '_blank');
+    if (!nuevaPestana) {
+        alert('Por favor, permite ventanas emergentes en tu navegador para ver el expediente en una pestaña nueva.');
+        return;
     }
+    
+    const opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric' };
+    const fechaTexto = new Date().toLocaleDateString('es-MX', opcionesFecha);
+    
+    const dateSpan = elemento.querySelector('#pdf-fecha');
+    if (dateSpan) dateSpan.innerText = fechaTexto;
+
+    const contenidoHTML = elemento.innerHTML;
+    
+    nuevaPestana.document.open();
+    nuevaPestana.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expediente de Usuario - RUMN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f172a;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1e293b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .toolbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: #112641;
+            border-bottom: 1px solid #1f395a;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            z-index: 1000;
+        }
+        .toolbar-title {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toolbar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-tool {
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-print {
+            background: #0284c7;
+            color: #ffffff;
+        }
+        .btn-print:hover { background: #0369a1; }
+        .btn-download {
+            background: #2d6a4f;
+            color: #ffffff;
+        }
+        .btn-download:hover { background: #1b4332; }
+        .btn-close {
+            background: #475569;
+            color: #ffffff;
+        }
+        .btn-close:hover { background: #334155; }
+        .document-wrapper {
+            padding: 35px 20px 50px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .pdf-sheet {
+            background: #ffffff;
+            color: #000000;
+            width: 100%;
+            max-width: 800px;
+            padding: 45px 50px;
+            border-radius: 6px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+        .pdf-header-doc {
+            text-align: center;
+            border-bottom: 2px solid #112641;
+            padding-bottom: 16px;
+            margin-bottom: 25px;
+        }
+        .pdf-header-doc h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #112641;
+            font-family: 'Times New Roman', serif;
+            letter-spacing: 0.5px;
+        }
+        .pdf-header-doc p {
+            margin: 6px 0 0 0;
+            font-size: 13px;
+            color: #475569;
+            font-style: italic;
+            font-weight: bold;
+        }
+        .pdf-body {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 25px;
+            align-items: flex-start;
+        }
+        .pdf-photo-doc {
+            width: 130px;
+            height: 130px;
+            object-fit: cover;
+            border: 2px solid #112641;
+            border-radius: 4px;
+        }
+        .pdf-details {
+            flex: 1;
+        }
+        .pdf-section-title {
+            background: #f1f5f9;
+            padding: 7px 12px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            border-left: 4px solid #112641;
+            font-size: 13.5px;
+            color: #112641;
+        }
+        .pdf-line {
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #1e293b;
+        }
+        .pdf-line strong {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .pdf-footer {
+            border-top: 1px solid #cbd5e1;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 35px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #ffffff !important; padding: 0 !important; }
+            .document-wrapper { padding: 0 !important; }
+            .pdf-sheet {
+                box-shadow: none !important;
+                max-width: 100% !important;
+                padding: 10mm 15mm !important;
+            }
+            @page {
+                size: letter portrait;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar no-print">
+        <div class="toolbar-title">
+            <span>📄</span> Expediente Oficial de Usuario - RUMN
+        </div>
+        <div class="toolbar-actions">
+            <button class="btn-tool btn-print" onclick="window.print()">
+                🖨️ Imprimir / Guardar como PDF
+            </button>
+            <button class="btn-tool btn-download" onclick="descargarComoPDF()">
+                📥 Descargar PDF (.pdf)
+            </button>
+            <button class="btn-tool btn-close" onclick="window.close()">
+                ✖️ Cerrar
+            </button>
+        </div>
+    </div>
+    
+    <div class="document-wrapper">
+        <div id="documento-para-descargar" class="pdf-sheet">
+            ${contenidoHTML}
+        </div>
+    </div>
+
+    <script>
+        function descargarComoPDF() {
+            const elem = document.getElementById('documento-para-descargar');
+            const opt = {
+                margin: 0.4,
+                filename: 'Perfil_Usuario_RUMN.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(elem).save();
+        }
+    <\/script>
+</body>
+</html>`);
+    nuevaPestana.document.close();
 }
 
 // --- INICIALIZACION ROBUSTA ESPERANDO A QUE CARGUEN TODOS LOS SCRIPTS ---
 window.addEventListener('load', function() {
-    if (document.getElementById('vista-pendientes')) { 
+    let rolActual = document.getElementById('rol-actual') ? document.getElementById('rol-actual').value : '';
+    let subrolActual = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value.trim() : '';
+
+    if (rolActual === 'administracion' || subrolActual !== '' || document.getElementById('vista-pendientes') || document.getElementById('vista-cotizaciones-10k')) { 
         let savedView = localStorage.getItem('activeViewAdmin');
         if (savedView) {
-            if (savedView === 'cotizaciones-10k' && typeof verCotizacionesMas10000 === 'function') {
-                verCotizacionesMas10000();
+            if (savedView === 'cotizaciones-10k') {
+                if (typeof verCotizacionesMas10000 === 'function') {
+                    verCotizacionesMas10000();
+                } else {
+                    cambiarVistaAdmin('cotizaciones-10k');
+                }
             } else {
                 cambiarVistaAdmin(savedView);
             }
         } else {
-            let subrol = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value.trim() : '';
-            if (subrol === 'Jefatura') {
+            if (subrolActual === 'Jefatura') {
                 cambiarVistaAdmin('pendientes');
-            } else if (subrol === 'Supervisor') {
+            } else if (subrolActual === 'Supervisor') {
                 cambiarVistaAdmin('reportes');
-            } else if (subrol === 'Administrador') {
+            } else if (subrolActual === 'Administrador') {
                 if (typeof verCotizacionesMas10000 === 'function') {
                     verCotizacionesMas10000();
                 } else {

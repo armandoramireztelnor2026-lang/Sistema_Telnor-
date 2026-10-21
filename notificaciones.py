@@ -1616,3 +1616,81 @@ def enviar_correo_correccion_cotizacion(lista_supervisores, proveedor, unidad, t
         )
         disparar_correo(correo_sup, asunto, cuerpo_html)
     return True, "Enviado"
+
+
+def enviar_correo_rehacer_cotizacion_taller(correo_taller, proveedor, ticket, unidad, motivo, nombre_supervisor=None):
+    if not correo_taller or str(correo_taller).strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    autor = formatear_nombre_rol(nombre_supervisor, "Supervisor")
+    unidad_limpia = str(unidad).replace('8090-', '')
+    asunto = f"⚠️ Se Requiere Rehacer Cotización - Ticket {ticket} (Unidad 8090-{unidad_limpia})"
+
+    bloque_obs = (
+        f'<div style="background-color: #fff7ed; border-left: 4px solid #ea580c; border-radius: 6px; padding: 13px 16px; margin: 15px 0;">'
+        f'<div style="color: #9a3412; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">'
+        f'Observaciones del Supervisor:'
+        f'</div>'
+        f'<div style="color: #7c2d12; font-size: 14px; font-style: italic;">'
+        f'"{motivo}"'
+        f'</div>'
+        f'</div>'
+    )
+
+    cuerpo_html = generar_plantilla_base(
+        titulo_header="Se Requiere Rehacer Cotización",
+        subtitulo_header="El supervisor solicita capturar la cotización nuevamente",
+        categoria_badge="REHACER COTIZACIÓN",
+        color_tema="naranja",
+        saludo=f"Estimado proveedor <strong>{proveedor}</strong>,",
+        mensaje_intro="El supervisor ha revisado la cotización enviada y ha detectado inconsistencias o errores en la información capturada. La cotización previa ha sido cancelada para que puedas elaborarla de nuevo desde tu bandeja de trabajo:",
+        detalles_items=[
+            ("🎫 Ticket", f"<strong>{ticket}</strong>"),
+            ("🚚 Unidad", f"8090-{unidad_limpia}"),
+            ("👤 Supervisor", f"<strong>{nombre_supervisor or 'Supervisor Asignado'}</strong>")
+        ],
+        bloque_destacado=bloque_obs,
+        callout_texto="<strong>Instrucciones:</strong> El ticket ya se encuentra disponible nuevamente en tu sección de <strong>Tickets de Trabajo Asignados</strong>. Por favor ingresa al sistema, revisa las observaciones del supervisor y genera la cotización con los datos corregidos.",
+        callout_tipo="advertencia",
+        autor_proceso=autor
+    )
+    return disparar_correo(correo_taller, asunto, cuerpo_html)
+
+
+def enviar_correo_rehacer_cotizacion_supervisor(correo_supervisor, nombre_supervisor, ticket, unidad, proveedor, motivo):
+    if not correo_supervisor or str(correo_supervisor).strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    unidad_limpia = str(unidad).replace('8090-', '')
+    asunto = f"🔄 Solicitud Enviada: Rehacer Cotización - Ticket {ticket} (Unidad 8090-{unidad_limpia})"
+
+    bloque_obs = (
+        f'<div style="background-color: #fff7ed; border-left: 4px solid #ea580c; border-radius: 6px; padding: 13px 16px; margin: 15px 0;">'
+        f'<div style="color: #9a3412; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">'
+        f'Observaciones Registradas:'
+        f'</div>'
+        f'<div style="color: #7c2d12; font-size: 14px; font-style: italic;">'
+        f'"{motivo}"'
+        f'</div>'
+        f'</div>'
+    )
+
+    cuerpo_html = generar_plantilla_base(
+        titulo_header="Solicitud de Rehacer Cotización",
+        subtitulo_header="Notificación enviada al taller proveedor",
+        categoria_badge="SOLICITUD ENVIADA",
+        color_tema="naranja",
+        saludo=f"Hola <strong>{nombre_supervisor}</strong>,",
+        mensaje_intro="Has solicitado al taller rehacer la cotización debido a observaciones en la captura. La cotización anterior fue borrada del sistema y el ticket regresó a la bandeja del proveedor para una nueva captura:",
+        detalles_items=[
+            ("🎫 Ticket", f"<strong>{ticket}</strong>"),
+            ("🚚 Unidad", f"8090-{unidad_limpia}"),
+            ("🔧 Taller / Proveedor", proveedor)
+        ],
+        bloque_destacado=bloque_obs,
+        callout_texto="El sistema te notificará automáticamente por correo en cuanto el taller envíe la nueva cotización corregida.",
+        callout_tipo="info",
+        autor_proceso=formatear_nombre_rol(nombre_supervisor, "Supervisor")
+    )
+    return disparar_correo(correo_supervisor, asunto, cuerpo_html)
+
