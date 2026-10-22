@@ -413,7 +413,7 @@ function renderizarTablaReportes(lista) {
         // Set row info for filtering
         let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
         let rowHtml = `
-            <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-cope="${cleanCope}" data-estado="${estado}" data-fecha="${fechaISO}" data-costo="${ticketGasto}" data-pend-doc50="${isRowPendDoc50 ? '1' : '0'}" data-pend-oc="${isRowPendOC ? '1' : '0'}">
+            <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-cope="${cleanCope}" data-estado="${estado}" data-fecha="${fechaISO}" data-costo="${ticketGasto}" data-pend-doc50="${isRowPendDoc50 ? '1' : '0'}" data-pend-oc="${isRowPendOC ? '1' : '0'}" data-reactivado="${f.reactivado_desde_caras ? '1' : '0'}">
                 <td style="vertical-align:top; padding-top:15px;"><input type="checkbox" class="chk-reporte" value="${ticket}"></td>
                 <td style="vertical-align:top; padding-top:15px;"><span style="color:#0ea5e9; font-weight:bold;">${ticket}</span>${badgeCaras}</td>
                 <td style="vertical-align:top; padding-top:15px;">${numEco}</td>
@@ -536,6 +536,14 @@ function aplicarFiltrosReportes() {
                 match = false;
             }
         }
+
+        // 6. Filtro Reactivadas de Cotizaciones Caras (botón toggle)
+        if (match && window.filtroReactivadasCarasActivo) {
+            let esReactivado = tr.getAttribute('data-reactivado') === '1';
+            if (!esReactivado) {
+                match = false;
+            }
+        }
         
         // Aplicar estado de visibilidad y clase de filtro para paginación
         if (match) {
@@ -580,6 +588,29 @@ function aplicarFiltrosReportes() {
     }
 }
 
+window.filtroReactivadasCarasActivo = false;
+
+function toggleFiltroReactivadas() {
+    window.filtroReactivadasCarasActivo = !window.filtroReactivadasCarasActivo;
+    let btn = document.getElementById('btn-filtro-reactivadas');
+    if (btn) {
+        if (window.filtroReactivadasCarasActivo) {
+            btn.style.background = '#f59e0b';
+            btn.style.color = '#0f172a';
+            btn.style.borderColor = '#d97706';
+            btn.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.4)';
+            btn.innerHTML = '<span style="font-size:1.1em;">⚠️</span> Reactivadas C/Caras';
+        } else {
+            btn.style.background = '#334155';
+            btn.style.color = '#cbd5e1';
+            btn.style.borderColor = '#475569';
+            btn.style.boxShadow = 'none';
+            btn.innerHTML = '<span style="font-size:1.1em;">⚠️</span> Reactivadas C/Caras';
+        }
+    }
+    aplicarFiltrosReportes();
+}
+
 function limpiarFiltrosReportes() {
     let elTexto = document.getElementById('filtro-texto-reportes');
     let elEstado = document.getElementById('filtro-estado-reportes');
@@ -592,6 +623,16 @@ function limpiarFiltrosReportes() {
     if (elProv) elProv.value = '';
     if (elCiudad) elCiudad.value = '';
     if (elFecha) elFecha.value = '';
+
+    window.filtroReactivadasCarasActivo = false;
+    let btn = document.getElementById('btn-filtro-reactivadas');
+    if (btn) {
+        btn.style.background = '#334155';
+        btn.style.color = '#cbd5e1';
+        btn.style.borderColor = '#475569';
+        btn.style.boxShadow = 'none';
+        btn.innerHTML = '<span style="font-size:1.1em;">⚠️</span> Reactivadas C/Caras';
+    }
 
     aplicarFiltrosReportes();
 }

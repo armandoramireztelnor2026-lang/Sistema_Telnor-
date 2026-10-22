@@ -129,6 +129,10 @@
     <input type="hidden" id="rol-actual" value="administracion">
     <input type="hidden" id="subrol-actual" value="{{ usuario.datos_perfil.subrol }}">
     <input type="hidden" id="ciudad-actual" value="{{ usuario.datos_perfil.ciudad }}">
+    <input type="hidden" id="nombre-usuario-actual" value="{{ usuario.datos_perfil.nombres | trim }} {{ usuario.datos_perfil.apellido_paterno | trim }}">
+    <script>
+        window.USUARIOS_ADMIN_SISTEMA = {{ (usuarios_admin or []) | tojson | safe }};
+    </script>
     <div class="dashboard-container">
         <aside class="sidebar">
             <button title="Manual del Sistema" onclick="abrirManualSistema()"
@@ -172,9 +176,10 @@
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
 
                 <!-- Módulo de Cobertura (Separado al final en tono amarillo ligero) -->
-                <div style="margin-top: 15px; border-top: 1px dashed rgba(253, 224, 71, 0.35); padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn-sidebar btn-sidebar-cobertura" onclick="verCotizacionesMas10000()">Cotizaciones +10000 (Admin)</button>
-                    <button class="btn-sidebar btn-sidebar-cobertura" onclick="cambiarVistaAdmin('liberar-doc-contable')">Liberar Doc. Contable (Admin)</button>
+                <div style="margin-top: 15px; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="text-align: center; color: #fde047; font-size: 1.12rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Delegación Por Ausencia</div>
+                    <button class="btn-sidebar btn-sidebar-cobertura" onclick="verCotizacionesMas10000()">Cotizaciones +10000</button>
+                    <button class="btn-sidebar btn-sidebar-cobertura" onclick="cambiarVistaAdmin('liberar-doc-contable')">Liberar Doc. Contable</button>
                 </div>
                 {% endif %}
 
@@ -187,9 +192,10 @@
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
 
                 <!-- Módulos de Cobertura (Separados al final en tono amarillo ligero) -->
-                <div style="margin-top: 15px; border-top: 1px dashed rgba(253, 224, 71, 0.35); padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn-sidebar btn-sidebar-cobertura" onclick="cambiarVistaAdmin('facturas')">Cotizaciones y Órdenes (Cobertura)</button>
-                    <button class="btn-sidebar btn-sidebar-cobertura" onclick="cambiarVistaAdmin('facturas_finales')">Facturas (Cobertura)</button>
+                <div style="margin-top: 15px; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="text-align: center; color: #fde047; font-size: 1.12rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Delegación Por Ausencia</div>
+                    <button class="btn-sidebar btn-sidebar-cobertura" onclick="cambiarVistaAdmin('facturas')">Cotizaciones y Órdenes</button>
+                    <button class="btn-sidebar btn-sidebar-cobertura" onclick="cambiarVistaAdmin('facturas_finales')">Facturas</button>
                 </div>
                 {% endif %}
 
@@ -209,7 +215,20 @@
                 </div>
                 <div class="admin-container">
                     <!-- RESUMEN DE ESTADO OPERATIVO DE LA FLOTA -->
-                    <div class="metricas-unidades-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                    <div class="metricas-unidades-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                        <!-- Total de Unidades -->
+                        <div class="card-metrica-flota card-total" onclick="filtrarUnidadesPorEstado('Todas')" title="Clic para mostrar todas las unidades" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(79, 70, 229, 0.05)); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 12px; padding: 16px 20px; cursor: pointer; transition: all 0.2s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.85em; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 0.5px;">Total de Unidades</span>
+                                <span style="font-size: 1.4em;">🚘</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                                <span id="metrica-total-unidades" style="font-size: 2em; font-weight: 800; color: #ffffff;">--</span>
+                                <span id="porcentaje-total-unidades" style="font-size: 0.85em; color: #a5b4fc; font-weight: 600; background: rgba(99, 102, 241, 0.2); padding: 2px 7px; border-radius: 6px;">100%</span>
+                            </div>
+                            <div style="font-size: 0.8em; color: #94a3b8; margin-top: 6px;">Mostrar todas las unidades</div>
+                        </div>
+
                         <!-- En Circulación -->
                         <div class="card-metrica-flota card-circulacion" onclick="filtrarUnidadesPorEstado('En Circulación')" title="Clic para filtrar unidades en circulación" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.05)); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 16px 20px; cursor: pointer; transition: all 0.2s ease;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -267,7 +286,7 @@
                         <div class="buscador-wrapper-div" style="max-width: 500px; margin:0; flex:1;">
                             <span class="buscador-icono">&#x1F50D;</span>
                             <input type="text" id="search-unidades" placeholder="Buscar por Unidad, Marca, Modelo o Estado..."
-                                class="buscador-pildora" onkeyup="filtrarTabla('search-unidades', 'tbody-unidades')">
+                                class="buscador-pildora" onkeyup="aplicarFiltroUnidades()">
                         </div>
                         <button onclick="abrirModalUnidad('agregar')" class="btn-info"
                             style="padding:10px 20px; background:#10b981; border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">+
@@ -695,7 +714,12 @@
                                 style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
                                 onchange="aplicarFiltrosReportes()">
                         </div>
-                        <div>
+                        <div style="display:flex; gap:8px;">
+                            <button id="btn-filtro-reactivadas" type="button" onclick="toggleFiltroReactivadas()"
+                                style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:8px 12px; border-radius:5px; cursor:pointer; height:35px; display:inline-flex; align-items:center; gap:6px; font-size:0.85em; font-weight:600; transition:all 0.2s;"
+                                title="Mostrar sólo cotizaciones reactivadas de cotizaciones caras">
+                                <span style="font-size:1.1em;">⚠️</span> Reactivadas C/Caras
+                            </button>
                             <button onclick="limpiarFiltrosReportes()"
                                 style="background:#475569; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; height:35px;">Limpiar</button>
                         </div>
@@ -1044,6 +1068,23 @@
                             </div>
                         </div>
 
+                        <!-- Ultimo Reactivado de Cotizaciones Caras -->
+                        <div class="analitica-card analitica-card-orange">
+                            <div class="analitica-card-header">
+                                <div class="analitica-icon-badge">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <polyline points="1 20 1 14 7 14"></polyline>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="analitica-card-title">Último Reactivado C/Cara</h3>
+                            </div>
+                            <div id="analitica-reactivado-caro" class="analitica-card-body">
+                                Cargando...
+                            </div>
+                        </div>
+
                         <!-- Ultima Reparada -->
                         <div class="analitica-card analitica-card-purple">
                             <div class="analitica-card-header">
@@ -1104,7 +1145,26 @@
                         <p>Censo vehicular en tiempo real de unidades en circulación, taller, jurídicos e inhabilitadas.</p>
                     </div>
 
-                    <div class="analitica-grid-events" style="grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin-bottom: 30px;">
+                    <div class="analitica-grid-events" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 30px;">
+                        <!-- Total de Unidades -->
+                        <div class="analitica-card analitica-card-indigo">
+                            <div class="analitica-card-header">
+                                <div class="analitica-icon-badge" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">
+                                    🚘
+                                </div>
+                                <h3 class="analitica-card-title">Total de Unidades</h3>
+                            </div>
+                            <div class="analitica-card-body" style="padding-top: 5px;">
+                                <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                                    <span id="analitica-flota-total" style="font-size: 2.2em; font-weight: 800; color: #ffffff;">--</span>
+                                    <span id="analitica-flota-total-pct" style="font-size: 0.9em; color: #a5b4fc; font-weight: 700; background: rgba(99, 102, 241, 0.15); padding: 3px 8px; border-radius: 6px;">100%</span>
+                                </div>
+                                <div style="font-size: 0.85em; color: #94a3b8; margin-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px;">
+                                    Censo total de la flota registrada
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- En Circulación -->
                         <div class="analitica-card analitica-card-green">
                             <div class="analitica-card-header">
@@ -1377,15 +1437,8 @@
         </div>
     </div>
 
-    <div id="modal-detalles-usuario" class="modal-overlay">
-        <div class="pdf-modal-box"><button class="btn-close-modal" onclick="cerrarModal('modal-detalles-usuario')"
-                style="color: #112641;">×</button>
-            <h3 style="color: #112641; margin-bottom: 20px;">Perfil de Usuario</h3>
-            <div id="pdf-perfil-contenido" class="pdf-document"></div>
-            <div class="modal-actions" style="max-width: 750px; margin-top: 20px;"><button class="btn-danger"
-                    onclick="cerrarModal('modal-detalles-usuario')">Cerrar</button><button class="btn-success-modal"
-                    onclick="descargarPDFUsuario()">Descargar Perfil (PDF)</button></div>
-        </div>
+    <div id="modal-detalles-usuario" class="modal-overlay" style="z-index: 10005;">
+        <div class="modal-box large perfil-sistema-modal" id="modal-detalles-usuario-box"></div>
     </div>
     <div id="modal-detalles" class="modal-overlay" style="z-index: 10005;">
         <div class="modal-box"><button class="btn-close-modal" onclick="cerrarModal('modal-detalles')">×</button>
@@ -1937,15 +1990,77 @@
         <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
     </div>
 
-    <script src="/static/script.js?v=1000005"></script>
+    <script src="/static/script.js?v=1000009"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js?v=6"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
-    <script src="/static/unidades.js?v=9"></script>
-    <script src="/static/facturas_principal.js?v=51"></script>
-    <script src="/static/seccion_reportes.js?v=999999"></script>
-    <script src="/static/cotizaciones_10k.js?v=22"></script>
+    <script src="/static/unidades.js?v=10"></script>
+    <script src="/static/facturas_principal.js?v=57"></script>
+    <script src="/static/seccion_reportes.js?v=1000001"></script>
+    <script src="/static/cotizaciones_10k.js?v=24"></script>
+
+    <!-- MODAL ADVERTENCIA DE DELEGACIÓN / EMERGENCIAS -->
+    <div id="modal-advertencia-delegacion" class="modal-overlay" style="display: none; z-index: 99999999; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(4px);" onclick="if(event.target === this) cerrarModalAdvertenciaDelegacion()">
+        <div class="modal-box" style="max-width: 580px; width: 90%; background: #0b1c30; border: 1px solid #d97706; border-radius: 14px; padding: 26px 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); position: relative;">
+            <button class="btn-close-modal" onclick="cerrarModalAdvertenciaDelegacion()" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">×</button>
+            
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px; border-bottom: 1px solid rgba(217, 119, 6, 0.3); padding-bottom: 14px;">
+                <div style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0;">
+                    ⚠️
+                </div>
+                <div>
+                    <h3 style="margin: 0; color: #fbbf24; font-size: 1.25rem; font-family: 'Poppins', sans-serif; font-weight: 700;">Acción de Delegación / Emergencia</h3>
+                    <span style="font-size: 0.82rem; color: #94a3b8;">Protocolo de Cobertura y Suplencia Operativa</span>
+                </div>
+            </div>
+
+            <!-- FICHA DETALLADA DEL PROCESO A DELEGAR -->
+            <div style="background: #112641; border: 1px solid #1f395a; border-radius: 10px; padding: 16px 20px; margin-bottom: 18px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+                    <span style="color: #94a3b8; font-size: 0.85rem;">Ticket / Unidad:</span>
+                    <span id="delegacion-ticket-id" style="color: #38bdf8; font-weight: 700; background: rgba(14,165,233,0.12); padding: 3px 10px; border-radius: 5px; border: 1px solid rgba(14,165,233,0.25); font-size: 0.88rem;">--</span>
+                </div>
+                
+                <div style="margin-bottom: 12px;">
+                    <span style="color: #94a3b8; font-size: 0.82rem; display: block; margin-bottom: 3px;">Proceso que se delegará:</span>
+                    <strong id="delegacion-proceso-nombre" style="color: #f59e0b; font-size: 1.05rem; display: block;">--</strong>
+                    <span id="delegacion-proceso-desc" style="color: #cbd5e1; font-size: 0.84rem; display: block; margin-top: 3px; line-height: 1.4;">--</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; background: #081422; border-radius: 8px; padding: 12px 14px; border: 1px solid #1f395a;">
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.78rem; display: block; margin-bottom: 3px;">¿A quién corresponde este proceso?</span>
+                        <strong id="delegacion-rol-titular" style="color: #f87171; font-size: 0.95rem;">--</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.78rem; display: block; margin-bottom: 3px;">Asumido temporalmente por:</span>
+                        <strong id="delegacion-rol-suplente" style="color: #34d399; font-size: 0.95rem;">--</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AVISO DE EXCLUSIVIDAD POR EMERGENCIA -->
+            <div style="background: rgba(245, 158, 11, 0.08); border-left: 4px solid #f59e0b; padding: 12px 15px; border-radius: 0 8px 8px 0; margin-bottom: 22px;">
+                <p style="color: #e2e8f0; font-size: 0.88rem; line-height: 1.55; margin: 0;">
+                    <strong style="color: #fbbf24;">Aviso de Exclusividad:</strong> Este botón es <strong>únicamente para casos de emergencia</strong> o en caso de que por causas de fuerza mayor o ausencia justificada, <span id="delegacion-titular-texto" style="color: #fbbf24; font-weight: 700;">el responsable</span> <strong>no pueda confirmar o aceptar esta acción directamente desde su propio perfil</strong>.
+                </p>
+                <p style="color: #94a3b8; font-size: 0.8rem; line-height: 1.4; margin: 6px 0 0 0;">
+                    ℹ️ Al confirmar que estás enterado, se abrirá la interfaz habitual de este proceso para proceder con la confirmación correspondiente.
+                </p>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" onclick="cerrarModalAdvertenciaDelegacion()" style="background: #334155; color: #cbd5e1; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: background 0.2s;">
+                    Cancelar
+                </button>
+                <button type="button" id="btn-confirmar-enterado-delegacion" onclick="confirmarEnteradoDelegacion()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35); transition: all 0.2s;">
+                    ✓ Estoy Enterado y Deseo Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DOC CONTABLE -->
     <div id="modal-doc-contable" class="modal-overlay">
         <div class="modal-box large">
@@ -2104,7 +2219,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/static/panel_control.js?v=1"></script>
     <script src="/static/ciudades_copes.js?v=1"></script>
-    <script src="/static/analitica.js?v=2"></script>
+    <script src="/static/analitica.js?v=4"></script>
     <script src="/static/manual_sistema.js?v=1"></script>
     <!-- FOOLPROOF FALLBACK -->
     <script>

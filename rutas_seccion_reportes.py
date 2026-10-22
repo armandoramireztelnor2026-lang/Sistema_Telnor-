@@ -168,23 +168,32 @@ def obtener_lista_seccion_reportes():
             if subrol == 'Jefatura' and nombre_completo:
                 nombre_jefatura = nombre_completo
 
-    # Precalcular COPEs de los reportes para búsqueda rápida
+    # Precalcular COPEs y reactivados de los reportes para búsqueda rápida
     reporte_a_cope = {str(r.get("id")): r.get("cope", "") for r in todos_reportes}
+    reporte_a_reactivado = {str(r.get("id")): r.get("reactivado_desde_caras", False) for r in todos_reportes}
 
     # 2. Asignar nombres al ticket y calcular estado
     for f in todos_combinados:
         cope_f = f.get('cope', '')
         
+        # Extraer ID del reporte para cruzar información
+        r_id = f.get("id_reporte") or f.get("numero_reporte")
+        if not r_id:
+            retro = f.get("retro", "")
+            match = re.search(r"\[TICKET:(.*?)\]", retro)
+            if match:
+                r_id = match.group(1).strip()
+        if not r_id:
+            r_id = f.get("id")
+
         # Si no tiene COPE (como las facturas), extraerlo del reporte original
-        if not cope_f:
-            r_id = f.get("id_reporte") or f.get("numero_reporte")
-            if not r_id:
-                retro = f.get("retro", "")
-                match = re.search(r"\[TICKET:(.*?)\]", retro)
-                if match:
-                    r_id = match.group(1).strip()
-            if r_id:
-                cope_f = reporte_a_cope.get(str(r_id), "")
+        if not cope_f and r_id:
+            cope_f = reporte_a_cope.get(str(r_id), "")
+
+        # Si el reporte original fue reactivado desde cotizaciones caras, preservar la bandera
+        if not f.get('reactivado_desde_caras') and r_id:
+            if reporte_a_reactivado.get(str(r_id)):
+                f['reactivado_desde_caras'] = True
 
         sup_nombre = cope_a_sup.get(cope_f, "No asignado")
         admin_nombre = cope_a_admin.get(cope_f, "No asignado")
@@ -207,6 +216,10 @@ def obtener_lista_seccion_reportes():
     proveedor_filtro = request.args.get('proveedor', '').strip()
     ciudad_filtro = request.args.get('ciudad', '').strip()
     fecha_filtro = request.args.get('fecha', '').strip()
+    reactivadas_filtro = request.args.get('reactivadas', '').strip().lower()
+
+    if reactivadas_filtro in ['1', 'true', 'si', 's']:
+        todos_combinados = [f for f in todos_combinados if f.get('reactivado_desde_caras') is True]
 
     def norm(txt):
         if not txt:

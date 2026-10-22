@@ -2,7 +2,8 @@
     "100126": {
         "Marca": "CHEVROLET",
         "Modelo": "2025",
-        "Juridicos": false
+        "Juridicos": false,
+        "Estado": "Activa"
     },
     "100428": {
         "Marca": "CHEVROLET",

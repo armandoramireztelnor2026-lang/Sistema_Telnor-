@@ -1,48 +1,6 @@
 {
     "facturas": [
         {
-            "id": "20261008114654",
-            "proveedor": "AUTOPARTES Y MOTORES B.C.",
-            "unidad": "8090-1867",
-            "responsable": "Andres Avila",
-            "telefono": "6634041184",
-            "titulo": "n",
-            "retro": "[TICKET:REP-20261006123116]\r\nREPORTE ORIGINAL DEL CHOFER: Sobre calentamiento ",
-            "diagnostico": "n",
-            "trabajo_realizar": "n",
-            "mantenimiento": "Correctivo",
-            "precio": 11000.0,
-            "fecha": "2026-10-08",
-            "numero_orden": "",
-            "compania": "RUMN",
-            "timestamp": "2026-10-08T11:46:54.800717",
-            "fotos_cotizacion": [],
-            "fotos_evidencia": [],
-            "codigo_liberacion": "",
-            "entregado": "No",
-            "cotizaciones": [
-                {
-                    "id_cotizacion": "1",
-                    "precio": 11000.0,
-                    "titulo": "n",
-                    "mantenimiento": "Correctivo",
-                    "retro": "[TICKET:REP-20261006123116]\r\nREPORTE ORIGINAL DEL CHOFER: Sobre calentamiento ",
-                    "diagnostico": "n",
-                    "trabajo_realizar": "n",
-                    "fotos_evidencia": [
-                        "evidencia_1791485214782_0_supervisor.jpg"
-                    ],
-                    "pdf_cotizacion": "pdf_cot_20261008114654_0_110306_Meta_3.1_Formato_de_Matriz_de_Planteamiento_del_Problema.docx.pdf"
-                }
-            ],
-            "reactivado_desde_caras": false,
-            "comentarios": "HOLA ES UNA PRUEBA",
-            "autor_comentario": "Samuel Giron",
-            "eliminado_por": "",
-            "estado": "Cancelado_Cotizacion_Cara",
-            "fecha_cierre": "2026-10-12 15:55:31"
-        },
-        {
             "id": "20261008133951",
             "proveedor": "AUTOPARTES Y MOTORES B.C.",
             "unidad": "8090-1212",
@@ -431,7 +389,8 @@
                     "numero_orden": "2400012",
                     "numero_cotizacion_asignacion": "101221212",
                     "factura_folio": "3334343",
-                    "factura_pdf": "FACTURA_FINAL_20261020114438_0_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_1.pdf"
+                    "factura_pdf": "FACTURA_FINAL_20261020114438_0_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_1.pdf",
+                    "numero_doc50": "5029849234321"
                 },
                 {
                     "id_cotizacion": "2",
@@ -448,7 +407,8 @@
                     "numero_orden": "290010121",
                     "numero_cotizacion_asignacion": "001928812",
                     "factura_folio": "333222",
-                    "factura_pdf": "FACTURA_FINAL_20261020114438_1_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_2.pdf"
+                    "factura_pdf": "FACTURA_FINAL_20261020114438_1_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_2.pdf",
+                    "numero_doc50": "5000001221"
                 }
             ],
             "reactivado_desde_caras": false,
@@ -460,10 +420,12 @@
             "supervisor_aprobador": "Samuel Giron",
             "aprobado_admin_10k": true,
             "liberado_admin": true,
-            "fecha_cierre": "2026-10-20 21:43:11",
+            "fecha_cierre": "2026-10-22 12:33:59",
             "factura_folio": "3334343",
             "factura_pdf": "FACTURA_FINAL_20261020114438_0_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_1.pdf",
-            "validacion_fiscal": "Pendiente"
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "5029849234321",
+            "estado": "Archivado"
         },
         {
             "id": "20261021120545",
@@ -529,6 +491,58 @@
             "validado_fiscal_por": "Administrador en Cobertura: Manuel Alejandro  Marquez",
             "numero_doc50": "50000002233",
             "estado": "Archivado"
+        },
+        {
+            "id": "20261022123650",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1867",
+            "responsable": "Andres Avila",
+            "telefono": "6634041184",
+            "titulo": "cambio de balatas",
+            "retro": "[TICKET:REP-20261006123116]\r\nSobre calentamiento",
+            "diagnostico": "Datos",
+            "trabajo_realizar": "Datos",
+            "mantenimiento": "Correctivo",
+            "precio": 10005.0,
+            "fecha": "2026-10-22",
+            "numero_orden": "32112331223",
+            "compania": "RUMN",
+            "timestamp": "2026-10-22T12:36:50.053090",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "69815462",
+            "entregado": "No",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 10005.0,
+                    "titulo": "cambio de balatas",
+                    "mantenimiento": "Correctivo",
+                    "retro": "[TICKET:REP-20261006123116]\r\nSobre calentamiento",
+                    "diagnostico": "Datos",
+                    "trabajo_realizar": "Datos",
+                    "fotos_evidencia": [
+                        "evidencia_1792697810023_0_Actividad_2.4._Auditoria_de_servicios_de_la_nube.png"
+                    ],
+                    "pdf_cotizacion": "pdf_cot_20261022123650_0_132646_Meta_3.2_Diseno_de_instrumento_de_captacion_de_informacion_De_La_Cruz_Jeremy_Garnica_Alexis_Ramirez_Armando_1.pdf",
+                    "numero_orden": "32112331223",
+                    "numero_cotizacion_asignacion": "2900000121211"
+                }
+            ],
+            "reactivado_desde_caras": true,
+            "comentarios": "HOLA ES UNA PRUEBA",
+            "autor_comentario": "Samuel Giron",
+            "eliminado_por": "",
+            "timestamp_aprobacion": "2026-10-22T13:40:17.369414",
+            "numero_cotizacion_asignacion": "2900000121211",
+            "supervisor_aprobador": "Samuel Giron",
+            "estado": "pendiente",
+            "aprobado_admin": true,
+            "estado_custom": "",
+            "aprobado_admin_10k": true,
+            "aprobado_corp": true,
+            "liberado_admin": false,
+            "fecha_cierre": "2026-10-22 13:41:31"
         }
     ]
 }

@@ -22,7 +22,9 @@
             "compania": "RUMN",
             "comentarios": "HOLA ES UNA PRUEBA",
             "autor_comentario": "Samuel Giron",
-            "eliminado_por": ""
+            "eliminado_por": "",
+            "reactivado_desde_caras": true,
+            "numero_cotizacion_asignacion": "2900000121211"
         },
         {
             "id": "REP-20261008131643",

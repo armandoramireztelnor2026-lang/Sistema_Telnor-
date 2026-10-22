@@ -2172,6 +2172,9 @@ tbody tr.selected-row {
 .analitica-card-yellow { border-top: 3px solid #eab308; }
 .analitica-card-yellow .analitica-icon-badge { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
 
+.analitica-card-indigo { border-top: 3px solid #6366f1; }
+.analitica-card-indigo .analitica-icon-badge { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+
 /* Contenedor de Gráficas */
 .analitica-chart-card {
     background: #112641;
@@ -2382,5 +2385,9 @@ tbody tr.selected-row {
     display: block !important;
     margin-top: 4px !important;
     letter-spacing: 0.3px !important;
+}
+
+.card-metrica-flota:hover {
+    filter: brightness(1.15);
 }
 

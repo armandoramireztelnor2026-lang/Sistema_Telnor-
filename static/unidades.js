@@ -1,4 +1,4 @@
-let filtroEstadoActual = null;
+let filtroEstadoActual = 'Todas';
 
 async function cargarUnidades() {
     try {
@@ -18,6 +18,8 @@ async function cargarUnidades() {
                 const el = document.getElementById(id);
                 if (el) el.innerText = val;
             };
+            setTxt('metrica-total-unidades', (t.total !== undefined) ? t.total : Object.keys(data).length);
+            setTxt('porcentaje-total-unidades', '100%');
             setTxt('metrica-circulacion-unidades', t.circulacion);
             setTxt('porcentaje-circulacion-unidades', p.circulacion + '%');
             setTxt('metrica-taller-unidades', t.taller);
@@ -26,6 +28,12 @@ async function cargarUnidades() {
             setTxt('porcentaje-juridicos-unidades', p.juridicos + '%');
             setTxt('metrica-inhabilitadas-unidades', t.inhabilitadas);
             setTxt('porcentaje-inhabilitadas-unidades', p.inhabilitadas + '%');
+        } else {
+            const count = Object.keys(data).length;
+            const elTotal = document.getElementById('metrica-total-unidades');
+            if (elTotal) elTotal.innerText = count;
+            const elTotalPct = document.getElementById('porcentaje-total-unidades');
+            if (elTotalPct) elTotalPct.innerText = '100%';
         }
 
         let tbody = document.getElementById('tbody-unidades');
@@ -83,9 +91,8 @@ async function cargarUnidades() {
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay unidades registradas.</td></tr>';
         } else {
             tbody.innerHTML = rows;
-            if (filtroEstadoActual) {
-                aplicarFiltroUnidades();
-            }
+            aplicarFiltroUnidades();
+            actualizarBordesTarjetasFiltro();
         }
     } catch (e) {
         console.error("Error al cargar unidades:", e);
@@ -95,8 +102,12 @@ async function cargarUnidades() {
 }
 
 function filtrarUnidadesPorEstado(estado) {
-    if (filtroEstadoActual === estado) {
-        filtroEstadoActual = null;
+    if (estado === 'Todas' || estado === 'Todos' || !estado) {
+        filtroEstadoActual = 'Todas';
+        const inputSearch = document.getElementById('search-unidades');
+        if (inputSearch) inputSearch.value = '';
+    } else if (filtroEstadoActual === estado) {
+        filtroEstadoActual = 'Todas';
     } else {
         filtroEstadoActual = estado;
     }
@@ -106,6 +117,7 @@ function filtrarUnidadesPorEstado(estado) {
 
 function actualizarBordesTarjetasFiltro() {
     const mapClase = {
+        'Todas': 'card-total',
         'En Circulación': 'card-circulacion',
         'En Taller': 'card-taller',
         'En Jurídicos': 'card-juridicos',
@@ -116,13 +128,12 @@ function actualizarBordesTarjetasFiltro() {
         c.style.boxShadow = 'none';
         c.style.borderColor = '';
     });
-    if (filtroEstadoActual && mapClase[filtroEstadoActual]) {
-        const active = document.querySelector(`.${mapClase[filtroEstadoActual]}`);
-        if (active) {
-            active.style.transform = 'scale(1.02)';
-            active.style.boxShadow = '0 0 15px rgba(255,255,255,0.2)';
-            active.style.borderColor = '#ffffff';
-        }
+    const claseActiva = mapClase[filtroEstadoActual] || 'card-total';
+    const active = document.querySelector(`.${claseActiva}`);
+    if (active) {
+        active.style.transform = 'scale(1.02)';
+        active.style.boxShadow = '0 0 15px rgba(255,255,255,0.25)';
+        active.style.borderColor = '#ffffff';
     }
 }
 
@@ -133,7 +144,7 @@ function aplicarFiltroUnidades() {
 
     rows.forEach(r => {
         const est = r.getAttribute('data-estado');
-        const estadoOk = !filtroEstadoActual || est === filtroEstadoActual;
+        const estadoOk = (!filtroEstadoActual || filtroEstadoActual === 'Todas') ? true : (est === filtroEstadoActual);
         const textOk = !q || r.innerText.toLowerCase().includes(q);
         r.style.display = (estadoOk && textOk) ? '' : 'none';
     });

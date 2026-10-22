@@ -456,73 +456,545 @@ function procesarAccion(identificador, accion) {
 }
 
 function abrirModalDetallesUsuario(usuarioId) {
-    const user = usuariosGlobal.find(u => u.usuario === usuarioId);
+    const user = (usuariosGlobal || []).find(u => u.usuario === usuarioId);
     if (!user) return;
 
-    const dp = user.datos_perfil;
-    const carpeta = (user.rol === 'proveedores') ? 'logos_proveedores' : ((user.rol === 'administracion') ? 'foto_administracion' : 'foto_corporativos');
-    const rolTexto = user.rol.toUpperCase();
-    let ciudadCopeTexto = dp.ciudad ? `${dp.ciudad} / ${dp.cope || 'N/A'}` : 'No especificada';
+    const dp = user.datos_perfil || {};
+    const rol = user.rol;
+    const isProv = rol === 'proveedores';
+    const isCorp = rol === 'corporativos';
+    const isAdmin = rol === 'administracion';
 
-    let htmlContent = `
-        <div class="pdf-header-doc">
-            <h2>EXPEDIENTE DE USUARIO</h2>
-            <p>PERFIL DE USUARIO - ${rolTexto}</p>
-        </div>
-        <div class="pdf-body">
-            <img src="/static/${carpeta}/${dp.foto_ruta}" class="pdf-photo-doc" onerror="this.src='https://via.placeholder.com/150/ffffff/000000?text=Foto'">
-            <div class="pdf-details">
-    `;
+    const carpeta = isProv ? 'logos_proveedores' : (isAdmin ? 'foto_administracion' : 'foto_corporativos');
+    const fotoSrc = dp.foto_ruta ? `/static/${carpeta}/${dp.foto_ruta}` : 'https://via.placeholder.com/150/112641/40916c?text=Foto';
 
-    if (user.rol === 'proveedores') {
-        htmlContent += `
-            <div class="pdf-section-title">■ DATOS DE LA EMPRESA</div>
-            <div class="pdf-line"><strong>Razón Social:</strong> ${dp.nombre_proveedor}</div>
-            <div class="pdf-line"><strong>Descripción:</strong> <span class="texto-largo">${dp.descripcion}</span></div>
-            <div class="pdf-line"><strong>Usuario Sistema:</strong> ${user.usuario}</div>
-            <br>
-            <div class="pdf-section-title">■ INFORMACIÓN DE CONTACTO</div>
-            <div class="pdf-line"><strong>Encargado Principal:</strong> ${dp.encargado}</div>
-            <div class="pdf-line"><strong>Teléfono:</strong> ${dp.telefono}</div>
-            <div class="pdf-line"><strong>Correo:</strong> ${dp.correo}</div>
-            <div class="pdf-line"><strong>Dirección:</strong> <span class="texto-largo">${dp.direccion} (C.P. ${dp.codigo_postal})</span></div>
+    let ciudadCopeTexto = dp.ciudad ? (dp.cope ? `${dp.ciudad} / ${dp.cope}` : dp.ciudad) : 'No especificada';
+
+    let headerIcon = '👤';
+    let headerIconBg = 'rgba(64, 145, 108, 0.2)';
+    let headerIconColor = '#40916c';
+    let headerIconBorder = 'rgba(64, 145, 108, 0.4)';
+    let headerTitle = 'Perfil de Usuario del Sistema';
+    let headerSubtitle = 'Portal Automotriz';
+    let borderColorPhoto = '#40916c';
+    let photoBg = '#081422';
+    let photoFit = 'cover';
+    let photoPadding = '0';
+    let statusBadgeText = 'Usuario Activo';
+    let statusBadgeBg = 'rgba(16, 185, 129, 0.15)';
+    let statusBadgeColor = '#34d399';
+    let statusBadgeBorder = 'rgba(16, 185, 129, 0.3)';
+    let statusDotColor = '#10b981';
+    let photoTooltip = 'Clic en foto para ampliar';
+    let nivelAccesoBadge = `<span style="background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; display: inline-block;">${dp.subrol || 'Administración'}</span>`;
+
+    if (isProv) {
+        headerIcon = '🏢';
+        headerIconBg = 'rgba(16, 185, 129, 0.2)';
+        headerIconColor = '#10b981';
+        headerIconBorder = 'rgba(16, 185, 129, 0.4)';
+        headerTitle = 'Perfil de Taller Autorizado';
+        headerSubtitle = 'Portal Proveedores';
+        borderColorPhoto = '#10b981';
+        photoBg = '#ffffff';
+        photoFit = 'contain';
+        photoPadding = '6px';
+        statusBadgeText = 'Proveedor Verificado';
+        statusBadgeBg = 'rgba(16, 185, 129, 0.15)';
+        statusBadgeColor = '#34d399';
+        statusBadgeBorder = 'rgba(16, 185, 129, 0.3)';
+        statusDotColor = '#10b981';
+        photoTooltip = 'Clic en logo para ampliar';
+        nivelAccesoBadge = `<span style="background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; display: inline-block;">Proveedor</span>`;
+    } else if (isCorp) {
+        headerIcon = '🏛️';
+        headerIconBg = 'rgba(168, 85, 247, 0.2)';
+        headerIconColor = '#a855f7';
+        headerIconBorder = 'rgba(168, 85, 247, 0.4)';
+        headerTitle = 'Perfil de Dirección Corporativa';
+        headerSubtitle = 'Portal Ejecutivo';
+        borderColorPhoto = '#a855f7';
+        photoBg = '#081422';
+        photoFit = 'cover';
+        photoPadding = '0';
+        statusBadgeText = 'Acceso Ejecutivo';
+        statusBadgeBg = 'rgba(139, 92, 246, 0.15)';
+        statusBadgeColor = '#c084fc';
+        statusBadgeBorder = 'rgba(139, 92, 246, 0.3)';
+        statusDotColor = '#a855f7';
+        photoTooltip = 'Clic en foto para ampliar';
+        nivelAccesoBadge = `<span style="background: rgba(139, 92, 246, 0.18); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.4); padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; display: inline-block;">Corporativo</span>`;
+    }
+
+    let seccion1HTML = '';
+    if (isProv) {
+        seccion1HTML = `
+            <div style="background: #0d1e33; border: 1px solid #1f395a; border-radius: 10px; padding: 14px 18px;">
+                <div style="font-size: 0.8rem; text-transform: uppercase; color: #38bdf8; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    <span>🏢</span> DATOS DE LA EMPRESA Y CONTACTO
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">
+                    <div style="grid-column: span 2;">
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Razón Social / Empresa:</span>
+                        <strong style="color: #ffffff; font-size: 1.05rem;">${dp.nombre_proveedor || 'Sin razón social'}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Encargado Principal:</span>
+                        <strong style="color: #ffffff;">${dp.encargado || 'N/A'}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Resp. en Turno:</span>
+                        <strong style="color: #ffffff;">${dp.responsable || 'N/A'}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Ciudad Base:</span>
+                        <strong style="color: #38bdf8;">${dp.ciudad || 'No especificada'}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Teléfono:</span>
+                        <strong style="color: #ffffff;">${dp.telefono || 'N/A'}</strong>
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Correo Electrónico:</span>
+                        <strong style="color: #e2e8f0;">${dp.correo || 'N/A'}</strong>
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Dirección del Taller:</span>
+                        <span style="color: #cbd5e1; font-size: 0.85rem;">${dp.direccion || 'No registrada'} (C.P. ${dp.codigo_postal || 'N/A'})</span>
+                    </div>
+                    ${dp.descripcion ? `
+                    <div style="grid-column: span 2;">
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Descripción:</span>
+                        <span style="color: #94a3b8; font-style: italic; font-size: 0.85rem;">${dp.descripcion}</span>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+    } else if (isCorp) {
+        seccion1HTML = `
+            <div style="background: #0d1e33; border: 1px solid #1f395a; border-radius: 10px; padding: 14px 18px;">
+                <div style="font-size: 0.8rem; text-transform: uppercase; color: #38bdf8; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    <span>👔</span> INFORMACIÓN DEL DIRECTIVO
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">
+                    <div style="grid-column: span 2;">
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Nombre Completo:</span>
+                        <strong style="color: #ffffff; font-size: 1.05rem;">${dp.nombres || ''} ${dp.apellido_paterno || ''} ${dp.apellido_materno || ''}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">No. de Empleado:</span>
+                        <strong style="color: #ffffff;">${dp.num_empleado || 'N/A'}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Ciudad Base:</span>
+                        <strong style="color: #38bdf8;">${dp.ciudad || 'No especificada'}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Área Asignada:</span>
+                        <strong style="color: #ffffff;">${dp.area || 'N/A'}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Correo Electrónico:</span>
+                        <strong style="color: #e2e8f0;">${dp.correo || 'No registrado'}</strong>
+                    </div>
+                </div>
+            </div>
         `;
     } else {
-        htmlContent += `
-            <div class="pdf-section-title">■ INFORMACIÓN DEL EMPLEADO</div>
-            <div class="pdf-line"><strong>Nombre Completo:</strong> ${dp.nombres} ${dp.apellido_paterno} ${dp.apellido_materno || ''}</div>
-            <div class="pdf-line"><strong>Ubicación Base:</strong> <span style="color:#0284c7; font-weight:bold;">${ciudadCopeTexto}</span></div>
-            <div class="pdf-line"><strong>Área Asignada:</strong> ${dp.area}</div>
-            <div class="pdf-line"><strong>Número Empleado:</strong> ${dp.num_empleado}</div>
-            <div class="pdf-line"><strong>Correo Electrónico:</strong> ${dp.correo || 'N/A'}</div>
-            <br>
-            <div class="pdf-section-title">■ CREDENCIALES DEL SISTEMA</div>
-            <div class="pdf-line"><strong>Usuario Asignado:</strong> ${user.usuario}</div>
-            <div class="pdf-line"><strong>Nivel de Acceso:</strong> ${rolTexto} ${dp.subrol ? ' - <strong style="color:#f59e0b">' + dp.subrol + '</strong>' : ''}</div>
+        seccion1HTML = `
+            <div style="background: #0d1e33; border: 1px solid #1f395a; border-radius: 10px; padding: 14px 18px;">
+                <div style="font-size: 0.8rem; text-transform: uppercase; color: #38bdf8; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    <span>📋</span> INFORMACIÓN DEL EMPLEADO
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Nombre Completo:</span>
+                        <strong style="color: #ffffff;">${dp.nombres || ''} ${dp.apellido_paterno || ''} ${dp.apellido_materno || ''}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">No. de Empleado:</span>
+                        <strong style="color: #ffffff;">${dp.num_empleado || 'N/A'}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Ciudad Base:</span>
+                        <strong style="color: #38bdf8;">${ciudadCopeTexto}</strong>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Área Asignada:</span>
+                        <strong style="color: #ffffff;">${dp.area || 'N/A'}</strong>
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Correo Electrónico:</span>
+                        <strong style="color: #e2e8f0;">${dp.correo || 'No registrado'}</strong>
+                    </div>
+                </div>
+            </div>
         `;
     }
 
-    const fechaHoy = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
-    htmlContent += `
+    const opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const fechaHoy = new Date().toLocaleDateString('es-MX', opcionesFecha);
+
+    const modalHTML = `
+        <button class="btn-close-modal" onclick="cerrarModal('modal-detalles-usuario')" style="color: #94a3b8; font-size: 24px; top: 15px; right: 20px;">×</button>
+        
+        <!-- Header del Modal -->
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 22px; border-bottom: 1px solid #1f395a; padding-bottom: 16px;">
+            <div style="width: 44px; height: 44px; border-radius: 10px; background: ${headerIconBg}; color: ${headerIconColor}; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid ${headerIconBorder};">
+                ${headerIcon}
+            </div>
+            <div>
+                <h3 style="color: #ffffff; margin: 0; font-size: 1.3rem; font-weight: 700;">${headerTitle}</h3>
+                <p style="color: #94a3b8; margin: 3px 0 0 0; font-size: 0.85rem;">${headerSubtitle}</p>
             </div>
         </div>
-        <div class="pdf-footer">Documento extraído de la Base de Datos Central el: ${fechaHoy}</div>
+
+        <!-- Cuerpo del Perfil -->
+        <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+            
+            <!-- Columna Izquierda: Foto y Estado -->
+            <div style="display: flex; flex-direction: column; align-items: center; min-width: 170px;">
+                <div style="width: 150px; height: 150px; border-radius: 14px; border: 3px solid ${borderColorPhoto}; box-shadow: 0 8px 24px rgba(0,0,0,0.5); overflow: hidden; background: ${photoBg}; padding: ${photoPadding}; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <img src="${fotoSrc}"
+                        style="width: 100%; height: 100%; object-fit: ${photoFit}; cursor: pointer; transition: transform 0.3s;" onclick="abrirLightbox(this.src)" title="${photoTooltip}" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onerror="this.src='https://via.placeholder.com/150/112641/40916c?text=Foto'">
+                </div>
+                <div style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; background: ${statusBadgeBg}; color: ${statusBadgeColor}; font-size: 0.82rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; border: 1px solid ${statusBadgeBorder};">
+                    <span style="display: inline-block; width: 8px; height: 8px; background: ${statusDotColor}; border-radius: 50%;"></span>
+                    ${statusBadgeText}
+                </div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px;">${photoTooltip}</div>
+            </div>
+
+            <!-- Columna Derecha: Tarjetas de Información -->
+            <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px;">
+                ${seccion1HTML}
+
+                <!-- Sección 2: Credenciales y Nivel de Acceso -->
+                <div style="background: #0d1e33; border: 1px solid #1f395a; border-radius: 10px; padding: 14px 18px;">
+                    <div style="font-size: 0.8rem; text-transform: uppercase; color: ${headerIconColor}; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                        <span>🔐</span> CREDENCIALES DEL SISTEMA
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; align-items: center;">
+                        <div>
+                            <span style="color: #94a3b8; font-size: 0.8rem; display: block;">Usuario del Sistema:</span>
+                            <code style="background: rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 4px; color: #e2e8f0; font-size: 0.85rem;">${user.usuario}</code>
+                        </div>
+                        <div>
+                            <span style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 2px;">Nivel de Acceso:</span>
+                            ${nivelAccesoBadge}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meta / Timestamp -->
+        <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: #64748b; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <span>Fecha de consulta: <strong style="color: #94a3b8;">${fechaHoy}</strong></span>
+        </div>
+
+        <!-- Acciones del Modal -->
+        <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+            <button class="btn-danger" onclick="cerrarModal('modal-detalles-usuario')" style="max-width: 140px; padding: 10px 18px;">Cerrar</button>
+            <button class="btn-success-modal" onclick="descargarPDFDetallesUsuario('${user.usuario}')" style="padding: 10px 22px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; cursor: pointer;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Confirmar y Descargar PDF
+            </button>
+        </div>
     `;
 
-    document.getElementById('pdf-perfil-contenido').innerHTML = htmlContent;
-    document.getElementById('modal-detalles-usuario').style.display = 'flex';
+    const contenedor = document.getElementById('modal-detalles-usuario-box');
+    if (contenedor) {
+        contenedor.innerHTML = modalHTML;
+    }
+    const modalEl = document.getElementById('modal-detalles-usuario');
+    if (modalEl) {
+        modalEl.style.display = 'flex';
+    }
+}
+
+function descargarPDFDetallesUsuario(usuarioId) {
+    const user = (usuariosGlobal || []).find(u => u.usuario === usuarioId);
+    if (!user) return;
+
+    const dp = user.datos_perfil || {};
+    const rol = user.rol;
+    const isProv = rol === 'proveedores';
+    const isCorp = rol === 'corporativos';
+    const carpeta = isProv ? 'logos_proveedores' : (rol === 'administracion' ? 'foto_administracion' : 'foto_corporativos');
+    const fotoSrc = dp.foto_ruta ? `/static/${carpeta}/${dp.foto_ruta}` : 'https://via.placeholder.com/150/ffffff/000000?text=Foto';
+
+    let subTituloDoc = isProv ? 'EXPEDIENTE DE USUARIO - PROVEEDOR' : (isCorp ? 'EXPEDIENTE DE USUARIO - DIRECCIÓN CORPORATIVA' : 'EXPEDIENTE DE USUARIO - AUTOMOTRIZ');
+    let nivelAccesoColor = isProv ? '#10b981' : (isCorp ? '#8b5cf6' : '#f59e0b');
+    let nivelAccesoTexto = isProv ? 'Proveedor' : (isCorp ? 'Corporativo' : (dp.subrol || 'Administración'));
+    let ciudadCopeTexto = dp.ciudad ? (dp.cope ? `${dp.ciudad} / ${dp.cope}` : dp.ciudad) : 'No especificada';
+
+    let detallesDocHTML = '';
+    if (isProv) {
+        detallesDocHTML = `
+            <div class="pdf-section-title">■ DATOS DE LA EMPRESA</div>
+            <div class="pdf-line"><strong>Razón Social:</strong> ${dp.nombre_proveedor || 'N/A'}</div>
+            <div class="pdf-line"><strong>Descripción:</strong> <span class="texto-largo">${dp.descripcion || 'Sin descripción'}</span></div>
+            <div class="pdf-line"><strong>Usuario Sistema:</strong> ${user.usuario}</div>
+            <br>
+            <div class="pdf-section-title">■ INFORMACIÓN DE CONTACTO</div>
+            <div class="pdf-line"><strong>Encargado Principal:</strong> ${dp.encargado || 'N/A'}</div>
+            <div class="pdf-line"><strong>Resp. en Turno:</strong> ${dp.responsable || 'N/A'}</div>
+            <div class="pdf-line"><strong>Ciudad Base:</strong> <span style="color:#0284c7; font-weight:bold;">${dp.ciudad || 'No especificada'}</span></div>
+            <div class="pdf-line"><strong>Teléfono:</strong> ${dp.telefono || 'N/A'}</div>
+            <div class="pdf-line"><strong>Correo:</strong> ${dp.correo || 'N/A'}</div>
+            <div class="pdf-line"><strong>Dirección:</strong> <span class="texto-largo">${dp.direccion || 'N/A'} (C.P. ${dp.codigo_postal || 'N/A'})</span></div>
+            <br>
+            <div class="pdf-section-title">■ CREDENCIALES DEL SISTEMA</div>
+            <div class="pdf-line"><strong>Usuario Asignado:</strong> ${user.usuario}</div>
+            <div class="pdf-line"><strong>Nivel de Acceso:</strong> <span style="color:${nivelAccesoColor}; font-weight:bold;">${nivelAccesoTexto}</span></div>
+        `;
+    } else {
+        detallesDocHTML = `
+            <div class="pdf-section-title">■ INFORMACIÓN DEL EMPLEADO</div>
+            <div class="pdf-line"><strong>Nombre Completo:</strong> ${dp.nombres || ''} ${dp.apellido_paterno || ''} ${dp.apellido_materno || ''}</div>
+            <div class="pdf-line"><strong>No. de Empleado:</strong> ${dp.num_empleado || 'N/A'}</div>
+            <div class="pdf-line"><strong>Ciudad Base:</strong> <span style="color:#0284c7; font-weight:bold;">${ciudadCopeTexto}</span></div>
+            <div class="pdf-line"><strong>Área Asignada:</strong> ${dp.area || 'N/A'}</div>
+            <div class="pdf-line"><strong>Correo Electrónico:</strong> ${dp.correo || 'No registrado'}</div>
+            <br>
+            <div class="pdf-section-title">■ CREDENCIALES DEL SISTEMA</div>
+            <div class="pdf-line"><strong>Usuario Asignado:</strong> ${user.usuario}</div>
+            <div class="pdf-line"><strong>Nivel de Acceso:</strong> <span style="color:${nivelAccesoColor}; font-weight:bold;">${nivelAccesoTexto}</span></div>
+        `;
+    }
+
+    const opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric' };
+    const fechaTexto = new Date().toLocaleDateString('es-MX', opcionesFecha);
+
+    const docCompleto = `
+        <div class="pdf-sheet">
+            <div class="pdf-header-doc">
+                <h2>EXPEDIENTE DE USUARIO</h2>
+                <p>${subTituloDoc}</p>
+            </div>
+            <div class="pdf-body">
+                <img src="${fotoSrc}" class="pdf-photo-doc" style="object-fit:${isProv ? 'contain' : 'cover'}; ${isProv ? 'background:#fff; padding:4px;' : ''}" onerror="this.src='https://via.placeholder.com/150/ffffff/000000?text=Foto'">
+                <div class="pdf-details">
+                    ${detallesDocHTML}
+                </div>
+            </div>
+            <div class="pdf-footer">Documento extraído de la Base de Datos Central el: ${fechaTexto}</div>
+        </div>
+    `;
+
+    const nuevaPestana = window.open('', '_blank');
+    if (!nuevaPestana) {
+        alert('Por favor, permite ventanas emergentes en tu navegador para ver el expediente en una pestaña nueva.');
+        return;
+    }
+
+    nuevaPestana.document.open();
+    nuevaPestana.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expediente de Usuario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f172a;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1e293b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .toolbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: #112641;
+            border-bottom: 1px solid #1f395a;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            z-index: 1000;
+        }
+        .toolbar-title {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toolbar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-tool {
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-print { background: #0284c7; color: #ffffff; }
+        .btn-print:hover { background: #0369a1; }
+        .btn-download { background: #2d6a4f; color: #ffffff; }
+        .btn-download:hover { background: #1b4332; }
+        .btn-close { background: #475569; color: #ffffff; }
+        .btn-close:hover { background: #334155; }
+        .document-wrapper {
+            padding: 35px 20px 50px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .pdf-sheet {
+            background: #ffffff;
+            color: #000000;
+            width: 100%;
+            max-width: 800px;
+            padding: 45px 50px;
+            border-radius: 6px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+        .pdf-header-doc {
+            text-align: center;
+            border-bottom: 2px solid #112641;
+            padding-bottom: 16px;
+            margin-bottom: 25px;
+        }
+        .pdf-header-doc h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #112641;
+            font-family: 'Times New Roman', serif;
+            letter-spacing: 0.5px;
+        }
+        .pdf-header-doc p {
+            margin: 6px 0 0 0;
+            font-size: 13px;
+            color: #475569;
+            font-style: italic;
+            font-weight: bold;
+        }
+        .pdf-body {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 25px;
+            align-items: flex-start;
+        }
+        .pdf-photo-doc {
+            width: 130px;
+            height: 130px;
+            object-fit: cover;
+            border: 2px solid #112641;
+            border-radius: 4px;
+        }
+        .pdf-details { flex: 1; }
+        .pdf-section-title {
+            background: #f1f5f9;
+            padding: 7px 12px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            border-left: 4px solid #112641;
+            font-size: 13.5px;
+            color: #112641;
+        }
+        .pdf-line {
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #1e293b;
+        }
+        .pdf-line strong {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .pdf-footer {
+            border-top: 1px solid #cbd5e1;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 35px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #ffffff !important; padding: 0 !important; }
+            .document-wrapper { padding: 0 !important; }
+            .pdf-sheet {
+                box-shadow: none !important;
+                max-width: 100% !important;
+                padding: 10mm 15mm !important;
+            }
+            @page {
+                size: letter portrait;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar no-print">
+        <div class="toolbar-title">
+            <span>📄</span> Expediente Oficial de Usuario
+        </div>
+        <div class="toolbar-actions">
+            <button class="btn-tool btn-print" onclick="window.print()">
+                🖨️ Imprimir / Guardar como PDF
+            </button>
+            <button class="btn-tool btn-download" onclick="descargarComoPDF()">
+                📥 Descargar PDF (.pdf)
+            </button>
+            <button class="btn-tool btn-close" onclick="window.close()">
+                ✖️ Cerrar
+            </button>
+        </div>
+    </div>
+    
+    <div class="document-wrapper">
+        <div id="documento-impresion">
+            ${docCompleto}
+        </div>
+    </div>
+
+    <script>
+        function descargarComoPDF() {
+            const element = document.getElementById('documento-impresion');
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: 'Perfil_Usuario.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    <\/script>
+</body>
+</html>`);
+    nuevaPestana.document.close();
 }
 
 function descargarPDFUsuario() {
-    const elemento = document.getElementById('pdf-perfil-contenido');
-    const opciones = {
-        margin: 0.4,
-        filename: 'Perfil_Usuario.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-    html2pdf().set(opciones).from(elemento).save();
+    // Mantener como compatibilidad si se llamaba en algún otro contexto
+    descargarPDF();
 }
 
 function cargarListaUsuarios(rolBuscado, idTabla) {
@@ -533,14 +1005,10 @@ function cargarListaUsuarios(rolBuscado, idTabla) {
 
         let filtrados = usuariosGlobal.filter(u => u.rol === rolBuscado && u.datos_perfil);
 
-        // --- ¡NUEVO!: FILTRO GEOGRÁFICO PARA EL SUPERVISOR EN LA INTERFAZ ---
         let subrolActualElement = document.getElementById('subrol-actual');
         let ciudadActualElement = document.getElementById('ciudad-actual');
         let subrolActual = subrolActualElement ? subrolActualElement.value : '';
         let miCiudad = ciudadActualElement ? ciudadActualElement.value : '';
-
-        // El filtro de ciudad para supervisores ha sido removido porque los proveedores ahora son globales
-        // -------------------------------------------------------------------
 
         if (filtrados.length === 0) { tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;">No hay usuarios en esta sección</td></tr>`; return; }
 
@@ -553,9 +1021,9 @@ function cargarListaUsuarios(rolBuscado, idTabla) {
 
             const btnAcciones = `
                 <div class="acciones-td" style="flex-direction: column;">
-                    <button class="btn-danger" style="background-color: #b45309; margin-bottom: 5px; width: 100%;" onclick="abrirModalDetallesUsuario('${u.usuario}')">📄 Ver PDF / Detalles</button>
+                    <button class="btn-info" style="background-color: #0284c7; margin-bottom: 5px; width: 100%; font-weight: 600;" onclick="abrirModalDetallesUsuario('${u.usuario}')">Ver Detalles</button>
                     <div style="display:flex; gap:5px; width:100%;">
-                        <button class="btn-info" onclick="abrirModalEditar('${u.usuario}')" style="flex:1;">Editar</button>
+                        <button class="btn-success" onclick="abrirModalEditar('${u.usuario}')" style="flex:1; background-color: #10b981;">Editar</button>
                         ${subrolActual !== 'Supervisor' ? `<button class="btn-danger-sm" onclick="eliminarUsuario('${u.usuario}', '${rolBuscado}')" style="flex:1;">Eliminar</button>` : ''}
                     </div>
                 </div>`;
@@ -624,10 +1092,50 @@ function abrirModalEditar(usuarioId) {
     if (document.getElementById('edit-ciudad')) {
         actualizarCopeSelect('edit-ciudad', 'edit-cope', dp.cope);
     }
+    guardarEstadoInicialEdicion();
     document.getElementById('modal-editar').style.display = 'flex';
 }
 
+function guardarEstadoInicialEdicion() {
+    const form = document.getElementById('form-editar');
+    if (!form) return;
+    const inputs = form.querySelectorAll('input:not([type="file"]):not([type="hidden"]), select, textarea');
+    const estado = {};
+    inputs.forEach(el => {
+        const clave = el.name || el.id;
+        if (clave) {
+            estado[clave] = (el.value || '').trim();
+        }
+    });
+    window.estadoInicialEdicionUsuario = estado;
+}
+
 function procesarEdicion() {
+    const fotoInput = document.getElementById('edit-foto');
+    const tieneNuevaFoto = Boolean(fotoInput && fotoInput.files && fotoInput.files.length > 0);
+
+    const form = document.getElementById('form-editar');
+    const inputs = form ? form.querySelectorAll('input:not([type="file"]):not([type="hidden"]), select, textarea') : [];
+    let huboCambios = tieneNuevaFoto;
+
+    if (!huboCambios && window.estadoInicialEdicionUsuario) {
+        for (const el of inputs) {
+            const clave = el.name || el.id;
+            if (!clave) continue;
+            const valActual = (el.value || '').trim();
+            const valInicial = window.estadoInicialEdicionUsuario[clave] !== undefined ? window.estadoInicialEdicionUsuario[clave] : '';
+            if (valActual !== valInicial) {
+                huboCambios = true;
+                break;
+            }
+        }
+    }
+
+    if (!huboCambios) {
+        alert("No se ha modificado ningún dato.");
+        return;
+    }
+
     if (!confirm("⚠️ ¿Estás seguro de guardar los cambios para este usuario?")) return;
 
     let formData = new FormData(document.getElementById('form-editar'));

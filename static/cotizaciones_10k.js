@@ -79,7 +79,7 @@ async function cargarCotizaciones10k() {
                         btnAprobar = `<button class="btn-cobertura-disabled" disabled style="${btnStyle}" title="Excepción Corporativa: Prohibida suplencia en cotizaciones > $10,000 de Corporativos. Requiere Administrador titular.">🔒 Flujo Estricto Corp (Sin Cobertura)</button>
                         <span class="badge-estricto-corp">Requiere Admin Titular</span>`;
                     } else {
-                        btnAprobar = `<button class="btn-cobertura" style="${btnStyle}" ${hoverStr} onclick="accion10k('${f.id}', 'aprobar', true)">🛡️ Asumir Proceso (Aprobar a Corp)</button>`;
+                        btnAprobar = `<button class="btn-cobertura" style="${btnStyle}" ${hoverStr} onclick="delegarAprobar10k('${f.id}', '${f.unidad || ''}')">🛡️ Asumir Proceso (Aprobar a Corp)</button>`;
                     }
                 } else {
                     // Administrador titular (o Jefatura)

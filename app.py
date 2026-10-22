@@ -87,7 +87,20 @@ def proveedores():
 @app.route('/administracion')
 def administracion(): 
     if 'usuario' not in session or session['usuario']['rol'] != 'administracion': return redirect(url_for('login_page'))
-    return render_template('administracion.html', usuario=session['usuario'])
+    usuarios_data = leer_json('usuarios.json').get('usuarios', [])
+    admin_users = [
+        {
+            "subrol": u.get('datos_perfil', {}).get('subrol'),
+            "nombres": (u.get('datos_perfil', {}).get('nombres') or '').strip(),
+            "apellido_paterno": (u.get('datos_perfil', {}).get('apellido_paterno') or '').strip(),
+            "nombre_completo": f"{(u.get('datos_perfil', {}).get('nombres') or '').strip()} {(u.get('datos_perfil', {}).get('apellido_paterno') or '').strip()}".strip(),
+            "cope": u.get('datos_perfil', {}).get('cope'),
+            "copes_asignados": u.get('datos_perfil', {}).get('copes_asignados', []),
+            "ciudad": u.get('datos_perfil', {}).get('ciudad')
+        }
+        for u in usuarios_data if u.get('rol') == 'administracion'
+    ]
+    return render_template('administracion.html', usuario=session['usuario'], usuarios_admin=admin_users)
 
 @app.route('/corporativos')
 def corporativos(): 

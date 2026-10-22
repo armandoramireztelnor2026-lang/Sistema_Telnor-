@@ -2365,6 +2365,10 @@ def reactivar_desde_caras():
     if "usuario" not in session or session["usuario"]["rol"] != "administracion":
         return jsonify({"status": "error", "message": "No autorizado"})
 
+    subrol = session["usuario"].get("datos_perfil", {}).get("subrol", "")
+    if subrol != "Supervisor":
+        return jsonify({"status": "error", "message": "Solo el rol de Supervisor tiene autorización para reactivar tickets desde Cotizaciones Caras."})
+
     factura_id = request.json.get("id")
     data = leer_json("facturas.json")
 
@@ -2454,7 +2458,9 @@ def eliminar_silencioso():
     factura_a_eliminar = None
     
     for f in data.get("facturas", []):
-        if f["id"] == factura_id:
+        if str(f["id"]) == str(factura_id):
+            if subrol_eli == "Administrador" and f.get("estado") == "Archivado":
+                return jsonify({"status": "error", "message": "El rol de Administrador no tiene permisos para eliminar tickets que estén en Tickets Finalizados."}), 403
             eliminada = True
             factura_a_eliminar = f
             for tipo in ["fotos_cotizacion", "fotos_evidencia"]:

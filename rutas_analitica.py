@@ -331,6 +331,35 @@ def obtener_datos_auditados(period):
             ultima_fiscal = extract_factura_info(f)
             break
 
+    # 9. Ultimo ticket reactivado de cotizaciones caras
+    ultimo_reactivado_caras = None
+    candidatos_reactivados = []
+    for f in facturas:
+        tid = obtener_ticket_id_factura(f)
+        rep = reportes_map.get(tid)
+        if f.get('reactivado_desde_caras') is True or (rep and rep.get('reactivado_desde_caras') is True):
+            candidatos_reactivados.append(extract_factura_info(f))
+
+    for r in reportes:
+        if r.get('reactivado_desde_caras') is True:
+            r_id = str(r.get('id', ''))
+            if not any(str(c.get('ticket')) == r_id for c in candidatos_reactivados):
+                resp = resolver_responsables(r.get('cope'), cope_map, def_admin, def_super, def_jefe)
+                candidatos_reactivados.append({
+                    "ticket": r.get('id', 'N/A'),
+                    "chofer": obtener_chofer(None, r),
+                    "unidad": obtener_unidad(None, r),
+                    "taller": obtener_taller(None, r),
+                    "administrador": resp['Administrador'],
+                    "supervisor": resp['Supervisor'],
+                    "jefatura": resp['Jefatura'],
+                    "fecha": r.get('timestamp') or r.get('fecha', '')
+                })
+
+    if candidatos_reactivados:
+        candidatos_reactivados.sort(key=lambda x: str(x.get('fecha') or ''))
+        ultimo_reactivado_caras = candidatos_reactivados[-1]
+
     # TOPS
     now = datetime.datetime.now()
     unidades_tiempo = []
@@ -450,6 +479,7 @@ def obtener_datos_auditados(period):
             "ultimo_finalizado": ultimo_finalizado,
             "ultimo_asignado": ultimo_asignado,
             "ultimo_caro": ultimo_caro,
+            "ultimo_reactivado_caras": ultimo_reactivado_caras,
             "ultima_reparada": ultima_reparada,
             "ultima_entregada": ultima_entregada,
             "ultima_rechazada": ultima_rechazada,
@@ -584,14 +614,15 @@ def exportar_analitica_excel():
     ws1.row_dimensions[4].height = 28
 
     event_labels = [
-        ("Último Reporte Llegado", events["ultimo_llegado"]),
-        ("Último Reporte Finalizado", events["ultimo_finalizado"]),
-        ("Último Asignado a Taller", events["ultimo_asignado"]),
-        ("Última Cotización Cara (>=10k)", events["ultimo_caro"]),
-        ("Última Unidad Reparada", events["ultima_reparada"]),
-        ("Última Unidad Entregada", events["ultima_entregada"]),
-        ("Última Cotización Rechazada", events["ultima_rechazada"]),
-        ("Última Factura Fiscal", events["ultima_fiscal"])
+        ("Último Reporte Llegado", events.get("ultimo_llegado")),
+        ("Último Reporte Finalizado", events.get("ultimo_finalizado")),
+        ("Último Asignado a Taller", events.get("ultimo_asignado")),
+        ("Última Cotización Cara (>=10k)", events.get("ultimo_caro")),
+        ("Último Reactivado Cot. Caras", events.get("ultimo_reactivado_caras")),
+        ("Última Unidad Reparada", events.get("ultima_reparada")),
+        ("Última Unidad Entregada", events.get("ultima_entregada")),
+        ("Última Cotización Rechazada", events.get("ultima_rechazada")),
+        ("Última Factura Fiscal", events.get("ultima_fiscal"))
     ]
 
     row_num = 5

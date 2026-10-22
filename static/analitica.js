@@ -33,6 +33,7 @@ async function cargarAnalitica() {
         finalizado: document.getElementById('analitica-finalizado'),
         asignado: document.getElementById('analitica-asignado'),
         caro: document.getElementById('analitica-caro'),
+        reactivado_caro: document.getElementById('analitica-reactivado-caro'),
         reparada: document.getElementById('analitica-reparada'),
         entregada: document.getElementById('analitica-entregada'),
         rechazada: document.getElementById('analitica-rechazada'),
@@ -71,6 +72,8 @@ async function cargarAnalitica() {
                     const el = document.getElementById(id);
                     if (el) el.innerText = val;
                 };
+                setTxt('analitica-flota-total', (fm.totales.total !== undefined) ? fm.totales.total : (fm.totales.circulacion + fm.totales.taller + fm.totales.juridicos + fm.totales.inhabilitadas));
+                setTxt('analitica-flota-total-pct', '100%');
                 setTxt('analitica-flota-circulacion', fm.totales.circulacion);
                 setTxt('analitica-flota-circulacion-pct', fm.porcentajes.circulacion + '%');
                 setTxt('analitica-flota-taller', fm.totales.taller);
@@ -151,6 +154,7 @@ async function cargarAnalitica() {
             if (divs.finalizado) divs.finalizado.innerHTML = formatData(data.ultimo_finalizado, true);
             if (divs.asignado) divs.asignado.innerHTML = formatData(data.ultimo_asignado, true);
             if (divs.caro) divs.caro.innerHTML = formatData(data.ultimo_caro, true);
+            if (divs.reactivado_caro) divs.reactivado_caro.innerHTML = formatData(data.ultimo_reactivado_caras, true);
             if (divs.reparada) divs.reparada.innerHTML = formatData(data.ultima_reparada, true);
             if (divs.entregada) divs.entregada.innerHTML = formatData(data.ultima_entregada, true);
             if (divs.rechazada) divs.rechazada.innerHTML = formatData(data.ultima_rechazada, true);
