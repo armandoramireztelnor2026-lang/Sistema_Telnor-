@@ -35,7 +35,7 @@
                 <!-- Módulo de Garantía / Retrabajo (Verde) -->
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align: center; color: #4ade80; font-size: 1.12rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
-                    <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button">Retrabajo</button>
+                    <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button" onclick="cambiarVistaProv('retrabajo')">Retrabajo</button>
                 </div>
             </nav>
             <div class="btn-logout-container"><a href="/logout" class="btn-logout"
@@ -141,6 +141,36 @@
                                 </tr>
                             </thead>
                             <tbody id="tabla-archivo-prov"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vista-retrabajo" style="display: none;">
+                <div class="top-bar">
+                    <h2>Órdenes de Retrabajo / Garantía</h2>
+                </div>
+                <div class="admin-container">
+                    <input type="text" id="buscador-retrabajos-prov" class="buscador-pildora"
+                        placeholder="Buscar por ticket, unidad..."
+                        onkeyup="filtrarTabla('buscador-retrabajos-prov', 'tabla-retrabajos-prov')"
+                        style="margin-bottom: 20px; width: 100%; max-width: 400px; padding: 12px; border-radius: 20px; border: 1px solid #1f395a; background: #0b1c30; color: white;">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Fecha Reasignación</th>
+                                    <th>Unidad</th>
+                                    <th>Motivo de Retrabajo / Falla Persistente</th>
+                                    <th>Supervisor que Reasignó</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-retrabajos-prov">
+                                <tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">Cargando órdenes de retrabajo...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -459,13 +489,42 @@
     <!-- MODAL DE AYUDA DINÁMICO (MANUAL) -->
     <div id="modal-ayuda" class="manual-overlay"></div>
 
-    <script src="/static/script.js?v=1000005"></script>
+    <!-- MODAL DETALLE DE RETRABAJO / GARANTÍA (SECCIÓN 1 Y 2) -->
+    <div id="modal-detalle-retrabajo" class="modal-overlay" style="display: none; z-index: 10005;">
+        <div class="modal-box large" style="max-width: 1000px; width: 95vw; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; padding: 0; background: #0b1c30; border: 1.5px solid #22c55e; border-radius: 14px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);">
+            <!-- Header Modal -->
+            <div style="background: linear-gradient(135deg, #14532d, #064e3b); padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #22c55e;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 26px;">🛡️</span>
+                    <div>
+                        <h3 style="margin: 0; color: #ffffff; font-size: 1.25rem; font-weight: 700; letter-spacing: 0.5px;" id="modal-retrabajo-titulo">Garantía / Retrabajo</h3>
+                        <p style="margin: 2px 0 0 0; color: #86efac; font-size: 0.85rem;" id="modal-retrabajo-subtitulo">Revisión exclusiva de Secciones 1 y 2 para reatención</p>
+                    </div>
+                </div>
+                <button class="btn-close-modal" onclick="cerrarModal('modal-detalle-retrabajo')" style="position: static; font-size: 26px; color: #e2e8f0; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">×</button>
+            </div>
+
+            <!-- Contenido Scrollable con Sección 1 y Sección 2 -->
+            <div id="contenido-detalle-retrabajo" style="padding: 24px; overflow-y: auto; flex: 1; color: #e2e8f0;">
+                <!-- Inyectado dinámicamente por script.js -->
+            </div>
+
+            <!-- Footer Modal Retrabajo Proveedor -->
+            <div style="background: #081322; padding: 16px 24px; border-top: 1px solid #1f395a; display: flex; justify-content: flex-end; align-items: center;">
+                <button type="button" class="btn-footer-retrabajo btn-footer-retrabajo-cerrar" onclick="cerrarModal('modal-detalle-retrabajo')">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js?v=1000013"></script>
 
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js?v=6"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
-    <script src="/static/facturas_principal.js?v=51"></script>
+    <script src="/static/facturas_principal.js?v=61"></script>
     <script src="/static/manual_sistema.js?v=1"></script>
 </body>
 

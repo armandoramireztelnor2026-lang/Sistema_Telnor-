@@ -1694,3 +1694,99 @@ def enviar_correo_rehacer_cotizacion_supervisor(correo_supervisor, nombre_superv
     )
     return disparar_correo(correo_supervisor, asunto, cuerpo_html)
 
+
+def enviar_correo_retrabajo_taller(correo_taller, nombre_taller, ticket, unidad, motivo_retrabajo, nombre_supervisor=None):
+    """
+    Notifica al taller que se ha reasignado una orden de retrabajo / garantía para la unidad,
+    indicando que hubo retrabajo porque la unidad no fue reparada correctamente y persiste la falla.
+    """
+    if not correo_taller or str(correo_taller).strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    unidad_limpia = str(unidad).replace('8090-', '')
+    asunto = f"⚠️ Orden de Retrabajo / Garantía - Unidad 8090-{unidad_limpia} - Ticket #{ticket}"
+
+    bloque_obs = (
+        f'<div style="background-color: #fef2f2; border-left: 4px solid #ef4444; border-radius: 6px; padding: 13px 16px; margin: 15px 0;">'
+        f'<div style="color: #991b1b; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">'
+        f'Motivo del Retrabajo Reportado:'
+        f'</div>'
+        f'<div style="color: #7f1d1d; font-size: 14px; font-style: italic; line-height: 1.5;">'
+        f'"{motivo_retrabajo}"'
+        f'</div>'
+        f'</div>'
+    )
+
+    cuerpo_html = generar_plantilla_base(
+        titulo_header="Orden de Retrabajo / Garantía",
+        subtitulo_header="Reatención técnica por falla no solventada",
+        categoria_badge="RETRABAJO • GARANTÍA",
+        color_tema="rojo",
+        saludo=f"Hola <strong>{nombre_taller}</strong>,",
+        mensaje_intro=(
+            f"Se le notifica que se ha emitido y autorizado una <strong>orden de retrabajo por garantía</strong> "
+            f"para la unidad <strong>8090-{unidad_limpia}</strong> (Ticket <strong>{ticket}</strong>), "
+            f"debido a que <strong>la unidad no fue reparada de manera correcta y se sigue presentando el fallo del cual es el ticket</strong>."
+        ),
+        detalles_items=[
+            ("🎫 Ticket", f"<strong>{ticket}</strong>"),
+            ("🚚 Unidad", f"8090-{unidad_limpia}"),
+            ("🔧 Taller Asignado", nombre_taller),
+            ("👨‍💼 Supervisor Asignado", nombre_supervisor or "Supervisión Vehicular")
+        ],
+        bloque_destacado=bloque_obs,
+        callout_texto="Por favor ingrese al sistema en su panel de taller dentro del módulo de <strong>Garantía / Retrabajo</strong> para recibir la unidad e iniciar la corrección prioritaria sin costo adicional bajo la garantía de servicio.",
+        callout_tipo="peligro",
+        autor_proceso=formatear_nombre_rol(nombre_supervisor, "Supervisor") if nombre_supervisor else None
+    )
+    return disparar_correo(correo_taller, asunto, cuerpo_html)
+
+
+def enviar_correo_cancelacion_retrabajo_chofer(correo_chofer, nombre_chofer, ticket, unidad, motivo_cancelacion, nombre_supervisor=None):
+    """
+    Notifica al chofer por medio del supervisor indicándole que no se puede retrabajar
+    la unidad por la razón expuesta.
+    """
+    if not correo_chofer or str(correo_chofer).strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    unidad_limpia = str(unidad).replace('8090-', '')
+    asunto = f"Aviso de Garantía: Solicitud No Procedente - Ticket #{ticket} (Unidad 8090-{unidad_limpia})"
+
+    bloque_dictamen = (
+        f'<div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 13px 16px; margin: 15px 0;">'
+        f'<div style="color: #92400e; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">'
+        f'Motivo del Dictamen (Supervisor):'
+        f'</div>'
+        f'<div style="color: #78350f; font-size: 14px; font-style: italic; line-height: 1.5;">'
+        f'"{motivo_cancelacion}"'
+        f'</div>'
+        f'</div>'
+    )
+
+    cuerpo_html = generar_plantilla_base(
+        titulo_header="Dictamen de Garantía Vehicular",
+        subtitulo_header="Resolución sobre solicitud de retrabajo",
+        categoria_badge="GARANTÍA CANCELADA",
+        color_tema="ambar",
+        saludo=f"Hola <strong>{nombre_chofer}</strong>,",
+        mensaje_intro=(
+            f"Le informamos que la solicitud de garantía / retrabajo registrada para la unidad <strong>8090-{unidad_limpia}</strong> "
+            f"(Ticket <strong>{ticket}</strong>) ha sido revisada por la supervisión vehicular y se ha determinado que "
+            f"<strong>no se puede retrabajar</strong> debido a las razones expuestas a continuación:"
+        ),
+        detalles_items=[
+            ("🎫 Ticket", f"<strong>{ticket}</strong>"),
+            ("🚚 Unidad", f"8090-{unidad_limpia}"),
+            ("👤 Empleado / Chofer", nombre_chofer),
+            ("🚫 Dictamen", "No procede retrabajo / Solicitud cancelada"),
+            ("👨‍💼 Dictaminado por", nombre_supervisor or "Supervisión Vehicular")
+        ],
+        bloque_destacado=bloque_dictamen,
+        callout_texto="La solicitud ha sido dada de baja del sistema. Para cualquier duda o aclaración sobre este dictamen técnico, comuníquese directamente con su supervisor asignado.",
+        callout_tipo="alerta",
+        autor_proceso=formatear_nombre_rol(nombre_supervisor, "Supervisor") if nombre_supervisor else None
+    )
+    return disparar_correo(correo_chofer, asunto, cuerpo_html)
+
+

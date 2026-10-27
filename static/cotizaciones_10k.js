@@ -87,7 +87,17 @@ async function cargarCotizaciones10k() {
                 }
 
                 let btnCaras = `<button style="${btnStyle} background:#b91c1c !important;" ${hoverStr} onclick="abrirCancelacion10k('${f.id}')">Cancelar Ticket (Cara)</button>`;
-                let acciones = `<div style="display:flex; flex-direction:column;">${btnVerDetalles}${btnAprobar}${btnCaras}</div>`;
+                let enRetrabajoBloqueo = (f.estado === 'En Asignacion/Retrabajo' || f.estado === 'Retrabajo' || f.estado_retrabajo === 'Pendiente' || f.estado_retrabajo === 'Reasignado');
+                let acciones = '';
+                if (enRetrabajoBloqueo) {
+                    let nombreEstadoBloq = (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado') ? 'Retrabajo' : 'En Asignación/Retrabajo';
+                    acciones = `<div style="display:flex; flex-direction:column; gap:5px;">
+                        ${btnVerDetalles}
+                        <button disabled style="${btnStyle} background:#334155 !important; color:#f87171 !important; border:1px solid #ef4444; opacity:0.9; cursor:not-allowed;">🔒 Bloqueado (${nombreEstadoBloq})</button>
+                    </div>`;
+                } else {
+                    acciones = `<div style="display:flex; flex-direction:column;">${btnVerDetalles}${btnAprobar}${btnCaras}</div>`;
+                }
 
                 let idRepForTable = typeof obtenerIdReporte === 'function' ? obtenerIdReporte(f) : (f.id || 'S/T');
                 let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';

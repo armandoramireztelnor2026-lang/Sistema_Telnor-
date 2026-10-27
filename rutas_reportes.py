@@ -13,6 +13,8 @@ from notificaciones import (
     enviar_correo_nuevo_ticket,
     enviar_correo_confirmacion_reporte,
     enviar_correo_ticket_rechazado,
+    enviar_correo_retrabajo_taller,
+    enviar_correo_cancelacion_retrabajo_chofer,
 )
 
 reportes_bp = Blueprint("reportes_bp", __name__)
@@ -877,11 +879,25 @@ def aplicar_garantia():
     # Actualizar factura en facturas.json
     for f in facturas_data.get("facturas", []):
         if str(f.get("id")) == str(factura_correspondiente.get("id")):
-            f["retrabajo"] = "Sí"
-            f["num_retrabajo"] = int(f.get("num_retrabajo", 0)) + 1
+            f["retrabajo"] = "Pendiente"
+            f["estado_retrabajo"] = "Pendiente"
+            if "estado_previo" not in f or not f["estado_previo"]:
+                f["estado_previo"] = f.get("estado")
+            f["estado"] = "En Asignacion/Retrabajo"
             f["ultimo_motivo_retrabajo"] = motivo
+            # NOTA: NO se incrementa num_retrabajo aquí porque apenas se va a reasignar o cancelar
             break
     escribir_json("facturas.json", facturas_data)
+
+    # Actualizar en reportes.json
+    reportes_data = leer_json("reportes.json")
+    for r in reportes_data.get("reportes", []):
+        if str(r.get("id")) == str(ticket_original_val):
+            if "estado_previo" not in r or not r["estado_previo"]:
+                r["estado_previo"] = r.get("estado")
+            r["estado"] = "En Asignacion/Retrabajo"
+            break
+    escribir_json("reportes.json", reportes_data)
 
     return jsonify({
         "status": "success",
@@ -952,6 +968,285 @@ def obtener_detalle_retrabajo(ticket_id):
                 "retrabajo": ret
             })
     return jsonify({"status": "error", "message": "Garantía no encontrada para este ticket"}), 404
+
+
+@reportes_bp.route("/api/garantia/reasignar", methods=["POST"])
+def reasignar_retrabajo():
+    if "usuario" not in session or session["usuario"].get("rol") != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    data = request.get_json() or {}
+    ticket = str(data.get("ticket", "")).strip().upper()
+    if not ticket:
+        return jsonify({"status": "error", "message": "Ticket no especificado"}), 400
+
+    retrabajos_data = leer_json("retrabajos.json")
+    todos = retrabajos_data.get("retrabajos", [])
+    
+    encontrado = None
+    for ret in todos:
+        r_id = str(ret.get("id", "")).strip().upper()
+        r_orig = str(ret.get("ticket_original", "")).strip().upper()
+        r_tick = str(ret.get("ticket", "")).strip().upper()
+        if ticket in [r_id, r_orig, r_tick] or (ticket.replace("REP-", "") in [r_id.replace("REP-", ""), r_orig.replace("REP-", "")]):
+            encontrado = ret
+            break
+
+    if not encontrado:
+        return jsonify({"status": "error", "message": "Reporte de retrabajo no encontrado"}), 404
+
+    dp = session["usuario"].get("datos_perfil", {})
+    nombres = dp.get("nombres", "")
+    apellidos = dp.get("apellido_paterno", "")
+    sup_nombre = f"{nombres} {apellidos}".strip() or session["usuario"].get("nombre", "Supervisor")
+
+    encontrado["estado"] = "Reasignado"
+    encontrado["fecha_reasignacion"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    encontrado["supervisor_reasigno"] = sup_nombre
+    escribir_json("retrabajos.json", retrabajos_data)
+
+    # Actualizar en facturas.json si corresponde
+    facturas_data = leer_json("facturas.json")
+    f_id = str(encontrado.get("factura_id", "")).strip().upper()
+    for f in facturas_data.get("facturas", []):
+        if str(f.get("id", "")).strip().upper() == f_id or ticket in str(f.get("retro", "")).upper() or str(f.get("id_reporte", "")).upper() == ticket:
+            f["retrabajo"] = "Sí"
+            f["estado_retrabajo"] = "Reasignado"
+            if "estado_previo" not in f or not f["estado_previo"]:
+                f["estado_previo"] = f.get("estado")
+            f["estado"] = "Retrabajo"
+            # Se empieza a contar cuando el supervisor lo vuelve a reasignar al taller
+            f["num_retrabajo"] = int(f.get("num_retrabajo", 0)) + 1
+            break
+    escribir_json("facturas.json", facturas_data)
+
+    # Actualizar en reportes.json
+    reportes_data = leer_json("reportes.json")
+    for r in reportes_data.get("reportes", []):
+        r_id_clean = str(r.get("id", "")).strip().upper()
+        if r_id_clean == ticket or r_id_clean == str(encontrado.get("ticket_original", "")).strip().upper():
+            if "estado_previo" not in r or not r["estado_previo"]:
+                r["estado_previo"] = r.get("estado")
+            r["estado"] = "Retrabajo"
+            break
+    escribir_json("reportes.json", reportes_data)
+
+    s2 = encontrado.get("seccion_2", {})
+    nombre_taller = s2.get("proveedor") or encontrado.get("proveedor", "Taller")
+    unidad = encontrado.get("unidad", "S/N")
+    motivo_chofer = encontrado.get("motivo_chofer", "Falla persistente no reparada de manera correcta")
+    ticket_display = encontrado.get("ticket_original") or encontrado.get("ticket") or ticket
+
+    # Buscar correo del taller en usuarios.json
+    usuarios = leer_json("usuarios.json")
+    correo_taller = None
+    for u in usuarios:
+        if u.get("rol") == "proveedores":
+            perf = u.get("datos_perfil", {})
+            if perf.get("nombre_proveedor") == nombre_taller or u.get("nombre_proveedor") == nombre_taller:
+                correo_taller = u.get("correo") or perf.get("correo")
+                break
+
+    if not correo_taller:
+        correo_taller = "armandoramireztelnor2026@gmail.com"
+
+    try:
+        enviar_correo_retrabajo_taller(
+            correo_taller=correo_taller,
+            nombre_taller=nombre_taller,
+            ticket=ticket_display,
+            unidad=unidad,
+            motivo_retrabajo=motivo_chofer,
+            nombre_supervisor=sup_nombre
+        )
+    except Exception as e:
+        print(f"Error al enviar correo de retrabajo al taller: {e}")
+
+    return jsonify({
+        "status": "success",
+        "message": f"Retrabajo para el ticket {ticket_display} reasignado exitosamente al taller {nombre_taller}. Se envió notificación por correo."
+    })
+
+
+@reportes_bp.route("/api/garantia/cancelar_reasignacion", methods=["POST"])
+def cancelar_reasignacion_retrabajo():
+    if "usuario" not in session or session["usuario"].get("rol") != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    data = request.get_json() or {}
+    ticket = str(data.get("ticket", "")).strip().upper()
+    motivo_cancelacion = str(data.get("motivo", "")).strip()
+
+    if not ticket:
+        return jsonify({"status": "error", "message": "Ticket no especificado"}), 400
+    if not motivo_cancelacion:
+        return jsonify({"status": "error", "message": "Debes especificar el motivo de cancelación"}), 400
+
+    retrabajos_data = leer_json("retrabajos.json")
+    todos = retrabajos_data.get("retrabajos", [])
+    
+    encontrado = None
+    for ret in todos:
+        r_id = str(ret.get("id", "")).strip().upper()
+        r_orig = str(ret.get("ticket_original", "")).strip().upper()
+        r_tick = str(ret.get("ticket", "")).strip().upper()
+        if ticket in [r_id, r_orig, r_tick] or (ticket.replace("REP-", "") in [r_id.replace("REP-", ""), r_orig.replace("REP-", "")]):
+            encontrado = ret
+            break
+
+    if not encontrado:
+        return jsonify({"status": "error", "message": "Reporte de retrabajo no encontrado"}), 404
+
+    s1 = encontrado.get("seccion_1", {})
+    correo_chofer = s1.get("email")
+    nombre_chofer = s1.get("empleado", "Chofer / Empleado")
+    unidad = encontrado.get("unidad", "S/N")
+    ticket_display = encontrado.get("ticket_original") or encontrado.get("ticket") or ticket
+
+    dp = session["usuario"].get("datos_perfil", {})
+    nombres = dp.get("nombres", "")
+    apellidos = dp.get("apellido_paterno", "")
+    sup_nombre = f"{nombres} {apellidos}".strip() or session["usuario"].get("nombre", "Supervisor")
+
+    if not correo_chofer:
+        correo_chofer = "armandoramireztelnor2026@gmail.com"
+
+    try:
+        enviar_correo_cancelacion_retrabajo_chofer(
+            correo_chofer=correo_chofer,
+            nombre_chofer=nombre_chofer,
+            ticket=ticket_display,
+            unidad=unidad,
+            motivo_cancelacion=motivo_cancelacion,
+            nombre_supervisor=sup_nombre
+        )
+    except Exception as e:
+        print(f"Error al enviar correo de cancelación de retrabajo al chofer: {e}")
+
+    # Eliminar reporte de retrabajo de retrabajos.json (requisito explícito del usuario)
+    id_enc = str(encontrado.get("id", "")).strip().upper()
+    orig_enc = str(encontrado.get("ticket_original", "")).strip().upper()
+    retrabajos_data["retrabajos"] = [
+        r for r in todos 
+        if str(r.get("id", "")).strip().upper() != id_enc
+        and str(r.get("ticket_original", "")).strip().upper() != orig_enc
+    ]
+    escribir_json("retrabajos.json", retrabajos_data)
+
+    # Actualizar en facturas.json si corresponde
+    facturas_data = leer_json("facturas.json")
+    f_id = str(encontrado.get("factura_id", "")).strip().upper()
+    for f in facturas_data.get("facturas", []):
+        if str(f.get("id", "")).strip().upper() == f_id or ticket in str(f.get("retro", "")).upper() or str(f.get("id_reporte", "")).upper() == ticket:
+            f["retrabajo"] = "Cancelado"
+            f["estado_retrabajo"] = "Cancelado"
+            f["motivo_cancelacion_retrabajo"] = motivo_cancelacion
+            f["estado"] = f.get("estado_previo") or "Archivado"
+            if not f.get("num_retrabajo"):
+                f["num_retrabajo"] = 0
+            break
+    escribir_json("facturas.json", facturas_data)
+
+    # Restaurar en reportes.json si corresponde
+    reportes_data = leer_json("reportes.json")
+    for r in reportes_data.get("reportes", []):
+        r_id_clean = str(r.get("id", "")).strip().upper()
+        if r_id_clean == ticket or r_id_clean == str(encontrado.get("ticket_original", "")).strip().upper():
+            r["estado"] = r.get("estado_previo") or "Finalizado"
+            break
+    escribir_json("reportes.json", reportes_data)
+
+    return jsonify({
+        "status": "success",
+        "message": f"La reasignación del ticket {ticket_display} ha sido cancelada. El reporte de retrabajo fue eliminado y se notificó al chofer."
+    })
+
+
+@reportes_bp.route("/api/garantia/proveedor/lista", methods=["GET"])
+def obtener_retrabajos_proveedor():
+    if "usuario" not in session or session["usuario"].get("rol") != "proveedores":
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    dp = session["usuario"].get("datos_perfil", {})
+    mi_proveedor = str(dp.get("nombre_proveedor", "")).strip().upper()
+
+    retrabajos_data = leer_json("retrabajos.json")
+    todos = retrabajos_data.get("retrabajos", [])
+
+    filtrados = []
+    for ret in todos:
+        s2 = ret.get("seccion_2", {})
+        prov_ret = str(s2.get("proveedor") or ret.get("proveedor", "")).strip().upper()
+        estado = str(ret.get("estado", "")).strip()
+        if prov_ret == mi_proveedor and estado in ["Reasignado", "Reasignado_Taller"]:
+            filtrados.append(ret)
+
+    return jsonify({
+        "status": "success",
+        "total": len(filtrados),
+        "retrabajos": filtrados
+    })
+
+
+@reportes_bp.route("/api/garantia/taller/finalizar", methods=["POST"])
+def finalizar_retrabajo_taller():
+    if "usuario" not in session or session["usuario"].get("rol") != "proveedores":
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    data = request.get_json() or {}
+    ticket = str(data.get("ticket", "")).strip().upper()
+    if not ticket:
+        return jsonify({"status": "error", "message": "Ticket no especificado"}), 400
+
+    retrabajos_data = leer_json("retrabajos.json")
+    todos = retrabajos_data.get("retrabajos", [])
+
+    encontrado = None
+    for ret in todos:
+        r_id = str(ret.get("id", "")).strip().upper()
+        r_orig = str(ret.get("ticket_original", "")).strip().upper()
+        r_tick = str(ret.get("ticket", "")).strip().upper()
+        if ticket in [r_id, r_orig, r_tick] or (ticket.replace("REP-", "") in [r_id.replace("REP-", ""), r_orig.replace("REP-", "")]):
+            encontrado = ret
+            break
+
+    if not encontrado:
+        return jsonify({"status": "error", "message": "Reporte de retrabajo no encontrado"}), 404
+
+    dp = session["usuario"].get("datos_perfil", {})
+    taller_nombre = dp.get("nombre_proveedor", "Taller")
+
+    # Actualizar estado en retrabajos.json
+    encontrado["estado"] = "Finalizado"
+    encontrado["fecha_finalizacion_taller"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    escribir_json("retrabajos.json", retrabajos_data)
+
+    # Actualizar estado en facturas.json y restaurar estado previo
+    facturas_data = leer_json("facturas.json")
+    f_id = str(encontrado.get("factura_id", "")).strip().upper()
+    for f in facturas_data.get("facturas", []):
+        if str(f.get("id", "")).strip().upper() == f_id or ticket in str(f.get("retro", "")).upper() or str(f.get("id_reporte", "")).upper() == ticket:
+            f["estado_retrabajo"] = "Finalizado"
+            f["estado"] = f.get("estado_previo") or "Archivado"
+            break
+    escribir_json("facturas.json", facturas_data)
+
+    # Actualizar estado en reportes.json
+    reportes_data = leer_json("reportes.json")
+    for r in reportes_data.get("reportes", []):
+        r_id_clean = str(r.get("id", "")).strip().upper()
+        if r_id_clean == ticket or r_id_clean == str(encontrado.get("ticket_original", "")).strip().upper():
+            r["estado"] = r.get("estado_previo") or "Finalizado"
+            break
+    escribir_json("reportes.json", reportes_data)
+
+    ticket_display = encontrado.get("ticket_original") or encontrado.get("ticket") or ticket
+    return jsonify({
+        "status": "success",
+        "message": f"El retrabajo para el ticket {ticket_display} ha sido marcado como FINALIZADO exitosamente por el taller {taller_nombre}."
+    })
+
+
 
 
 

@@ -198,7 +198,11 @@ function renderizarTablaReportes(lista) {
             confirmadaTotal = (apSuper && apCorp);
         }
 
-        if (f.estado === 'Cancelado_Cotizacion_Cara') {
+        if (f.estado === 'En Asignacion/Retrabajo' || f.estado_retrabajo === 'Pendiente') {
+            estado = "En Asignacion/Retrabajo";
+        } else if (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado') {
+            estado = "Retrabajo";
+        } else if (f.estado === 'Cancelado_Cotizacion_Cara') {
             estado = "Incosteable";
         } else if (f.estado === 'Rechazado_Con_Recomendaciones') {
             estado = "Correcciones/Taller";
@@ -329,8 +333,22 @@ function renderizarTablaReportes(lista) {
         let htmlBtnPdfFactura = '';
         let htmlNumContable = '';
         
-        let valRetrabajo = f.retrabajo || f.es_retrabajo || '-';
-        let valNumRetrabajo = f.num_retrabajo || f.numero_retrabajo || '-';
+        let rawRetrabajo = String(f.retrabajo || f.es_retrabajo || '').trim();
+        let valRetrabajo = '';
+        if (rawRetrabajo.toLowerCase() === 'sí' || rawRetrabajo.toLowerCase() === 'si' || rawRetrabajo.toLowerCase() === 'reasignado') {
+            valRetrabajo = '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Sí</span>';
+        } else if (rawRetrabajo.toLowerCase() === 'pendiente' || rawRetrabajo.toLowerCase() === 'solicitado' || rawRetrabajo.toLowerCase() === 'en revisión' || rawRetrabajo.toLowerCase() === 'en revision') {
+            valRetrabajo = '<span style="background:#eab308; color:#0b1c30; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;" title="Solicitud en revisión (apenas se va a reasignar o cancelar)">Pendiente</span>';
+        } else if (rawRetrabajo.toLowerCase() === 'cancelado') {
+            valRetrabajo = '<span style="background:#64748b; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Cancelado</span>';
+        } else {
+            valRetrabajo = '<span style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No Aplica</span>';
+        }
+
+        let numRet = parseInt(f.num_retrabajo || f.numero_retrabajo || 0, 10);
+        let valNumRetrabajo = (numRet > 0)
+            ? `<span style="background:#f59e0b; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">${numRet}</span>`
+            : '<span style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No Aplica</span>';
         
         let numCotizaciones = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones.length : 1;
         let costoTotalRow = 0;
@@ -415,6 +433,16 @@ function renderizarTablaReportes(lista) {
 
         // Set row info for filtering
         let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+        let badgeColorEstado = '#0ea5e9';
+        let textColorEstado = 'white';
+        if (estado === 'En Asignacion/Retrabajo') {
+            badgeColorEstado = '#eab308';
+            textColorEstado = '#0b1c30';
+        } else if (estado === 'Retrabajo') {
+            badgeColorEstado = '#ef4444';
+            textColorEstado = 'white';
+        }
+
         let rowHtml = `
             <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-cope="${cleanCope}" data-estado="${estado}" data-fecha="${fechaISO}" data-costo="${ticketGasto}" data-pend-doc50="${isRowPendDoc50 ? '1' : '0'}" data-pend-oc="${isRowPendOC ? '1' : '0'}" data-reactivado="${f.reactivado_desde_caras ? '1' : '0'}">
                 <td style="vertical-align:top; padding-top:15px;"><input type="checkbox" class="chk-reporte" value="${ticket}"></td>
@@ -423,7 +451,7 @@ function renderizarTablaReportes(lista) {
                 <td style="vertical-align:top; padding-top:15px;">${fechaTicket}</td>
                 <td style="vertical-align:top; padding-top:15px;">${tiempoTicket}</td>
                 <td style="vertical-align:top; padding-top:15px;">${f.fecha_cierre || pendienteHTML}</td>
-                <td style="vertical-align:top; padding-top:15px;"><span style="background:#0ea5e9; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">${estado}</span></td>
+                <td style="vertical-align:top; padding-top:15px;"><span style="background:${badgeColorEstado}; color:${textColorEstado}; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">${estado}</span></td>
                 <td style="vertical-align:top; padding-top:15px;">${statusUnidad}</td>
                 <td style="vertical-align:top; padding-top:15px;">${nombreSup}</td>
                 <td style="vertical-align:top; padding-top:15px;">${compania}</td>

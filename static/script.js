@@ -481,7 +481,7 @@ function cambiarVistaAdmin(vista) {
 function cambiarVistaProv(vista) {
     localStorage.setItem('activeViewProv', vista);
     marcarBotonActivo(vista);
-    document.getElementById('vista-facturas').style.display = 'none';
+    if (document.getElementById('vista-facturas')) document.getElementById('vista-facturas').style.display = 'none';
     if (document.getElementById('vista-reportes-prov')) {
         document.getElementById('vista-reportes-prov').style.display = 'none';
     }
@@ -491,20 +491,28 @@ function cambiarVistaProv(vista) {
     if (document.getElementById('vista-archivo')) {
         document.getElementById('vista-archivo').style.display = 'none';
     }
+    if (document.getElementById('vista-retrabajo')) {
+        document.getElementById('vista-retrabajo').style.display = 'none';
+    }
 
     if (vista === 'facturas') {
-        document.getElementById('vista-facturas').style.display = 'block';
+        if (document.getElementById('vista-facturas')) document.getElementById('vista-facturas').style.display = 'block';
     } else if (vista === 'reportes') {
-        document.getElementById('vista-reportes-prov').style.display = 'block';
+        if (document.getElementById('vista-reportes-prov')) document.getElementById('vista-reportes-prov').style.display = 'block';
         if (typeof cargarReportesProv === 'function') cargarReportesProv();
     } else if (vista === 'facturas_finales') {
-        document.getElementById('vista-facturas-finales').style.display = 'block';
+        if (document.getElementById('vista-facturas-finales')) document.getElementById('vista-facturas-finales').style.display = 'block';
         if (typeof cargarFacturas === 'function') cargarFacturas();
     } else if (vista === 'archivo') {
         if (document.getElementById('vista-archivo')) {
             document.getElementById('vista-archivo').style.display = 'block';
         }
         if (typeof cargarFacturas === 'function') cargarFacturas();
+    } else if (vista === 'retrabajo') {
+        if (document.getElementById('vista-retrabajo')) {
+            document.getElementById('vista-retrabajo').style.display = 'block';
+        }
+        if (typeof cargarRetrabajosProveedor === 'function') cargarRetrabajosProveedor();
     }
 }
 
@@ -585,6 +593,7 @@ async function cargarRetrabajosAdmin() {
         const res = await fetch('/api/garantia/supervisor/lista');
         const data = await res.json();
         const retrabajos = data.retrabajos || [];
+        window.retrabajosSupervisorGlobal = retrabajos;
         
         if (retrabajos.length === 0) {
             tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:25px; color:#94a3b8;">No hay solicitudes de garantía o retrabajo registradas para tu supervisión.</td></tr>';
@@ -854,6 +863,225 @@ async function abrirDetalleRetrabajo(ticketId) {
         alert('Error al obtener los detalles de la garantía.');
     }
 }
+window.abrirDetalleRetrabajo = abrirDetalleRetrabajo;
+
+window.accionReasignarRetrabajo = async function() {
+    const btn = document.getElementById('btn-reasignar-retrabajo');
+    const ticketId = btn ? btn.getAttribute('data-ticket') : null;
+    if (!ticketId) {
+        alert('No se pudo identificar el ticket a reasignar.');
+        return;
+    }
+
+    const confirmar = confirm(`⚠️ ¿Confirmas la REASIGNACIÓN de garantía / retrabajo para el ticket ${ticketId}?\n\nAl confirmar, se enviará la orden de retrabajo al taller en su respectivo botón de Retrabajo y se le notificará por correo electrónico que la unidad no fue reparada de manera correcta y se sigue presentando el fallo del ticket.`);
+    if (!confirmar) return;
+
+    try {
+        let res = await fetch('/api/garantia/reasignar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticket: ticketId })
+        });
+        let data = await res.json();
+
+        if (data.status === 'success') {
+            alert(data.message || 'Retrabajo reasignado exitosamente al taller.');
+            cerrarModal('modal-detalle-retrabajo');
+            if (typeof cargarRetrabajosAdmin === 'function') cargarRetrabajosAdmin();
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo reasignar el retrabajo.'));
+        }
+    } catch (err) {
+        console.error('Error al reasignar retrabajo:', err);
+        alert('Ocurrió un error al procesar la reasignación de garantía.');
+    }
+};
+
+window.abrirModalCancelarReasignacion = function() {
+    const btn = document.getElementById('btn-cancelar-reasignacion');
+    const ticketId = btn ? btn.getAttribute('data-ticket') : null;
+    if (!ticketId) {
+        alert('No se pudo identificar el ticket a cancelar.');
+        return;
+    }
+
+    let unidadTxt = '--';
+    let choferTxt = '--';
+
+    if (window.retrabajosSupervisorGlobal && Array.isArray(window.retrabajosSupervisorGlobal)) {
+        let r = window.retrabajosSupervisorGlobal.find(x => String(x.ticket_original || x.ticket || x.id) === String(ticketId));
+        if (r) {
+            unidadTxt = r.unidad ? (r.unidad.startsWith('8090-') ? r.unidad : `8090-${r.unidad}`) : '--';
+            choferTxt = (r.seccion_1 && r.seccion_1.empleado) ? r.seccion_1.empleado : (r.empleado || '--');
+        }
+    }
+
+    const elTick = document.getElementById('cancelar-reasig-ticket');
+    const elUni = document.getElementById('cancelar-reasig-unidad');
+    const elChof = document.getElementById('cancelar-reasig-chofer');
+    const txtMotivo = document.getElementById('cancelar-reasig-motivo');
+
+    if (elTick) elTick.innerText = ticketId;
+    if (elUni) elUni.innerText = unidadTxt;
+    if (elChof) elChof.innerText = choferTxt;
+    if (txtMotivo) txtMotivo.value = '';
+
+    const modal = document.getElementById('modal-cancelar-reasignacion');
+    if (modal) {
+        modal.setAttribute('data-ticket', ticketId);
+        modal.style.display = 'flex';
+        if (txtMotivo) setTimeout(() => txtMotivo.focus(), 100);
+    }
+};
+
+window.ejecutarCancelarReasignacion = async function() {
+    const modal = document.getElementById('modal-cancelar-reasignacion');
+    const ticketId = modal ? modal.getAttribute('data-ticket') : null;
+    const txtMotivo = document.getElementById('cancelar-reasig-motivo');
+    const motivo = txtMotivo ? txtMotivo.value.trim() : '';
+
+    if (!ticketId) {
+        alert('No se pudo identificar el ticket.');
+        return;
+    }
+
+    if (!motivo) {
+        alert('Por favor escribe la razón por la cual no se puede retrabajar para notificar al chofer.');
+        if (txtMotivo) txtMotivo.focus();
+        return;
+    }
+
+    const confirmar = confirm(`⚠️ ¿Confirmas la CANCELACIÓN de la reasignación para el ticket ${ticketId}?\n\nEl reporte de retrabajo se eliminará permanentemente del sistema y se le enviará un correo explicativo al chofer con el motivo ingresado.`);
+    if (!confirmar) return;
+
+    try {
+        let res = await fetch('/api/garantia/cancelar_reasignacion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticket: ticketId, motivo: motivo })
+        });
+        let data = await res.json();
+
+        if (data.status === 'success') {
+            alert(data.message || 'La reasignación ha sido cancelada y el reporte eliminado.');
+            cerrarModal('modal-cancelar-reasignacion');
+            cerrarModal('modal-detalle-retrabajo');
+            if (typeof cargarRetrabajosAdmin === 'function') cargarRetrabajosAdmin();
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo cancelar la reasignación.'));
+        }
+    } catch (err) {
+        console.error('Error al cancelar reasignación:', err);
+        alert('Ocurrió un error al procesar la cancelación de la reasignación.');
+    }
+};
+
+window.cargarRetrabajosProveedor = async function() {
+    const tbody = document.getElementById('tabla-retrabajos-prov');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">Cargando órdenes de retrabajo...</td></tr>';
+
+    try {
+        const res = await fetch('/api/garantia/proveedor/lista');
+        const data = await res.json();
+        const retrabajos = data.retrabajos || [];
+
+        if (retrabajos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:25px; color:#94a3b8;">No tienes órdenes de retrabajo o garantía pendientes de atender.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        retrabajos.forEach(r => {
+            let ticketId = r.ticket_original || r.ticket || r.id;
+            let unidadStr = r.unidad ? (r.unidad.startsWith('8090-') ? r.unidad : `8090-${r.unidad}`) : '--';
+            let fechaReasig = r.fecha_reasignacion || r.fecha_solicitud || '--';
+            let motivoLimpio = String(r.motivo_chofer || 'Falla no solventada en reparación previa').trim().replace(/^["'«»“”„]+|["'«»“”„]+$/g, '').trim();
+            let supervisor = r.supervisor_reasigno || r.supervisor_asignado || 'Supervisión Vehicular';
+
+            let badgeEstado = `<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:0.82rem; display:inline-block; white-space:nowrap;">Retrabajo</span>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #f59e0b; font-size: 0.95rem;">${ticketId}</strong></td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #38bdf8;">${fechaReasig}</strong></td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #ffffff;">${unidadStr}</strong></td>
+                    <td style="white-space: normal; min-width: 260px; max-width: 420px; vertical-align: middle; padding: 10px 12px; line-height: 1.5; word-break: break-word;">
+                        <p style="margin: 0; padding: 0; color: #f1f5f9; font-size: 0.88rem; font-weight: 500; line-height: 1.5; white-space: normal; word-break: break-word; text-align: left;">${motivoLimpio}</p>
+                    </td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><span style="color: #cbd5e1;">${supervisor}</span></td>
+                    <td style="white-space: nowrap; vertical-align: middle; text-align: center;">${badgeEstado}</td>
+                    <td style="white-space: nowrap; vertical-align: middle; text-align: center;">
+                        <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                            <button class="btn-info" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; white-space: nowrap; cursor: pointer; background: #0284c7; color: white; border: none;" onclick="abrirDetallesTicketRetrabajo('${ticketId}', '${r.factura_id || ''}')">
+                                Ver Detalles
+                            </button>
+                            <button class="btn-success" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; white-space: nowrap; cursor: pointer; background: #10b981; color: white; border: none;" onclick="abrirDetalleRetrabajo('${ticketId}')">
+                                Ver Retrabajo
+                            </button>
+                            <button class="btn-primary" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; white-space: nowrap; cursor: pointer; background: #16a34a; color: white; border: none;" onclick="marcarRetrabajoFinalizado('${ticketId}')">
+                                Retrabajo Finalizado
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    } catch (err) {
+        console.error('Error al cargar retrabajos del proveedor:', err);
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:25px; color:#ef4444;">Error al cargar las órdenes de retrabajo.</td></tr>';
+    }
+};
+
+window.abrirDetallesTicketRetrabajo = function(ticketId, facturaId) {
+    let fId = facturaId;
+    if (!fId && typeof facturasGlobal !== 'undefined') {
+        let found = facturasGlobal.find(x => String(x.id) === String(ticketId) || String(x.id_reporte) === String(ticketId) || String(x.retro).includes(ticketId));
+        if (found) fId = found.id;
+    }
+    if (fId && typeof abrirDetalles === 'function') {
+        abrirDetalles(fId);
+    } else if (typeof abrirReporteProv === 'function') {
+        abrirReporteProv(ticketId);
+    } else if (typeof abrirDetalles === 'function') {
+        abrirDetalles(ticketId);
+    } else {
+        abrirDetalleRetrabajo(ticketId);
+    }
+};
+
+window.marcarRetrabajoFinalizado = async function(ticketId) {
+    if (!ticketId) {
+        alert('Ticket no identificado.');
+        return;
+    }
+
+    const confirmar = confirm(`⚠️ ¿Confirmas que los trabajos de retrabajo / garantía para el ticket ${ticketId} han sido FINALIZADOS por el taller?\n\nAl confirmar, la orden de retrabajo concluirá y se desbloquearán las acciones del ticket.`);
+    if (!confirmar) return;
+
+    try {
+        let res = await fetch('/api/garantia/taller/finalizar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticket: ticketId })
+        });
+        let data = await res.json();
+        if (data.status === 'success') {
+            alert(data.message || 'Retrabajo finalizado con éxito.');
+            if (typeof cargarRetrabajosProveedor === 'function') {
+                cargarRetrabajosProveedor();
+            }
+            if (typeof cargarFacturas === 'function') {
+                cargarFacturas();
+            }
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo finalizar el retrabajo.'));
+        }
+    } catch (err) {
+        console.error('Error al finalizar retrabajo:', err);
+        alert('Ocurrió un error al marcar el retrabajo como finalizado.');
+    }
+};
 
 function abrirModalDetalles(identificador) {
     const user = pendientesGlobal.find(u => u.correo === identificador || u.num_empleado === identificador);

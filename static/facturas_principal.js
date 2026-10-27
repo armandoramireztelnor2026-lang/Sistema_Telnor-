@@ -582,9 +582,16 @@ async function cargarFacturas() {
                     }
                 }
 
+                let enRetrabajoBloqueo = (f.estado === 'En Asignacion/Retrabajo' || f.estado === 'Retrabajo' || f.estado_retrabajo === 'Pendiente' || f.estado_retrabajo === 'Reasignado');
                 let badgeColor, textoEstado;
 
-                if (f.estado_custom && f.estado_custom !== "") { textoEstado = f.estado_custom; badgeColor = confirmadaTotal ? '#2d6a4f' : '#b45309'; }
+                if (f.estado === 'En Asignacion/Retrabajo' || f.estado_retrabajo === 'Pendiente') {
+                    textoEstado = 'En Asignacion/Retrabajo';
+                    badgeColor = '#eab308';
+                } else if (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado') {
+                    textoEstado = 'Retrabajo';
+                    badgeColor = '#ef4444';
+                } else if (f.estado_custom && f.estado_custom !== "") { textoEstado = f.estado_custom; badgeColor = confirmadaTotal ? '#2d6a4f' : '#b45309'; }
                 else if (confirmadaTotal) { badgeColor = '#2d6a4f'; textoEstado = 'Aprobada (Con Orden)'; }
                 else {
                     badgeColor = '#b45309';
@@ -602,7 +609,8 @@ async function cargarFacturas() {
                         textoEstado = 'Pendiente: Supervisor';
                     }
                 }
-                let estadoBadge = `<span style="background:${badgeColor}; color:white; padding:4px 8px; border-radius:12px; white-space:nowrap;">${textoEstado}</span>`;
+                let textColorBadge = (textoEstado === 'En Asignacion/Retrabajo') ? '#0b1c30' : 'white';
+                let estadoBadge = `<span style="background:${badgeColor}; color:${textColorBadge}; padding:4px 8px; border-radius:12px; white-space:nowrap; font-weight:bold;">${textoEstado}</span>`;
                 if (f.estado === 'Rechazado_Con_Recomendaciones') {
                     let rechazadoPor = f.rechazado_por || 'Supervisión';
                     estadoBadge += `<br><span style="color:#ef4444; font-weight:bold; display:block; margin-top:4px;">Rechazada por ${rechazadoPor}</span>`;
@@ -642,7 +650,13 @@ async function cargarFacturas() {
 
                 let subrolAct = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value : '';
 
-                if (rolUsuario === 'administracion') {
+                if (enRetrabajoBloqueo) {
+                    let nombreEstadoBloq = (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado') ? 'Retrabajo' : 'En Asignación/Retrabajo';
+                    btnAccion = `<div style="display:flex; flex-direction:column; gap:6px; width:100%; min-width:180px;">
+                        <button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0; padding:8px 10px; border-radius:6px; font-weight:bold; font-size:0.85em;">Ver Detalles</button>
+                        <button disabled style="background:#334155; color:#f87171; border:1px solid #ef4444; width:100%; padding:8px 10px; border-radius:6px; font-weight:bold; font-size:0.8em; margin:0; cursor:not-allowed; opacity:0.9; text-align:center;">🔒 Bloqueado: ${nombreEstadoBloq}</button>
+                    </div>`;
+                } else if (rolUsuario === 'administracion') {
                     btnAccion = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">`;
 
                     if (f.estado === 'Rechazado_Con_Recomendaciones') {
@@ -815,10 +829,19 @@ async function cargarFacturas() {
                 if (tbodyDocContables && rolUsuario === 'administracion') {
                     // En esta vista solo van tickets con factura aprobada y liberados para capturar Doc 50
                     if (valFiscalX === 'Aprobada' && f.liberado_admin === true) {
-                        let btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
-                            <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>
-                            <button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalDocContable('${f.id}')">Ingresar Número de Doc. Contable</button>
-                        </div>`;
+                        let btnDoc = '';
+                        if (enRetrabajoBloqueo) {
+                            let nombreEstadoBloq = (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado') ? 'Retrabajo' : 'En Asignación/Retrabajo';
+                            btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                                <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>
+                                <button disabled style="background:#334155; color:#f87171; border:1px solid #ef4444; width:100%; padding:8px 10px; border-radius:6px; font-weight:bold; font-size:0.8em; margin:0; cursor:not-allowed; opacity:0.9; text-align:center;">🔒 Bloqueado: ${nombreEstadoBloq}</button>
+                            </div>`;
+                        } else {
+                            btnDoc = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                                <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>
+                                <button class="btn-success" style="display:block; width:100%; margin:0;" onclick="abrirModalDocContable('${f.id}')">Ingresar Número de Doc. Contable</button>
+                            </div>`;
+                        }
 
                         let ffStr = '';
                         if (f.cotizaciones && f.cotizaciones.length > 1) {
@@ -848,22 +871,31 @@ async function cargarFacturas() {
                 if (tbodyLiberarDoc && rolUsuario === 'administracion') {
                     // En esta vista solo van tickets pendientes de liberación
                     if (f.liberado_admin === false) {
-                        let btnLiberar = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
-                            <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-
-                        if (subrolAct === 'Supervisor') {
-                            btnLiberar += `<button class="btn-cobertura" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="delegarLiberarTicket('${f.id}', '${f.unidad || ''}')">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
+                        let btnLiberar = '';
+                        if (enRetrabajoBloqueo) {
+                            let nombreEstadoBloq = (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado') ? 'Retrabajo' : 'En Asignación/Retrabajo';
+                            btnLiberar = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                                <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>
+                                <button disabled style="background:#334155; color:#f87171; border:1px solid #ef4444; width:100%; padding:8px 10px; border-radius:6px; font-weight:bold; font-size:0.8em; margin:0; cursor:not-allowed; opacity:0.9; text-align:center;">🔒 Bloqueado: ${nombreEstadoBloq}</button>
+                            </div>`;
                         } else {
-                            btnLiberar += `<button class="btn-liberar-ticket-admin" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirModalLiberarTicket('${f.id}')">✔️ Liberar Ticket</button>`;
-                        }
+                            btnLiberar = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                                <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
 
-                        if (subrolAct === 'Administrador') {
-                            btnLiberar += `<button class="btn-actualizar-orden" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="solicitarCorreccionOrden('${f.id}')">Corrección (Num. Pedido y Orden)</button>`;
-                        } else if (subrolAct !== 'Supervisor') {
-                            btnLiberar += `<button class="btn-actualizar-orden" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirActualizarOrdenes('${f.id}')">Actualizar Pedido/Orden</button>`;
-                        }
+                            if (subrolAct === 'Supervisor') {
+                                btnLiberar += `<button class="btn-cobertura" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="delegarLiberarTicket('${f.id}', '${f.unidad || ''}')">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
+                            } else {
+                                btnLiberar += `<button class="btn-liberar-ticket-admin" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirModalLiberarTicket('${f.id}')">✔️ Liberar Ticket</button>`;
+                            }
 
-                        btnLiberar += `</div>`;
+                            if (subrolAct === 'Administrador') {
+                                btnLiberar += `<button class="btn-actualizar-orden" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="solicitarCorreccionOrden('${f.id}')">Corrección (Num. Pedido y Orden)</button>`;
+                            } else if (subrolAct !== 'Supervisor') {
+                                btnLiberar += `<button class="btn-actualizar-orden" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirActualizarOrdenes('${f.id}')">Actualizar Pedido/Orden</button>`;
+                            }
+
+                            btnLiberar += `</div>`;
+                        }
 
                         let ffStrLib = '';
                         if (f.cotizaciones && f.cotizaciones.length > 1) {
@@ -906,7 +938,13 @@ async function cargarFacturas() {
                         let btnAdminExtra = '';
                         let estadoFiscalBadge = '';
 
-                        if (rolUsuario === 'administracion') {
+                        if (enRetrabajoBloqueo) {
+                            let nombreEstadoBloq = (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado') ? 'Retrabajo' : 'En Asignación/Retrabajo';
+                            btnAdminExtra = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
+                                <button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>
+                                <button disabled style="background:#334155; color:#f87171; border:1px solid #ef4444; width:100%; padding:8px 10px; border-radius:6px; font-weight:bold; font-size:0.8em; margin:0; cursor:not-allowed; opacity:0.9; text-align:center;">🔒 Bloqueado: ${nombreEstadoBloq}</button>
+                            </div>`;
+                        } else if (rolUsuario === 'administracion') {
                             btnAdminExtra = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">`;
                             btnAdminExtra += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
                             

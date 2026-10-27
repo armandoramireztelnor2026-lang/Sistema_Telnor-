@@ -2093,15 +2093,15 @@
         <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
     </div>
 
-    <script src="/static/script.js?v=1000011"></script>
+    <script src="/static/script.js?v=1000013"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js?v=6"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
     <script src="/static/unidades.js?v=10"></script>
-    <script src="/static/facturas_principal.js?v=60"></script>
-    <script src="/static/seccion_reportes.js?v=1000002"></script>
-    <script src="/static/cotizaciones_10k.js?v=25"></script>
+    <script src="/static/facturas_principal.js?v=61"></script>
+    <script src="/static/seccion_reportes.js?v=1000006"></script>
+    <script src="/static/cotizaciones_10k.js?v=26"></script>
 
     <!-- MODAL ALERTA CORTA DELEGACIÓN (ACCESO A SECCIÓN POR BOTÓN AMARILLO) -->
     <div id="modal-alerta-corta-delegacion" class="modal-overlay" style="display: none; z-index: 99999999; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(4px);" onclick="if(event.target === this) cerrarModalAlertaCortaDelegacion()">
@@ -2364,18 +2364,73 @@
                 <!-- Inyectado dinámicamente por script.js -->
             </div>
 
-            <!-- Footer Modal Retrabajo: Botones Reasignar y Cancelar Reasignación arriba del botón Cancelar -->
+            <!-- Footer Modal Retrabajo: Botones Reasignar y Cancelar Reasignación arriba del botón Cancelar con diseño homogéneo -->
             <div style="background: #081322; padding: 16px 24px; border-top: 1px solid #1f395a; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-                    <button type="button" id="btn-reasignar-retrabajo" class="btn-primary" style="background: #0284c7; color: white; border: none; padding: 10px 24px; font-weight: 700; font-size: 0.92rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);" onmouseover="this.style.background='#0369a1'" onmouseout="this.style.background='#0284c7'">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; align-items: center;">
+                    <button type="button" id="btn-reasignar-retrabajo" class="btn-footer-retrabajo btn-footer-retrabajo-reasignar" onclick="accionReasignarRetrabajo()">
                         Reasignar
                     </button>
-                    <button type="button" id="btn-cancelar-reasignacion" style="background: #b91c1c; color: white; border: none; padding: 10px 24px; font-weight: 700; font-size: 0.92rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);" onmouseover="this.style.background='#991b1b'" onmouseout="this.style.background='#b91c1c'">
+                    <button type="button" id="btn-cancelar-reasignacion" class="btn-footer-retrabajo btn-footer-retrabajo-cancelar-reasig" onclick="abrirModalCancelarReasignacion()">
                         Cancelar Reasignacion
                     </button>
                 </div>
-                <button type="button" class="btn-danger" onclick="cerrarModal('modal-detalle-retrabajo')" style="padding: 10px 28px; font-weight: 700; font-size: 0.92rem; border-radius: 8px; cursor: pointer; background: #475569; border: none; color: white; min-width: 140px; text-align: center; transition: all 0.2s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
+                <button type="button" class="btn-footer-retrabajo btn-footer-retrabajo-cerrar" onclick="cerrarModal('modal-detalle-retrabajo')">
                     Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL INTERFAZ MEDIANA: CANCELAR REASIGNACIÓN DE RETRABAJO -->
+    <div id="modal-cancelar-reasignacion" class="modal-overlay" style="display: none; z-index: 10015; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(4px);">
+        <div class="modal-box" style="max-width: 580px; width: 92%; background: #0b1c30; border: 1.5px solid #ef4444; border-radius: 14px; box-shadow: 0 20px 45px rgba(0,0,0,0.7); overflow: hidden; display: flex; flex-direction: column; padding: 0;">
+            <!-- Header Modal Cancelar Reasignación -->
+            <div style="background: linear-gradient(135deg, #7f1d1d, #450a0a); padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ef4444;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 24px;">🚫</span>
+                    <div>
+                        <h3 style="margin: 0; color: #ffffff; font-size: 1.18rem; font-weight: 700; letter-spacing: 0.5px;">Cancelar Reasignación</h3>
+                        <p style="margin: 2px 0 0 0; color: #fca5a5; font-size: 0.82rem;">Dictamen de no procedencia de garantía para el chofer</p>
+                    </div>
+                </div>
+                <button class="btn-close-modal" onclick="cerrarModal('modal-cancelar-reasignacion')" style="position: static; font-size: 24px; color: #e2e8f0; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">×</button>
+            </div>
+
+            <!-- Cuerpo Modal -->
+            <div style="padding: 22px 24px; color: #e2e8f0; display: flex; flex-direction: column; gap: 16px;">
+                <!-- Ficha informativa del Ticket -->
+                <div style="background: #112641; border: 1px solid #1f395a; border-radius: 10px; padding: 14px 18px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.88rem;">
+                        <span style="color: #94a3b8;">Ticket Original:</span>
+                        <strong id="cancelar-reasig-ticket" style="color: #38bdf8;">--</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.88rem;">
+                        <span style="color: #94a3b8;">Unidad:</span>
+                        <strong id="cancelar-reasig-unidad" style="color: #ffffff;">--</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.88rem;">
+                        <span style="color: #94a3b8;">Chofer / Solicitante:</span>
+                        <span id="cancelar-reasig-chofer" style="color: #cbd5e1; font-weight: 600;">--</span>
+                    </div>
+                </div>
+
+                <!-- Campo de Motivo -->
+                <div>
+                    <label for="cancelar-reasig-motivo" style="color: #f1f5f9; font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 6px;">
+                        Motivo de cancelación (se notificará al chofer por correo): <span style="color: #ef4444;">*</span>
+                    </label>
+                    <textarea id="cancelar-reasig-motivo" rows="4" style="width: 100%; box-sizing: border-box; background: #071526; border: 1.5px solid #334155; border-radius: 8px; color: #ffffff; padding: 12px; font-family: inherit; font-size: 0.9rem; resize: vertical; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#ef4444'" onblur="this.style.borderColor='#334155'" placeholder="Escribe detalladamente la razón técnica o administrativa por la cual no procede el retrabajo o garantía para este ticket..."></textarea>
+                    <span style="color: #94a3b8; font-size: 0.78rem; display: block; margin-top: 4px;">Este motivo se incluirá textualmente en el correo de notificación institucional enviado al chofer.</span>
+                </div>
+            </div>
+
+            <!-- Footer con los 2 botones -->
+            <div style="background: #081322; padding: 16px 24px; border-top: 1px solid #1f395a; display: flex; justify-content: flex-end; gap: 12px; align-items: center;">
+                <button type="button" class="btn-footer-retrabajo btn-footer-retrabajo-cerrar" onclick="cerrarModal('modal-cancelar-reasignacion')">
+                    Volver
+                </button>
+                <button type="button" class="btn-footer-retrabajo btn-footer-retrabajo-cancelar-reasig" onclick="ejecutarCancelarReasignacion()">
+                    Cancelar Reasignacion
                 </button>
             </div>
         </div>

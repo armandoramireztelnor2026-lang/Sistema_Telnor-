@@ -418,6 +418,56 @@ input:focus {
     box-shadow: inset 4px 0 0 #ffffff, 0 4px 12px rgba(5, 150, 105, 0.35) !important;
 }
 
+/* BOTONES DE ACCION EN MODAL RETRABAJO (DISEÑO HOMOGÉNEO) */
+.btn-footer-retrabajo {
+    padding: 10px 24px !important;
+    font-weight: 700 !important;
+    font-size: 0.92rem !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    border: none !important;
+    color: #ffffff !important;
+    min-width: 165px !important;
+    height: 42px !important;
+    text-align: center !important;
+    font-family: 'Poppins', sans-serif !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+}
+
+.btn-footer-retrabajo-reasignar {
+    background: #0284c7 !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35) !important;
+}
+.btn-footer-retrabajo-reasignar:hover {
+    background: #0369a1 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(2, 132, 199, 0.45) !important;
+}
+
+.btn-footer-retrabajo-cancelar-reasig {
+    background: #b91c1c !important;
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.35) !important;
+}
+.btn-footer-retrabajo-cancelar-reasig:hover {
+    background: #991b1b !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(185, 28, 28, 0.45) !important;
+}
+
+.btn-footer-retrabajo-cerrar {
+    background: #475569 !important;
+    box-shadow: 0 4px 12px rgba(71, 85, 105, 0.25) !important;
+}
+.btn-footer-retrabajo-cerrar:hover {
+    background: #334155 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(71, 85, 105, 0.35) !important;
+}
+
 .btn-logout-container {
     margin-top: auto;
     width: 100%;
