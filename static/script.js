@@ -221,7 +221,7 @@ function marcarBotonActivo(vista) {
         let onclickAttr = b.getAttribute('onclick');
         if (onclickAttr) {
             let matchesView = onclickAttr.includes("('" + vista + "')");
-            let matches10k = (vista === 'cotizaciones-10k' && onclickAttr.includes("verCotizacionesMas10000"));
+            let matches10k = (vista === 'cotizaciones-10k' && (onclickAttr.includes("verCotizacionesMas10000") || onclickAttr.includes("cotizaciones-10k")));
             let matchesFF = ((vista === 'facturas-finales' || vista === 'facturas_finales') && (onclickAttr.includes("facturas-finales") || onclickAttr.includes("facturas_finales")));
             let matchesDoc = ((vista === 'documentos-contables' || vista === 'documentos_contables') && (onclickAttr.includes("documentos-contables") || onclickAttr.includes("documentos_contables")));
             let matchesLib = ((vista === 'liberar-doc-contable' || vista === 'liberar_doc_contable') && (onclickAttr.includes("liberar-doc-contable") || onclickAttr.includes("liberar_doc_contable")));
@@ -237,10 +237,215 @@ function marcarBotonActivo(vista) {
     });
 }
 
+window.obtenerNombresDelegacion = window.obtenerNombresDelegacion || function(ticketId, rolTitularBase) {
+    let nombreAdmin = "Manuel Alejandro Marquez";
+    let nombreSuper = "Samuel Giron";
+
+    if (window.USUARIOS_ADMIN_SISTEMA && Array.isArray(window.USUARIOS_ADMIN_SISTEMA)) {
+        let adminUser = window.USUARIOS_ADMIN_SISTEMA.find(u => u.subrol === 'Administrador');
+        if (adminUser && adminUser.nombre_completo) {
+            nombreAdmin = adminUser.nombre_completo;
+        }
+    }
+
+    let subrolActual = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value.trim() : '';
+    let nombreActual = document.getElementById('nombre-usuario-actual') ? document.getElementById('nombre-usuario-actual').value.trim() : '';
+
+    if (subrolActual === 'Supervisor' && nombreActual) {
+        nombreSuper = nombreActual;
+    } else if (subrolActual === 'Administrador' && nombreActual) {
+        nombreAdmin = nombreActual;
+    }
+
+    if (rolTitularBase === 'Supervisor') {
+        return {
+            titular: `Supervisor: ${nombreSuper}`,
+            suplente: `Administrador: ${nombreAdmin}`,
+            titularTexto: `el Supervisor (${nombreSuper})`
+        };
+    } else {
+        return {
+            titular: `Administrador: ${nombreAdmin}`,
+            suplente: `Supervisor: ${nombreSuper}`,
+            titularTexto: `el Administrador (${nombreAdmin})`
+        };
+    }
+};
+
+window.solicitarConfirmacionDelegacion = window.solicitarConfirmacionDelegacion || function(param1, param2) {
+    let callback = null;
+    let info = {};
+    if (typeof param1 === 'function' || typeof param1 === 'string') {
+        callback = param1;
+        info = param2 || {};
+    } else {
+        info = param1 || {};
+        callback = param2;
+    }
+
+    window.callbackAccionDelegada = callback;
+    const modal = document.getElementById('modal-advertencia-delegacion');
+    if (modal) {
+        const elTicket = document.getElementById('delegacion-ticket-id');
+        const elProceso = document.getElementById('delegacion-proceso-nombre');
+        const elDesc = document.getElementById('delegacion-proceso-desc');
+        const elTitular = document.getElementById('delegacion-rol-titular');
+        const elSuplente = document.getElementById('delegacion-rol-suplente');
+        const elTitularTexto = document.getElementById('delegacion-titular-texto');
+
+        let ticketTxt = info.ticket || 'N/A';
+        if (info.unidad) {
+            ticketTxt += ` | Eco #${info.unidad}`;
+        }
+
+        if (elTicket) elTicket.innerText = ticketTxt;
+        if (elProceso) elProceso.innerText = info.proceso || 'Proceso Operativo';
+        if (elDesc) elDesc.innerText = info.descripcion || 'Acción de contingencia operativa.';
+        if (elTitular) elTitular.innerText = info.titular || '--';
+        if (elSuplente) elSuplente.innerText = info.suplente || '--';
+        if (elTitularTexto) elTitularTexto.innerText = info.titularTexto || info.titular || 'el responsable';
+
+        modal.style.display = 'flex';
+    } else {
+        let msg = `⚠️ AVISO DE DELEGACIÓN / EMERGENCIA:\n\n` +
+                  `Proceso a delegar: ${info.proceso || 'Acción Operativa'}\n` +
+                  `¿A quién corresponde?: ${info.titular || 'Responsable'}\n` +
+                  `Asumido por: ${info.suplente || 'Usuario en Suplencia'}\n\n` +
+                  `Este botón es solo para emergencias o en caso de que ${info.titularTexto || 'el responsable'} no pueda confirmar desde su propio perfil.\n\n` +
+                  `¿Estás enterado y deseas continuar a la interfaz habitual?`;
+        if (confirm(msg)) {
+            if (typeof callback === 'function') {
+                callback();
+            } else if (typeof callback === 'string') {
+                try { (new Function(callback))(); } catch(e) { console.error(e); }
+            }
+        }
+    }
+};
+
+window.cerrarModalAdvertenciaDelegacion = window.cerrarModalAdvertenciaDelegacion || function() {
+    const modal = document.getElementById('modal-advertencia-delegacion');
+    if (modal) modal.style.display = 'none';
+    window.callbackAccionDelegada = null;
+};
+
+window.confirmarEnteradoDelegacion = window.confirmarEnteradoDelegacion || function() {
+    const cb = window.callbackAccionDelegada;
+    window.cerrarModalAdvertenciaDelegacion();
+    if (typeof cb === 'function') {
+        cb();
+    } else if (typeof cb === 'string') {
+        try { (new Function(cb))(); } catch(e) { console.error(e); }
+    }
+};
+
+window.delegarLiberarTicket = window.delegarLiberarTicket || function(id, unidad) {
+    const roles = window.obtenerNombresDelegacion(id, 'Administrador');
+    window.solicitarConfirmacionDelegacion(() => {
+        if (typeof abrirModalLiberarTicket === 'function') {
+            abrirModalLiberarTicket(id);
+        } else if (typeof asumirLiberacionAdmin === 'function') {
+            asumirLiberacionAdmin(id, true);
+        }
+    }, {
+        proceso: "Liberar Ticket para Facturación Fiscal",
+        descripcion: "Autorización administrativa y contable previa para permitir al taller proveedor emitir y subir su factura fiscal al sistema.",
+        titular: roles.titular,
+        suplente: roles.suplente,
+        titularTexto: roles.titularTexto,
+        ticket: id,
+        unidad: unidad
+    });
+};
+
+window.delegarAprobar10k = window.delegarAprobar10k || function(id, unidad) {
+    const roles = window.obtenerNombresDelegacion(id, 'Administrador');
+    window.solicitarConfirmacionDelegacion(() => {
+        if (typeof accion10k === 'function') {
+            accion10k(id, 'aprobar', true);
+        } else if (typeof abrirModalAprobar10k === 'function') {
+            abrirModalAprobar10k(id, true);
+        }
+    }, {
+        proceso: "Aprobación de Cotización Mayor a $10,000 hacia Corporativos",
+        descripcion: "Filtro y autorización previa de presupuesto de alto costo (mayor a $10,000 MXN) para canalizar a Corporativos.",
+        titular: roles.titular,
+        suplente: roles.suplente,
+        titularTexto: roles.titularTexto,
+        ticket: id,
+        unidad: unidad
+    });
+};
+
+window.cerrarModalAlertaCortaDelegacion = function() {
+    const modal = document.getElementById('modal-alerta-corta-delegacion');
+    if (modal) modal.style.display = 'none';
+    window.callbackAlertaCortaDelegacion = null;
+};
+
+window.confirmarAlertaCortaDelegacion = function() {
+    const cb = window.callbackAlertaCortaDelegacion;
+    window.cerrarModalAlertaCortaDelegacion();
+    if (typeof cb === 'function') {
+        cb();
+    } else if (typeof cb === 'string') {
+        try { (new Function(cb))(); } catch(e) { console.error(e); }
+    }
+};
+
+window.mostrarAlertaCortaDelegacion = function(mensaje, callback) {
+    window.callbackAlertaCortaDelegacion = callback;
+    const modal = document.getElementById('modal-alerta-corta-delegacion');
+    const msgEl = document.getElementById('alerta-corta-delegacion-msg');
+    if (modal && msgEl) {
+        msgEl.innerHTML = mensaje;
+        modal.style.display = 'flex';
+    } else {
+        const textoPlano = (mensaje || '').replace(/<[^>]*>?/gm, '');
+        if (confirm(`⚠️ DELEGACIÓN POR AUSENCIA\n\n${textoPlano}\n\n¿Deseas continuar?`)) {
+            if (typeof callback === 'function') callback();
+        }
+    }
+};
+
+window.abrirVistaDelegada = function(tipo) {
+    let mensaje = '';
+    let callback = null;
+
+    if (tipo === 'cotizaciones-10k') {
+        callback = () => {
+            if (typeof verCotizacionesMas10000 === 'function') verCotizacionesMas10000();
+            else cambiarVistaAdmin('cotizaciones-10k');
+        };
+        mensaje = 'Estás ingresando a <strong style="color: #fbbf24;">Cotizaciones +10,000</strong> bajo el protocolo de <strong style="color: #fbbf24;">Delegación por Ausencia</strong> (suplencia del Administrador).<br><br>¿Deseas continuar?';
+    } else if (tipo === 'liberar-doc-contable') {
+        callback = () => cambiarVistaAdmin('liberar-doc-contable');
+        mensaje = 'Estás ingresando a <strong style="color: #fbbf24;">Liberar Doc. Contable</strong> bajo el protocolo de <strong style="color: #fbbf24;">Delegación por Ausencia</strong> (suplencia del Administrador).<br><br>¿Deseas continuar?';
+    } else if (tipo === 'facturas') {
+        callback = () => cambiarVistaAdmin('facturas');
+        mensaje = 'Estás ingresando a <strong style="color: #fbbf24;">Cotizaciones y Órdenes</strong> bajo el protocolo de <strong style="color: #fbbf24;">Delegación por Ausencia</strong> (suplencia del Supervisor).<br><br>¿Deseas continuar?';
+    } else if (tipo === 'facturas_finales' || tipo === 'facturas-finales') {
+        callback = () => cambiarVistaAdmin('facturas_finales');
+        mensaje = 'Estás ingresando a <strong style="color: #fbbf24;">Facturas</strong> bajo el protocolo de <strong style="color: #fbbf24;">Delegación por Ausencia</strong> (suplencia del Supervisor).<br><br>¿Deseas continuar?';
+    } else {
+        callback = () => cambiarVistaAdmin(tipo);
+        mensaje = 'Estás ingresando a esta sección bajo el protocolo de <strong style="color: #fbbf24;">Delegación por Ausencia</strong>.<br><br>¿Deseas continuar?';
+    }
+
+    if (typeof window.mostrarAlertaCortaDelegacion === 'function') {
+        window.mostrarAlertaCortaDelegacion(mensaje, callback);
+    } else {
+        const textoPlano = (mensaje || '').replace(/<[^>]*>?/gm, '');
+        if (confirm(`⚠️ DELEGACIÓN POR AUSENCIA\n\n${textoPlano}\n\n¿Deseas continuar?`)) {
+            if (callback) callback();
+        }
+    }
+};
+
 function cambiarVistaAdmin(vista) {
     localStorage.setItem('activeViewAdmin', vista);
     marcarBotonActivo(vista);
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica'];
+    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica', 'retrabajo', 'tiempo-garantia'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';
@@ -250,6 +455,7 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'facturas_finales') vistaId = 'facturas-finales';
     if (vista === 'documentos_contables') vistaId = 'documentos-contables';
     if (vista === 'liberar_doc_contable') vistaId = 'liberar-doc-contable';
+    if (vista === 'tiempo_garantia') vistaId = 'tiempo-garantia';
 
     let elVista = document.getElementById('vista-' + vistaId);
     if (elVista) elVista.style.display = 'block';
@@ -266,6 +472,8 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'ciudades-copes' && typeof cargarCiudadesCopes === 'function') cargarCiudadesCopes();
     if (vista === 'reportes' && typeof cargarReportesAdmin === 'function') cargarReportesAdmin();
     if (vista === 'analitica' && typeof cargarAnalitica === 'function') cargarAnalitica();
+    if (vista === 'retrabajo' && typeof cargarRetrabajosAdmin === 'function') cargarRetrabajosAdmin();
+    if (vista === 'tiempo-garantia' || vista === 'tiempo_garantia') cargarListaUsuarios('proveedores', 'tabla-tiempo-garantia');
     if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'facturas-finales' || vista === 'documentos_contables' || vista === 'documentos-contables' || vista === 'liberar-doc-contable' || vista === 'liberar_doc_contable' || vista === 'archivo') && typeof cargarFacturas === 'function') cargarFacturas();
     if (vista === 'cotizaciones-10k' && typeof cargarCotizaciones10k === 'function') cargarCotizaciones10k();
 }
@@ -366,6 +574,285 @@ function cargarPendientes() {
         });
         if (typeof aplicarPaginacion === 'function') aplicarPaginacion('tabla-pendientes', 20, true);
     });
+}
+
+async function cargarRetrabajosAdmin() {
+    const tbody = document.getElementById('tabla-retrabajos');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px; color:#94a3b8;">Cargando retrabajos asignados...</td></tr>';
+    
+    try {
+        const res = await fetch('/api/garantia/supervisor/lista');
+        const data = await res.json();
+        const retrabajos = data.retrabajos || [];
+        
+        if (retrabajos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:25px; color:#94a3b8;">No hay solicitudes de garantía o retrabajo registradas para tu supervisión.</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        retrabajos.forEach(r => {
+            let ticketId = r.ticket_original || r.ticket || r.id;
+            let unidadStr = r.unidad ? (r.unidad.startsWith('8090-') ? r.unidad : `8090-${r.unidad}`) : '--';
+            let fechaSalida = r.fecha_salida_taller || r.fecha_salida || (r.seccion_2 && (r.seccion_2.fecha_salida || r.seccion_2.fecha_ingreso)) || '--';
+            let motivoLimpio = String(r.motivo_chofer || 'Sin motivo reportado').trim().replace(/^["'«»“”„]+|["'«»“”„]+$/g, '').trim();
+            
+            let tallerPrevio = (r.seccion_2 && r.seccion_2.proveedor) ? r.seccion_2.proveedor : 'Taller no asignado';
+            
+            let estadoColor = '#eab308';
+            if (r.estado === 'Atendido') estadoColor = '#22c55e';
+            if (r.estado === 'Rechazado') estadoColor = '#ef4444';
+            
+            let badgeEstado = `<span style="background: rgba(234, 179, 8, 0.15); color: ${estadoColor}; border: 1px solid ${estadoColor}; padding: 3px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; display: inline-block;">${r.estado || 'Pendiente'}</span>`;
+            
+            // Precio individual de cotizaciones
+            let preciosHTML = '';
+            let cotsList = (r.seccion_2 && r.seccion_2.cotizaciones) ? r.seccion_2.cotizaciones : [];
+            if (cotsList.length > 0) {
+                preciosHTML = cotsList.map((c, idx) => {
+                    let etiqueta = cotsList.length > 1 ? `Cot #${idx + 1}: ` : '';
+                    let pVal = Number(c.precio || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 });
+                    return `<div style="white-space: nowrap; font-size: 0.82rem; color: #4ade80; font-weight: 600;"><span style="color: #94a3b8; font-weight: 400;">${etiqueta}</span>$${pVal}</div>`;
+                }).join('');
+                if (cotsList.length > 1) {
+                    let totalVal = Number(r.seccion_2.precio_total || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 });
+                    preciosHTML += `<div style="white-space: nowrap; font-size: 0.82rem; color: #f59e0b; font-weight: 700; border-top: 1px dashed rgba(255,255,255,0.15); margin-top: 3px; padding-top: 2px;">Total: $${totalVal}</div>`;
+                }
+            } else if (r.seccion_2 && r.seccion_2.precio_total) {
+                let pVal = Number(r.seccion_2.precio_total).toLocaleString('es-MX', { minimumFractionDigits: 2 });
+                preciosHTML = `<div style="white-space: nowrap; font-size: 0.82rem; color: #4ade80; font-weight: 700;">$${pVal}</div>`;
+            } else {
+                preciosHTML = `<span style="color: #94a3b8; font-size: 0.82rem;">--</span>`;
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #f59e0b; font-size: 0.95rem;">${ticketId}</strong></td>
+                    <td style="white-space: nowrap; vertical-align: middle;">${r.fecha_solicitud || '--'}</td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #38bdf8;">${fechaSalida}</strong></td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #ffffff;">${unidadStr}</strong></td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><span style="color: #38bdf8; font-weight: 600;">${r.cope || '--'}</span></td>
+                    <td style="white-space: nowrap; vertical-align: middle;">${r.ciudad || '--'}</td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><span style="color: #cbd5e1;">${tallerPrevio}</span></td>
+                    <td style="white-space: nowrap; vertical-align: middle; text-align: right; padding: 10px 12px;">${preciosHTML}</td>
+                    <td style="white-space: normal; min-width: 260px; max-width: 420px; vertical-align: middle; padding: 10px 12px; line-height: 1.5; word-break: break-word;">
+                        <p style="margin: 0; padding: 0; color: #f1f5f9; font-size: 0.88rem; font-weight: 500; line-height: 1.5; white-space: normal; word-break: break-word; text-align: left;">${motivoLimpio}</p>
+                    </td>
+                    <td style="white-space: nowrap; vertical-align: middle; text-align: center;">${badgeEstado}</td>
+                    <td style="white-space: nowrap; vertical-align: middle; text-align: center;">
+                        <button class="btn-success" style="padding: 6px 14px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; white-space: nowrap; cursor: pointer;" onclick="abrirDetalleRetrabajo('${ticketId}')">
+                            Ver Retrabajo
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        if (typeof aplicarPaginacion === 'function') {
+            aplicarPaginacion('tabla-retrabajos', 15, true);
+        }
+    } catch (err) {
+        console.error('Error al cargar retrabajos:', err);
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:20px; color:#ef4444;">Error al cargar las solicitudes de retrabajo.</td></tr>';
+    }
+}
+
+async function abrirDetalleRetrabajo(ticketId) {
+    try {
+        const res = await fetch(`/api/garantia/retrabajo/${encodeURIComponent(ticketId)}`);
+        const data = await res.json();
+        if (data.status !== 'success' || !data.retrabajo) {
+            alert('No se pudo cargar la información de la garantía.');
+            return;
+        }
+        
+        const r = data.retrabajo;
+        const s1 = r.seccion_1 || {};
+        const s2 = r.seccion_2 || {};
+        
+        const ticketVal = r.ticket_original || r.ticket || r.id;
+        const tit = document.getElementById('modal-retrabajo-titulo');
+        const sub = document.getElementById('modal-retrabajo-subtitulo');
+        if (tit) tit.innerText = `🛡️ Garantía / Retrabajo - Ticket: ${ticketVal}`;
+        if (sub) sub.innerText = `Unidad: 8090-${r.unidad} | COPE: ${r.cope} | Supervisor: ${r.supervisor_asignado}`;
+        
+        const cont = document.getElementById('contenido-detalle-retrabajo');
+        if (!cont) return;
+        
+        // Firma del Chofer si existe
+        let firmaHTML = '';
+        if (s1.firma_chofer && String(s1.firma_chofer).startsWith('data:image')) {
+            firmaHTML = `
+                <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #1f395a; text-align: center;">
+                    <span style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 6px;">✍️ Firma del Chofer / Operador:</span>
+                    <img src="${s1.firma_chofer}" alt="Firma del Chofer" style="background: white; border-radius: 8px; max-width: 260px; max-height: 90px; border: 2px solid #1f395a; padding: 4px;">
+                </div>
+            `;
+        }
+        
+        // Cotizaciones y Diagnóstico Taller (Sección 2)
+        let cotizacionesHTML = '';
+        const cots = s2.cotizaciones || [];
+        cots.forEach((c, idx) => {
+            let numCotStr = cots.length > 1 ? ` (Cotización #${idx + 1})` : '';
+            
+            let pdfLink = '';
+            if (c.pdf_cotizacion) {
+                let nombreArchivo = String(c.pdf_cotizacion);
+                pdfLink = `
+                    <div style="margin-top: 10px; max-width: 100%; box-sizing: border-box;">
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 5px;">Documento de Cotización Adjunto:</span>
+                        <a href="/static/facturas_archivos/${c.pdf_cotizacion}" target="_blank" 
+                           style="display: inline-flex; align-items: flex-start; gap: 8px; max-width: 100%; background: #081422; border: 1px solid #1e3a5f; padding: 8px 14px; border-radius: 8px; color: #38bdf8; font-weight: 600; font-size: 0.85rem; text-decoration: none; box-sizing: border-box; word-break: break-all; overflow-wrap: anywhere; line-height: 1.45; transition: all 0.2s;" 
+                           onmouseover="this.style.borderColor='#38bdf8'; this.style.background='#0d1e33';" 
+                           onmouseout="this.style.borderColor='#1e3a5f'; this.style.background='#081422';"
+                           title="${nombreArchivo}">
+                            <span style="font-size: 18px; flex-shrink: 0; margin-top: 1px;">📄</span>
+                            <span style="word-break: break-all; overflow-wrap: anywhere;">
+                                <span style="font-weight: 700; color: #38bdf8; text-decoration: underline;">Ver Archivo</span>
+                                <span style="color: #94a3b8; font-size: 0.82rem; font-weight: 400; margin-left: 4px;">(${nombreArchivo})</span>
+                            </span>
+                        </a>
+                    </div>
+                `;
+            }
+            
+            let evidenciasHTML = '';
+            if (c.fotos_evidencia && c.fotos_evidencia.length > 0) {
+                evidenciasHTML = `
+                    <div style="margin-top: 10px;">
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 6px;">Evidencias Adjuntas del Taller:</span>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                `;
+                c.fotos_evidencia.forEach(foto => {
+                    const fLow = String(foto).toLowerCase();
+                    if (fLow.endsWith('.mp4') || fLow.endsWith('.mov') || fLow.endsWith('.webm')) {
+                        evidenciasHTML += `
+                            <a href="/static/facturas_archivos/${foto}" target="_blank" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 85px; height: 85px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; text-decoration: none; color: #38bdf8; font-size: 11px;">
+                                <span style="font-size: 24px;">🎥</span>
+                                <span style="font-size: 9px; text-align: center; overflow: hidden; text-overflow: ellipsis; max-width: 75px;">Video</span>
+                            </a>
+                        `;
+                    } else {
+                        evidenciasHTML += `
+                            <a href="/static/facturas_archivos/${foto}" target="_blank" style="display: block; width: 85px; height: 85px; border-radius: 8px; overflow: hidden; border: 1px solid #334155;">
+                                <img src="/static/facturas_archivos/${foto}" alt="Evidencia" style="width: 100%; height: 100%; object-fit: cover;">
+                            </a>
+                        `;
+                    }
+                });
+                evidenciasHTML += `</div></div>`;
+            }
+            
+            cotizacionesHTML += `
+                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #1e3a5f; border-radius: 8px; padding: 14px; margin-top: 10px; max-width: 100%; box-sizing: border-box; overflow: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #1e3a5f; padding-bottom: 6px;">
+                        <span style="color: #38bdf8; font-weight: 700; font-size: 0.95rem;">${c.titulo || 'Detalle de Reparación'}${numCotStr}</span>
+                        <div style="text-align: right;">
+                            <span style="color: #94a3b8; font-size: 0.72rem; display: block; font-weight: 600; text-transform: uppercase;">Precio Individual:</span>
+                            <span style="background: #064e3b; color: #4ade80; border: 1px solid #22c55e; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.88rem; display: inline-block;">$${Number(c.precio || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN</span>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 0.88rem;">
+                        <div><strong style="color: #94a3b8;">Mantenimiento:</strong> <span style="color: #ffffff;">${c.mantenimiento || 'Correctivo'}</span></div>
+                        <div><strong style="color: #94a3b8;">Diagnóstico del Mecánico:</strong> <div style="background: #09131f; padding: 8px 12px; border-radius: 6px; margin-top: 3px; color: #f1f5f9; border-left: 3px solid #38bdf8;">${c.diagnostico || 'Sin diagnóstico registrado'}</div></div>
+                        <div><strong style="color: #94a3b8;">Trabajo a Realizar:</strong> <div style="background: #09131f; padding: 8px 12px; border-radius: 6px; margin-top: 3px; color: #f1f5f9; border-left: 3px solid #10b981;">${c.trabajo_realizar || 'Sin trabajo registrado'}</div></div>
+                        ${c.retro ? `<div><strong style="color: #94a3b8;">Retro / Situación:</strong> <div style="background: #09131f; padding: 8px 12px; border-radius: 6px; margin-top: 3px; color: #f1f5f9; font-style: italic;">${c.retro}</div></div>` : ''}
+                    </div>
+                    ${pdfLink}
+                    ${evidenciasHTML}
+                </div>
+            `;
+        });
+        
+        cont.innerHTML = `
+            <!-- BANNER DEL MOTIVO DE RETRABAJO REPORTADO POR CHOFER -->
+            <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(245, 158, 11, 0.12)); border: 2px solid #f59e0b; border-radius: 12px; padding: 18px 20px; margin-bottom: 22px;">
+                <div style="display: flex; align-items: center; gap: 8px; color: #f59e0b; font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                    <span style="font-size: 20px;">⚠️</span> MOTIVO DEL RETRABAJO / FALLA NO RESUELTA (REPORTADO POR EL CHOFER)
+                </div>
+                <div style="background: #0d1e33; border: 1px solid #1f395a; border-radius: 8px; padding: 14px 16px;">
+                    <p style="margin: 0; color: #fef08a; font-size: 0.95rem; line-height: 1.6; word-break: break-word; white-space: pre-wrap; font-style: normal;">${String(r.motivo_chofer || 'No especificado').trim().replace(/^["'«»“”„]+|["'«»“”„]+$/g, '').trim()}</p>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-top: 10px; font-size: 0.82rem; color: #94a3b8;">
+                    <span>📅 Solicitado: <strong>${r.fecha_solicitud} ${r.hora_solicitud || ''}</strong></span>
+                    <span>🏢 COPE / Edificio: <strong style="color:#38bdf8;">${r.cope}</strong></span>
+                    <span>👤 Supervisor Asignado: <strong style="color:#4ade80;">${r.supervisor_asignado}</strong></span>
+                </div>
+            </div>
+
+            <!-- GRID CONTENIENDO EXCLUSIVAMENTE SECCION 1 Y SECCION 2 -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                
+                <!-- ■ SECCIÓN 1: REPORTE DE INCIDENCIA (CHOFER) -->
+                <div style="background: #0d1e33; border: 1.5px solid #0284c7; border-radius: 12px; padding: 18px 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1.5px solid #0284c7; padding-bottom: 8px;">
+                        <span style="color: #38bdf8; font-weight: 800; font-size: 1.05rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                            <span>■</span> SECCIÓN 1: REPORTE DE INCIDENCIA ORIGINAL (CHOFER)
+                        </span>
+                        <span style="background: #0369a1; color: white; padding: 2px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">Ticket: ${s1.ticket || r.ticket_original}</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 0.88rem;">
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Unidad:</span><strong style="color: #ffffff; font-size: 1rem;">8090-${s1.unidad || r.unidad}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Marca y Modelo:</span><strong style="color: #ffffff;">${s1.marca || 'N/A'} ${s1.modelo || 'N/A'}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Fecha y Hora Reporte:</span><strong style="color: #cbd5e1;">${s1.fecha || '--'} ${s1.hora ? s1.hora + ' hrs' : ''}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Kilometraje:</span><strong style="color: #cbd5e1;">${s1.kilometraje || 'No registrado'} km</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Compañía:</span><strong style="color: #10b981;">${s1.compania || 'Telnor'}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Tipo Mantenimiento:</span><strong style="color: ${s1.mantenimiento === 'Preventivo' ? '#38bdf8' : '#ef4444'};">${s1.mantenimiento || 'Correctivo'}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Ciudad y COPE:</span><strong style="color: #38bdf8;">${s1.ciudad || '--'} - ${s1.cope || '--'}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Departamento:</span><strong style="color: #cbd5e1;">${s1.departamento || 'No especificado'}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Chofer / Operador:</span><strong style="color: #ffffff;">${s1.empleado || 'No registrado'}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Teléfono Celular:</span><strong style="color: #cbd5e1;">${s1.celular || 'No registrado'}</strong></div>
+                        <div style="grid-column: 1 / -1;"><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Correo Electrónico:</span><strong style="color: #cbd5e1;">${s1.email || 'No registrado'}</strong></div>
+                        
+                        <div style="grid-column: 1 / -1; margin-top: 5px;">
+                            <span style="color: #f59e0b; font-size: 0.82rem; font-weight: 700; display: block; margin-bottom: 4px;">Falla Original Reportada:</span>
+                            <div style="background: #09131f; padding: 12px 14px; border-radius: 8px; color: #e2e8f0; font-style: italic; border-left: 3px solid #f59e0b;">
+                                "${s1.falla_original || 'Sin detalle de falla'}"
+                            </div>
+                        </div>
+                    </div>
+                    ${firmaHTML}
+                </div>
+
+                <!-- ■ SECCIÓN 2: DIAGNÓSTICO Y COTIZACIÓN (TALLER) -->
+                <div style="background: #0d1e33; border: 1.5px solid #10b981; border-radius: 12px; padding: 18px 20px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1.5px solid #10b981; padding-bottom: 8px;">
+                        <span style="color: #4ade80; font-weight: 800; font-size: 1.05rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                            <span>■</span> SECCIÓN 2: DIAGNÓSTICO, TRABAJO Y COTIZACIÓN (TALLER PREVIO)
+                        </span>
+                        <span style="background: #064e3b; color: #4ade80; padding: 2px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">Proveedor: ${s2.proveedor || 'Taller'}</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 0.88rem; margin-bottom: 12px;">
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Taller / Proveedor:</span><strong style="color: #ffffff; font-size: 1rem;">${s2.proveedor || 'No asignado'}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Responsable en Turno:</span><strong style="color: #ffffff;">${s2.responsable || 'No registrado'}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Fecha Ingreso a Taller:</span><strong style="color: #cbd5e1;">${s2.fecha_ingreso || '--'}</strong></div>
+                        <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Costo Previo Total (s/IVA):</span><strong style="color: #4ade80; font-size: 1rem;">$${Number(s2.precio_total || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN</strong></div>
+                    </div>
+
+                    <!-- Cotizaciones / Trabajos de Sección 2 -->
+                    ${cotizacionesHTML}
+                </div>
+
+            </div>
+        `;
+        
+        document.getElementById('modal-detalle-retrabajo').style.display = 'flex';
+        const btnReasig = document.getElementById('btn-reasignar-retrabajo');
+        if (btnReasig) {
+            btnReasig.setAttribute('data-ticket', ticketId);
+        }
+        const btnCancelReasig = document.getElementById('btn-cancelar-reasignacion');
+        if (btnCancelReasig) {
+            btnCancelReasig.setAttribute('data-ticket', ticketId);
+        }
+    } catch (err) {
+        console.error('Error al abrir detalle de retrabajo:', err);
+        alert('Error al obtener los detalles de la garantía.');
+    }
 }
 
 function abrirModalDetalles(identificador) {

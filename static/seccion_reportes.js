@@ -329,6 +329,9 @@ function renderizarTablaReportes(lista) {
         let htmlBtnPdfFactura = '';
         let htmlNumContable = '';
         
+        let valRetrabajo = f.retrabajo || f.es_retrabajo || '-';
+        let valNumRetrabajo = f.num_retrabajo || f.numero_retrabajo || '-';
+        
         let numCotizaciones = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones.length : 1;
         let costoTotalRow = 0;
         let isRowPendOC = false;
@@ -433,6 +436,8 @@ function renderizarTablaReportes(lista) {
                 <td style="vertical-align:top; padding-top:15px;">${fechaEntrada}</td>
                 <td style="vertical-align:top; padding-top:15px;">${tiempoTaller}</td>
                 <td style="vertical-align:top; padding-top:15px;">${fechaSalida}</td>
+                <td style="vertical-align:top; padding-top:15px;">${valRetrabajo}</td>
+                <td style="vertical-align:top; padding-top:15px;">${valNumRetrabajo}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumPedido}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumOrden}</td>
                 <td style="vertical-align:top; padding-top:15px;">${htmlNumFactura}</td>
@@ -573,7 +578,7 @@ function aplicarFiltrosReportes() {
         if (!filaSinResultados) {
             filaSinResultados = document.createElement('tr');
             filaSinResultados.id = 'fila-sin-resultados-reportes';
-            filaSinResultados.innerHTML = `<td colspan="28" style="text-align: center; color: #a3b1c6; padding: 25px; font-weight: bold; background: #0f172a;">🔍 No se encontraron tickets con los filtros seleccionados.</td>`;
+            filaSinResultados.innerHTML = `<td colspan="30" style="text-align: center; color: #a3b1c6; padding: 25px; font-weight: bold; background: #0f172a;">🔍 No se encontraron tickets con los filtros seleccionados.</td>`;
             tbody.appendChild(filaSinResultados);
         } else {
             filaSinResultados.style.display = '';

@@ -193,6 +193,82 @@ window.confirmarEnteradoDelegacion = function() {
     }
 };
 
+window.cerrarModalAlertaCortaDelegacion = function() {
+    const modal = document.getElementById('modal-alerta-corta-delegacion');
+    if (modal) modal.style.display = 'none';
+    window.callbackAlertaCortaDelegacion = null;
+};
+
+window.confirmarAlertaCortaDelegacion = function() {
+    const cb = window.callbackAlertaCortaDelegacion;
+    window.cerrarModalAlertaCortaDelegacion();
+    if (typeof cb === 'function') {
+        cb();
+    } else if (typeof cb === 'string') {
+        try { (new Function(cb))(); } catch(e) { console.error(e); }
+    }
+};
+
+window.mostrarAlertaCortaDelegacion = function(mensaje, callback) {
+    window.callbackAlertaCortaDelegacion = callback;
+    const modal = document.getElementById('modal-alerta-corta-delegacion');
+    const msgEl = document.getElementById('alerta-corta-delegacion-msg');
+    if (modal && msgEl) {
+        msgEl.innerHTML = mensaje;
+        modal.style.display = 'flex';
+    } else {
+        const textoPlano = (mensaje || '').replace(/<[^>]*>?/gm, '');
+        if (confirm(`⚠️ DELEGACIÓN POR AUSENCIA\n\n${textoPlano}\n\n¿Deseas continuar?`)) {
+            if (typeof callback === 'function') callback();
+        }
+    }
+};
+
+window.abrirVistaDelegada = function(tipo) {
+    let mensaje = '';
+    let callback = null;
+
+    if (tipo === 'cotizaciones-10k') {
+        callback = () => {
+            if (typeof verCotizacionesMas10000 === 'function') {
+                verCotizacionesMas10000();
+            } else if (typeof cambiarVistaAdmin === 'function') {
+                cambiarVistaAdmin('cotizaciones-10k');
+            }
+        };
+        mensaje = 'Estás ingresando a <strong style="color: #fbbf24;">Cotizaciones +10,000</strong> bajo el protocolo de <strong style="color: #fbbf24;">Delegación por Ausencia</strong> (suplencia del Administrador).<br><br>¿Deseas continuar?';
+    } else if (tipo === 'liberar-doc-contable') {
+        callback = () => {
+            if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('liberar-doc-contable');
+        };
+        mensaje = 'Estás ingresando a <strong style="color: #fbbf24;">Liberar Doc. Contable</strong> bajo el protocolo de <strong style="color: #fbbf24;">Delegación por Ausencia</strong> (suplencia del Administrador).<br><br>¿Deseas continuar?';
+    } else if (tipo === 'facturas') {
+        callback = () => {
+            if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('facturas');
+        };
+        mensaje = 'Estás ingresando a <strong style="color: #fbbf24;">Cotizaciones y Órdenes</strong> bajo el protocolo de <strong style="color: #fbbf24;">Delegación por Ausencia</strong> (suplencia del Supervisor).<br><br>¿Deseas continuar?';
+    } else if (tipo === 'facturas_finales' || tipo === 'facturas-finales') {
+        callback = () => {
+            if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin('facturas_finales');
+        };
+        mensaje = 'Estás ingresando a <strong style="color: #fbbf24;">Facturas</strong> bajo el protocolo de <strong style="color: #fbbf24;">Delegación por Ausencia</strong> (suplencia del Supervisor).<br><br>¿Deseas continuar?';
+    } else {
+        callback = () => {
+            if (typeof cambiarVistaAdmin === 'function') cambiarVistaAdmin(tipo);
+        };
+        mensaje = 'Estás ingresando a esta sección bajo el protocolo de <strong style="color: #fbbf24;">Delegación por Ausencia</strong>.<br><br>¿Deseas continuar?';
+    }
+
+    if (typeof window.mostrarAlertaCortaDelegacion === 'function') {
+        window.mostrarAlertaCortaDelegacion(mensaje, callback);
+    } else {
+        const textoPlano = (mensaje || '').replace(/<[^>]*>?/gm, '');
+        if (confirm(`⚠️ DELEGACIÓN POR AUSENCIA\n\n${textoPlano}\n\n¿Deseas continuar?`)) {
+            if (callback) callback();
+        }
+    }
+};
+
 window.delegarAutorizarRevision = function(id, unidad) {
     const roles = window.obtenerNombresDelegacion(id, 'Supervisor');
     window.solicitarConfirmacionDelegacion(() => abrirRevisionAdmin(id), {
@@ -221,7 +297,13 @@ window.delegarValidarPin = function(id, unidad) {
 
 window.delegarLiberarTicket = function(id, unidad) {
     const roles = window.obtenerNombresDelegacion(id, 'Administrador');
-    window.solicitarConfirmacionDelegacion(() => asumirLiberacionAdmin(id), {
+    window.solicitarConfirmacionDelegacion(() => {
+        if (typeof abrirModalLiberarTicket === 'function') {
+            abrirModalLiberarTicket(id);
+        } else if (typeof asumirLiberacionAdmin === 'function') {
+            asumirLiberacionAdmin(id, true);
+        }
+    }, {
         proceso: "Liberar Ticket para Facturación Fiscal",
         descripcion: "Autorización administrativa y contable previa para permitir al taller proveedor emitir y subir su factura fiscal al sistema.",
         titular: roles.titular,
@@ -247,7 +329,13 @@ window.delegarValidarFiscal = function(id, folio, pdf, unidad) {
 
 window.delegarAprobar10k = function(id, unidad) {
     const roles = window.obtenerNombresDelegacion(id, 'Administrador');
-    window.solicitarConfirmacionDelegacion(() => accion10k(id, 'aprobar', true), {
+    window.solicitarConfirmacionDelegacion(() => {
+        if (typeof accion10k === 'function') {
+            accion10k(id, 'aprobar', true);
+        } else if (typeof abrirModalAprobar10k === 'function') {
+            abrirModalAprobar10k(id, true);
+        }
+    }, {
         proceso: "Aprobación de Cotización Mayor a $10,000 hacia Corporativos",
         descripcion: "Filtro y autorización previa de presupuesto de alto costo (mayor a $10,000 MXN) para canalizar a Corporativos.",
         titular: roles.titular,
@@ -258,12 +346,14 @@ window.delegarAprobar10k = function(id, unidad) {
     });
 };
 
-function asumirLiberacionAdmin(facturaId) {
+function asumirLiberacionAdmin(facturaId, omitirConfirmacion = false) {
     let nomAdmin = "Manuel Alejandro Marquez";
     if (window.obtenerNombresDelegacion) {
         nomAdmin = window.obtenerNombresDelegacion(facturaId, 'Administrador').titular.replace('Administrador: ', '');
     }
-    if (!confirm(`⚠️ ¿Deseas ASUMIR EL PROCESO (Autorizar por Ausencia) para liberar este ticket en suplencia del Administrador (${nomAdmin})?\n\nEsta acción notificará al taller proveedor para que proceda a subir su factura fiscal.`)) return;
+    if (!omitirConfirmacion) {
+        if (!confirm(`⚠️ ¿Deseas ASUMIR EL PROCESO (Autorizar por Ausencia) para liberar este ticket en suplencia del Administrador (${nomAdmin})?\n\nEsta acción notificará al taller proveedor para que proceda a subir su factura fiscal.`)) return;
+    }
     mostrarLoaderDinamico('Procesando Cobertura...', 'Liberando ticket por ausencia ⏳');
     fetch('/api/facturas/liberar_doc50', {
         method: 'POST',
@@ -755,17 +845,21 @@ async function cargarFacturas() {
 
                 // ==========================================
                 // LIBERAR DOCUMENTO CONTABLE (ADMIN / COBERTURA)
-                // ==========================================
                 if (tbodyLiberarDoc && rolUsuario === 'administracion') {
                     // En esta vista solo van tickets pendientes de liberación
                     if (f.liberado_admin === false) {
                         let btnLiberar = `<div style="display:flex; flex-direction:column; gap:5px; width:100%;">
-                            <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>
-                            <button class="btn-liberar-ticket-admin" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirModalLiberarTicket('${f.id}')">✔️ Liberar Ticket</button>`;
+                            <button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
+
+                        if (subrolAct === 'Supervisor') {
+                            btnLiberar += `<button class="btn-cobertura" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="delegarLiberarTicket('${f.id}', '${f.unidad || ''}')">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
+                        } else {
+                            btnLiberar += `<button class="btn-liberar-ticket-admin" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirModalLiberarTicket('${f.id}')">✔️ Liberar Ticket</button>`;
+                        }
 
                         if (subrolAct === 'Administrador') {
                             btnLiberar += `<button class="btn-actualizar-orden" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="solicitarCorreccionOrden('${f.id}')">Corrección (Num. Pedido y Orden)</button>`;
-                        } else {
+                        } else if (subrolAct !== 'Supervisor') {
                             btnLiberar += `<button class="btn-actualizar-orden" style="display:block; width:100%; margin:0; margin-top:5px;" onclick="abrirActualizarOrdenes('${f.id}')">Actualizar Pedido/Orden</button>`;
                         }
 

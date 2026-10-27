@@ -18,8 +18,17 @@ from notificaciones import (
 reportes_bp = Blueprint("reportes_bp", __name__)
 
 def leer_json(archivo):
-    if not os.path.exists(archivo): return {"reportes": []}
-    with open(archivo, "r", encoding="utf-8") as f: return json.load(f)
+    if not os.path.exists(archivo):
+        if "retrabajo" in archivo: return {"retrabajos": []}
+        if "factura" in archivo: return {"facturas": []}
+        if "ticket" in archivo: return {"tickets": []}
+        return {"reportes": []}
+    with open(archivo, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except Exception:
+            if "retrabajo" in archivo: return {"retrabajos": []}
+            return {}
 
 def escribir_json(archivo, data):
     with open(archivo, "w", encoding="utf-8") as f: json.dump(data, f, indent=4)
@@ -477,3 +486,472 @@ def toggle_juridicos_unidad():
             return jsonify({"status": "error", "message": "Unidad no encontrada"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
+
+@reportes_bp.route("/api/garantia/buscar_ticket/<path:ticket_query>", methods=["GET"])
+def buscar_ticket_garantia(ticket_query):
+    query = str(ticket_query).strip()
+    if not query:
+        return jsonify({"status": "error", "message": "Por favor ingrese un número de ticket válido."})
+    
+    # 1. Buscar en reportes.json
+    reportes_data = leer_json("reportes.json")
+    reporte_encontrado = None
+    
+    clean_q = query.upper().replace("REP-", "").replace("REP", "").strip()
+    
+    for r in reportes_data.get("reportes", []):
+        r_id = str(r.get("id", "")).strip()
+        r_clean = r_id.upper().replace("REP-", "").replace("REP", "").strip()
+        
+        # Coincidencia exacta o numérica limpia
+        if r_id.upper() == query.upper() or (clean_q and clean_q == r_clean):
+            reporte_encontrado = r
+            break
+            
+    # 2. Si no se encontró directo en reportes, buscar en facturas.json por id de factura o [TICKET:REP-xxx]
+    if not reporte_encontrado:
+        facturas_data = leer_json("facturas.json")
+        for f in facturas_data.get("facturas", []):
+            f_id = str(f.get("id", "")).strip()
+            f_clean = f_id.upper().replace("REP-", "").replace("REP", "").strip()
+            
+            match_factura = (f_id.upper() == query.upper() or (clean_q and clean_q == f_clean))
+            
+            retro = f.get("retro", "")
+            import re
+            m = re.search(r"\[TICKET:(.*?)\]", retro)
+            ref_rep_id = m.group(1).strip() if m else ""
+            ref_clean = ref_rep_id.upper().replace("REP-", "").replace("REP", "").strip()
+            
+            match_retro = (ref_rep_id and (ref_rep_id.upper() == query.upper() or (clean_q and clean_q == ref_clean)))
+            
+            if match_factura or match_retro:
+                target_id = ref_rep_id if ref_rep_id else f_id
+                for r in reportes_data.get("reportes", []):
+                    if str(r.get("id", "")).strip().upper() == target_id.upper():
+                        reporte_encontrado = r
+                        break
+                
+                if not reporte_encontrado:
+                    u_eco = str(f.get("unidad", "")).replace("8090-", "").strip()
+                    reporte_encontrado = {
+                        "id": ref_rep_id or f.get("id"),
+                        "fecha": f.get("fecha", ""),
+                        "unidad": u_eco,
+                        "marca": f.get("marca", ""),
+                        "modelo": f.get("modelo", ""),
+                        "ciudad": f.get("ciudad", ""),
+                        "cope": f.get("cope", ""),
+                        "empleado": f.get("responsable", ""),
+                        "celular": f.get("telefono", ""),
+                        "email": f.get("email", ""),
+                        "kilometraje": f.get("kilometraje", ""),
+                        "mantenimiento": f.get("mantenimiento", "Correctivo"),
+                        "falla": f.get("retro", "") or f.get("diagnostico", "") or f.get("titulo", ""),
+                        "asignado_a": f.get("proveedor", "")
+                    }
+                break
+
+    # 3. Buscar en tickets_archivados.json por si acaso
+    if not reporte_encontrado:
+        arch_data = leer_json("tickets_archivados.json")
+        for a in arch_data.get("tickets", []):
+            a_id = str(a.get("id", "")).strip()
+            a_clean = a_id.upper().replace("REP-", "").replace("REP", "").strip()
+            if a_id.upper() == query.upper() or (clean_q and clean_q == a_clean):
+                reporte_encontrado = a
+                break
+
+    if not reporte_encontrado:
+        return jsonify({
+            "status": "not_found",
+            "message": f"No se encontró ningún reporte o ticket con el número '{query}'. Verifique el identificador e intente de nuevo."
+        })
+
+    # 4. REGLA ESTRICTA: Solo se puede mandar a retrabajo una unidad cuando el chofer ya haya verificado su número de confirmación (salida de taller)
+    facturas_data = leer_json("facturas.json")
+    todas_facturas = facturas_data.get("facturas", [])
+    if os.path.exists("tickets_archivados.json"):
+        todas_facturas += leer_json("tickets_archivados.json").get("facturas", [])
+
+    factura_correspondiente = None
+    rep_id_target = str(reporte_encontrado.get("id", query)).strip().upper()
+    rep_id_clean = rep_id_target.replace("REP-", "").replace("REP", "").strip()
+
+    import re
+    for f in todas_facturas:
+        f_id = str(f.get("id", "")).strip().upper()
+        f_id_clean = f_id.replace("REP-", "").replace("REP", "").strip()
+        f_rep = str(f.get("id_reporte", "") or f.get("numero_reporte", "")).strip().upper()
+        retro = str(f.get("retro", ""))
+        m = re.search(r"\[TICKET:(.*?)\]", retro)
+        m_ticket = m.group(1).strip().upper() if m else ""
+
+        if f_id == rep_id_target or f_rep == rep_id_target or m_ticket == rep_id_target or (f_id_clean and f_id_clean == rep_id_clean):
+            factura_correspondiente = f
+            break
+
+    if not factura_correspondiente:
+        return jsonify({
+            "status": "no_elegible",
+            "message": "Este ticket no puede ser enviado a retrabajo porque aún no ha sido atendido ni procesado en taller."
+        })
+
+    entregado_val = str(factura_correspondiente.get("entregado", "")).strip().lower()
+    if entregado_val not in ["sí", "s", "si"]:
+        return jsonify({
+            "status": "no_elegible",
+            "message": "Solo se puede mandar a retrabajo una unidad cuando el chofer ya haya verificado su número de confirmación para cuando el taller en teoría la dejó arreglada y lista."
+        })
+
+    # Verificar si ya tiene retrabajo pendiente en proceso
+    retrabajos_data = leer_json("retrabajos.json")
+    for ret in retrabajos_data.get("retrabajos", []):
+        if str(ret.get("ticket_original", "")).strip().upper() == rep_id_target and ret.get("estado") == "Pendiente":
+            return jsonify({
+                "status": "ya_en_retrabajo",
+                "message": "Este ticket ya cuenta con una solicitud de garantía/retrabajo pendiente en revisión con el supervisor."
+            })
+
+    eco = str(reporte_encontrado.get("unidad", "")).replace("8090-", "").strip()
+    
+    # Fallback para marca y modelo desde unidades.json si vienen vacíos o N/A
+    unidades_data = leer_json("unidades.json")
+    u_info = unidades_data.get(f"8090{eco}", {}) or unidades_data.get(eco, {})
+    marca_val = reporte_encontrado.get("marca") or u_info.get("Marca") or "N/A"
+    modelo_val = reporte_encontrado.get("modelo") or u_info.get("Modelo") or "N/A"
+    
+    ts = str(reporte_encontrado.get("timestamp", ""))
+    hora_val = ""
+    if "T" in ts:
+        try:
+            hora_val = ts.split("T")[1].split(".")[0]
+        except Exception:
+            hora_val = ""
+            
+    datos_reporte = {
+        "id": reporte_encontrado.get("id", query),
+        "fecha": reporte_encontrado.get("fecha", "No especificada"),
+        "hora": hora_val,
+        "timestamp": reporte_encontrado.get("timestamp", ""),
+        "unidad": eco,
+        "marca": marca_val,
+        "modelo": modelo_val,
+        "kilometraje": reporte_encontrado.get("kilometraje", "No registrado"),
+        "empleado": reporte_encontrado.get("empleado") or reporte_encontrado.get("responsable") or "No registrado",
+        "celular": reporte_encontrado.get("celular") or reporte_encontrado.get("telefono") or "No registrado",
+        "email": reporte_encontrado.get("email", "No registrado"),
+        "departamento": reporte_encontrado.get("departamento", "No especificado"),
+        "ciudad": reporte_encontrado.get("ciudad") or factura_correspondiente.get("ciudad", "No especificada"),
+        "cope": reporte_encontrado.get("cope") or factura_correspondiente.get("cope", "No especificado"),
+        "compania": reporte_encontrado.get("compania") or factura_correspondiente.get("compania", "Telnor"),
+        "mantenimiento": reporte_encontrado.get("mantenimiento", "Correctivo"),
+        "falla": reporte_encontrado.get("falla") or reporte_encontrado.get("retro") or "Falla mecánica reportada",
+        "firma_chofer": reporte_encontrado.get("firma_chofer", ""),
+        "estado": reporte_encontrado.get("estado", "Pendiente"),
+        "asignado_a": factura_correspondiente.get("proveedor") or reporte_encontrado.get("asignado_a", "")
+    }
+
+    return jsonify({
+        "status": "success",
+        "encontrado": True,
+        "reporte": datos_reporte
+    })
+
+
+@reportes_bp.route("/api/garantia/aplicar", methods=["POST"])
+def aplicar_garantia():
+    req = request.get_json() or {}
+    ticket_id = str(req.get("ticket_id", "")).strip()
+    motivo = str(req.get("motivo", "")).strip()
+    import re
+    motivo = re.sub(r'^["\'«»“”„]+|["\'«»“”„]+$', '', motivo).strip()
+
+    if not ticket_id:
+        return jsonify({"status": "error", "message": "Número de ticket no proporcionado."}), 400
+    if not motivo:
+        return jsonify({"status": "error", "message": "Por favor escribe el motivo del retrabajo detallando la falla no resuelta o reincidencia."}), 400
+
+    reportes_data = leer_json("reportes.json")
+    reporte_encontrado = None
+    clean_q = ticket_id.upper().replace("REP-", "").replace("REP", "").strip()
+
+    for r in reportes_data.get("reportes", []):
+        r_id = str(r.get("id", "")).strip()
+        r_clean = r_id.upper().replace("REP-", "").replace("REP", "").strip()
+        if r_id.upper() == ticket_id.upper() or (clean_q and clean_q == r_clean):
+            reporte_encontrado = r
+            break
+
+    facturas_data = leer_json("facturas.json")
+    todas_facturas = facturas_data.get("facturas", [])
+    if os.path.exists("tickets_archivados.json"):
+        todas_facturas += leer_json("tickets_archivados.json").get("facturas", [])
+
+    factura_correspondiente = None
+    import re
+    target_id_str = (reporte_encontrado.get("id") if reporte_encontrado else ticket_id).strip().upper()
+    target_clean = target_id_str.replace("REP-", "").replace("REP", "").strip()
+
+    for f in todas_facturas:
+        f_id = str(f.get("id", "")).strip().upper()
+        f_id_clean = f_id.replace("REP-", "").replace("REP", "").strip()
+        f_rep = str(f.get("id_reporte", "") or f.get("numero_reporte", "")).strip().upper()
+        retro = str(f.get("retro", ""))
+        m = re.search(r"\[TICKET:(.*?)\]", retro)
+        m_ticket = m.group(1).strip().upper() if m else ""
+
+        if f_id == target_id_str or f_rep == target_id_str or m_ticket == target_id_str or (f_id_clean and f_id_clean == target_clean):
+            factura_correspondiente = f
+            break
+
+    if not reporte_encontrado and factura_correspondiente:
+        u_eco = str(factura_correspondiente.get("unidad", "")).replace("8090-", "").strip()
+        reporte_encontrado = {
+            "id": ticket_id,
+            "fecha": factura_correspondiente.get("fecha", ""),
+            "unidad": u_eco,
+            "marca": factura_correspondiente.get("marca", ""),
+            "modelo": factura_correspondiente.get("modelo", ""),
+            "ciudad": factura_correspondiente.get("ciudad", ""),
+            "cope": factura_correspondiente.get("cope", ""),
+            "empleado": factura_correspondiente.get("responsable", ""),
+            "celular": factura_correspondiente.get("telefono", ""),
+            "email": factura_correspondiente.get("email", ""),
+            "kilometraje": factura_correspondiente.get("kilometraje", ""),
+            "mantenimiento": factura_correspondiente.get("mantenimiento", "Correctivo"),
+            "falla": factura_correspondiente.get("retro", "") or factura_correspondiente.get("diagnostico", ""),
+            "asignado_a": factura_correspondiente.get("proveedor", "")
+        }
+
+    if not reporte_encontrado or not factura_correspondiente:
+        return jsonify({"status": "error", "message": "No se encontraron los registros de servicio correspondientes para este ticket."}), 404
+
+    # Validación estricta del número de confirmación
+    entregado_val = str(factura_correspondiente.get("entregado", "")).strip().lower()
+    if entregado_val not in ["sí", "s", "si"]:
+        return jsonify({
+            "status": "error",
+            "message": "Solo se puede mandar a retrabajo una unidad cuando el chofer ya haya verificado su número de confirmación para cuando el taller en teoría la dejó arreglada y lista."
+        }), 400
+
+    eco = str(reporte_encontrado.get("unidad", "")).replace("8090-", "").strip()
+    unidades_data = leer_json("unidades.json")
+    u_info = unidades_data.get(f"8090{eco}", {}) or unidades_data.get(eco, {})
+    marca_val = reporte_encontrado.get("marca") or u_info.get("Marca") or "N/A"
+    modelo_val = reporte_encontrado.get("modelo") or u_info.get("Modelo") or "N/A"
+
+    cope_val = reporte_encontrado.get("cope") or factura_correspondiente.get("cope") or "No especificado"
+    ciudad_val = reporte_encontrado.get("ciudad") or factura_correspondiente.get("ciudad") or "No especificada"
+
+    # 1. SECCIÓN 1: REPORTE DE INCIDENCIA (ORIGEN)
+    seccion_1 = {
+        "ticket": reporte_encontrado.get("id", ticket_id),
+        "fecha": reporte_encontrado.get("fecha", ""),
+        "hora": reporte_encontrado.get("hora", "") or (reporte_encontrado.get("timestamp", "").split("T")[1].split(".")[0] if "T" in str(reporte_encontrado.get("timestamp", "")) else ""),
+        "timestamp": reporte_encontrado.get("timestamp", ""),
+        "unidad": eco,
+        "marca": marca_val,
+        "modelo": modelo_val,
+        "kilometraje": reporte_encontrado.get("kilometraje", "No registrado"),
+        "compania": reporte_encontrado.get("compania") or factura_correspondiente.get("compania") or "Telnor",
+        "mantenimiento": reporte_encontrado.get("mantenimiento", "Correctivo"),
+        "ciudad": ciudad_val,
+        "cope": cope_val,
+        "empleado": reporte_encontrado.get("empleado") or reporte_encontrado.get("responsable") or "No registrado",
+        "celular": reporte_encontrado.get("celular") or reporte_encontrado.get("telefono") or "No registrado",
+        "email": reporte_encontrado.get("email", "No registrado"),
+        "departamento": reporte_encontrado.get("departamento", "No especificado"),
+        "falla_original": reporte_encontrado.get("falla") or reporte_encontrado.get("retro") or "Falla mecánica",
+        "firma_chofer": reporte_encontrado.get("firma_chofer", "")
+    }
+
+    # 2. SECCIÓN 2: DIAGNÓSTICO Y COTIZACIÓN (TALLER)
+    cots_raw = factura_correspondiente.get("cotizaciones", [])
+    cotizaciones_sec2 = []
+    for c in cots_raw:
+        cotizaciones_sec2.append({
+            "id_cotizacion": c.get("id_cotizacion"),
+            "titulo": c.get("titulo", "Sin Título"),
+            "mantenimiento": c.get("mantenimiento", "Correctivo"),
+            "precio": c.get("precio", 0.0),
+            "retro": c.get("retro", ""),
+            "diagnostico": c.get("diagnostico", ""),
+            "trabajo_realizar": c.get("trabajo_realizar", ""),
+            "pdf_cotizacion": c.get("pdf_cotizacion"),
+            "fotos_evidencia": c.get("fotos_evidencia", [])
+        })
+
+    seccion_2 = {
+        "proveedor": factura_correspondiente.get("proveedor", "Taller No Asignado"),
+        "responsable": factura_correspondiente.get("responsable", "No registrado"),
+        "fecha_ingreso": factura_correspondiente.get("fecha", ""),
+        "precio_total": factura_correspondiente.get("precio", 0.0),
+        "titulo": factura_correspondiente.get("titulo", ""),
+        "retro": factura_correspondiente.get("retro", ""),
+        "diagnostico": factura_correspondiente.get("diagnostico", ""),
+        "trabajo_realizar": factura_correspondiente.get("trabajo_realizar", ""),
+        "cotizaciones": cotizaciones_sec2 if cotizaciones_sec2 else [{
+            "titulo": factura_correspondiente.get("titulo", "Global"),
+            "mantenimiento": factura_correspondiente.get("mantenimiento", "Correctivo"),
+            "precio": factura_correspondiente.get("precio", 0.0),
+            "retro": factura_correspondiente.get("retro", ""),
+            "diagnostico": factura_correspondiente.get("diagnostico", ""),
+            "trabajo_realizar": factura_correspondiente.get("trabajo_realizar", ""),
+            "pdf_cotizacion": (factura_correspondiente.get("fotos_cotizacion") or [None])[0],
+            "fotos_evidencia": factura_correspondiente.get("fotos_evidencia", [])
+        }],
+        "fotos_evidencia": factura_correspondiente.get("fotos_evidencia", [])
+    }
+
+    # 3. IDENTIFICAR AL SUPERVISOR ASIGNADO A ESE COPE / EDIFICIO
+    sup_usuario = ""
+    sup_nombre = "Supervisor Asignado"
+    sup_correo = ""
+
+    usuarios_data = leer_json("usuarios.json")
+    cope_target_norm = str(cope_val).strip().upper()
+
+    for u in usuarios_data.get("usuarios", []):
+        if u.get("rol") == "administracion":
+            dp = u.get("datos_perfil", {})
+            if dp.get("subrol") == "Supervisor":
+                cope_prin = str(dp.get("cope", "")).strip().upper()
+                copes_asig = [str(c).strip().upper() for c in dp.get("copes_asignados", [])]
+                if cope_target_norm == cope_prin or cope_target_norm in copes_asig:
+                    sup_usuario = u.get("usuario", "")
+                    nomb = f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()
+                    if nomb: sup_nombre = nomb
+                    sup_correo = dp.get("correo", "")
+                    break
+
+    if not sup_usuario:
+        for u in usuarios_data.get("usuarios", []):
+            if u.get("rol") == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor":
+                sup_usuario = u.get("usuario", "")
+                dp = u.get("datos_perfil", {})
+                sup_nombre = f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip()
+                sup_correo = dp.get("correo", "")
+                break
+
+    # 4. CREAR EL REGISTRO DE RETRABAJO (Mantiene el mismo número de ticket original)
+    ticket_original_val = reporte_encontrado.get("id", ticket_id)
+
+    # Determinar fecha de salida del taller de la cual sale el retrabajo
+    fecha_salida_val = ""
+    if factura_correspondiente.get("fecha_cierre"):
+        fecha_salida_val = str(factura_correspondiente["fecha_cierre"]).split(" ")[0]
+    elif factura_correspondiente.get("fecha_salida"):
+        fecha_salida_val = str(factura_correspondiente["fecha_salida"]).split(" ")[0]
+    elif factura_correspondiente.get("fecha"):
+        fecha_salida_val = str(factura_correspondiente["fecha"]).split(" ")[0]
+
+    nuevo_retrabajo = {
+        "id": ticket_original_val,
+        "ticket": ticket_original_val,
+        "ticket_original": ticket_original_val,
+        "factura_id": factura_correspondiente.get("id"),
+        "unidad": eco,
+        "cope": cope_val,
+        "ciudad": ciudad_val,
+        "fecha_solicitud": datetime.datetime.now().strftime("%Y-%m-%d"),
+        "hora_solicitud": datetime.datetime.now().strftime("%H:%M:%S"),
+        "fecha_salida": fecha_salida_val,
+        "fecha_salida_taller": fecha_salida_val,
+        "timestamp": datetime.datetime.now().isoformat(),
+        "motivo_chofer": motivo,
+        "supervisor_asignado": sup_nombre,
+        "supervisor_usuario": sup_usuario,
+        "supervisor_correo": sup_correo,
+        "estado": "Pendiente",
+        "seccion_1": seccion_1,
+        "seccion_2": seccion_2
+    }
+
+    retrabajos_data = leer_json("retrabajos.json")
+    if "retrabajos" not in retrabajos_data:
+        retrabajos_data["retrabajos"] = []
+    retrabajos_data["retrabajos"].append(nuevo_retrabajo)
+    escribir_json("retrabajos.json", retrabajos_data)
+
+    # Actualizar factura en facturas.json
+    for f in facturas_data.get("facturas", []):
+        if str(f.get("id")) == str(factura_correspondiente.get("id")):
+            f["retrabajo"] = "Sí"
+            f["num_retrabajo"] = int(f.get("num_retrabajo", 0)) + 1
+            f["ultimo_motivo_retrabajo"] = motivo
+            break
+    escribir_json("facturas.json", facturas_data)
+
+    return jsonify({
+        "status": "success",
+        "message": f"Garantía aplicada con éxito para el ticket {ticket_original_val} y se canalizó al supervisor ({sup_nombre}) para el COPE {cope_val}.",
+        "ticket": ticket_original_val
+    })
+
+
+@reportes_bp.route("/api/garantia/supervisor/lista", methods=["GET"])
+def obtener_retrabajos_supervisor():
+    if "usuario" not in session or session["usuario"].get("rol") != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    usuario_sesion = session["usuario"]
+    dp = usuario_sesion.get("datos_perfil", {})
+    subrol = dp.get("subrol", "")
+    mi_cope = str(dp.get("cope", "")).strip().upper()
+    copes_extra = [str(c).strip().upper() for c in dp.get("copes_asignados", [])]
+    copes_permitidos = set([mi_cope] + copes_extra)
+
+    retrabajos_data = leer_json("retrabajos.json")
+    todos = retrabajos_data.get("retrabajos", [])
+
+    facturas_data_cache = None
+    for ret in todos:
+        if not ret.get("fecha_salida_taller") and not ret.get("fecha_salida"):
+            if facturas_data_cache is None:
+                facturas_data_cache = leer_json("facturas.json").get("facturas", [])
+            f_id = str(ret.get("factura_id", "")).strip().upper()
+            t_orig = str(ret.get("ticket_original", "") or ret.get("id", "")).strip().upper()
+            for f in facturas_data_cache:
+                f_cur_id = str(f.get("id", "")).strip().upper()
+                f_retro = str(f.get("retro", "")).upper()
+                f_rep = str(f.get("id_reporte", "")).strip().upper()
+                if (f_id and f_cur_id == f_id) or (t_orig and (t_orig in f_retro or f_rep == t_orig)):
+                    f_sal = (str(f.get("fecha_cierre", "")).split(" ")[0] or str(f.get("fecha_salida", "")).split(" ")[0])
+                    if f_sal:
+                        ret["fecha_salida"] = f_sal
+                        ret["fecha_salida_taller"] = f_sal
+                    break
+
+    filtrados = []
+    for ret in todos:
+        ret_cope = str(ret.get("cope", "")).strip().upper()
+        if subrol in ["Jefatura", "Administrador"]:
+            filtrados.append(ret)
+        elif ret_cope in copes_permitidos or not ret_cope:
+            filtrados.append(ret)
+
+    return jsonify({
+        "status": "success",
+        "total": len(filtrados),
+        "retrabajos": filtrados
+    })
+
+
+@reportes_bp.route("/api/garantia/retrabajo/<ticket_id>", methods=["GET"])
+def obtener_detalle_retrabajo(ticket_id):
+    retrabajos_data = leer_json("retrabajos.json")
+    t_clean = str(ticket_id).strip().upper()
+    for ret in retrabajos_data.get("retrabajos", []):
+        r_id = str(ret.get("id", "")).strip().upper()
+        r_orig = str(ret.get("ticket_original", "")).strip().upper()
+        r_tick = str(ret.get("ticket", "")).strip().upper()
+        if t_clean in [r_id, r_orig, r_tick] or (t_clean and t_clean.replace("REP-", "") in [r_id.replace("REP-", ""), r_orig.replace("REP-", "")]):
+            return jsonify({
+                "status": "success",
+                "retrabajo": ret
+            })
+    return jsonify({"status": "error", "message": "Garantía no encontrada para este ticket"}), 404
+
+
+

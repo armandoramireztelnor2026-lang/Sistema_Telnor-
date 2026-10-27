@@ -73,7 +73,10 @@
             "factura_pdf": "FACTURA_FINAL_20261008133951_0_Meta_2.3_Resolucion_de_casos_practicos_de_analisis_espacial.docx.pdf",
             "validacion_fiscal": "Aprobada",
             "numero_doc50": "500000012",
-            "estado": "Archivado"
+            "estado": "Archivado",
+            "retrabajo": "S\u00ed",
+            "num_retrabajo": 2,
+            "ultimo_motivo_retrabajo": "Ruido reincidente en frenos y suspensi\u00f3n al girar."
         },
         {
             "id": "20261009110502",

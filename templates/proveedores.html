@@ -31,6 +31,12 @@
                 <button class="btn-sidebar" onclick="cambiarVistaProv('facturas')">Cotizaciones</button>
                 <button class="btn-sidebar" onclick="cambiarVistaProv('facturas_finales')">Facturas</button>
                 <button class="btn-sidebar" onclick="cambiarVistaProv('archivo')">Archivo Histórico</button>
+
+                <!-- Módulo de Garantía / Retrabajo (Verde) -->
+                <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="text-align: center; color: #4ade80; font-size: 1.12rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
+                    <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button">Retrabajo</button>
+                </div>
             </nav>
             <div class="btn-logout-container"><a href="/logout" class="btn-logout"
                     onclick="return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
