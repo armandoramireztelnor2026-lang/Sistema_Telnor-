@@ -1,0 +1,61 @@
+{
+    "mensajes": [
+        {
+            "id": "msg_1793218559142",
+            "emisor_usuario": "ManuelAlejandro_Marquez-RUMN-2026-admin",
+            "emisor_nombre": "Manuel Alejandro Marquez",
+            "emisor_rol": "Administrador",
+            "receptor_usuario": "Samuel_Giron-RUMN-2026-admin",
+            "receptor_nombre": "Samuel Giron",
+            "receptor_rol": "Supervisor",
+            "mensaje": "Hola esto sigue siendo una oprueba",
+            "fecha": "2026-10-28 13:15:59",
+            "hora_corta": "01:15 PM",
+            "fecha_completa": "01:15 PM • 28/10/2026",
+            "timestamp": 1793218559,
+            "leido": true,
+            "eliminado": false,
+            "respuesta_a": null,
+            "fecha_leido": "2026-10-28 13:16:20",
+            "fecha_leido_completa": "01:16:20 PM • 28/10/2026"
+        },
+        {
+            "id": "msg_1793218594217",
+            "emisor_usuario": "Samuel_Giron-RUMN-2026-admin",
+            "emisor_nombre": "Samuel Giron",
+            "emisor_rol": "Supervisor",
+            "receptor_usuario": "AUTOPARTESYMOTORESB.C.-RUMN-2026-prov",
+            "receptor_nombre": "AUTOPARTES Y MOTORES B.C.",
+            "receptor_rol": "Taller",
+            "mensaje": "haber si esto no truena",
+            "fecha": "2026-10-28 13:16:34",
+            "hora_corta": "01:16 PM",
+            "fecha_completa": "01:16 PM • 28/10/2026",
+            "timestamp": 1793218594,
+            "leido": true,
+            "eliminado": false,
+            "respuesta_a": null,
+            "fecha_leido": "2026-10-28 13:17:18",
+            "fecha_leido_completa": "01:17:18 PM • 28/10/2026"
+        },
+        {
+            "id": "msg_1793218640761",
+            "emisor_usuario": "AUTOPARTESYMOTORESB.C.-RUMN-2026-prov",
+            "emisor_nombre": "AUTOPARTES Y MOTORES B.C.",
+            "emisor_rol": "Taller",
+            "receptor_usuario": "Samuel_Giron-RUMN-2026-admin",
+            "receptor_nombre": "Samuel Giron",
+            "receptor_rol": "Supervisor",
+            "mensaje": "ok",
+            "fecha": "2026-10-28 13:17:20",
+            "hora_corta": "01:17 PM",
+            "fecha_completa": "01:17 PM • 28/10/2026",
+            "timestamp": 1793218640,
+            "leido": true,
+            "eliminado": false,
+            "respuesta_a": null,
+            "fecha_leido": "2026-10-28 13:33:55",
+            "fecha_leido_completa": "01:33:55 PM • 28/10/2026"
+        }
+    ]
+}

@@ -74,10 +74,11 @@
             "validacion_fiscal": "Aprobada",
             "numero_doc50": "500000012",
             "estado_previo": "Archivado",
-            "estado": "En Asignacion/Retrabajo",
-            "retrabajo": "Pendiente",
-            "num_retrabajo": 0,
-            "ultimo_motivo_retrabajo": "Ruido reincidente en frenos y suspensión al girar."
+            "estado": "Retrabajo",
+            "retrabajo": "S\u00ed",
+            "num_retrabajo": 5,
+            "ultimo_motivo_retrabajo": "Ruido reincidente en frenos y suspensi\u00f3n al girar.",
+            "estado_retrabajo": "Reasignado"
         },
         {
             "id": "20261009110502",

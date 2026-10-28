@@ -1177,13 +1177,16 @@ def reasignar_retrabajo():
     ticket_display = encontrado.get("ticket_original") or encontrado.get("ticket") or ticket
 
     # Buscar correo del taller en usuarios.json
-    usuarios = leer_json("usuarios.json")
+    usuarios_data = leer_json("usuarios.json")
     correo_taller = None
-    for u in usuarios:
+    target_taller = str(nombre_taller or "").strip().upper()
+    for u in usuarios_data.get("usuarios", []):
         if u.get("rol") == "proveedores":
             perf = u.get("datos_perfil", {})
-            if perf.get("nombre_proveedor") == nombre_taller or u.get("nombre_proveedor") == nombre_taller:
-                correo_taller = u.get("correo") or perf.get("correo")
+            nom_prov = str(perf.get("nombre_proveedor") or u.get("nombre_proveedor") or "").strip().upper()
+            user_prov = str(u.get("usuario") or "").strip().upper()
+            if nom_prov == target_taller or user_prov == target_taller or (nom_prov and nom_prov in target_taller) or (target_taller and target_taller in nom_prov):
+                correo_taller = perf.get("correo") or u.get("correo")
                 break
 
     if not correo_taller:
@@ -1308,6 +1311,7 @@ def obtener_retrabajos_proveedor():
 
     dp = session["usuario"].get("datos_perfil", {})
     mi_proveedor = str(dp.get("nombre_proveedor", "")).strip().upper()
+    mi_usuario = str(session["usuario"].get("usuario", "")).strip().upper()
 
     retrabajos_data = leer_json("retrabajos.json")
     todos = retrabajos_data.get("retrabajos", [])
@@ -1315,9 +1319,16 @@ def obtener_retrabajos_proveedor():
     filtrados = []
     for ret in todos:
         s2 = ret.get("seccion_2", {})
-        prov_ret = str(s2.get("proveedor") or ret.get("proveedor", "")).strip().upper()
+        prov_ret = str(s2.get("proveedor") or ret.get("proveedor") or ret.get("taller") or "").strip().upper()
         estado = str(ret.get("estado", "")).strip()
-        if prov_ret == mi_proveedor and estado in ["Reasignado", "Reasignado_Taller"]:
+        
+        coincide = False
+        if mi_proveedor and (prov_ret == mi_proveedor or prov_ret in mi_proveedor or mi_proveedor in prov_ret):
+            coincide = True
+        elif mi_usuario and (prov_ret == mi_usuario or mi_usuario in prov_ret):
+            coincide = True
+
+        if coincide and estado in ["Reasignado", "Reasignado_Taller"]:
             filtrados.append(ret)
 
     return jsonify({

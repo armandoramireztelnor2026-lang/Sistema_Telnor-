@@ -1,0 +1,1426 @@
+# -*- coding: utf-8 -*-
+import os
+
+nuevo_chat_widget = """<!-- ==================================================== -->
+<!-- COMPONENTE: CHAT INTERNO FLOTANTE (ESTILO FAB)      -->
+<!-- DISPONIBLE ABAJO A LA DERECHA PARA ROLES PERMITIDOS -->
+<!-- ==================================================== -->
+
+<style>
+    /* BOTÓN FLOTANTE INFERIOR DERECHO */
+    #chat-fab-boton {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 99999;
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        box-shadow: 0 8px 26px rgba(2, 132, 199, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        user-select: none;
+    }
+    #chat-fab-boton:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 12px 32px rgba(2, 132, 199, 0.65);
+        background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+    }
+    #chat-fab-icono {
+        font-size: 1.65rem;
+        line-height: 1;
+        transition: transform 0.25s ease;
+    }
+
+    /* BADGE DE MENSAJES NO LEÍDOS */
+    #chat-fab-badge {
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        background: #ef4444;
+        color: #ffffff;
+        font-size: 0.72rem;
+        font-weight: 800;
+        min-width: 20px;
+        height: 20px;
+        border-radius: 10px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.85);
+        border: 2px solid #081322;
+        animation: pulseBadge 2s infinite;
+    }
+    @keyframes pulseBadge {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.12); }
+    }
+
+    /* PANEL PRINCIPAL DE LA VENTANA DE CHAT */
+    #chat-flotante-panel {
+        position: fixed;
+        bottom: 92px;
+        right: 24px;
+        z-index: 99999;
+        width: 720px;
+        max-width: calc(100vw - 32px);
+        height: 780px;
+        max-height: calc(100vh - 105px);
+        border-radius: 18px;
+        background: #081322;
+        border: 1.5px solid #1f395a;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.7);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* CABECERA DEL CHAT */
+    .chat-header-bar {
+        background: #0b1c30;
+        border-bottom: 1px solid #1f395a;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+    .chat-header-title {
+        color: #ffffff;
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .chat-header-sub {
+        color: #94a3b8;
+        font-size: 0.73rem;
+        margin: 2px 0 0 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .chat-header-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .chat-header-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+
+    /* LISTA DE CONTACTOS */
+    #chat-vista-contactos {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+    .chat-busqueda-box {
+        padding: 10px 14px;
+        background: #06111f;
+        border-bottom: 1px solid #1f395a;
+    }
+    .chat-input-filtro {
+        width: 100%;
+        background: #0b1c30;
+        border: 1px solid #1f395a;
+        border-radius: 8px;
+        padding: 8px 12px;
+        color: #ffffff;
+        font-size: 0.82rem;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .chat-input-filtro:focus {
+        border-color: #38bdf8;
+    }
+    .chat-contactos-lista {
+        flex: 1;
+        overflow-y: auto;
+        padding: 6px 0;
+    }
+    .chat-contacto-item {
+        padding: 11px 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(31, 57, 90, 0.4);
+        transition: background 0.15s ease;
+    }
+    .chat-contacto-item:hover {
+        background: rgba(56, 189, 248, 0.08);
+    }
+    .chat-contacto-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #112641;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        border: 2px solid #1f395a;
+    }
+    .chat-contacto-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .chat-contacto-nombre-fila {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        margin-bottom: 3px;
+    }
+    .chat-contacto-nombre {
+        color: #ffffff;
+        font-size: 0.85rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .chat-contacto-rol-pill {
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .chat-contacto-msg-fila {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+    }
+    .chat-contacto-ultimo-msg {
+        color: #94a3b8;
+        font-size: 0.74rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .chat-badge-contacto {
+        background: #ef4444;
+        color: #ffffff;
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 1px 6px;
+        border-radius: 10px;
+        min-width: 16px;
+        text-align: center;
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+    }
+
+    /* VISTA DE CONVERSACIÓN (HILO DE MENSAJES) */
+    #chat-vista-conversacion {
+        display: none;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+    }
+    .chat-mensajes-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #081322;
+    }
+
+    /* WRAPPER DEL MENSAJE */
+    .chat-mensaje-wrapper {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        max-width: 82%;
+    }
+    .chat-mensaje-wrapper.propio {
+        align-self: flex-end;
+        align-items: flex-end;
+    }
+    .chat-mensaje-wrapper.remoto {
+        align-self: flex-start;
+        align-items: flex-start;
+    }
+
+    /* BARRA DE ACCIONES FLOTANTE (RESPONDER, DETALLES, ELIMINAR) */
+    .chat-msg-acciones-barra {
+        display: none;
+        position: absolute;
+        top: -14px;
+        background: #0e2238;
+        border: 1px solid #1f395a;
+        border-radius: 20px;
+        padding: 2px 6px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+        z-index: 10;
+        align-items: center;
+        gap: 2px;
+    }
+    .chat-mensaje-wrapper.propio .chat-msg-acciones-barra {
+        right: 8px;
+    }
+    .chat-mensaje-wrapper.remoto .chat-msg-acciones-barra {
+        left: 8px;
+    }
+    .chat-mensaje-wrapper:hover .chat-msg-acciones-barra {
+        display: flex;
+    }
+
+    .chat-msg-btn-accion {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 3px 6px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        transition: all 0.15s ease;
+    }
+    .chat-msg-btn-accion:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #ffffff;
+    }
+    .chat-msg-btn-accion.btn-peligro:hover {
+        background: rgba(239, 68, 68, 0.25);
+        color: #f87171;
+    }
+
+    /* BURBUJA DE MENSAJE */
+    .chat-mensaje-globo {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 14px;
+        font-size: 0.86rem;
+        line-height: 1.45;
+        position: relative;
+        word-break: break-word;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+    }
+    .chat-msg-propio {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        border-bottom-right-radius: 3px;
+        box-shadow: 0 3px 12px rgba(2, 132, 199, 0.35);
+    }
+    .chat-msg-remoto {
+        background: #0f243a;
+        color: #f1f5f9;
+        border: 1px solid #1f395a;
+        border-bottom-left-radius: 3px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+    }
+    .chat-msg-eliminado {
+        background: rgba(30, 41, 59, 0.6) !important;
+        border: 1px dashed #334155 !important;
+        color: #94a3b8 !important;
+        box-shadow: none !important;
+    }
+
+    .chat-msg-highlight {
+        animation: highlightPulse 1.8s ease;
+    }
+    @keyframes highlightPulse {
+        0% { transform: scale(1); box-shadow: 0 0 0px #38bdf8; }
+        30% { transform: scale(1.02); box-shadow: 0 0 18px #38bdf8; }
+        100% { transform: scale(1); box-shadow: none; }
+    }
+
+    /* BLOQUE DE MENSAJE CITADO (RESPUESTA) DENTRO DE LA BURBUJA */
+    .chat-cita-box {
+        background: rgba(0, 0, 0, 0.3);
+        border-left: 3px solid #38bdf8;
+        border-radius: 6px;
+        padding: 6px 10px;
+        margin-bottom: 7px;
+        font-size: 0.76rem;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .chat-cita-box:hover {
+        background: rgba(0, 0, 0, 0.45);
+    }
+    .chat-cita-autor {
+        font-weight: 700;
+        color: #38bdf8;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.72rem;
+    }
+    .chat-cita-texto {
+        color: #cbd5e1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .chat-msg-hora {
+        font-size: 0.68rem;
+        margin-top: 5px;
+        text-align: right;
+        opacity: 0.85;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    /* BARRA DE PREVIA DE RESPUESTA ARRIBA DEL INPUT */
+    .chat-preview-respuesta-bar {
+        background: #071526;
+        border-top: 1px solid #1f395a;
+        padding: 8px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        animation: fadeIn 0.2s ease;
+    }
+    .chat-preview-respuesta-info {
+        flex: 1;
+        min-width: 0;
+        border-left: 3px solid #38bdf8;
+        padding-left: 8px;
+    }
+    .chat-preview-respuesta-titulo {
+        font-size: 0.75rem;
+        color: #38bdf8;
+        font-weight: 700;
+    }
+    .chat-preview-respuesta-snippet {
+        font-size: 0.73rem;
+        color: #94a3b8;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .chat-btn-cancelar-resp {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+    .chat-btn-cancelar-resp:hover {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.15);
+    }
+
+    /* BARRA DE ENTRADA DE TEXTO */
+    .chat-footer-input {
+        background: #0b1c30;
+        border-top: 1px solid #1f395a;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+    .chat-input-texto {
+        flex: 1;
+        background: #06111f;
+        border: 1.5px solid #1f395a;
+        border-radius: 24px;
+        padding: 11px 18px;
+        color: #ffffff;
+        font-size: 0.9rem;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .chat-input-texto:focus {
+        border-color: #38bdf8;
+    }
+    .chat-btn-enviar {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        border: none;
+        color: #ffffff;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+        flex-shrink: 0;
+    }
+    .chat-btn-enviar:hover {
+        transform: scale(1.08);
+        background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+    }
+
+    /* MODAL DE DETALLES DEL MENSAJE (REDDISEÑADO CON ALTA ESTÉTICA) */
+    .chat-modal-detalles-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(3, 8, 16, 0.88);
+        backdrop-filter: blur(6px);
+        z-index: 100000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+    .chat-modal-detalles-card {
+        background: #09182b;
+        border: 1.5px solid #234771;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 650px;
+        max-height: 94%;
+        overflow-y: auto;
+        box-shadow: 0 24px 65px rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+    }
+    .chat-modal-detalles-header {
+        padding: 14px 20px;
+        border-bottom: 1px solid #1f395a;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #06111f;
+    }
+    .chat-modal-detalles-body {
+        padding: 18px 20px;
+        color: #e2e8f0;
+        font-size: 0.84rem;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .chat-detalles-seccion {
+        background: #071424;
+        border: 1px solid #1a3350;
+        border-radius: 12px;
+        padding: 14px 16px;
+    }
+    .chat-detalles-seccion-titulo {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #38bdf8;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* GRID Y TARJETAS DE PARTICIPANTES (SIN AMONTONAMIENTO) */
+    .chat-participantes-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .chat-participante-card {
+        background: #0b1d33;
+        border: 1px solid #1e3a5f;
+        border-radius: 10px;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 8px;
+        min-width: 0;
+        box-sizing: border-box;
+        transition: border-color 0.2s, background 0.2s;
+    }
+    .chat-participante-card.emisor {
+        border-left: 3.5px solid #0284c7;
+    }
+    .chat-participante-card.receptor {
+        border-left: 3.5px solid #10b981;
+    }
+    .chat-participante-tag {
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        text-transform: uppercase;
+    }
+    .chat-participante-tag.emisor { color: #38bdf8; }
+    .chat-participante-tag.receptor { color: #34d399; }
+
+    .chat-participante-body {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+    .chat-participante-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #071526;
+        border: 1.5px solid #1f395a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    .chat-participante-meta {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .chat-participante-nombre {
+        color: #ffffff;
+        font-size: 0.86rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .chat-participante-user {
+        color: #94a3b8;
+        font-size: 0.71rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .chat-participante-rol-wrap {
+        margin-top: 4px;
+        display: flex;
+    }
+    .chat-participantes-conector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        color: #38bdf8;
+        font-size: 1.25rem;
+        opacity: 0.85;
+    }
+
+    /* FILAS DE LINEA DE TIEMPO Y ESTADOS */
+    .chat-timeline-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 12px;
+        border-radius: 8px;
+        background: #0b1d33;
+        border: 1px solid #1e3a5f;
+        margin-bottom: 7px;
+        gap: 12px;
+        font-size: 0.8rem;
+    }
+    .chat-timeline-item:last-child {
+        margin-bottom: 0;
+    }
+    .chat-timeline-label {
+        color: #94a3b8;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+    .chat-timeline-val {
+        color: #f1f5f9;
+        text-align: right;
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    /* COLORES POR ROL */
+    .pill-rol-Taller { background: rgba(16, 185, 129, 0.18); border: 1px solid #10b981; color: #34d399; }
+    .pill-rol-Supervisor { background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; }
+    .pill-rol-Administrador { background: rgba(99, 102, 241, 0.18); border: 1px solid #6366f1; color: #a5b4fc; }
+    .pill-rol-Corporativos { background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; }
+    .pill-rol-Jefatura { background: rgba(234, 88, 12, 0.18); border: 1px solid #ea580c; color: #fb923c; }
+</style>
+
+<!-- ========================================== -->
+<!-- BOTÓN FLOTANTE (FAB) INFERIOR DERECHO      -->
+<!-- ========================================== -->
+<div id="chat-fab-boton" onclick="toggleChatFlotante()" title="Abrir Mensajería Interna">
+    <span id="chat-fab-icono">💬</span>
+    <span id="chat-fab-badge">0</span>
+</div>
+
+<!-- ========================================== -->
+<!-- PANEL DE CHAT FLOTANTE                     -->
+<!-- ========================================== -->
+<div id="chat-flotante-panel">
+    
+    <!-- 1. VISTA DE CONTACTOS -->
+    <div id="chat-vista-contactos">
+        <div class="chat-header-bar">
+            <div>
+                <h4 class="chat-header-title">
+                    <span>💬</span> Mensajería Interna
+                </h4>
+                <div class="chat-header-sub" id="chat-mi-perfil-tag">
+                    <span style="color: #10b981;">●</span> Cargando perfil...
+                </div>
+            </div>
+            <div style="display: flex; gap: 4px;">
+                <button type="button" class="chat-header-btn" onclick="cargarContactosChat(true)" title="Actualizar contactos">🔄</button>
+                <button type="button" class="chat-header-btn" onclick="toggleChatFlotante()" title="Cerrar chat">✖</button>
+            </div>
+        </div>
+
+        <div class="chat-busqueda-box">
+            <input type="text" id="chat-filtro-input" class="chat-input-filtro" placeholder="🔍 Buscar por nombre o rol..." oninput="filtrarContactosChat()">
+        </div>
+
+        <div class="chat-contactos-lista" id="chat-contenedor-contactos">
+            <div style="text-align: center; padding: 30px 15px; color: #94a3b8; font-size: 0.82rem;">
+                Cargando contactos autorizados...
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. VISTA DE CONVERSACIÓN CON CONTACTO SELECCIONADO -->
+    <div id="chat-vista-conversacion">
+        <div class="chat-header-bar">
+            <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                <button type="button" class="chat-header-btn" onclick="volverAContactosChat()" title="Volver a contactos" style="padding: 4px 6px; font-size: 1.2rem;">
+                    ◀
+                </button>
+                <div style="min-width: 0;">
+                    <div id="chat-activo-nombre" style="color: #ffffff; font-size: 0.88rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        Contacto
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-top: 1px;">
+                        <span id="chat-activo-rol-pill" class="chat-contacto-rol-pill">Rol</span>
+                        <span id="chat-activo-cope" style="color: #64748b; font-size: 0.68rem;"></span>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 4px;">
+                <button type="button" class="chat-header-btn" onclick="refrescarConversacionActual()" title="Actualizar mensajes">🔄</button>
+                <button type="button" class="chat-header-btn" onclick="toggleChatFlotante()" title="Cerrar chat">✖</button>
+            </div>
+        </div>
+
+        <div class="chat-mensajes-body" id="chat-contenedor-mensajes">
+            <div style="text-align: center; padding: 40px 15px; color: #64748b; font-size: 0.8rem;">
+                Cargando mensajes...
+            </div>
+        </div>
+
+        <!-- BARRA PREVIA DE RESPUESTA A MENSAJE (CITA) -->
+        <div id="chat-preview-respuesta" style="display:none;" class="chat-preview-respuesta-bar">
+            <div class="chat-preview-respuesta-info">
+                <div class="chat-preview-respuesta-titulo">
+                    <span>↩️ Respondiendo a <strong id="chat-resp-autor">Usuario</strong></span>
+                </div>
+                <div id="chat-resp-texto" class="chat-preview-respuesta-snippet">Texto del mensaje citado</div>
+            </div>
+            <button type="button" class="chat-btn-cancelar-resp" onclick="cancelarRespuestaChat()" title="Cancelar respuesta">✕</button>
+        </div>
+
+        <!-- ENTRADA DE MENSAJES -->
+        <div class="chat-footer-input">
+            <input type="text" id="chat-input-mensaje" class="chat-input-texto" placeholder="Escribe un mensaje..." onkeypress="handleKeyChat(event)">
+            <button type="button" class="chat-btn-enviar" onclick="enviarMensajeChat()" title="Enviar mensaje">
+                ➤
+            </button>
+        </div>
+
+        <!-- MODAL DE DETALLES DEL MENSAJE -->
+        <div id="chat-modal-detalles" style="display:none;" class="chat-modal-detalles-overlay">
+            <div class="chat-modal-detalles-card">
+                <div class="chat-modal-detalles-header">
+                    <div style="font-weight: 800; font-size: 0.95rem; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+                        <span>ℹ️</span> Detalles del Mensaje
+                    </div>
+                    <button type="button" class="chat-header-btn" onclick="cerrarDetallesMensajeChat()" title="Cerrar">✕</button>
+                </div>
+                <div class="chat-modal-detalles-body" id="chat-modal-detalles-contenido">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ========================================== -->
+<!-- LÓGICA DE CONTROL DEL CHAT INTERNO         -->
+<!-- ========================================== -->
+<script>
+    let chatContactosGlobal = [];
+    let contactoActivoId = null;
+    let miUsuarioChatId = null;
+    let miRolChat = null;
+    let intervaloPollingChat = null;
+    let conversacionActualMensajes = [];
+    let mensajeRespondiendo = null;
+
+    // Inicializar chat al cargar
+    document.addEventListener("DOMContentLoaded", function() {
+        iniciarChatFlotante();
+    });
+
+    function iniciarChatFlotante() {
+        fetch('/api/chat/mi_perfil')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    miUsuarioChatId = data.usuario;
+                    miRolChat = data.rol;
+                    
+                    const perfilTag = document.getElementById('chat-mi-perfil-tag');
+                    if (perfilTag) {
+                        const iconRol = obtenerIconoRol(data.rol);
+                        perfilTag.innerHTML = `<span style="color:#10b981;">●</span> ${data.nombre} • <span class="chat-contacto-rol-pill pill-rol-${data.rol}">${iconRol} ${data.rol}</span>`;
+                    }
+                    
+                    // Cargar lista inicial de contactos
+                    cargarContactosChat(false);
+                    
+                    // Iniciar polling de no leídos cada 3.5 segundos
+                    if (intervaloPollingChat) clearInterval(intervaloPollingChat);
+                    intervaloPollingChat = setInterval(verificarMensajesNoLeidos, 3500);
+                } else {
+                    // Si no está autenticado en un rol permitido, ocultar botón
+                    const fab = document.getElementById('chat-fab-boton');
+                    if (fab) fab.style.display = 'none';
+                }
+            })
+            .catch(err => {
+                console.log("Chat interno: usuario no autenticado en rol activo.");
+                const fab = document.getElementById('chat-fab-boton');
+                if (fab) fab.style.display = 'none';
+            });
+    }
+
+    function toggleChatFlotante() {
+        const panel = document.getElementById('chat-flotante-panel');
+        const icono = document.getElementById('chat-fab-icono');
+        if (!panel) return;
+
+        if (panel.style.display === 'flex') {
+            panel.style.display = 'none';
+            if (icono) icono.innerText = '💬';
+        } else {
+            panel.style.display = 'flex';
+            if (icono) icono.innerText = '✖';
+            
+            // Si no hay contacto abierto, cargar la lista de contactos
+            if (!contactoActivoId) {
+                cargarContactosChat(true);
+            } else {
+                refrescarConversacionActual();
+            }
+        }
+    }
+
+    function obtenerIconoRol(rol) {
+        if (rol === 'Taller') return '🔧';
+        if (rol === 'Supervisor') return '👨‍💼';
+        if (rol === 'Administrador') return '🏢';
+        if (rol === 'Corporativos') return '💼';
+        if (rol === 'Jefatura') return '👑';
+        return '👤';
+    }
+
+    function cargarContactosChat(forzarScroll) {
+        fetch('/api/chat/contactos')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    chatContactosGlobal = data.contactos || [];
+                    renderizarContactos(chatContactosGlobal);
+                    actualizarBadgeGlobal(chatContactosGlobal);
+                }
+            })
+            .catch(err => console.error("Error al cargar contactos de chat:", err));
+    }
+
+    function renderizarContactos(contactos) {
+        const cont = document.getElementById('chat-contenedor-contactos');
+        if (!cont) return;
+
+        if (!contactos || contactos.length === 0) {
+            cont.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px; color: #64748b; font-size: 0.82rem;">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">📭</div>
+                    No hay contactos disponibles según los permisos de tu rol (<strong>${miRolChat || ''}</strong>).
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        contactos.forEach(c => {
+            const iconoRol = obtenerIconoRol(c.rol);
+            const badgeNoLeidos = c.no_leidos > 0 ? `<span class="chat-badge-contacto">${c.no_leidos}</span>` : '';
+            const ultimoMsg = c.ultimo_mensaje ? c.ultimo_mensaje : '<span style="color:#64748b; font-style:italic;">Iniciar conversación...</span>';
+            const horaMsg = c.hora_corta || '';
+
+            html += `
+                <div class="chat-contacto-item" onclick="abrirConversacionChat('${c.usuario}')">
+                    <div class="chat-contacto-avatar">
+                        ${iconoRol}
+                    </div>
+                    <div class="chat-contacto-info">
+                        <div class="chat-contacto-nombre-fila">
+                            <span class="chat-contacto-nombre" title="${c.nombre}">${c.nombre}</span>
+                            <span class="chat-contacto-rol-pill pill-rol-${c.rol}">${iconoRol} ${c.rol}</span>
+                        </div>
+                        <div class="chat-contacto-msg-fila">
+                            <span class="chat-contacto-ultimo-msg">${ultimoMsg}</span>
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                ${horaMsg ? `<span style="color:#64748b; font-size:0.65rem;">${horaMsg}</span>` : ''}
+                                ${badgeNoLeidos}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        cont.innerHTML = html;
+    }
+
+    function filtrarContactosChat() {
+        const q = (document.getElementById('chat-filtro-input')?.value || '').toLowerCase().trim();
+        if (!q) {
+            renderizarContactos(chatContactosGlobal);
+            return;
+        }
+        const filtrados = chatContactosGlobal.filter(c => 
+            c.nombre.toLowerCase().includes(q) || 
+            c.rol.toLowerCase().includes(q) ||
+            (c.cope && c.cope.toLowerCase().includes(q))
+        );
+        renderizarContactos(filtrados);
+    }
+
+    function abrirConversacionChat(contactoId) {
+        contactoActivoId = contactoId;
+        cancelarRespuestaChat();
+        const contacto = chatContactosGlobal.find(c => c.usuario === contactoId);
+        
+        document.getElementById('chat-vista-contactos').style.display = 'none';
+        document.getElementById('chat-vista-conversacion').style.display = 'flex';
+
+        if (contacto) {
+            document.getElementById('chat-activo-nombre').innerText = contacto.nombre;
+            const rolPill = document.getElementById('chat-activo-rol-pill');
+            if (rolPill) {
+                rolPill.className = `chat-contacto-rol-pill pill-rol-${contacto.rol}`;
+                rolPill.innerText = `${obtenerIconoRol(contacto.rol)} ${contacto.rol}`;
+            }
+            const copeEl = document.getElementById('chat-activo-cope');
+            if (copeEl) copeEl.innerText = contacto.cope ? `(${contacto.cope})` : '';
+        }
+
+        refrescarConversacionActual();
+        setTimeout(() => {
+            const inp = document.getElementById('chat-input-mensaje');
+            if (inp) inp.focus();
+        }, 150);
+    }
+
+    function volverAContactosChat() {
+        contactoActivoId = null;
+        cancelarRespuestaChat();
+        document.getElementById('chat-vista-conversacion').style.display = 'none';
+        document.getElementById('chat-vista-contactos').style.display = 'flex';
+        cargarContactosChat(false);
+    }
+
+    function refrescarConversacionActual() {
+        if (!contactoActivoId) return;
+
+        fetch(`/api/chat/conversacion/${encodeURIComponent(contactoActivoId)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    conversacionActualMensajes = data.mensajes || [];
+                    renderizarMensajes(conversacionActualMensajes, data.mi_usuario);
+                }
+            })
+            .catch(err => console.error("Error al cargar conversación:", err));
+    }
+
+    function formatearTiempoCompletoChat(m) {
+        if (!m) return '';
+        if (m.fecha_completa) return m.fecha_completa;
+        
+        let d = null;
+        if (m.fecha) {
+            const partes = m.fecha.split(' ');
+            if (partes.length === 2) {
+                const fPartes = partes[0].split('-');
+                const hPartes = partes[1].split(':');
+                d = new Date(parseInt(fPartes[0]), parseInt(fPartes[1]) - 1, parseInt(fPartes[2]), parseInt(hPartes[0]), parseInt(hPartes[1]), parseInt(hPartes[2] || 0));
+            } else {
+                d = new Date(m.fecha);
+            }
+        } else if (m.timestamp) {
+            d = new Date(m.timestamp * 1000);
+        }
+
+        if (!d || isNaN(d.getTime())) {
+            return m.fecha || m.hora_corta || '';
+        }
+
+        const hora = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const dia = String(d.getDate()).padStart(2, '0');
+        const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const mes = meses[d.getMonth()];
+        const anio = d.getFullYear();
+
+        return `${hora} • ${dia} ${mes} ${anio}`;
+    }
+
+    function renderizarMensajes(mensajes, miId) {
+        const cont = document.getElementById('chat-contenedor-mensajes');
+        if (!cont) return;
+
+        if (!mensajes || mensajes.length === 0) {
+            cont.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px; color: #64748b; font-size: 0.8rem;">
+                    <div style="font-size: 2.2rem; margin-bottom: 8px;">👋</div>
+                    No hay mensajes en esta conversación.<br>¡Escribe un mensaje para comenzar!
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        mensajes.forEach(m => {
+            const esMio = (m.emisor_usuario === miId || m.emisor_usuario === miUsuarioChatId);
+            const clase = esMio ? 'chat-msg-propio' : 'chat-msg-remoto';
+            const hora = formatearTiempoCompletoChat(m);
+            const check = esMio ? (m.leido ? ' <span style="color:#86efac; font-weight:bold;" title="Leído">✓✓</span>' : ' <span style="opacity:0.7;" title="Entregado">✓</span>') : '';
+            const estaEliminado = !!m.eliminado;
+
+            // Bloque de respuesta citada si existe
+            let htmlCita = '';
+            if (m.respuesta_a && m.respuesta_a.id) {
+                htmlCita = `
+                    <div class="chat-cita-box" onclick="hacerScrollAMensaje('${m.respuesta_a.id}')" title="Ver mensaje original">
+                        <div class="chat-cita-autor">↩️ ${escapeHtml(m.respuesta_a.emisor_nombre || 'Usuario')}</div>
+                        <div class="chat-cita-texto">${escapeHtml(m.respuesta_a.mensaje || '')}</div>
+                    </div>
+                `;
+            }
+
+            // Barra de acciones flotantes
+            let barraAcciones = `
+                <div class="chat-msg-acciones-barra">
+                    ${!estaEliminado ? `
+                        <button type="button" class="chat-msg-btn-accion" onclick="prepararRespuestaChat('${m.id}')" title="Responder">
+                            ↩️ Responder
+                        </button>
+                    ` : ''}
+                    <button type="button" class="chat-msg-btn-accion" onclick="verDetallesMensajeChat('${m.id}')" title="Ver detalles">
+                        ℹ️ Info
+                    </button>
+                    ${(esMio && !estaEliminado) ? `
+                        <button type="button" class="chat-msg-btn-accion btn-peligro" onclick="eliminarMensajeChat('${m.id}')" title="Eliminar mensaje">
+                            🗑️ Eliminar
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+
+            let contenidoTexto = '';
+            if (estaEliminado) {
+                contenidoTexto = `
+                    <div style="font-style: italic; opacity: 0.75; display: flex; align-items: center; gap: 6px;">
+                        <span>🚫</span> <em>Este mensaje fue eliminado</em>
+                    </div>
+                `;
+            } else {
+                contenidoTexto = `<div style="white-space: pre-wrap;">${escapeHtml(m.mensaje)}</div>`;
+            }
+
+            html += `
+                <div class="chat-mensaje-wrapper ${esMio ? 'propio' : 'remoto'}" id="msg-wrapper-${m.id}">
+                    ${barraAcciones}
+                    <div class="chat-mensaje-globo ${clase} ${estaEliminado ? 'chat-msg-eliminado' : ''}" id="msg-elem-${m.id}">
+                        ${htmlCita}
+                        ${contenidoTexto}
+                        <div class="chat-msg-hora">
+                            <span>${hora}</span>
+                            ${check}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        cont.innerHTML = html;
+        cont.scrollTop = cont.scrollHeight;
+    }
+
+    // --- ACCIÓN: RESPONDER MENSAJE (CITA) ---
+    function prepararRespuestaChat(msgId) {
+        const msg = conversacionActualMensajes.find(m => m.id === msgId);
+        if (!msg || msg.eliminado) return;
+
+        mensajeRespondiendo = {
+            id: msg.id,
+            emisor_nombre: msg.emisor_nombre || 'Usuario',
+            mensaje: msg.mensaje
+        };
+
+        const previewBar = document.getElementById('chat-preview-respuesta');
+        const autorEl = document.getElementById('chat-resp-autor');
+        const textoEl = document.getElementById('chat-resp-texto');
+
+        if (autorEl) autorEl.innerText = mensajeRespondiendo.emisor_nombre;
+        if (textoEl) textoEl.innerText = mensajeRespondiendo.mensaje;
+        if (previewBar) previewBar.style.display = 'flex';
+
+        const inp = document.getElementById('chat-input-mensaje');
+        if (inp) inp.focus();
+    }
+
+    function cancelarRespuestaChat() {
+        mensajeRespondiendo = null;
+        const previewBar = document.getElementById('chat-preview-respuesta');
+        if (previewBar) previewBar.style.display = 'none';
+    }
+
+    function hacerScrollAMensaje(msgId) {
+        const el = document.getElementById('msg-elem-' + msgId);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('chat-msg-highlight');
+            setTimeout(() => el.classList.remove('chat-msg-highlight'), 1800);
+        } else {
+            console.log("Mensaje citado no disponible en la vista actual.");
+        }
+    }
+
+    // --- ACCIÓN: ELIMINAR MENSAJE ---
+    function eliminarMensajeChat(msgId) {
+        if (!confirm("¿Deseas eliminar este mensaje para todos en la conversación?")) return;
+
+        fetch('/api/chat/eliminar_mensaje', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensaje_id: msgId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                refrescarConversacionActual();
+            } else {
+                alert("Error al eliminar mensaje: " + (data.message || "No autorizado"));
+            }
+        })
+        .catch(err => {
+            console.error("Error al eliminar mensaje:", err);
+            alert("No se pudo conectar con el servidor.");
+        });
+    }
+
+    // --- ACCIÓN: VER DETALLES DEL MENSAJE (REDDISEÑADO CON ALTA ESTÉTICA) ---
+    function verDetallesMensajeChat(msgId) {
+        const msg = conversacionActualMensajes.find(m => m.id === msgId);
+        if (!msg) return;
+
+        const modal = document.getElementById('chat-modal-detalles');
+        const cont = document.getElementById('chat-modal-detalles-contenido');
+        if (!modal || !cont) return;
+
+        const esMio = (msg.emisor_usuario === miUsuarioChatId);
+        const iconoEmisor = obtenerIconoRol(msg.emisor_rol);
+        const iconoReceptor = obtenerIconoRol(msg.receptor_rol);
+
+        let estadoLecturaHtml = '';
+        if (msg.leido) {
+            const fechaLeido = msg.fecha_leido_completa || msg.fecha_leido || 'Registrado por el destinatario';
+            estadoLecturaHtml = `
+                <div class="chat-timeline-item">
+                    <span class="chat-timeline-label">👁️ Leído:</span>
+                    <span class="chat-timeline-val" style="color:#86efac; font-weight:700;">
+                        ✓✓ Sí, leído (${fechaLeido})
+                    </span>
+                </div>
+            `;
+        } else {
+            estadoLecturaHtml = `
+                <div class="chat-timeline-item">
+                    <span class="chat-timeline-label">👁️ Leído:</span>
+                    <span class="chat-timeline-val" style="color:#fbbf24; font-weight:600;">
+                        ⏳ Aún no leído (Entregado al receptor ✓)
+                    </span>
+                </div>
+            `;
+        }
+
+        let citaDetalleHtml = '';
+        if (msg.respuesta_a && msg.respuesta_a.id) {
+            citaDetalleHtml = `
+                <div class="chat-detalles-seccion">
+                    <div class="chat-detalles-seccion-titulo">↩️ Respuesta a otro mensaje</div>
+                    <div class="chat-timeline-item">
+                        <span class="chat-timeline-label">Respondido a:</span>
+                        <span class="chat-timeline-val"><strong>${escapeHtml(msg.respuesta_a.emisor_nombre || '')}</strong></span>
+                    </div>
+                    <div style="background:#0b1d33; padding:10px 14px; border-radius:8px; border-left:3.5px solid #38bdf8; font-size:0.83rem; color:#cbd5e1; font-style:italic; margin-top:8px; border:1px solid #1e3a5f;">
+                        "${escapeHtml(msg.respuesta_a.mensaje || '')}"
+                    </div>
+                </div>
+            `;
+        }
+
+        let eliminacionDetalleHtml = '';
+        if (msg.eliminado) {
+            eliminacionDetalleHtml = `
+                <div class="chat-detalles-seccion" style="border-color:#ef4444;">
+                    <div class="chat-detalles-seccion-titulo" style="color:#ef4444;">🚫 Registro de Eliminación</div>
+                    <div class="chat-timeline-item">
+                        <span class="chat-timeline-label" style="color:#ef4444;">Estado:</span>
+                        <span class="chat-timeline-val" style="color:#f87171; font-weight:700;">Mensaje Eliminado</span>
+                    </div>
+                    <div class="chat-timeline-item">
+                        <span class="chat-timeline-label">Fecha eliminación:</span>
+                        <span class="chat-timeline-val">${msg.fecha_eliminado_completa || msg.fecha_eliminado || 'N/A'}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        cont.innerHTML = `
+            <!-- VISTA PREVIA DEL MENSAJE -->
+            <div class="chat-detalles-seccion">
+                <div class="chat-detalles-seccion-titulo">💬 Contenido del Mensaje</div>
+                <div style="background:#0b1d33; padding:12px 16px; border-radius:10px; border-left:4px solid #38bdf8; border:1px solid #1e3a5f; font-size:0.9rem; color:#f8fafc; white-space:pre-wrap; line-height:1.5;">${escapeHtml(msg.mensaje)}</div>
+            </div>
+
+            <!-- PARTICIPANTES EN TARJETAS LIMPIAS Y ESPACIOSAS -->
+            <div class="chat-detalles-seccion">
+                <div class="chat-detalles-seccion-titulo">👥 Participantes de la Conversación</div>
+                <div class="chat-participantes-grid">
+                    
+                    <!-- TARJETA EMISOR -->
+                    <div class="chat-participante-card emisor">
+                        <div class="chat-participante-tag emisor">
+                            <span>●</span> Emisor (Envía)
+                        </div>
+                        <div class="chat-participante-body">
+                            <div class="chat-participante-avatar">${iconoEmisor}</div>
+                            <div class="chat-participante-meta">
+                                <div class="chat-participante-nombre" title="${escapeHtml(msg.emisor_nombre)}">
+                                    ${escapeHtml(msg.emisor_nombre)}
+                                </div>
+                                <div class="chat-participante-user" title="@${msg.emisor_usuario}">
+                                    @${msg.emisor_usuario}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-participante-rol-wrap">
+                            <span class="chat-contacto-rol-pill pill-rol-${msg.emisor_rol}">${iconoEmisor} ${msg.emisor_rol}</span>
+                        </div>
+                    </div>
+
+                    <!-- CONECTOR VISUAL ENTRE AMBOS -->
+                    <div class="chat-participantes-conector">
+                        <span>➔</span>
+                    </div>
+
+                    <!-- TARJETA RECEPTOR -->
+                    <div class="chat-participante-card receptor">
+                        <div class="chat-participante-tag receptor">
+                            <span>●</span> Receptor (Recibe)
+                        </div>
+                        <div class="chat-participante-body">
+                            <div class="chat-participante-avatar">${iconoReceptor}</div>
+                            <div class="chat-participante-meta">
+                                <div class="chat-participante-nombre" title="${escapeHtml(msg.receptor_nombre)}">
+                                    ${escapeHtml(msg.receptor_nombre)}
+                                </div>
+                                <div class="chat-participante-user" title="@${msg.receptor_usuario}">
+                                    @${msg.receptor_usuario}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-participante-rol-wrap">
+                            <span class="chat-contacto-rol-pill pill-rol-${msg.receptor_rol}">${iconoReceptor} ${msg.receptor_rol}</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TIEMPO Y ESTADOS -->
+            <div class="chat-detalles-seccion">
+                <div class="chat-detalles-seccion-titulo">⏱️ Línea de Tiempo y Auditoría</div>
+                <div class="chat-timeline-item">
+                    <span class="chat-timeline-label">📤 Enviado:</span>
+                    <span class="chat-timeline-val" style="color:#38bdf8; font-weight:700;">${msg.fecha_completa || msg.fecha}</span>
+                </div>
+                <div class="chat-timeline-item">
+                    <span class="chat-timeline-label">📥 Entregado:</span>
+                    <span class="chat-timeline-val" style="color:#34d399;">✓ Sí, registrado en servidor Telnor</span>
+                </div>
+                ${estadoLecturaHtml}
+                <div class="chat-timeline-item">
+                    <span class="chat-timeline-label">🆔 ID Registro:</span>
+                    <span class="chat-timeline-val" style="font-family:ui-monospace, monospace; color:#94a3b8; font-size:0.75rem;">${msg.id}</span>
+                </div>
+            </div>
+
+            ${citaDetalleHtml}
+            ${eliminacionDetalleHtml}
+        `;
+
+        modal.style.display = 'flex';
+    }
+
+    function cerrarDetallesMensajeChat() {
+        const modal = document.getElementById('chat-modal-detalles');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function enviarMensajeChat() {
+        const input = document.getElementById('chat-input-mensaje');
+        if (!input) return;
+        const texto = input.value.trim();
+        if (!texto || !contactoActivoId) return;
+
+        const citaActual = mensajeRespondiendo ? { ...mensajeRespondiendo } : null;
+
+        input.value = '';
+        input.focus();
+        cancelarRespuestaChat();
+
+        // Enviar al servidor
+        fetch('/api/chat/enviar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                receptor_usuario: contactoActivoId,
+                mensaje: texto,
+                respuesta_a: citaActual
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                refrescarConversacionActual();
+            } else {
+                alert("Error al enviar: " + (data.message || "No autorizado"));
+            }
+        })
+        .catch(err => {
+            console.error("Error al enviar mensaje:", err);
+            alert("No se pudo enviar el mensaje. Verifica tu conexión.");
+        });
+    }
+
+    function handleKeyChat(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            enviarMensajeChat();
+        }
+    }
+
+    function verificarMensajesNoLeidos() {
+        fetch('/api/chat/no_leidos')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const badgeFab = document.getElementById('chat-fab-badge');
+                    if (badgeFab) {
+                        if (data.total_no_leidos > 0) {
+                            badgeFab.innerText = data.total_no_leidos > 99 ? '99+' : data.total_no_leidos;
+                            badgeFab.style.display = 'flex';
+                        } else {
+                            badgeFab.style.display = 'none';
+                        }
+                    }
+
+                    // Si hay conversación abierta, refrescar mensajes
+                    const panel = document.getElementById('chat-flotante-panel');
+                    if (panel && panel.style.display === 'flex' && contactoActivoId) {
+                        refrescarConversacionActual();
+                    }
+                }
+            })
+            .catch(() => {});
+    }
+
+    function actualizarBadgeGlobal(contactos) {
+        let total = 0;
+        contactos.forEach(c => {
+            if (c.no_leidos) total += c.no_leidos;
+        });
+        const badgeFab = document.getElementById('chat-fab-badge');
+        if (badgeFab) {
+            if (total > 0) {
+                badgeFab.innerText = total > 99 ? '99+' : total;
+                badgeFab.style.display = 'flex';
+            } else {
+                badgeFab.style.display = 'none';
+            }
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.innerText = text;
+        return div.innerHTML;
+    }
+</script>
+"""
+
+with open('templates/chat_widget.html', 'w', encoding='utf-8') as f:
+    f.write(nuevo_chat_widget)
+
+print("templates/chat_widget.html actualizado con nuevo diseño estético.")

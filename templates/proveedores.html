@@ -35,8 +35,10 @@
                 <!-- Módulo de Garantía / Retrabajo (Verde) -->
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align: center; color: #4ade80; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
-                    <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button" onclick="cambiarVistaProv('retrabajo')">Retrabajo</button>
-                    <button class="btn-sidebar btn-sidebar-retrabajo" style="border-color: rgba(56, 189, 248, 0.5) !important; color: #38bdf8 !important;" title="Tiempo de Garantía" type="button" onclick="abrirModalGarantiaProveedor()">⏱️ Tiempo/Garantía</button>
+                    <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button" onclick="cambiarVistaProv('retrabajo')" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <span>Retrabajo</span>
+                        <span id="badge-retrabajo-prov" style="display: none; background: #ef4444; color: white; padding: 2px 7px; border-radius: 10px; font-size: 0.72rem; font-weight: 800; min-width: 18px; text-align: center; line-height: 1;">0</span>
+                    </button>
                 </div>
             </nav>
             <div class="btn-logout-container"><a href="/logout" class="btn-logout"
@@ -585,7 +587,7 @@
         </div>
     </div>
 
-    <script src="/static/script.js?v=1000016"></script>
+    <script src="/static/script.js?v=1000028"></script>
 
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js?v=6"></script>
@@ -593,6 +595,7 @@
     <script src="/static/facturas_pdf.js?v=3"></script>
     <script src="/static/facturas_principal.js?v=61"></script>
     <script src="/static/manual_sistema.js?v=1"></script>
+{% include 'chat_widget.html' %}
 </body>
 
 </html>
