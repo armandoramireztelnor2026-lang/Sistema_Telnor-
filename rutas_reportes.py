@@ -489,6 +489,119 @@ def toggle_juridicos_unidad():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
+
+def obtener_fecha_entrega(factura):
+    fecha_str = factura.get("fecha_entrega") or factura.get("fecha")
+    if not fecha_str:
+        return None
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%Y/%m/%d %H:%M:%S", "%Y/%m/%d"):
+        try:
+            return datetime.datetime.strptime(fecha_str.split("T")[0] if "T" in fecha_str else fecha_str, fmt)
+        except ValueError:
+            pass
+    try:
+        part = fecha_str.split(" ")[0].split("T")[0]
+        return datetime.datetime.strptime(part, "%Y-%m-%d")
+    except Exception:
+        return None
+
+
+def formatear_duracion_segundos(segundos_totales):
+    segundos_totales = int(max(0, segundos_totales))
+    dias = segundos_totales // 86400
+    resto = segundos_totales % 86400
+    horas = resto // 3600
+    resto = resto % 3600
+    minutos = resto // 60
+    segundos = resto % 60
+    
+    partes = []
+    if dias > 0:
+        partes.append(f"{dias} día{'s' if dias != 1 else ''}")
+    if horas > 0:
+        partes.append(f"{horas} hr{'s' if horas != 1 else ''}")
+    if minutos > 0:
+        partes.append(f"{minutos} min")
+    if segundos > 0 or not partes:
+        partes.append(f"{segundos} seg")
+    return ", ".join(partes)
+
+
+def formatear_duracion_corta(segundos_totales):
+    segundos_totales = int(max(0, segundos_totales))
+    dias = segundos_totales // 86400
+    resto = segundos_totales % 86400
+    horas = resto // 3600
+    resto = resto % 3600
+    minutos = resto // 60
+    segundos = resto % 60
+    
+    partes = []
+    if dias > 0: partes.append(f"{dias}d")
+    if horas > 0: partes.append(f"{horas}h")
+    if minutos > 0: partes.append(f"{minutos}m")
+    if segundos > 0 or not partes: partes.append(f"{segundos}s")
+    return " ".join(partes)
+
+
+def verificar_vigencia_garantia(factura_correspondiente):
+    nombre_taller = factura_correspondiente.get("proveedor", "Taller")
+    usuarios_data = leer_json("usuarios.json")
+    
+    dias_gar = 30
+    horas_gar = 0
+    mins_gar = 0
+    segs_gar = 0
+    
+    for u in usuarios_data.get("usuarios", []):
+        if u.get("rol") == "proveedores":
+            dp = u.get("datos_perfil", {})
+            p_nom = str(dp.get("nombre_proveedor", "")).strip().upper()
+            u_nom = str(u.get("usuario", "")).strip().upper()
+            if p_nom == str(nombre_taller).strip().upper() or u_nom == str(nombre_taller).strip().upper():
+                try:
+                    dias_gar = int(dp.get("dias_garantia", 30))
+                except:
+                    dias_gar = 30
+                try:
+                    horas_gar = int(dp.get("horas_garantia", 0))
+                except:
+                    horas_gar = 0
+                try:
+                    mins_gar = int(dp.get("minutos_garantia", 0))
+                except:
+                    mins_gar = 0
+                try:
+                    segs_gar = int(dp.get("segundos_garantia", 0))
+                except:
+                    segs_gar = 0
+                break
+
+    total_segundos_garantia = dias_gar * 86400 + horas_gar * 3600 + mins_gar * 60 + segs_gar
+    if total_segundos_garantia <= 0:
+        total_segundos_garantia = 30 * 86400
+
+    dt_entrega = obtener_fecha_entrega(factura_correspondiente)
+    if not dt_entrega:
+        txt_def = formatear_duracion_segundos(total_segundos_garantia)
+        return True, 0, total_segundos_garantia, total_segundos_garantia, "Fecha no registrada", nombre_taller, "0 seg", txt_def, txt_def
+
+    ahora = datetime.datetime.now()
+    segundos_transcurridos = (ahora - dt_entrega).total_seconds()
+    if segundos_transcurridos < 0:
+        segundos_transcurridos = 0
+
+    vigente = segundos_transcurridos <= total_segundos_garantia
+    segundos_restantes = max(0, total_segundos_garantia - segundos_transcurridos)
+    fecha_entrega_formateada = dt_entrega.strftime("%Y-%m-%d %H:%M:%S")
+
+    txt_limite = formatear_duracion_segundos(total_segundos_garantia)
+    txt_transcurrido = formatear_duracion_segundos(segundos_transcurridos)
+    txt_restante = formatear_duracion_segundos(segundos_restantes)
+
+    return vigente, segundos_transcurridos, total_segundos_garantia, segundos_restantes, fecha_entrega_formateada, nombre_taller, txt_transcurrido, txt_limite, txt_restante
+
+
 @reportes_bp.route("/api/garantia/buscar_ticket/<path:ticket_query>", methods=["GET"])
 def buscar_ticket_garantia(ticket_query):
     query = str(ticket_query).strip()
@@ -600,10 +713,25 @@ def buscar_ticket_garantia(ticket_query):
         })
 
     entregado_val = str(factura_correspondiente.get("entregado", "")).strip().lower()
-    if entregado_val not in ["sí", "s", "si"]:
+    if not (entregado_val in ["sí", "si", "s"] or entregado_val.startswith("s")):
         return jsonify({
             "status": "no_elegible",
             "message": "Solo se puede mandar a retrabajo una unidad cuando el chofer ya haya verificado su número de confirmación para cuando el taller en teoría la dejó arreglada y lista."
+        })
+
+    # Validación de vigencia de tiempo de garantía del taller
+    vigente, segs_trans, segs_tot, segs_rest, f_entrega, n_taller, txt_trans, txt_lim, txt_rest = verificar_vigencia_garantia(factura_correspondiente)
+    if not vigente:
+        return jsonify({
+            "status": "garantia_expirada",
+            "message": f"El tiempo de garantía ya pasó para este ticket. El taller '{n_taller}' ofrece un límite de {txt_lim} de garantía y han transcurrido {txt_trans} desde la entrega ({f_entrega}). Ya no es posible aplicar garantía para este servicio.",
+            "limite_tiempo": txt_lim,
+            "tiempo_transcurrido": txt_trans,
+            "tiempo_restante": "0 seg",
+            "segundos_transcurridos": int(segs_trans),
+            "total_segundos_limite": int(segs_tot),
+            "fecha_entrega": f_entrega,
+            "taller": n_taller
         })
 
     # Verificar si ya tiene retrabajo pendiente en proceso
@@ -651,7 +779,10 @@ def buscar_ticket_garantia(ticket_query):
         "falla": reporte_encontrado.get("falla") or reporte_encontrado.get("retro") or "Falla mecánica reportada",
         "firma_chofer": reporte_encontrado.get("firma_chofer", ""),
         "estado": reporte_encontrado.get("estado", "Pendiente"),
-        "asignado_a": factura_correspondiente.get("proveedor") or reporte_encontrado.get("asignado_a", "")
+        "asignado_a": factura_correspondiente.get("proveedor") or reporte_encontrado.get("asignado_a", ""),
+        "garantia_limite": txt_lim,
+        "garantia_transcurrido": txt_trans,
+        "garantia_restante": txt_rest
     }
 
     return jsonify({
@@ -731,10 +862,18 @@ def aplicar_garantia():
 
     # Validación estricta del número de confirmación
     entregado_val = str(factura_correspondiente.get("entregado", "")).strip().lower()
-    if entregado_val not in ["sí", "s", "si"]:
+    if not (entregado_val in ["sí", "si", "s"] or entregado_val.startswith("s")):
         return jsonify({
             "status": "error",
             "message": "Solo se puede mandar a retrabajo una unidad cuando el chofer ya haya verificado su número de confirmación para cuando el taller en teoría la dejó arreglada y lista."
+        }), 400
+
+    # Validación de vigencia de tiempo de garantía del taller
+    vigente_ap, segs_trans_ap, segs_tot_ap, segs_rest_ap, f_entrega_ap, n_taller_ap, txt_trans_ap, txt_lim_ap, txt_rest_ap = verificar_vigencia_garantia(factura_correspondiente)
+    if not vigente_ap:
+        return jsonify({
+            "status": "error",
+            "message": f"El tiempo de garantía ya pasó para este ticket. El taller '{n_taller_ap}' tiene un límite de {txt_lim_ap} de garantía y han transcurrido {txt_trans_ap} desde la entrega ({f_entrega_ap})."
         }), 400
 
     eco = str(reporte_encontrado.get("unidad", "")).replace("8090-", "").strip()
@@ -1250,3 +1389,166 @@ def finalizar_retrabajo_taller():
 
 
 
+
+
+@reportes_bp.route("/api/proveedor/actualizar_garantia", methods=["POST"])
+def actualizar_garantia_proveedor():
+    if "usuario" not in session or session["usuario"].get("rol") not in ["proveedores", "proveedor"]:
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    data = request.get_json() or {}
+    try:
+        dias = int(data.get("dias_garantia", 0))
+        horas = int(data.get("horas_garantia", 0))
+        minutos = int(data.get("minutos_garantia", 0))
+        segundos = int(data.get("segundos_garantia", 0))
+        
+        total_segundos = dias * 86400 + horas * 3600 + minutos * 60 + segundos
+        if total_segundos <= 0:
+            return jsonify({"status": "error", "message": "El tiempo de garantía debe ser mayor a 0 segundos."}), 400
+        if total_segundos > 365 * 86400:
+            return jsonify({"status": "error", "message": "El tiempo de garantía no puede exceder 365 días."}), 400
+    except (ValueError, TypeError):
+        return jsonify({"status": "error", "message": "Valores de tiempo inválidos."}), 400
+
+    mi_usuario = session["usuario"].get("usuario")
+    mi_nombre_prov = session["usuario"].get("datos_perfil", {}).get("nombre_proveedor", "")
+    usuarios_data = leer_json("usuarios.json")
+    actualizado = False
+
+    for u in usuarios_data.get("usuarios", []):
+        if u.get("usuario") == mi_usuario or (mi_nombre_prov and u.get("datos_perfil", {}).get("nombre_proveedor") == mi_nombre_prov):
+            if "datos_perfil" not in u:
+                u["datos_perfil"] = {}
+            u["datos_perfil"]["dias_garantia"] = dias
+            u["datos_perfil"]["horas_garantia"] = horas
+            u["datos_perfil"]["minutos_garantia"] = minutos
+            u["datos_perfil"]["segundos_garantia"] = segundos
+            u["datos_perfil"]["total_segundos_garantia"] = total_segundos
+            u["datos_perfil"]["fecha_actualizacion_garantia"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            if "usuario" in session and "datos_perfil" in session["usuario"]:
+                session["usuario"]["datos_perfil"]["dias_garantia"] = dias
+                session["usuario"]["datos_perfil"]["horas_garantia"] = horas
+                session["usuario"]["datos_perfil"]["minutos_garantia"] = minutos
+                session["usuario"]["datos_perfil"]["segundos_garantia"] = segundos
+                session["usuario"]["datos_perfil"]["total_segundos_garantia"] = total_segundos
+            actualizado = True
+            break
+
+    if actualizado:
+        escribir_json("usuarios.json", usuarios_data)
+        txt_tiempo = formatear_duracion_segundos(total_segundos)
+        return jsonify({
+            "status": "success",
+            "message": f"Tiempo de garantía actualizado a {txt_tiempo} exitosamente. Jefatura ha sido notificada de este periodo.",
+            "tiempo_formateado": txt_tiempo
+        })
+    return jsonify({"status": "error", "message": "Usuario de taller no encontrado"}), 404
+
+
+@reportes_bp.route("/api/garantia/talleres_tiempo", methods=["GET"])
+def obtener_talleres_tiempo_garantia():
+    if "usuario" not in session or session["usuario"].get("rol") not in ["administracion"]:
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    usuarios_data = leer_json("usuarios.json")
+    talleres = []
+
+    for u in usuarios_data.get("usuarios", []):
+        if u.get("rol") == "proveedores":
+            dp = u.get("datos_perfil", {})
+            try:
+                dias_gar = int(dp.get("dias_garantia", 30))
+            except:
+                dias_gar = 30
+            try:
+                horas_gar = int(dp.get("horas_garantia", 0))
+            except:
+                horas_gar = 0
+            try:
+                mins_gar = int(dp.get("minutos_garantia", 0))
+            except:
+                mins_gar = 0
+            try:
+                segs_gar = int(dp.get("segundos_garantia", 0))
+            except:
+                segs_gar = 0
+            
+            tot_segs = dias_gar * 86400 + horas_gar * 3600 + mins_gar * 60 + segs_gar
+            if tot_segs <= 0:
+                tot_segs = 30 * 86400
+                dias_gar = 30
+
+            foto = dp.get("foto_ruta", "")
+            if foto and not foto.startswith("/") and not foto.startswith("http"):
+                foto = f"/static/logos_proveedores/{foto}"
+
+            talleres.append({
+                "usuario": u.get("usuario"),
+                "nombre_proveedor": dp.get("nombre_proveedor") or u.get("usuario"),
+                "encargado": dp.get("encargado", "N/A"),
+                "telefono": dp.get("telefono", "N/A"),
+                "correo": dp.get("correo", "N/A"),
+                "ciudad": dp.get("ciudad", "N/A"),
+                "cope": dp.get("cope", "N/A"),
+                "dias_garantia": dias_gar,
+                "horas_garantia": horas_gar,
+                "minutos_garantia": mins_gar,
+                "segundos_garantia": segs_gar,
+                "total_segundos": tot_segs,
+                "tiempo_formateado": formatear_duracion_segundos(tot_segs),
+                "tiempo_corta": formatear_duracion_corta(tot_segs),
+                "garantia_configurada": bool(dp.get("dias_garantia") or dp.get("horas_garantia") or dp.get("minutos_garantia") or dp.get("segundos_garantia")),
+                "fecha_actualizacion": dp.get("fecha_actualizacion_garantia", "Predefinido (30 días)"),
+                "foto_ruta": foto
+            })
+
+    return jsonify({"status": "success", "talleres": talleres})
+
+
+@reportes_bp.route("/api/garantia/taller/actualizar_dias", methods=["POST"])
+def actualizar_dias_garantia_jefatura():
+    if "usuario" not in session or session["usuario"].get("rol") not in ["administracion"]:
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    data = request.get_json() or {}
+    usuario_taller = str(data.get("usuario", "")).strip()
+    try:
+        dias = int(data.get("dias_garantia", 0))
+        horas = int(data.get("horas_garantia", 0))
+        minutos = int(data.get("minutos_garantia", 0))
+        segundos = int(data.get("segundos_garantia", 0))
+        
+        total_segundos = dias * 86400 + horas * 3600 + minutos * 60 + segundos
+        if total_segundos <= 0:
+            return jsonify({"status": "error", "message": "El tiempo de garantía debe ser mayor a 0 segundos."}), 400
+        if total_segundos > 365 * 86400:
+            return jsonify({"status": "error", "message": "El tiempo de garantía no puede exceder 365 días."}), 400
+    except (ValueError, TypeError):
+        return jsonify({"status": "error", "message": "Valores de tiempo inválidos."}), 400
+
+    usuarios_data = leer_json("usuarios.json")
+    encontrado = False
+
+    for u in usuarios_data.get("usuarios", []):
+        if u.get("usuario") == usuario_taller or u.get("datos_perfil", {}).get("nombre_proveedor") == usuario_taller:
+            if "datos_perfil" not in u:
+                u["datos_perfil"] = {}
+            u["datos_perfil"]["dias_garantia"] = dias
+            u["datos_perfil"]["horas_garantia"] = horas
+            u["datos_perfil"]["minutos_garantia"] = minutos
+            u["datos_perfil"]["segundos_garantia"] = segundos
+            u["datos_perfil"]["total_segundos_garantia"] = total_segundos
+            u["datos_perfil"]["fecha_actualizacion_garantia"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " (Ajustado por Jefatura)"
+            encontrado = True
+            break
+
+    if encontrado:
+        escribir_json("usuarios.json", usuarios_data)
+        txt_tiempo = formatear_duracion_segundos(total_segundos)
+        return jsonify({
+            "status": "success",
+            "message": f"Tiempo de garantía para el taller actualizado a {txt_tiempo}.",
+            "tiempo_formateado": txt_tiempo
+        })
+    return jsonify({"status": "error", "message": "Taller no encontrado."}), 404

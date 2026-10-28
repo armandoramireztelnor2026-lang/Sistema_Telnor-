@@ -876,6 +876,17 @@
 
             <!-- CUERPO CON SCROLL INDEPENDIENTE -->
             <div class="modal-card-body">
+                <!-- BANNER VIGENCIA DE GARANTÍA -->
+                <div id="gar-banner-vigencia" style="display:none; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                        <span style="color:#34d399; font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px;">
+                            ⏱️ <span id="gar-txt-vigencia">Garantía Vigente</span>
+                        </span>
+                        <span id="gar-badge-dias" style="background:#10b981; color:#081322; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:800;">
+                            --
+                        </span>
+                    </div>
+                </div>
                 <!-- FICHA: TODOS LOS DATOS ORIGINALES DEL REPORTE -->
                 <div style="background:#081422; border:1px solid #1f395a; border-radius:10px; padding:14px; margin-bottom:16px;">
                     <!-- Encabezado de la Ficha: Folio, Fecha, Hora, Compañía y Estado -->
@@ -1173,6 +1184,18 @@
                         if (sinFirma) sinFirma.style.display = 'block';
                     }
 
+                    // Banner de vigencia de garantía
+                    const bannerVig = document.getElementById('gar-banner-vigencia');
+                    const txtVig = document.getElementById('gar-txt-vigencia');
+                    const badgeDias = document.getElementById('gar-badge-dias');
+                    if (bannerVig && r.dias_garantia_taller) {
+                        bannerVig.style.display = 'block';
+                        txtVig.innerText = `Garantía Vigente con ${r.asignado_a || 'el taller'} (Límite: ${r.dias_garantia_taller} días)`;
+                        badgeDias.innerText = `Quedan ${r.dias_restantes} días de garantía`;
+                    } else if (bannerVig) {
+                        bannerVig.style.display = 'none';
+                    }
+
                     // Limpiar área de motivo
                     const txt = document.getElementById('gar-motivo-chofer');
                     if (txt) txt.value = '';
@@ -1185,6 +1208,18 @@
                         if (scrollBody) {
                             scrollBody.scrollTop = 0;
                         }
+                    }
+                } else if (data.status === 'garantia_expirada') {
+                    if (divErr) {
+                        divErr.innerHTML = `
+                            <div style="background: rgba(239, 68, 68, 0.18); border: 1px solid #ef4444; border-radius: 8px; padding: 12px; margin-top: 10px; text-align: left;">
+                                <strong style="color: #f87171; font-size: 14px; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                                    ⚠️ Tiempo de Garantía Vencido
+                                </strong>
+                                <span style="color: #f1f5f9; font-size: 13px; line-height: 1.5; display: block;">${data.message}</span>
+                            </div>
+                        `;
+                        divErr.style.display = 'block';
                     }
                 } else {
                     if (divErr) {

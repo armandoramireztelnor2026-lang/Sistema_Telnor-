@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="/static/style.css?v=51061">
+    <link rel="stylesheet" href="/static/style.css?v=51062">
     <link rel="stylesheet" href="/static/manual_sistema.css?v=1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -156,14 +156,14 @@
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-admin')">Lista Automotriz</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('panel-control')">Panel de Control</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
-                <button class="btn-sidebar" onclick="alert('En Desarrollo');">Flujo de Trabajo</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('flujo-trabajo')">Flujo de Trabajo</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
 
                 <!-- Módulo de Garantía / Tiempo/Garantía (Verde para Jefatura) -->
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
-                    <div style="text-align: center; color: #4ade80; font-size: 1.12rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
-                    <button class="btn-sidebar btn-sidebar-retrabajo" title="Tiempo/Garantía" type="button" onclick="cambiarVistaAdmin('tiempo-garantia')">Tiempo/Garantia</button>
+                    <div style="text-align: center; color: #4ade80; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
+                    <button class="btn-sidebar btn-sidebar-retrabajo" title="Tiempo/Garantía" type="button" onclick="cambiarVistaAdmin('tiempo-garantia')">Tiempo/Garantía</button>
                 </div>
                 {% endif %}
 
@@ -184,14 +184,14 @@
 
                 <!-- Módulo de Cobertura (Separado al final en tono amarillo ligero) -->
                 <div style="margin-top: 15px; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                    <div style="text-align: center; color: #fde047; font-size: 1.12rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Delegación Por Ausencia</div>
+                    <div style="text-align: center; color: #fde047; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Delegación Por Ausencia</div>
                     <button class="btn-sidebar btn-sidebar-cobertura" onclick="abrirVistaDelegada('cotizaciones-10k')">Cotizaciones +10000</button>
                     <button class="btn-sidebar btn-sidebar-cobertura" onclick="abrirVistaDelegada('liberar-doc-contable')">Liberar Doc. Contable</button>
                 </div>
 
                 <!-- Módulo de Garantía / Retrabajo (Verde, hasta abajo de delegar) -->
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
-                    <div style="text-align: center; color: #4ade80; font-size: 1.12rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
+                    <div style="text-align: center; color: #4ade80; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
                     <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button" onclick="cambiarVistaAdmin('retrabajo')">Retrabajo</button>
                 </div>
                 {% endif %}
@@ -206,7 +206,7 @@
 
                 <!-- Módulos de Cobertura (Separados al final en tono amarillo ligero) -->
                 <div style="margin-top: 15px; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                    <div style="text-align: center; color: #fde047; font-size: 1.12rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Delegación Por Ausencia</div>
+                    <div style="text-align: center; color: #fde047; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Delegación Por Ausencia</div>
                     <button class="btn-sidebar btn-sidebar-cobertura" onclick="abrirVistaDelegada('facturas')">Cotizaciones y Órdenes</button>
                     <button class="btn-sidebar btn-sidebar-cobertura" onclick="abrirVistaDelegada('facturas_finales')">Facturas</button>
                 </div>
@@ -482,7 +482,7 @@
                         <span style="font-size: 1.8rem;">⏱️</span>
                         <div>
                             <h2 style="margin: 0;">Tiempo / Garantía</h2>
-                            <p style="margin: 2px 0 0 0; color: #94a3b8; font-size: 0.85rem;">Directorio y control de todos los talleres autorizados</p>
+                            <p style="margin: 2px 0 0 0; color: #94a3b8; font-size: 0.85rem;">Días de garantía establecidos por cada taller para la entrega de unidades</p>
                         </div>
                     </div>
                 </div>
@@ -490,7 +490,7 @@
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
                         <input type="text" id="buscador-tiempo-garantia" class="buscador-pildora"
-                            placeholder="Buscar taller, ciudad, encargado, correo..."
+                            placeholder="Buscar taller, encargado, ciudad..."
                             onkeyup="filtrarTabla('buscador-tiempo-garantia', 'tabla-tiempo-garantia')">
                     </div>
                     <div class="table-responsive">
@@ -498,21 +498,1801 @@
                             <thead>
                                 <tr>
                                     <th>Logo</th>
-                                    <th>Empresa</th>
-                                    <th>Usuario</th>
+                                    <th>Taller / Razón Social</th>
                                     <th>Encargado</th>
-                                    <th>Responsable</th>
-                                    <th>Teléfono</th>
-                                    <th>Correo</th>
-                                    <th>Dirección</th>
-                                    <th>C.P.</th>
-                                    <th>Descripción</th>
+                                    <th>Contacto (Tel / Correo)</th>
+                                    <th>Ciudad / COPE</th>
+                                    <th>Tiempo de Garantía Ofrecido</th>
+                                    <th>Estado / Notificación</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabla-tiempo-garantia"></tbody>
+                            <tbody id="tabla-tiempo-garantia">
+                                <tr><td colspan="8" style="text-align:center; padding:20px; color:#94a3b8;">Cargando tiempos de garantía de talleres...</td></tr>
+                            </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+                                                <!-- ==================================================== -->
+            <!-- VISTA: DIAGRAMA DE FLUJO DE TRABAJO (TICKETS DE SERVICIO) -->
+            <!-- ==================================================== -->
+            <div id="vista-flujo-trabajo" style="display: none;">
+                
+                <style>
+                    /* ESTILOS DEL DIAGRAMA DE FLUJO SEPARADO Y VISUAL */
+                    
+                    /* ESTILOS DE LA CABECERA DEL FLUJO (AISLADA DE .top-bar) */
+                    .flujo-header-box {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        align-items: flex-start !important;
+                        justify-content: flex-start !important;
+                        gap: 14px !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                        margin-bottom: 22px !important;
+                        padding: 20px 24px !important;
+                        background: #081322 !important;
+                        border: 1px solid #1f395a !important;
+                        border-radius: 14px !important;
+                    }
+                    .flujo-header-box h2 {
+                        white-space: normal !important;
+                        color: #ffffff !important;
+                        margin: 0 !important;
+                    }
+                    .flujo-header-box button {
+                        width: auto !important;
+                        flex-shrink: 0 !important;
+                        margin: 0 !important;
+                    }
+
+                    
+                    /* MODO COMPACTO DE EXPORTACIÓN (SIN TEXTOS LARGOS PARA 1 SOLA HOJA COMPACTA) */
+                    .flujo-modo-pdf-compacto p {
+                        display: none !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-box {
+                        padding: 9px 12px !important;
+                        margin-bottom: 0 !important;
+                        box-shadow: none !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-box h4,
+                    .flujo-modo-pdf-compacto .flujo-box h5 {
+                        margin: 0 !important;
+                        font-size: 0.92rem !important;
+                    }
+                    .flujo-modo-pdf-compacto .lane-cotizacion {
+                        padding: 10px 8px !important;
+                        gap: 0 !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-flecha-conector {
+                        margin: 2px 0 !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-flecha-linea {
+                        height: 7px !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-flecha-badge {
+                        padding: 2px 9px !important;
+                        font-size: 0.67rem !important;
+                    }
+                    .flujo-modo-pdf-compacto .etapa-header-bar {
+                        padding: 7px 12px !important;
+                        margin: 10px 0 6px 0 !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-box-decision {
+                        padding: 10px 12px !important;
+                        margin-bottom: 10px !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-box-decision h3 {
+                        font-size: 1rem !important;
+                        margin: 0 !important;
+                    }
+
+                    .flujo-contenedor-principal {
+                        background: #081322;
+                        border: 1px solid #1f395a;
+                        border-radius: 18px;
+                        padding: 30px 22px;
+                        max-width: 1040px;
+                        margin: 0 auto 50px auto;
+                    }
+                    
+                    /* Tarjeta individual de acción o bandeja */
+                    .flujo-box {
+                        background: #0c1a2f;
+                        border-radius: 12px;
+                        padding: 18px 20px;
+                        border: 1.5px solid #1f395a;
+                        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+                        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+                        position: relative;
+                    }
+                    .flujo-box:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.6);
+                    }
+
+                    /* Variantes de borde según rol principal */
+                    .flujo-box-chofer { border-color: #0284c7; }
+                    .flujo-box-chofer:hover { border-color: #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.25); }
+
+                    .flujo-box-supervisor { border-color: #f59e0b; }
+                    .flujo-box-supervisor:hover { border-color: #fbbf24; box-shadow: 0 0 20px rgba(245, 158, 11, 0.25); }
+
+                    .flujo-box-taller { border-color: #10b981; }
+                    .flujo-box-taller:hover { border-color: #34d399; box-shadow: 0 0 20px rgba(16, 185, 129, 0.25); }
+
+                    .flujo-box-admin { border-color: #6366f1; }
+                    .flujo-box-admin:hover { border-color: #818cf8; box-shadow: 0 0 20px rgba(99, 102, 241, 0.25); }
+
+                    .flujo-box-corp { border-color: #a855f7; }
+                    .flujo-box-corp:hover { border-color: #c084fc; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
+
+                    .flujo-box-decision {
+                        background: linear-gradient(135deg, rgba(30, 27, 75, 0.9), rgba(15, 23, 42, 0.98));
+                        border: 2px dashed #818cf8;
+                    }
+                    .flujo-box-decision:hover { border-color: #a5b4fc; box-shadow: 0 0 25px rgba(129, 140, 248, 0.35); }
+
+                    /* Flechas de flujo vertical con etiquetas */
+                    .flujo-flecha-conector {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 6px 0;
+                        position: relative;
+                    }
+                    .flujo-flecha-linea {
+                        width: 2px;
+                        height: 16px;
+                        background: #0284c7;
+                    }
+                    .flujo-flecha-badge {
+                        background: #06111f;
+                        border: 1px solid #1f395a;
+                        color: #94a3b8;
+                        font-size: 0.74rem;
+                        font-weight: 700;
+                        padding: 4px 14px;
+                        border-radius: 20px;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+                        z-index: 2;
+                        white-space: nowrap;
+                    }
+                    .flujo-flecha-punta {
+                        color: #0284c7;
+                        font-size: 0.9rem;
+                        line-height: 1;
+                        margin-top: -3px;
+                    }
+
+                    /* Píldoras de roles involucrados */
+                    .role-pill {
+                        font-size: 0.72rem;
+                        font-weight: 700;
+                        padding: 2px 9px;
+                        border-radius: 12px;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        white-space: nowrap;
+                    }
+                    .role-pill-chofer { background: rgba(2, 132, 199, 0.18); border: 1px solid #0284c7; color: #38bdf8; }
+                    .role-pill-supervisor { background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; }
+                    .role-pill-taller { background: rgba(16, 185, 129, 0.18); border: 1px solid #10b981; color: #34d399; }
+                    .role-pill-admin { background: rgba(99, 102, 241, 0.18); border: 1px solid #6366f1; color: #a5b4fc; }
+                    .role-pill-corp { background: rgba(168, 85, 247, 0.18); border: 1px solid #a855f7; color: #c084fc; }
+                    .role-pill-jefatura { background: rgba(234, 88, 12, 0.18); border: 1px solid #ea580c; color: #fb923c; }
+
+                    /* Separadores de etapa */
+                    .etapa-header-bar {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        background: #06111f;
+                        border: 1px solid #1f395a;
+                        border-radius: 10px;
+                        padding: 10px 16px;
+                        margin: 22px 0 14px 0;
+                    }
+                    .etapa-header-title {
+                        font-size: 0.95rem;
+                        font-weight: 800;
+                        color: #ffffff;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    .etapa-header-roles {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        flex-wrap: wrap;
+                    }
+
+                    /* Columnas separadas de bifurcación */
+                    .lane-cotizacion {
+                        flex: 1;
+                        min-width: 310px;
+                        border-radius: 14px;
+                        padding: 20px 16px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0;
+                    }
+                    .lane-menor10k {
+                        background: rgba(16, 185, 129, 0.04);
+                        border: 2px solid #10b981;
+                    }
+                    .lane-mayor10k {
+                        background: rgba(245, 158, 11, 0.04);
+                        border: 2px solid #f59e0b;
+                    }
+
+                    /* MAPA DE ETAPAS - GRID MODERNO Y ESPACIOSO (CERO AMONTONAMIENTO) */
+                    .mapa-etapas-contenedor {
+                        background: #0b1c30;
+                        border: 1px solid #1f395a;
+                        border-radius: 14px;
+                        padding: 16px 18px;
+                        margin-bottom: 26px;
+                        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+                    }
+                    .mapa-etapas-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 12px;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                    }
+                    .mapa-etapas-title {
+                        color: #94a3b8;
+                        font-size: 0.72rem;
+                        font-weight: 800;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                    }
+                    .mapa-etapas-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+                        gap: 10px;
+                        width: 100%;
+                        box-sizing: border-box;
+                    }
+                    @media (min-width: 1200px) {
+                        .mapa-etapas-grid {
+                            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                        }
+                    }
+                    @media (min-width: 768px) and (max-width: 1199px) {
+                        .mapa-etapas-grid {
+                            grid-template-columns: repeat(4, 1fr);
+                        }
+                    }
+                    @media (max-width: 767px) {
+                        .mapa-etapas-grid {
+                            grid-template-columns: repeat(2, 1fr);
+                        }
+                    }
+                    
+                    /* Tarjeta de navegación de cada paso */
+                    .nav-rapida-paso {
+                        background: #081322;
+                        border: 1.5px solid #1f395a;
+                        border-radius: 10px;
+                        padding: 10px 8px;
+                        text-align: center;
+                        text-decoration: none;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 4px;
+                        transition: all 0.2s ease;
+                        min-height: 58px;
+                        box-sizing: border-box;
+                        cursor: pointer;
+                    }
+                    .nav-rapida-paso:hover {
+                        transform: translateY(-2px);
+                        border-color: #38bdf8;
+                        background: rgba(56, 189, 248, 0.12);
+                        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+                    }
+                    .nav-rapida-num {
+                        font-size: 0.68rem;
+                        font-weight: 800;
+                        letter-spacing: 0.6px;
+                        text-transform: uppercase;
+                        line-height: 1;
+                    }
+                    .nav-rapida-nombre {
+                        font-size: 0.77rem;
+                        color: #ffffff;
+                        font-weight: 700;
+                        line-height: 1.25;
+                        text-align: center;
+                        white-space: normal;
+                        word-break: normal;
+                    }
+                    
+                    /* Efecto de foco temporal al hacer clic */
+                    .flujo-step-highlight {
+                        animation: pulsoFocoPaso 1.8s ease;
+                    }
+                    @keyframes pulsoFocoPaso {
+                        0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }
+                        50% { box-shadow: 0 0 25px 4px rgba(56, 189, 248, 0.5); }
+                        100% { box-shadow: none; }
+                    }
+                    
+                    /* REGLAS DE IMPRESIÓN Y DESCARGA A PDF */
+                    @media print {
+                        .no-print, .btn-flujo-tab, .nav-rapida-paso, .mapa-etapas-contenedor, #btn-descargar-flujo {
+                            display: none !important;
+                        }
+                        body, 
+                    /* MODO COMPACTO DE EXPORTACIÓN (SIN TEXTOS LARGOS PARA 1 SOLA HOJA COMPACTA) */
+                    .flujo-modo-pdf-compacto p {
+                        display: none !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-box {
+                        padding: 9px 12px !important;
+                        margin-bottom: 0 !important;
+                        box-shadow: none !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-box h4,
+                    .flujo-modo-pdf-compacto .flujo-box h5 {
+                        margin: 0 !important;
+                        font-size: 0.92rem !important;
+                    }
+                    .flujo-modo-pdf-compacto .lane-cotizacion {
+                        padding: 10px 8px !important;
+                        gap: 0 !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-flecha-conector {
+                        margin: 2px 0 !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-flecha-linea {
+                        height: 7px !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-flecha-badge {
+                        padding: 2px 9px !important;
+                        font-size: 0.67rem !important;
+                    }
+                    .flujo-modo-pdf-compacto .etapa-header-bar {
+                        padding: 7px 12px !important;
+                        margin: 10px 0 6px 0 !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-box-decision {
+                        padding: 10px 12px !important;
+                        margin-bottom: 10px !important;
+                    }
+                    .flujo-modo-pdf-compacto .flujo-box-decision h3 {
+                        font-size: 1rem !important;
+                        margin: 0 !important;
+                    }
+
+                    .flujo-contenedor-principal {
+                            background: #081322 !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        .flujo-box, .etapa-header-bar, .lane-cotizacion, .flujo-flecha-conector {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                    }
+                    .flujo-box, .etapa-header-bar, .lane-cotizacion {
+                        page-break-inside: avoid;
+                        break-inside: avoid;
+                    }
+
+                    .nav-rapida-paso:hover {
+                        transform: translateY(-2px);
+                        border-color: #38bdf8;
+                        background: rgba(56, 189, 248, 0.15);
+                    }
+                </style>
+                
+                <!-- ENCABEZADO PRINCIPAL DE LA VISTA -->
+                <div class="flujo-header-box">
+                    <!-- TÍTULO -->
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4); flex-shrink: 0;">
+                            🔄
+                        </div>
+                        <div>
+                            <h2 style="margin: 0; color: #ffffff; font-size: 1.45rem; font-weight: 800; letter-spacing: -0.3px;">
+                                Diagrama de Flujo de Trabajo
+                            </h2>
+                            <p style="margin: 3px 0 0 0; color: #94a3b8; font-size: 0.88rem;">
+                                Recorrido operativo de punta a punta, con cotizaciones separadas y roles en cada proceso
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- BOTONES DEBAJO DEL TÍTULO: ENLACE COMPLETO SIN BARRAS DE DESPLAZAMIENTO -->
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: #0b1c30; padding: 8px 12px; border-radius: 10px; border: 1px solid #1f395a; width: 100%; box-sizing: border-box;">
+                        <button type="button" class="btn-flujo-tab active" onclick="filtrarRutaFlujo('todos')" id="btn-flujo-todos" style="padding: 7px 14px; border-radius: 7px; border: 1px solid #38bdf8; background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s;">
+                            🌐 Todo el Flujo
+                        </button>
+                        <button type="button" class="btn-flujo-tab" onclick="filtrarRutaFlujo('menor10k')" id="btn-flujo-menor10k" style="padding: 7px 14px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: #86efac; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s;">
+                            🟢 Cotización ≤ $10,000
+                        </button>
+                        <button type="button" class="btn-flujo-tab" onclick="filtrarRutaFlujo('mayor10k')" id="btn-flujo-mayor10k" style="padding: 7px 14px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: #fbbf24; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s;">
+                            🟠 Cotización > $10,000
+                        </button>
+                        <button type="button" class="btn-flujo-tab" onclick="filtrarRutaFlujo('garantia')" id="btn-flujo-garantia" style="padding: 7px 14px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: #c084fc; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s;">
+                            🛡️ Circuito de Garantía
+                        </button>
+                        <!-- BOTÓN DESCARGAR DIRECTAMENTE AL LADO DE CIRCUITO DE GARANTÍA -->
+                        <button type="button" onclick="descargarDiagramaFlujo()" id="btn-descargar-flujo" 
+                            style="padding: 7px 14px; border-radius: 7px; border: 1px solid #10b981; background: rgba(16, 185, 129, 0.25); color: #86efac; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 6px rgba(16, 185, 129, 0.25); transition: all 0.2s; margin-left: 2px;"
+                            onmouseover="this.style.background='rgba(16, 185, 129, 0.45)'; this.style.color='#ffffff';"
+                            onmouseout="this.style.background='rgba(16, 185, 129, 0.25)'; this.style.color='#86efac';">
+                            <span style="font-size: 0.95rem; line-height: 1;">📥</span>
+                            <span>Descargar PDF (1 Hoja)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- GUÍA VISUAL DE ROLES -->
+                <div style="background: #0b1c30; border: 1px solid #1f395a; border-radius: 12px; padding: 12px 18px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;">
+                        ROLES PARTICIPANTES EN EL FLUJO:
+                    </span>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                        <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                        <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
+                        <span class="role-pill role-pill-admin">🏢 Administrador</span>
+                        <span class="role-pill role-pill-corp">💼 Corporativos</span>
+                        <span class="role-pill role-pill-jefatura">👑 Jefatura</span>
+                    </div>
+                </div>
+
+                <div class="flujo-contenedor-principal">
+                    
+                    <!-- BARRA DE ACCESO DIRECTO ENTRE ETAPAS (GRID RESPONSIVO, CERO AMONTONAMIENTO) -->
+                    <div class="mapa-etapas-contenedor">
+                        <div class="mapa-etapas-header">
+                            <span class="mapa-etapas-title">
+                                🗺️ MAPA DE ETAPAS (HAZ CLIC PARA ENFOCAR CADA SECCIÓN)
+                            </span>
+                            <span style="color: #64748b; font-size: 0.72rem; font-weight: 600;">
+                                11 pasos operativos de punta a punta
+                            </span>
+                        </div>
+                        <div class="mapa-etapas-grid">
+                            <a href="#etapa-1-reporte" onclick="enfocarPasoFlujo('etapa-1-reporte', event)" class="nav-rapida-paso" style="border-top: 3px solid #0284c7;">
+                                <span class="nav-rapida-num" style="color: #38bdf8;">PASO 1</span>
+                                <span class="nav-rapida-nombre">📝 Reporte</span>
+                            </a>
+                            <a href="#etapa-2-asignacion" onclick="enfocarPasoFlujo('etapa-2-asignacion', event)" class="nav-rapida-paso" style="border-top: 3px solid #f59e0b;">
+                                <span class="nav-rapida-num" style="color: #fbbf24;">PASO 2</span>
+                                <span class="nav-rapida-nombre">🎯 Asignación</span>
+                            </a>
+                            <a href="#etapa-3-cotizacion" onclick="enfocarPasoFlujo('etapa-3-cotizacion', event)" class="nav-rapida-paso" style="border-top: 3px solid #10b981;">
+                                <span class="nav-rapida-num" style="color: #34d399;">PASO 3</span>
+                                <span class="nav-rapida-nombre">🔍 Cotización</span>
+                            </a>
+                            <a href="#etapa-4-bifurcacion" onclick="enfocarPasoFlujo('etapa-4-bifurcacion', event)" class="nav-rapida-paso" style="border-top: 3px solid #6366f1;">
+                                <span class="nav-rapida-num" style="color: #a5b4fc;">PASO 4</span>
+                                <span class="nav-rapida-nombre">⚖️ Cotiz. ≤ / > 10k</span>
+                            </a>
+                            <a href="#etapa-5-reparacion" onclick="enfocarPasoFlujo('etapa-5-reparacion', event)" class="nav-rapida-paso" style="border-top: 3px solid #0284c7;">
+                                <span class="nav-rapida-num" style="color: #38bdf8;">PASO 5</span>
+                                <span class="nav-rapida-nombre">🛠️ Reparación y PIN</span>
+                            </a>
+                            <a href="#etapa-6-entrega" onclick="enfocarPasoFlujo('etapa-6-entrega', event)" class="nav-rapida-paso" style="border-top: 3px solid #10b981;">
+                                <span class="nav-rapida-num" style="color: #34d399;">PASO 6</span>
+                                <span class="nav-rapida-nombre">🔑 PIN y Garantía</span>
+                            </a>
+                            <a href="#etapa-7-verificacion-admin" onclick="enfocarPasoFlujo('etapa-7-verificacion-admin', event)" class="nav-rapida-paso" style="border-top: 3px solid #6366f1;">
+                                <span class="nav-rapida-num" style="color: #a5b4fc;">PASO 7</span>
+                                <span class="nav-rapida-nombre">🔢 Verificación Admin</span>
+                            </a>
+                            <a href="#etapa-8-factura-taller" onclick="enfocarPasoFlujo('etapa-8-factura-taller', event)" class="nav-rapida-paso" style="border-top: 3px solid #10b981;">
+                                <span class="nav-rapida-num" style="color: #34d399;">PASO 8</span>
+                                <span class="nav-rapida-nombre">🧾 Factura Taller</span>
+                            </a>
+                            <a href="#etapa-9-revision-supervisor" onclick="enfocarPasoFlujo('etapa-9-revision-supervisor', event)" class="nav-rapida-paso" style="border-top: 3px solid #f59e0b;">
+                                <span class="nav-rapida-num" style="color: #fbbf24;">PASO 9</span>
+                                <span class="nav-rapida-nombre">🔍 Revisión Factura</span>
+                            </a>
+                            <a href="#etapa-10-doc-contable" onclick="enfocarPasoFlujo('etapa-10-doc-contable', event)" class="nav-rapida-paso" style="border-top: 3px solid #10b981;">
+                                <span class="nav-rapida-num" style="color: #86efac;">PASO 10</span>
+                                <span class="nav-rapida-nombre">🏁 Cierre Contable</span>
+                            </a>
+                            <a href="#etapa-11-garantia" onclick="enfocarPasoFlujo('etapa-11-garantia', event)" class="nav-rapida-paso" style="border-top: 3px solid #a855f7;">
+                                <span class="nav-rapida-num" style="color: #c084fc;">PASO 11</span>
+                                <span class="nav-rapida-nombre">🛡️ Garantía</span>
+                            </a>
+
+                        </div>
+                    </div>
+
+                    <!-- ======================================================== -->
+                    <!-- SECUENCIA VISUAL COMPLETA CON TARJETAS SEPARADAS         -->
+                    <!-- ======================================================== -->
+                    <div id="diagrama-pasos-container" style="display: flex; flex-direction: column; gap: 0;">
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 1: REPORTE INICIAL                              -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-1-reporte" class="flujo-step-box flujo-step-todos flujo-step-menor10k flujo-step-mayor10k">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #0284c7;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #38bdf8;">PASO 1:</span> Generación del Reporte de Falla
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-chofer">🚗 Chofer (Emisor)</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    <span class="role-pill role-pill-jefatura">👑 Jefatura (Receptores)</span>
+                                </div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 1.1: ACCIÓN DEL CHOFER -->
+                            <div class="flujo-box flujo-box-chofer">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; color: #38bdf8; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            ⚡ ACCIÓN 1.1
+                                        </span>
+                                        <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                                    </div>
+                                    <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        INICIO DEL TICKET
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        📝
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Captura de falla mecánica y firma digital
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            El chofer ingresa número de unidad, kilometraje actual, describe los síntomas de la falla y plasma su <strong>firma autógrafa en pantalla</strong> para autenticar el reporte.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLECHA SEPARADORA -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #0284c7;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #0284c7; color: #38bdf8;">
+                                    <span>📨 Transmisión en tiempo real vía portal</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #0284c7;"></div>
+                                <div class="flujo-flecha-punta" style="color: #0284c7;">▼</div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 1.2: BANDEJA DE REPORTES -->
+                            <div class="flujo-box flujo-box-supervisor">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            📬 BANDEJA 1.2
+                                        </span>
+                                        <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                        <span class="role-pill role-pill-jefatura">👑 Jefatura</span>
+                                    </div>
+                                    <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        ESTADO: PENDIENTE
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        📥
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Recepción en "Bandeja de Reportes (Tickets Externos)"
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            El reporte se enlista con estatus <em>Pendiente</em> para que el Supervisor y Jefatura evalúen la falla y la zona de la unidad.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- FLECHA DE CONEXIÓN A PASO 2 -->
+                        <div class="flujo-flecha-conector">
+                            <div class="flujo-flecha-linea" style="background: #f59e0b; height: 20px;"></div>
+                            <div class="flujo-flecha-badge" style="border-color: #f59e0b; color: #fbbf24;">
+                                <span>🔍 Supervisor evalúa la falla y el COPE de la unidad</span>
+                            </div>
+                            <div class="flujo-flecha-linea" style="background: #f59e0b; height: 20px;"></div>
+                            <div class="flujo-flecha-punta" style="color: #f59e0b;">▼</div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 2: ASIGNACIÓN DE TALLER                         -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-2-asignacion" class="flujo-step-box flujo-step-todos flujo-step-menor10k flujo-step-mayor10k">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #f59e0b;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #fbbf24;">PASO 2:</span> Evaluación y Asignación de Proveedor
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                    <span class="role-pill role-pill-taller">🔧 Taller Mecánico (Proveedor)</span>
+                                </div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 2.1: ACCIÓN SUPERVISOR -->
+                            <div class="flujo-box flujo-box-supervisor">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            ⚡ ACCIÓN 2.1
+                                        </span>
+                                        <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    </div>
+                                    <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid #0284c7; color: #38bdf8; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        CANALIZACIÓN
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        🎯
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Selección y asignación del taller mecánico
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            El supervisor analiza la especialidad requerida, elige al taller mecánico de su catálogo y presiona <strong>"Asignar Taller"</strong> para abrir la orden.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLECHA SEPARADORA -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #10b981;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #10b981; color: #34d399;">
+                                    <span>📲 Notificación directa al portal del taller</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #10b981;"></div>
+                                <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 2.2: BANDEJA EN TALLER -->
+                            <div class="flujo-box flujo-box-taller">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            📬 BANDEJA 2.2
+                                        </span>
+                                        <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
+                                    </div>
+                                    <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid #0284c7; color: #38bdf8; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        ESTADO: ASIGNADO A TALLER
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        📋
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Recepción en "Bandeja de Tickets de Trabajo (Taller)"
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            El taller recibe la ficha técnica del vehículo para programar la llegada del chofer y preparar la revisión mecánica.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- FLECHA DE CONEXIÓN A PASO 3 -->
+                        <div class="flujo-flecha-conector">
+                            <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                            <div class="flujo-flecha-badge" style="border-color: #10b981; color: #34d399;">
+                                <span>🚗 Vehículo ingresa a instalaciones del taller</span>
+                            </div>
+                            <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                            <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 3: DIAGNÓSTICO Y COTIZACIÓN                    -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-3-cotizacion" class="flujo-step-box flujo-step-todos flujo-step-menor10k flujo-step-mayor10k">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #10b981;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #34d399;">PASO 3:</span> Diagnóstico Técnico y Cotización Formal
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-taller">🔧 Taller Mecánico (Emisor)</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    <span class="role-pill role-pill-admin">🏢 Administrador (Revisores)</span>
+                                </div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 3.1: ACCIÓN DEL TALLER -->
+                            <div class="flujo-box flujo-box-taller">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            ⚡ ACCIÓN 3.1
+                                        </span>
+                                        <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
+                                    </div>
+                                    <span style="background: rgba(168, 85, 247, 0.15); border: 1px solid #a855f7; color: #c084fc; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        PRESUPUESTO FORMAL
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        🔬
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Desglose de refacciones, mano de obra y evidencia
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            El taller captura piezas requeridas y costo de mano de obra. Adjunta <strong>fotos de piezas averiadas</strong> y el <strong>PDF de presupuesto oficial</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLECHA SEPARADORA -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #6366f1;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #6366f1; color: #a5b4fc;">
+                                    <span>📤 Envío de cotización digital al portal</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #6366f1;"></div>
+                                <div class="flujo-flecha-punta" style="color: #6366f1;">▼</div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 3.2: BANDEJA DE COTIZACIONES -->
+                            <div class="flujo-box flujo-box-admin">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #a5b4fc; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            📬 BANDEJA 3.2
+                                        </span>
+                                        <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                        <span class="role-pill role-pill-admin">🏢 Administrador</span>
+                                    </div>
+                                    <span style="background: rgba(168, 85, 247, 0.15); border: 1px solid #a855f7; color: #c084fc; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        ESTADO: COTIZACIÓN ENVIADA
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        💵
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Recepción en "Bandeja de Cotizaciones y Órdenes"
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            La cotización queda lista para validación económica. El sistema suma el importe total para determinar la ruta de autorización.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- FLECHA DE CONEXIÓN AL NODO DE DECISIÓN -->
+                        <div class="flujo-flecha-conector">
+                            <div class="flujo-flecha-linea" style="background: #6366f1; height: 22px;"></div>
+                            <div class="flujo-flecha-badge" style="border-color: #6366f1; color: #a5b4fc;">
+                                <span>⚖️ Verificación automática del umbral de $10,000 MXN</span>
+                            </div>
+                            <div class="flujo-flecha-linea" style="background: #6366f1; height: 22px;"></div>
+                            <div class="flujo-flecha-punta" style="color: #6366f1;">▼</div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 4: BIFURCACIÓN DE COSTOS TOTALMENTE SEPARADA    -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-4-bifurcacion" class="flujo-step-box flujo-step-todos flujo-step-menor10k flujo-step-mayor10k" style="position: relative;">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #6366f1;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #a5b4fc;">PASO 4:</span> Bifurcación Presupuestal y Aprobación
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    <span class="role-pill role-pill-admin">🏢 Administrador</span>
+                                    <span class="role-pill role-pill-corp">💼 Corporativos</span>
+                                </div>
+                            </div>
+
+                            <!-- NODO CENTRAL DE DECISIÓN -->
+                            <div class="flujo-box flujo-box-decision" style="text-align: center; padding: 22px 18px; margin-bottom: 20px;">
+                                <span style="background: rgba(129, 140, 248, 0.2); border: 1px solid #818cf8; color: #c7d2fe; font-size: 0.75rem; font-weight: 800; padding: 3px 14px; border-radius: 20px; display: inline-block; margin-bottom: 8px;">
+                                    ⚖️ PUNTO DE DECISIÓN PRESUPUESTAL
+                                </span>
+                                <h3 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.25rem; font-weight: 800;">
+                                    ¿El presupuesto excede los $10,000 MXN s/IVA?
+                                </h3>
+                                <p style="margin: 0; color: #cbd5e1; font-size: 0.85rem;">
+                                    El flujo se separa en <strong>dos carriles independientes</strong>:
+                                </p>
+                            </div>
+
+                            <!-- CONTENEDOR DE LAS 2 RUTAS SEPARADAS LADO A LADO -->
+                            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px;">
+                                
+                                <!-- ================= RUTA <= 10K ================= -->
+                                <div class="lane-cotizacion lane-menor10k flujo-rama-menor10k">
+                                    
+                                    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 16px;">
+                                        <span style="background: #10b981; color: #022c22; font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 6px;">
+                                            🟢 RUTA DIRECTA: COTIZACIÓN ≤ $10,000
+                                        </span>
+                                        <h4 style="margin: 0; color: #ffffff; font-size: 1rem; font-weight: 800;">
+                                            Aprobación Inmediata de Supervisión
+                                        </h4>
+                                        <div style="margin-top: 6px; display: flex; justify-content: center; gap: 6px;">
+                                            <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                            <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                            <span class="role-pill role-pill-taller">🔧 Taller</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flujo-box flujo-box-taller" style="border-color: #10b981;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                            <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #86efac; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+                                                PASO 4.1A
+                                            </span>
+                                            <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                        </div>
+                                        <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Supervisor autoriza con un clic
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            Verifica tabuladores y presiona <strong>"Aprobar y Asignar Orden"</strong>.
+                                        </p>
+                                    </div>
+
+                                    <div class="flujo-flecha-conector">
+                                        <div class="flujo-flecha-linea" style="background: #10b981;"></div>
+                                        <div class="flujo-flecha-badge" style="border-color: #10b981; color: #86efac;">
+                                            <span>Orden aprobada sin intermediarios</span>
+                                        </div>
+                                        <div class="flujo-flecha-linea" style="background: #10b981;"></div>
+                                        <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
+                                    </div>
+
+                                    <div class="flujo-box flujo-box-taller" style="border-color: #10b981;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                            <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #86efac; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+                                                PASO 4.2A
+                                            </span>
+                                            <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
+                                        </div>
+                                        <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Taller recibe visto bueno inmediato
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            La orden cambia a <strong>Aprobado</strong> para comprar refacciones.
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                                <!-- ================= RUTA > 10K ================= -->
+                                <div class="lane-cotizacion lane-mayor10k flujo-rama-mayor10k">
+                                    
+                                    <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 16px;">
+                                        <span style="background: #f59e0b; color: #451a03; font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 6px;">
+                                            🟠 RUTA ESCALADA: COTIZACIÓN > $10,000
+                                        </span>
+                                        <h4 style="margin: 0; color: #ffffff; font-size: 1rem; font-weight: 800;">
+                                            Autorización Multinivel
+                                        </h4>
+                                        <div style="margin-top: 6px; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;">
+                                            <span class="role-pill role-pill-supervisor">👨‍💼 Super</span>
+                                            <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                            <span class="role-pill role-pill-admin">🏢 Admin</span>
+                                            <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                            <span class="role-pill role-pill-corp">💼 Corp</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flujo-box flujo-box-supervisor" style="border-color: #f59e0b;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                            <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fde047; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+                                                PASO 4.1B
+                                            </span>
+                                            <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                        </div>
+                                        <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Supervisor escala cotización
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            Por superar $10,000, valida el informe y turna a nivel superior.
+                                        </p>
+                                    </div>
+
+                                    <div class="flujo-flecha-conector">
+                                        <div class="flujo-flecha-linea" style="background: #f59e0b;"></div>
+                                        <div class="flujo-flecha-badge" style="border-color: #f59e0b; color: #fde047;">
+                                            <span>Llega a bandeja especial +10,000</span>
+                                        </div>
+                                        <div class="flujo-flecha-linea" style="background: #f59e0b;"></div>
+                                        <div class="flujo-flecha-punta" style="color: #f59e0b;">▼</div>
+                                    </div>
+
+                                    <div class="flujo-box flujo-box-admin" style="border-color: #6366f1;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                            <span style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #a5b4fc; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+                                                PASO 4.2B
+                                            </span>
+                                            <span class="role-pill role-pill-admin">🏢 Administrador</span>
+                                        </div>
+                                        <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Administrador evalúa y pre-aprueba
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            Revisa en <em>"Cotizaciones +10,000"</em> y envía a Corporativos.
+                                        </p>
+                                    </div>
+
+                                    <div class="flujo-flecha-conector">
+                                        <div class="flujo-flecha-linea" style="background: #a855f7;"></div>
+                                        <div class="flujo-flecha-badge" style="border-color: #a855f7; color: #c084fc;">
+                                            <span>Turna a Corporativos *(aplica Delegación)*</span>
+                                        </div>
+                                        <div class="flujo-flecha-linea" style="background: #a855f7;"></div>
+                                        <div class="flujo-flecha-punta" style="color: #a855f7;">▼</div>
+                                    </div>
+
+                                    <div class="flujo-box flujo-box-corp" style="border-color: #a855f7;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                            <span style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #c084fc; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+                                                PASO 4.3B
+                                            </span>
+                                            <span class="role-pill role-pill-corp">💼 Corporativos</span>
+                                        </div>
+                                        <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Validación corporativa institucional
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            Emite el visto bueno final. Si no está, firma su <strong>Delegado por Ausencia</strong>.
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <!-- CONVERGENCIA DE AMBAS RUTAS HACIA PASO 5 -->
+                            <div class="flujo-flecha-conector" style="margin-top: 15px;">
+                                <div class="flujo-flecha-linea" style="background: #0284c7; height: 22px;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #0284c7; color: #38bdf8; background: #081322;">
+                                    <span>🛠️ Ambas rutas convergen: Orden aprobada para el taller</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #0284c7; height: 22px;"></div>
+                                <div class="flujo-flecha-punta" style="color: #0284c7;">▼</div>
+                            </div>
+
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 5: REPARACIÓN Y GENERACIÓN DEL PIN              -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-5-reparacion" class="flujo-step-box flujo-step-todos flujo-step-menor10k flujo-step-mayor10k">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #0284c7;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #38bdf8;">PASO 5:</span> Reparación en Taller y Generación de PIN
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                    <span class="role-pill role-pill-chofer">🚗 Chofer (Notificado)</span>
+                                </div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 5.1: ACCIÓN DE TALLER -->
+                            <div class="flujo-box flujo-box-taller">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            ⚡ ACCIÓN 5.1
+                                        </span>
+                                        <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
+                                    </div>
+                                    <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        TRABAJO MECÁNICO
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        🔧
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Taller efectúa la reparación y marca "Listo para Entrega"
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            Reemplaza refacciones autorizadas, realiza pruebas mecánicas y presiona el botón <strong>"Listo para Entrega"</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLECHA SEPARADORA -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #0284c7;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #0284c7; color: #38bdf8;">
+                                    <span>🔐 Generación automática del Código PIN en sistema</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #0284c7;"></div>
+                                <div class="flujo-flecha-punta" style="color: #0284c7;">▼</div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 5.2: RECEPCIÓN DEL PIN POR EL CHOFER -->
+                            <div class="flujo-box flujo-box-chofer">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; color: #38bdf8; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            📬 DESTINO 5.2
+                                        </span>
+                                        <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                                    </div>
+                                    <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        LISTA PARA ENTREGA
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        🔑
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Chofer recibe su Código PIN de recolección
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            El chofer recibe el <strong>Código PIN confidencial</strong> en su portal y acude al taller para inspeccionar y recoger la unidad.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- FLECHA DE CONEXIÓN A PASO 6 -->
+                        <div class="flujo-flecha-conector">
+                            <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                            <div class="flujo-flecha-badge" style="border-color: #10b981; color: #34d399;">
+                                <span>🤝 Chofer acude al taller e intercambia PIN</span>
+                            </div>
+                            <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                            <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 6: ENTREGA FÍSICA Y ARRANQUE DE RELOJ           -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-6-entrega" class="flujo-step-box flujo-step-todos flujo-step-menor10k flujo-step-mayor10k flujo-step-garantia">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #10b981;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #34d399;">PASO 6:</span> Entrega con PIN y Activación del Reloj de Garantía
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">⟷</span>
+                                    <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
+                                </div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 6.1: CANJE DE PIN -->
+                            <div class="flujo-box flujo-box-taller">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            ⚡ ACCIÓN 6.1
+                                        </span>
+                                        <span class="role-pill role-pill-taller">🔧 Taller</span>
+                                        <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                                    </div>
+                                    <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981; color: #86efac; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        ENTREGA FÍSICA
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        🏁
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Validación de PIN en sistema y entrega de llaves
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            El taller valida el PIN entregado por el chofer. El sistema autentica la entrega, registra la fecha/hora exacta y marca la unidad como <strong>Entregada</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLECHA SEPARADORA -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #a855f7;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #a855f7; color: #c084fc;">
+                                    <span>⏱️ EN ESTE INSTANTE EXACTO ARRANCA EL RELOJ</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #a855f7;"></div>
+                                <div class="flujo-flecha-punta" style="color: #a855f7;">▼</div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 6.2: INICIO DE GARANTÍA -->
+                            <div class="flujo-box" style="border: 2px solid #a855f7; background: rgba(168, 85, 247, 0.08);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #c084fc; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            HITO 6.2
+                                        </span>
+                                        <span class="role-pill role-pill-jefatura">👑 Jefatura</span>
+                                        <span class="role-pill role-pill-taller">🔧 Taller</span>
+                                    </div>
+                                    <span style="background: rgba(168, 85, 247, 0.25); border: 1px solid #a855f7; color: #e9d5ff; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        TEMPORIZADOR ACTIVO
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        ⏱️
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Arranque del tiempo de garantía ofrecido por ese taller
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            Inicia el conteo regresivo exacto (días, horas, minutos y segundos) configurado por Jefatura para este taller.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- FLECHA DE CONEXIÓN A PASO 7 -->
+                        <div class="flujo-flecha-conector">
+                            <div class="flujo-flecha-linea" style="background: #6366f1; height: 20px;"></div>
+                            <div class="flujo-flecha-badge" style="border-color: #6366f1; color: #a5b4fc;">
+                                <span>🔢 Turna al Administrador para auditar números de pedido y orden</span>
+                            </div>
+                            <div class="flujo-flecha-linea" style="background: #6366f1; height: 20px;"></div>
+                            <div class="flujo-flecha-punta" style="color: #6366f1;">▼</div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 7: AUDITORÍA DE NÚMEROS POR EL ADMINISTRADOR    -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-7-verificacion-admin" class="flujo-step-box flujo-step-todos flujo-step-menor10k flujo-step-mayor10k">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #6366f1;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #a5b4fc;">PASO 7:</span> Verificación de Número de Pedido y Orden
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-admin">🏢 Administrador (Auditor)</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">⟷</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                </div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 7.1: AUDITORÍA DE ADMINISTRADOR -->
+                            <div class="flujo-box flujo-box-admin">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #a5b4fc; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            ⚡ ACCIÓN 7.1
+                                        </span>
+                                        <span class="role-pill role-pill-admin">🏢 Administrador</span>
+                                    </div>
+                                    <span style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #a5b4fc; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        CONTROL DE NÚMEROS
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        🔢
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            El Administrador coteja Número de Pedido y Número de Orden
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            Revisa minuciosamente que los dos números subidos en las cotizaciones (<strong>número de pedido</strong> y <strong>número de orden</strong>) correspondan con exactitud a la asignación oficial.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLECHA SEPARADORA -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #6366f1;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #6366f1; color: #a5b4fc;">
+                                    <span>⚖️ Evaluación de validez de números</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #6366f1;"></div>
+                                <div class="flujo-flecha-punta" style="color: #6366f1;">▼</div>
+                            </div>
+
+                            <!-- BIFURCACIÓN DE NÚMEROS: CORRECTOS VS INCORRECTOS -->
+                            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                                
+                                <!-- CAMINO ROJO: NÚMEROS INCORRECTOS -->
+                                <div class="lane-cotizacion" style="background: rgba(239, 68, 68, 0.04); border: 2px solid #ef4444;">
+                                    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 12px;">
+                                        <span style="background: #ef4444; color: #ffffff; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
+                                            ❌ SI LOS NÚMEROS NO SON CORRECTOS
+                                        </span>
+                                        <h5 style="margin: 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Notificación por Correo al Supervisor
+                                        </h5>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #ef4444;">
+                                        <h5 style="margin: 0 0 4px 0; color: #fca5a5; font-size: 0.92rem; font-weight: 800;">
+                                            Administrador envía correo al Supervisor
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            Se envía una alerta por correo electrónico indicando qué número está erróneo para que el <strong>Supervisor lo modifique</strong> de inmediato.
+                                        </p>
+                                    </div>
+
+                                    <div class="flujo-flecha-conector">
+                                        <div class="flujo-flecha-linea" style="background: #ef4444;"></div>
+                                        <div class="flujo-flecha-badge" style="border-color: #ef4444; color: #fca5a5;">
+                                            <span>Supervisor corrige los números en sistema</span>
+                                        </div>
+                                        <div class="flujo-flecha-linea" style="background: #ef4444;"></div>
+                                        <div class="flujo-flecha-punta" style="color: #ef4444;">▼</div>
+                                    </div>
+
+                                    <div class="flujo-box flujo-box-supervisor">
+                                        <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.92rem; font-weight: 800;">
+                                            Re-evaluación del Administrador
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            Una vez corregidos los números por el Supervisor, el Administrador vuelve a revisarlos para autorizar la liberación.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- CAMINO VERDE: NÚMEROS CORRECTOS (LIBERACIÓN DEL TICKET) -->
+                                <div class="lane-cotizacion" style="background: rgba(16, 185, 129, 0.04); border: 2px solid #10b981;">
+                                    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 12px;">
+                                        <span style="background: #10b981; color: #022c22; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
+                                            ✅ SI AMBOS NÚMEROS ESTÁN CORRECTOS
+                                        </span>
+                                        <h5 style="margin: 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Administrador Libera el Ticket
+                                        </h5>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #10b981;">
+                                        <h5 style="margin: 0 0 4px 0; color: #86efac; font-size: 0.92rem; font-weight: 800;">
+                                            Liberación del ticket y apertura de permisos
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            El Administrador aprueba y libera el ticket. Esta acción desbloquea simultáneamente:
+                                        </p>
+                                        <ul style="margin: 4px 0 0 0; padding-left: 18px; color: #86efac; font-size: 0.78rem; line-height: 1.4;">
+                                            <li><strong>Permiso 1:</strong> Habilita el campo para que el <strong>Supervisor</strong> suba el número contable más adelante.</li>
+                                            <li><strong>Permiso 2:</strong> Libera el campo para que el <strong>Taller Mecánico</strong> suba su Factura fiscal.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- FLECHA DE CONEXIÓN A PASO 8 -->
+                        <div class="flujo-flecha-conector">
+                            <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                            <div class="flujo-flecha-badge" style="border-color: #10b981; color: #34d399;">
+                                <span>🧾 Taller notificado con campo liberado para subir su factura</span>
+                            </div>
+                            <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                            <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 8: SUBIDA DE FACTURA POR EL TALLER              -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-8-factura-taller" class="flujo-step-box flujo-step-todos flujo-step-menor10k flujo-step-mayor10k">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #10b981;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #34d399;">PASO 8:</span> Emisión y Carga de Factura Fiscal
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-taller">🔧 Taller Mecánico (Emisor)</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor (Revisor)</span>
+                                </div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 8.1: ACCIÓN DE SUBIDA POR TALLER -->
+                            <div class="flujo-box flujo-box-taller">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            ⚡ ACCIÓN 8.1
+                                        </span>
+                                        <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
+                                    </div>
+                                    <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        CARGA FISCAL
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        🧾
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Taller Mecánico sube su Factura en el campo liberado
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            Una vez liberado el ticket por el Administrador, el taller accede a su portal y sube los archivos de su factura electrónica (PDF y XML) con el desglose del trabajo realizado.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- FLECHA DE CONEXIÓN A PASO 9 -->
+                        <div class="flujo-flecha-conector">
+                            <div class="flujo-flecha-linea" style="background: #f59e0b; height: 20px;"></div>
+                            <div class="flujo-flecha-badge" style="border-color: #f59e0b; color: #fbbf24;">
+                                <span>🔍 Factura enviada a revisión del Supervisor</span>
+                            </div>
+                            <div class="flujo-flecha-linea" style="background: #f59e0b; height: 20px;"></div>
+                            <div class="flujo-flecha-punta" style="color: #f59e0b;">▼</div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 9: REVISIÓN DE FACTURA POR EL SUPERVISOR        -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-9-revision-supervisor" class="flujo-step-box flujo-step-todos flujo-step-menor10k flujo-step-mayor10k">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #f59e0b;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #fbbf24;">PASO 9:</span> Revisión y Validación de Factura por el Supervisor
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor (Revisor)</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">⟷</span>
+                                    <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
+                                </div>
+                            </div>
+
+                            <!-- NODO CENTRAL DE EVALUACIÓN DE FACTURA -->
+                            <div class="flujo-box flujo-box-decision" style="text-align: center; padding: 20px 18px; margin-bottom: 18px;">
+                                <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.75rem; font-weight: 800; padding: 3px 14px; border-radius: 20px; display: inline-block; margin-bottom: 8px;">
+                                    ⚖️ AUDITORÍA DE FACTURA POR SUPERVISOR
+                                </span>
+                                <h3 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.2rem; font-weight: 800;">
+                                    ¿La factura está correcta o tiene inconsistencias?
+                                </h3>
+                                <p style="margin: 0; color: #cbd5e1; font-size: 0.85rem;">
+                                    El supervisor revisa que los conceptos, montos y datos de la empresa sean los correctos:
+                                </p>
+                            </div>
+
+                            <!-- CONTENEDOR DE LAS 2 RUTAS DE FACTURA -->
+                            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                                
+                                <!-- CAMINO ROJO: FACTURA MAL O OTRA EMPRESA -->
+                                <div class="lane-cotizacion" style="background: rgba(239, 68, 68, 0.04); border: 2px solid #ef4444;">
+                                    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 12px;">
+                                        <span style="background: #ef4444; color: #ffffff; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
+                                            ❌ FACTURA ERRÓNEA O A OTRA EMPRESA
+                                        </span>
+                                        <h5 style="margin: 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Regreso y Notificación al Taller
+                                        </h5>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #ef4444;">
+                                        <h5 style="margin: 0 0 4px 0; color: #fca5a5; font-size: 0.92rem; font-weight: 800;">
+                                            Supervisor rechaza y regresa la factura
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            Si la factura está mal o se facturó a otra razón social/empresa, el Supervisor regresa el trámite y notifica al <strong>Taller Mecánico</strong> con el motivo del rechazo.
+                                        </p>
+                                    </div>
+
+                                    <div class="flujo-flecha-conector">
+                                        <div class="flujo-flecha-linea" style="background: #ef4444;"></div>
+                                        <div class="flujo-flecha-badge" style="border-color: #ef4444; color: #fca5a5;">
+                                            <span>Taller sube la factura corregida</span>
+                                        </div>
+                                        <div class="flujo-flecha-linea" style="background: #ef4444;"></div>
+                                        <div class="flujo-flecha-punta" style="color: #ef4444;">▼</div>
+                                    </div>
+
+                                    <div class="flujo-box flujo-box-taller">
+                                        <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.92rem; font-weight: 800;">
+                                            Nueva revisión del Supervisor
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            El taller emite la factura correcta y la vuelve a enviar al Supervisor para su aprobación definitiva.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- CAMINO VERDE: FACTURA CORRECTA (APROBADA) -->
+                                <div class="lane-cotizacion" style="background: rgba(16, 185, 129, 0.04); border: 2px solid #10b981;">
+                                    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 12px;">
+                                        <span style="background: #10b981; color: #022c22; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
+                                            ✅ SI TODO ESTÁ CORRECTO
+                                        </span>
+                                        <h5 style="margin: 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Aprobación de Factura
+                                        </h5>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #10b981;">
+                                        <h5 style="margin: 0 0 4px 0; color: #86efac; font-size: 0.92rem; font-weight: 800;">
+                                            Supervisor aprueba la factura fiscal
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            Verifica que la razón social, RFC, montos y sellos correspondan a la empresa. Presiona <strong>Aprobar Factura</strong>.
+                                        </p>
+                                    </div>
+
+                                    <div class="flujo-flecha-conector">
+                                        <div class="flujo-flecha-linea" style="background: #10b981;"></div>
+                                        <div class="flujo-flecha-badge" style="border-color: #10b981; color: #86efac;">
+                                            <span>Habilita captura de Documento Contable</span>
+                                        </div>
+                                        <div class="flujo-flecha-linea" style="background: #10b981;"></div>
+                                        <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
+                                    </div>
+
+                                    <div class="flujo-box flujo-box-supervisor">
+                                        <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.92rem; font-weight: 800;">
+                                            Avanza al cierre contable final
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            El ticket queda habilitado para que el Supervisor ingrese el folio de documento contable y concluya el trámite.
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- FLECHA DE CONEXIÓN A PASO 10 -->
+                        <div class="flujo-flecha-conector">
+                            <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                            <div class="flujo-flecha-badge" style="border-color: #10b981; color: #34d399;">
+                                <span>📑 Paso final: Captura de número de documento contable</span>
+                            </div>
+                            <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                            <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 10: NÚMERO CONTABLE Y FIN DEL PROCESO           -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-10-doc-contable" class="flujo-step-box flujo-step-todos flujo-step-menor10k flujo-step-mayor10k">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #10b981;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #34d399;">PASO 10:</span> Captura de Documento Contable y Fin del Proceso
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                    <span class="role-pill role-pill-jefatura">👑 Jefatura (Archivo y Liquidación)</span>
+                                </div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 10.1: CAPTURA DE NÚMERO CONTABLE -->
+                            <div class="flujo-box flujo-box-supervisor">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            ⚡ ACCIÓN 10.1
+                                        </span>
+                                        <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    </div>
+                                    <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #86efac; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        DOCUMENTO CONTABLE
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        📑
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            El Supervisor sube su Número de Documento Contable
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            Tras aprobar la factura correcta, el Supervisor ingresa en el sistema el <strong>número de documento contable</strong> correspondiente para saldar administrativamente la orden.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLECHA SEPARADORA -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #10b981;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #10b981; color: #34d399;">
+                                    <span>🏁 Registro contable finalizado exitosamente</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #10b981;"></div>
+                                <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 10.2: FIN DEL PROCESO -->
+                            <div class="flujo-box" style="border: 2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.98));">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: #10b981; color: #022c22; font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            🏁 HITO FINAL 10.2
+                                        </span>
+                                        <span class="role-pill role-pill-jefatura">👑 Jefatura</span>
+                                        <span class="role-pill role-pill-admin">🏢 Administrador</span>
+                                    </div>
+                                    <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981; color: #86efac; font-size: 0.75rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        PROCESO CONCLUIDO
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: #10b981; color: #022c22; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; font-weight: 800;">
+                                        ✅
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.15rem; font-weight: 800;">
+                                            Fin del Proceso: Ticket Cerrado y Archivado
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.85rem; line-height: 1.5;">
+                                            El ciclo regular del ticket concluye al 100%. La orden cuenta con reporte del chofer, diagnóstico y evidencias del taller, aprobación presupuestal, entrega física con PIN, validación de números de pedido/orden, factura fiscal aprobada y documento contable registrado para auditorías.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- CONECTOR HACIA CIRCUITO DE GARANTÍA -->
+                        <div class="flujo-connector-garantia" style="display: flex; justify-content: center; align-items: center; margin: 30px 0 10px 0;">
+                            <div style="display: flex; align-items: center; gap: 10px; background: rgba(168, 85, 247, 0.15); border: 1px dashed #a855f7; padding: 10px 22px; border-radius: 25px; color: #c084fc; font-size: 0.85rem; font-weight: 800;">
+                                <span>🔁</span> EN CASO DE QUE LA FALLA REINCIDA O PERSISTA (CIRCUITO DE GARANTÍA) <span>🔁</span>
+                            </div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 11: CIRCUITO DE GARANTÍA TOTALMENTE SEPARADO   -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-11-garantia" class="flujo-step-box flujo-step-todos flujo-step-garantia">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #a855f7;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #c084fc;">PASO 11:</span> Solicitud de Garantía y Validación de Límite de Tiempo
+                                </div>
+                                <div class="etapa-header-roles" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                                    <span class="role-pill role-pill-jefatura">👑 Jefatura</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    <span class="role-pill role-pill-taller">🔧 Taller</span>
+                                    <button type="button" onclick="descargarDiagramaFlujo()" style="margin-left: 8px; padding: 4px 10px; border-radius: 6px; border: 1px solid #10b981; background: rgba(16, 185, 129, 0.25); color: #86efac; font-size: 0.73rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                        📥 Descargar PDF
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 11.1: ACCIÓN CHOFER -->
+                            <div class="flujo-box flujo-box-chofer">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; color: #38bdf8; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                            ⚡ ACCIÓN 11.1
+                                        </span>
+                                        <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                                    </div>
+                                    <span style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #c084fc; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        SOLICITUD DE GARANTÍA
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        🛡️
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Chofer selecciona "¿Es Garantía?" e introduce folio del ticket original
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            Al detectar reincidencia en el vehículo entregado, el chofer inicia un reporte de garantía ingresando el número del ticket previo con el que el taller realizó el trabajo.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLECHA SEPARADORA -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #a855f7;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #a855f7; color: #c084fc;">
+                                    <span>⏱️ Consulta en vivo: Fecha actual vs Fecha entrega + Límite del taller</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #a855f7;"></div>
+                                <div class="flujo-flecha-punta" style="color: #a855f7;">▼</div>
+                            </div>
+
+                            <!-- NODO DE DECISIÓN DE GARANTÍA -->
+                            <div class="flujo-box flujo-box-decision" style="text-align: center; padding: 22px 18px; margin-bottom: 20px;">
+                                <span style="background: rgba(168, 85, 247, 0.25); border: 1px solid #a855f7; color: #e9d5ff; font-size: 0.75rem; font-weight: 800; padding: 3px 14px; border-radius: 20px; display: inline-block; margin-bottom: 8px;">
+                                    ⚖️ EVALUACIÓN AUTOMÁTICA DE VIGENCIA
+                                </span>
+                                <h3 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.25rem; font-weight: 800;">
+                                    ¿El tiempo transcurrido está dentro del límite de ese taller?
+                                </h3>
+                                <p style="margin: 0; color: #cbd5e1; font-size: 0.85rem;">
+                                    El sistema compara los días/horas/segundos exactos configurados para ese taller:
+                                </p>
+                            </div>
+
+                            <!-- CONTENEDOR DE LOS 2 RESULTADOS SEPARADOS -->
+                            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                                
+                                <!-- ================= RESULTADO A: DENTRO DE GARANTÍA ================= -->
+                                <div class="lane-cotizacion" style="background: rgba(16, 185, 129, 0.04); border: 2px solid #10b981;">
+                                    
+                                    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 14px;">
+                                        <span style="background: #10b981; color: #022c22; font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 6px;">
+                                            ✅ DENTRO DEL TIEMPO LÍMITE
+                                        </span>
+                                        <h4 style="margin: 0; color: #ffffff; font-size: 1rem; font-weight: 800;">
+                                            Garantía Aplicada ($0 Costo)
+                                        </h4>
+                                        <div style="margin-top: 6px; display: flex; justify-content: center; gap: 6px;">
+                                            <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                            <span class="role-pill role-pill-taller">🔧 Taller</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #10b981; background: rgba(16, 185, 129, 0.06);">
+                                        <h5 style="margin: 0 0 6px 0; color: #86efac; font-size: 0.95rem; font-weight: 800;">
+                                            Trámite aprobado y ticket congelado
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">
+                                            El ticket se reactiva en estado <strong>En Asignación/Retrabajo</strong>. Se inhabilitan cobros en bandejas regulares para proteger la orden.
+                                        </p>
+                                    </div>
+
+                                    <div class="flujo-flecha-conector">
+                                        <div class="flujo-flecha-linea" style="background: #10b981;"></div>
+                                        <div class="flujo-flecha-badge" style="border-color: #10b981; color: #86efac;">
+                                            <span>Canalización prioritaria sin costo</span>
+                                        </div>
+                                        <div class="flujo-flecha-linea" style="background: #10b981;"></div>
+                                        <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
+                                    </div>
+
+                                    <div class="flujo-box flujo-box-taller">
+                                        <h5 style="margin: 0 0 6px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Reingreso obligatorio al taller
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">
+                                            Llega a la bandeja <strong>Garantías y Retrabajos</strong> de Supervisión para reasignar y al Taller para corregir el vehículo sin costo alguno.
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                                <!-- ================= RESULTADO B: GARANTÍA EXPIRADA ================= -->
+                                <div class="lane-cotizacion" style="background: rgba(239, 68, 68, 0.04); border: 2px solid #ef4444;">
+                                    
+                                    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 14px;">
+                                        <span style="background: #ef4444; color: #ffffff; font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 6px;">
+                                            ❌ TIEMPO LÍMITE SUPERADO
+                                        </span>
+                                        <h4 style="margin: 0; color: #ffffff; font-size: 1rem; font-weight: 800;">
+                                            Bloqueo Automático Inmediato
+                                        </h4>
+                                        <div style="margin-top: 6px; display: flex; justify-content: center; gap: 6px;">
+                                            <span class="role-pill role-pill-chofer">🚗 Chofer Notificado</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.06);">
+                                        <h5 style="margin: 0 0 6px 0; color: #fca5a5; font-size: 0.95rem; font-weight: 800;">
+                                            Rechazo de garantía por el sistema
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">
+                                            El sistema detecta que transcurrieron más días/horas que los acordados por ese taller. <strong>Bloquea inmediatamente la solicitud</strong>.
+                                        </p>
+                                    </div>
+
+                                    <div class="flujo-flecha-conector">
+                                        <div class="flujo-flecha-linea" style="background: #ef4444;"></div>
+                                        <div class="flujo-flecha-badge" style="border-color: #ef4444; color: #fca5a5;">
+                                            <span>Alerta roja explicativa en pantalla</span>
+                                        </div>
+                                        <div class="flujo-flecha-linea" style="background: #ef4444;"></div>
+                                        <div class="flujo-flecha-punta" style="color: #ef4444;">▼</div>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #ef4444;">
+                                        <h5 style="margin: 0 0 6px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Aviso al chofer para nuevo reporte
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">
+                                            Se le informa detalladamente cuánto tiempo pasó y se le instruye a emitir un <strong>nuevo reporte regular</strong> sujeto a cotización ordinaria.
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
 
@@ -2093,7 +3873,7 @@
         <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
     </div>
 
-    <script src="/static/script.js?v=1000013"></script>
+    <script src="/static/script.js?v=1000025"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js?v=6"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
@@ -2102,6 +3882,70 @@
     <script src="/static/facturas_principal.js?v=61"></script>
     <script src="/static/seccion_reportes.js?v=1000006"></script>
     <script src="/static/cotizaciones_10k.js?v=26"></script>
+
+    
+    <!-- MODAL AJUSTAR TIEMPO DE GARANTÍA POR JEFATURA -->
+    <div id="modal-ajustar-garantia-jefatura" class="modal-overlay" style="display: none; z-index: 99999; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(4px);">
+        <div class="modal-box" style="max-width: 480px; width: 92%; background: #0b1c30; border: 1px solid #10b981; border-radius: 14px; padding: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); position: relative;">
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1f395a; padding-bottom: 12px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.8rem;">⏱️</span>
+                    <div>
+                        <h3 style="margin: 0; color: #ffffff; font-size: 1.15rem; font-weight: 700;">Ajustar Tiempo de Garantía</h3>
+                        <p style="margin: 2px 0 0 0; color: #86efac; font-size: 0.82rem;" id="ajuste-taller-nombre">Taller</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="cerrarModal('modal-ajustar-garantia-jefatura')" style="background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+
+            <input type="hidden" id="ajuste-taller-usuario">
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #34d399; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px;">
+                    Configuración de Tiempo de Garantía (Días, Horas, Minutos, Segundos):
+                </label>
+                
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px;">
+                    <div>
+                        <label style="display: block; color: #94a3b8; font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; text-align: center;">DÍAS</label>
+                        <input type="number" id="ajuste-taller-dias" min="0" max="365" value="0" oninput="actualizarPreviewAjusteJefatura()" style="width: 100%; box-sizing: border-box; padding: 10px 4px; border-radius: 8px; border: 1px solid #1f395a; background: #081322; color: #ffffff; font-size: 1.05rem; font-weight: 700; text-align: center;">
+                    </div>
+                    <div>
+                        <label style="display: block; color: #94a3b8; font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; text-align: center;">HORAS</label>
+                        <input type="number" id="ajuste-taller-horas" min="0" max="23" value="0" oninput="actualizarPreviewAjusteJefatura()" style="width: 100%; box-sizing: border-box; padding: 10px 4px; border-radius: 8px; border: 1px solid #1f395a; background: #081322; color: #ffffff; font-size: 1.05rem; font-weight: 700; text-align: center;">
+                    </div>
+                    <div>
+                        <label style="display: block; color: #94a3b8; font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; text-align: center;">MINUTOS</label>
+                        <input type="number" id="ajuste-taller-minutos" min="0" max="59" value="0" oninput="actualizarPreviewAjusteJefatura()" style="width: 100%; box-sizing: border-box; padding: 10px 4px; border-radius: 8px; border: 1px solid #1f395a; background: #081322; color: #ffffff; font-size: 1.05rem; font-weight: 700; text-align: center;">
+                    </div>
+                    <div>
+                        <label style="display: block; color: #94a3b8; font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; text-align: center;">SEGUNDOS</label>
+                        <input type="number" id="ajuste-taller-segundos" min="0" max="59" value="0" oninput="actualizarPreviewAjusteJefatura()" style="width: 100%; box-sizing: border-box; padding: 10px 4px; border-radius: 8px; border: 1px solid #1f395a; background: #081322; color: #ffffff; font-size: 1.05rem; font-weight: 700; text-align: center;">
+                    </div>
+                </div>
+
+                <!-- Preview del tiempo -->
+                <div id="ajuste-taller-preview" style="color: #34d399; font-size: 0.88rem; font-weight: 600; text-align: center; margin-bottom: 14px; background: rgba(16, 185, 129, 0.1); padding: 8px 12px; border-radius: 8px; border: 1px dashed #10b981;">
+                    Tiempo total: 30 días
+                </div>
+
+                <!-- Botones de selección rápida -->
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button type="button" style="padding: 4px 10px; font-size: 0.78rem; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="setValoresGarantiaJefatura(30, 0, 0, 0)">30 días</button>
+                    <button type="button" style="padding: 4px 10px; font-size: 0.78rem; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="setValoresGarantiaJefatura(15, 0, 0, 0)">15 días</button>
+                    <button type="button" style="padding: 4px 10px; font-size: 0.78rem; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="setValoresGarantiaJefatura(0, 1, 0, 0)">1 hr</button>
+                    <button type="button" style="padding: 4px 10px; font-size: 0.78rem; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="setValoresGarantiaJefatura(0, 0, 10, 0)">10 min</button>
+                    <button type="button" style="padding: 4px 10px; font-size: 0.78rem; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="setValoresGarantiaJefatura(0, 0, 0, 30)">30 seg</button>
+                    <button type="button" style="padding: 4px 10px; font-size: 0.78rem; background: #334155; color: #f87171; border: 1px solid #475569; border-radius: 6px; cursor: pointer;" onclick="setValoresGarantiaJefatura(0, 0, 0, 0)">Limpiar</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn-secondary" onclick="cerrarModal('modal-ajustar-garantia-jefatura')" style="background: #334155; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Cancelar</button>
+                <button type="button" onclick="guardarAjusteGarantiaJefatura()" style="background: #10b981; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">💾 Guardar Ajuste</button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL ALERTA CORTA DELEGACIÓN (ACCESO A SECCIÓN POR BOTÓN AMARILLO) -->
     <div id="modal-alerta-corta-delegacion" class="modal-overlay" style="display: none; z-index: 99999999; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(4px);" onclick="if(event.target === this) cerrarModalAlertaCortaDelegacion()">

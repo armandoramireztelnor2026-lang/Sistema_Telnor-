@@ -350,8 +350,22 @@ def validar_codigo():
                 return jsonify({"status": "error", "message": "Esta factura aún no tiene un código de liberación activo."})
             if str(codigo_real) == str(codigo_ingresado):
                 f['entregado'] = "Sí"
+                fecha_entrega_ahora = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                f['fecha_entrega'] = fecha_entrega_ahora
                 f['liberado_admin'] = False  # Bloqueado hasta que Admin lo libere
                 escribir_json('facturas.json', data)
+
+                import re
+                retro = f.get('retro', '')
+                m_tick = re.search(r'\[TICKET:(.*?)\]', str(retro))
+                ticket_id_ent = m_tick.group(1) if m_tick else f.get('id_reporte', str(id_factura))
+                reportes_data = leer_json('reportes.json')
+                for r in reportes_data.get('reportes', []):
+                    if str(r.get('id', '')).strip().upper() == str(ticket_id_ent).strip().upper():
+                        r['entregado'] = 'Sí'
+                        r['fecha_entrega'] = fecha_entrega_ahora
+                        break
+                escribir_json('reportes.json', reportes_data)
                 
                 proveedor_nombre = f.get('proveedor', '')
                 usuarios_data = leer_json("usuarios.json")

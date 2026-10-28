@@ -445,7 +445,7 @@ window.abrirVistaDelegada = function(tipo) {
 function cambiarVistaAdmin(vista) {
     localStorage.setItem('activeViewAdmin', vista);
     marcarBotonActivo(vista);
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica', 'retrabajo', 'tiempo-garantia'];
+    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica', 'retrabajo', 'tiempo-garantia', 'flujo-trabajo'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';
@@ -456,6 +456,7 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'documentos_contables') vistaId = 'documentos-contables';
     if (vista === 'liberar_doc_contable') vistaId = 'liberar-doc-contable';
     if (vista === 'tiempo_garantia') vistaId = 'tiempo-garantia';
+    if (vista === 'flujo_trabajo') vistaId = 'flujo-trabajo';
 
     let elVista = document.getElementById('vista-' + vistaId);
     if (elVista) elVista.style.display = 'block';
@@ -473,7 +474,13 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'reportes' && typeof cargarReportesAdmin === 'function') cargarReportesAdmin();
     if (vista === 'analitica' && typeof cargarAnalitica === 'function') cargarAnalitica();
     if (vista === 'retrabajo' && typeof cargarRetrabajosAdmin === 'function') cargarRetrabajosAdmin();
-    if (vista === 'tiempo-garantia' || vista === 'tiempo_garantia') cargarListaUsuarios('proveedores', 'tabla-tiempo-garantia');
+    if (vista === 'tiempo-garantia' || vista === 'tiempo_garantia') {
+        if (typeof cargarTiempoGarantiaJefatura === 'function') {
+            cargarTiempoGarantiaJefatura();
+        } else {
+            cargarListaUsuarios('proveedores', 'tabla-tiempo-garantia');
+        }
+    }
     if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'facturas-finales' || vista === 'documentos_contables' || vista === 'documentos-contables' || vista === 'liberar-doc-contable' || vista === 'liberar_doc_contable' || vista === 'archivo') && typeof cargarFacturas === 'function') cargarFacturas();
     if (vista === 'cotizaciones-10k' && typeof cargarCotizaciones10k === 'function') cargarCotizaciones10k();
 }
@@ -2231,3 +2238,589 @@ document.addEventListener('click', function (e) {
     buttons.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 });
+
+
+// ==========================================
+// GESTION DE TIEMPO / GARANTIA POR TALLER (JEFATURA Y PROVEEDORES)
+// ==========================================
+
+function formatTiempoTexto(dias, horas, minutos, segundos) {
+    let partes = [];
+    if (dias > 0) partes.push(`${dias} día${dias !== 1 ? 's' : ''}`);
+    if (horas > 0) partes.push(`${horas} hora${horas !== 1 ? 's' : ''}`);
+    if (minutos > 0) partes.push(`${minutos} minuto${minutos !== 1 ? 's' : ''}`);
+    if (segundos > 0 || partes.length === 0) partes.push(`${segundos} segundo${segundos !== 1 ? 's' : ''}`);
+    return partes.join(', ');
+}
+
+async function cargarTiempoGarantiaJefatura() {
+    const tbody = document.getElementById('tabla-tiempo-garantia');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#94a3b8;">Cargando tiempos de garantía de talleres...</td></tr>';
+
+    try {
+        const res = await fetch('/api/garantia/talleres_tiempo');
+        const data = await res.json();
+        if (data.status !== 'success' || !data.talleres || data.talleres.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#94a3b8;">No hay talleres registrados.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        data.talleres.forEach(t => {
+            const tr = document.createElement('tr');
+            
+            let fotoSrc = '';
+            if (t.foto_ruta) {
+                fotoSrc = (t.foto_ruta.startsWith('/') || t.foto_ruta.startsWith('http')) 
+                    ? t.foto_ruta 
+                    : '/static/logos_proveedores/' + t.foto_ruta;
+            }
+
+            const logoHtml = fotoSrc 
+                ? `<img src="${fotoSrc}" alt="Logo" style="width:36px; height:36px; border-radius:8px; object-fit:cover; border:1px solid #1f395a;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'width:36px; height:36px; border-radius:8px; background:#1e293b; display:flex; align-items:center; justify-content:center; font-size:1.1rem; border:1px solid #334155;\'>🔧</div>';">`
+                : `<div style="width:36px; height:36px; border-radius:8px; background:#1e293b; display:flex; align-items:center; justify-content:center; font-size:1.1rem; border:1px solid #334155;">🔧</div>`;
+
+            const textoTiempoPill = t.tiempo_formateado || (t.dias_garantia + ' días');
+            const badgeGarantia = `<span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-weight: 700; padding: 4px 12px; border-radius: 9999px; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 5px;">⏱️ ${textoTiempoPill}</span>`;
+
+            const estadoHtml = t.garantia_configurada
+                ? `<span style="color: #34d399; font-size: 0.82rem; font-weight: 600;">✅ Notificado por taller</span><br><small style="color: #64748b; font-size: 0.75rem;">${t.fecha_actualizacion || ''}</small>`
+                : `<span style="color: #f59e0b; font-size: 0.82rem; font-weight: 600;">⏳ Base por defecto</span><br><small style="color: #64748b; font-size: 0.75rem;">30 días estándar</small>`;
+
+            const escapedUsuario = (t.usuario || '').replace(/'/g, "\'");
+            const escapedNombre = (t.nombre_proveedor || '').replace(/'/g, "\'");
+
+            const diasVal = t.dias_garantia !== undefined ? t.dias_garantia : 30;
+            const horasVal = t.horas_garantia || 0;
+            const minsVal = t.minutos_garantia || 0;
+            const segsVal = t.segundos_garantia || 0;
+
+            tr.innerHTML = `
+                <td style="text-align:center;">${logoHtml}</td>
+                <td><strong>${t.nombre_proveedor}</strong><br><small style="color:#94a3b8;">Usuario: ${t.usuario}</small></td>
+                <td>${t.encargado || 'N/A'}</td>
+                <td><div>📞 ${t.telefono || 'N/A'}</div><small style="color:#94a3b8;">✉️ ${t.correo || 'N/A'}</small></td>
+                <td>${t.ciudad || 'N/A'} / ${t.cope || 'N/A'}</td>
+                <td style="text-align:center;">${badgeGarantia}</td>
+                <td>${estadoHtml}</td>
+                <td style="text-align:center;">
+                    <button type="button" class="btn-primary" style="padding: 6px 12px; font-size: 0.82rem; background: #0284c7; border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" onclick="abrirModalAjustarGarantiaJefatura('${escapedUsuario}', '${escapedNombre}', ${diasVal}, ${horasVal}, ${minsVal}, ${segsVal})">
+                        ⚙️ Ajustar Tiempo
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error('Error al cargar tiempos de garantía:', err);
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#ef4444;">Error al cargar la información de garantías.</td></tr>';
+    }
+}
+window.cargarTiempoGarantiaJefatura = cargarTiempoGarantiaJefatura;
+
+function setValoresGarantiaJefatura(d, h, m, s) {
+    if (document.getElementById('ajuste-taller-dias')) document.getElementById('ajuste-taller-dias').value = d;
+    if (document.getElementById('ajuste-taller-horas')) document.getElementById('ajuste-taller-horas').value = h;
+    if (document.getElementById('ajuste-taller-minutos')) document.getElementById('ajuste-taller-minutos').value = m;
+    if (document.getElementById('ajuste-taller-segundos')) document.getElementById('ajuste-taller-segundos').value = s;
+    actualizarPreviewAjusteJefatura();
+}
+window.setValoresGarantiaJefatura = setValoresGarantiaJefatura;
+
+function actualizarPreviewAjusteJefatura() {
+    const d = parseInt(document.getElementById('ajuste-taller-dias')?.value || 0, 10) || 0;
+    const h = parseInt(document.getElementById('ajuste-taller-horas')?.value || 0, 10) || 0;
+    const m = parseInt(document.getElementById('ajuste-taller-minutos')?.value || 0, 10) || 0;
+    const s = parseInt(document.getElementById('ajuste-taller-segundos')?.value || 0, 10) || 0;
+    
+    const prev = document.getElementById('ajuste-taller-preview');
+    if (prev) {
+        const texto = formatTiempoTexto(d, h, m, s);
+        prev.innerHTML = `<strong>Tiempo total:</strong> ${texto}`;
+    }
+}
+window.actualizarPreviewAjusteJefatura = actualizarPreviewAjusteJefatura;
+
+function abrirModalAjustarGarantiaJefatura(usuario, nombre, dias, horas, minutos, segundos) {
+    const modal = document.getElementById('modal-ajustar-garantia-jefatura');
+    if (!modal) return;
+    document.getElementById('ajuste-taller-usuario').value = usuario;
+    document.getElementById('ajuste-taller-nombre').textContent = nombre;
+    document.getElementById('ajuste-taller-dias').value = dias !== undefined ? dias : 30;
+    document.getElementById('ajuste-taller-horas').value = horas || 0;
+    document.getElementById('ajuste-taller-minutos').value = minutos || 0;
+    document.getElementById('ajuste-taller-segundos').value = segundos || 0;
+    actualizarPreviewAjusteJefatura();
+    modal.style.display = 'flex';
+}
+window.abrirModalAjustarGarantiaJefatura = abrirModalAjustarGarantiaJefatura;
+
+async function guardarAjusteGarantiaJefatura() {
+    const usuario = document.getElementById('ajuste-taller-usuario').value;
+    const nombre = document.getElementById('ajuste-taller-nombre').textContent || 'Taller';
+    const dias = parseInt(document.getElementById('ajuste-taller-dias').value || 0, 10) || 0;
+    const horas = parseInt(document.getElementById('ajuste-taller-horas').value || 0, 10) || 0;
+    const minutos = parseInt(document.getElementById('ajuste-taller-minutos').value || 0, 10) || 0;
+    const segundos = parseInt(document.getElementById('ajuste-taller-segundos').value || 0, 10) || 0;
+
+    if (!usuario) {
+        alert('Taller no identificado.');
+        return;
+    }
+
+    const totalSegundos = dias * 86400 + horas * 3600 + minutos * 60 + segundos;
+    if (totalSegundos <= 0) {
+        alert('Por favor ingrese un tiempo de garantía mayor a 0 segundos.');
+        return;
+    }
+    if (dias > 365) {
+        alert('El tiempo de garantía no puede exceder 365 días.');
+        return;
+    }
+
+    const tiempoTexto = formatTiempoTexto(dias, horas, minutos, segundos);
+
+    // CONFIRMACION ANTES DE GUARDAR
+    const confirmado = confirm(`¿Estás seguro de que deseas guardar y aplicar este tiempo de garantía para "${nombre}"?
+
+Tiempo asignado: ${tiempoTexto}`);
+    if (!confirmado) {
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/garantia/taller/actualizar_dias', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                usuario: usuario, 
+                dias_garantia: dias,
+                horas_garantia: horas,
+                minutos_garantia: minutos,
+                segundos_garantia: segundos
+            })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            alert(data.message || 'Tiempo de garantía actualizado exitosamente.');
+            cerrarModal('modal-ajustar-garantia-jefatura');
+            cargarTiempoGarantiaJefatura();
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo actualizar el tiempo de garantía.'));
+        }
+    } catch (err) {
+        console.error('Error al guardar ajuste de garantía:', err);
+        alert('Ocurrió un error al guardar el ajuste de garantía.');
+    }
+}
+window.guardarAjusteGarantiaJefatura = guardarAjusteGarantiaJefatura;
+
+// ==========================================
+// MODAL TIEMPO / GARANTIA DEL TALLER (PROVEEDORES)
+// ==========================================
+function setValoresGarantiaProv(d, h, m, s) {
+    if (document.getElementById('input-dias-garantia-prov')) document.getElementById('input-dias-garantia-prov').value = d;
+    if (document.getElementById('input-horas-garantia-prov')) document.getElementById('input-horas-garantia-prov').value = h;
+    if (document.getElementById('input-minutos-garantia-prov')) document.getElementById('input-minutos-garantia-prov').value = m;
+    if (document.getElementById('input-segundos-garantia-prov')) document.getElementById('input-segundos-garantia-prov').value = s;
+    actualizarPreviewGarantiaProv();
+}
+window.setValoresGarantiaProv = setValoresGarantiaProv;
+
+function actualizarPreviewGarantiaProv() {
+    const d = parseInt(document.getElementById('input-dias-garantia-prov')?.value || 0, 10) || 0;
+    const h = parseInt(document.getElementById('input-horas-garantia-prov')?.value || 0, 10) || 0;
+    const m = parseInt(document.getElementById('input-minutos-garantia-prov')?.value || 0, 10) || 0;
+    const s = parseInt(document.getElementById('input-segundos-garantia-prov')?.value || 0, 10) || 0;
+    
+    const prev = document.getElementById('preview-garantia-prov');
+    if (prev) {
+        const texto = formatTiempoTexto(d, h, m, s);
+        prev.innerHTML = `<strong>Tiempo ofrecido:</strong> ${texto}`;
+    }
+}
+window.actualizarPreviewGarantiaProv = actualizarPreviewGarantiaProv;
+
+function abrirModalGarantiaProveedor() {
+    const modal = document.getElementById('modal-garantia-proveedor');
+    if (modal) {
+        actualizarPreviewGarantiaProv();
+        modal.style.display = 'flex';
+    }
+}
+window.abrirModalGarantiaProveedor = abrirModalGarantiaProveedor;
+
+async function guardarGarantiaProveedor() {
+    const dias = parseInt(document.getElementById('input-dias-garantia-prov')?.value || 0, 10) || 0;
+    const horas = parseInt(document.getElementById('input-horas-garantia-prov')?.value || 0, 10) || 0;
+    const minutos = parseInt(document.getElementById('input-minutos-garantia-prov')?.value || 0, 10) || 0;
+    const segundos = parseInt(document.getElementById('input-segundos-garantia-prov')?.value || 0, 10) || 0;
+
+    const totalSegundos = dias * 86400 + horas * 3600 + minutos * 60 + segundos;
+    if (totalSegundos <= 0) {
+        alert('Por favor ingresa un tiempo de garantía mayor a 0 segundos.');
+        return;
+    }
+    if (dias > 365) {
+        alert('El tiempo de garantía no puede exceder 365 días.');
+        return;
+    }
+
+    const tiempoTexto = formatTiempoTexto(dias, horas, minutos, segundos);
+
+    // CONFIRMACION ANTES DE GUARDAR
+    const confirmado = confirm(`¿Estás seguro de que deseas notificar a Jefatura este tiempo de garantía?
+
+Tiempo total ofrecido: ${tiempoTexto}`);
+    if (!confirmado) {
+        return;
+    }
+
+    const btn = document.getElementById('btn-guardar-garantia-prov');
+    const txtOriginal = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Guardando...';
+    }
+
+    try {
+        const res = await fetch('/api/proveedor/actualizar_garantia', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                dias_garantia: dias,
+                horas_garantia: horas,
+                minutos_garantia: minutos,
+                segundos_garantia: segundos
+            })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            alert(data.message || 'Tiempo de garantía notificado a Jefatura con éxito.');
+            cerrarModal('modal-garantia-proveedor');
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo guardar la garantía.'));
+        }
+    } catch (err) {
+        console.error('Error al guardar garantía:', err);
+        alert('Ocurrió un error al notificar el tiempo de garantía.');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = txtOriginal;
+        }
+    }
+}
+window.guardarGarantiaProveedor = guardarGarantiaProveedor;
+
+// ==========================================
+// FILTRADO INTERACTIVO DE RUTAS EN DIAGRAMA DE FLUJO
+// ==========================================
+function filtrarRutaFlujo(tipo) {
+    const tabs = document.querySelectorAll('.btn-flujo-tab');
+    tabs.forEach(t => {
+        t.classList.remove('active');
+        t.style.background = 'transparent';
+    });
+
+    const activeBtn = document.getElementById('btn-flujo-' + tipo);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        if (tipo === 'todos') activeBtn.style.background = 'rgba(56, 189, 248, 0.2)';
+        if (tipo === 'menor10k') activeBtn.style.background = 'rgba(16, 185, 129, 0.2)';
+        if (tipo === 'mayor10k') activeBtn.style.background = 'rgba(245, 158, 11, 0.2)';
+        if (tipo === 'garantia') activeBtn.style.background = 'rgba(168, 85, 247, 0.2)';
+    }
+
+    const steps = document.querySelectorAll('.flujo-step-box');
+    const connectors = document.querySelectorAll('.flujo-flecha-conector, .flujo-arrow-v, .flujo-connector, .flujo-connector-garantia');
+
+    if (tipo === 'todos') {
+        steps.forEach(s => {
+            s.style.display = 'block';
+            s.style.opacity = '1';
+        });
+        connectors.forEach(c => c.style.opacity = '1');
+        const rMenor = document.querySelector('.flujo-rama-menor10k');
+        const rMayor = document.querySelector('.flujo-rama-mayor10k');
+        if (rMenor) rMenor.style.opacity = '1';
+        if (rMayor) rMayor.style.opacity = '1';
+        return;
+    }
+
+    steps.forEach(s => {
+        if (s.classList.contains('flujo-step-' + tipo)) {
+            s.style.display = 'block';
+            s.style.opacity = '1';
+        } else {
+            s.style.opacity = '0.2';
+        }
+    });
+
+    // Enfoque en bifurcacion paso 4
+    const rMenor = document.querySelector('.flujo-rama-menor10k');
+    const rMayor = document.querySelector('.flujo-rama-mayor10k');
+    if (rMenor && rMayor) {
+        if (tipo === 'menor10k') {
+            rMenor.style.opacity = '1';
+            rMayor.style.opacity = '0.15';
+            const f4 = document.getElementById('etapa-4-bifurcacion');
+            if (f4) f4.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (tipo === 'mayor10k') {
+            rMayor.style.opacity = '1';
+            rMenor.style.opacity = '0.15';
+            const f4 = document.getElementById('etapa-4-bifurcacion');
+            if (f4) f4.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            rMenor.style.opacity = '1';
+            rMayor.style.opacity = '1';
+        }
+    }
+
+    if (tipo === 'garantia') {
+        const fGarantia = document.getElementById('etapa-11-garantia');
+        if (fGarantia) fGarantia.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+window.filtrarRutaFlujo = filtrarRutaFlujo;
+
+// =========================================================
+// FUNCIÓN PARA DESCARGAR DIAGRAMA DE FLUJO EN FORMATO PDF
+// SIN CORTES LATERALES Y PAGINADO NATURAL POR PARTES
+// =========================================================
+
+// =========================================================
+// ENFOCAR PASO DEL DIAGRAMA CON SCROLL SUAVE Y RESALTE
+// =========================================================
+function enfocarPasoFlujo(idEtapa, ev) {
+    if (ev) ev.preventDefault();
+    const el = document.getElementById(idEtapa);
+    if (!el) return;
+
+    // Si la etapa está oculta por un filtro de pestañas, restablecer a 'todos'
+    if (el.style.display === 'none') {
+        if (typeof filtrarRutaFlujo === 'function') {
+            filtrarRutaFlujo('todos');
+        }
+    }
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('flujo-step-highlight');
+    setTimeout(() => {
+        el.classList.remove('flujo-step-highlight');
+    }, 1800);
+}
+
+function descargarDiagramaFlujo() {
+    // 1. Confirmación obligatoria al usuario
+    if (!confirm("¿Deseas generar y descargar el Diagrama de Flujo de Trabajo en formato PDF (1 hoja compacta)?")) {
+        return;
+    }
+
+    // 2. Asegurar que todas las etapas del diagrama estén visibles antes de exportar
+    if (typeof filtrarRutaFlujo === 'function') {
+        filtrarRutaFlujo('todos');
+    }
+
+    const contenedorOriginal = document.querySelector('.flujo-contenedor-principal');
+    if (!contenedorOriginal) {
+        alert("No se encontró el contenedor del diagrama de flujo.");
+        return;
+    }
+
+    const btn = document.getElementById('btn-descargar-flujo');
+    const textoOriginal = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = '<span style="font-size:0.95rem; line-height:1;">⏳</span><span>Generando 1 hoja...</span>';
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+    }
+
+    // 3. Ocultar temporalmente los botones del mapa de navegación de etapas
+    const mapaEtapas = contenedorOriginal.querySelector('.mapa-etapas-contenedor');
+    const estadoMapa = mapaEtapas ? mapaEtapas.style.display : '';
+    if (mapaEtapas) {
+        mapaEtapas.style.display = 'none';
+    }
+
+    // 4. Activar modo compacto temporal (oculta descripciones largas <p> para una sola hoja compacta)
+    contenedorOriginal.classList.add('flujo-modo-pdf-compacto');
+
+    // 5. Insertar encabezado institucional sin nombres exclusivos de empresas
+    const headerPdf = document.createElement('div');
+    headerPdf.id = 'flujo-pdf-temp-header';
+    headerPdf.style.textAlign = 'center';
+    headerPdf.style.padding = '8px 10px 16px 10px';
+    headerPdf.style.marginBottom = '18px';
+    headerPdf.style.borderBottom = '2px solid #1f395a';
+    headerPdf.innerHTML = `
+        <div style="font-size: 1.4rem; font-weight: 800; color: #ffffff; letter-spacing: -0.3px;">
+            SISTEMA INTEGRAL DE FLOTA AUTOMOTRIZ • DIAGRAMA DE FLUJO DE TRABAJO
+        </div>
+        <div style="font-size: 0.86rem; color: #94a3b8; margin-top: 4px;">
+            Procedimiento Operativo Oficial de Gestión y Liquidación de Tickets de Servicio
+        </div>
+        <div style="font-size: 0.74rem; color: #38bdf8; margin-top: 4px; font-weight: 700;">
+            Fecha de emisión: ${new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </div>
+    `;
+    contenedorOriginal.insertBefore(headerPdf, contenedorOriginal.firstChild);
+
+    // 6. Insertar pie de página institucional sin nombres exclusivos de empresas
+    const footerPdf = document.createElement('div');
+    footerPdf.id = 'flujo-pdf-temp-footer';
+    footerPdf.style.textAlign = 'center';
+    footerPdf.style.padding = '14px 10px 8px 10px';
+    footerPdf.style.marginTop = '20px';
+    footerPdf.style.borderTop = '1px solid #1f395a';
+    footerPdf.innerHTML = `
+        <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">
+            Documento de control interno institucional • Flujo completo de autorización, reparación, fiscalización y garantía automotriz
+        </div>
+    `;
+    contenedorOriginal.appendChild(footerPdf);
+
+    // Recordar posición previa de scroll y desplazar a la parte superior para calibrar el lienzo
+    const scrollPrevio = window.scrollY;
+    window.scrollTo(0, 0);
+
+    const fechaHoy = new Date().toISOString().slice(0, 10);
+    const nombreArchivo = `Diagrama_Flujo_Trabajo_Operativo_${fechaHoy}.pdf`;
+
+    // 7. CALCULAR DIMENSIONES DINÁMICAS EXACTAS PARA 1 SOLA HOJA COMPACTA
+    const anchoPulgadas = 8.5;
+    const margenHoriz = 0.25; // 0.25 in cada lado
+    const margenVert = 0.30;  // 0.30 in arriba y abajo
+    const anchoImprimible = anchoPulgadas - (margenHoriz * 2); // 8.0 in
+
+    const anchoRealPx = contenedorOriginal.offsetWidth || 1000;
+    const altoRealPx = contenedorOriginal.offsetHeight || 1600;
+
+    // Altura proporcional del contenido en pulgadas
+    const altoContenidoIn = anchoImprimible * (altoRealPx / anchoRealPx);
+    // Altura total de la página: incluye márgenes + 0.35 in de margen de seguridad para garantizar 1 sola página
+    const altoTotalIn = parseFloat((altoContenidoIn + (margenVert * 2) + 0.35).toFixed(2));
+
+    const opciones = {
+        margin: [margenVert, margenHoriz, margenVert, margenHoriz],
+        filename: nombreArchivo,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#081322'
+        },
+        jsPDF: { 
+            unit: 'in', 
+            format: [anchoPulgadas, altoTotalIn], 
+            orientation: 'portrait' 
+        }
+    };
+
+    const cleanup = () => {
+        contenedorOriginal.classList.remove('flujo-modo-pdf-compacto');
+        if (mapaEtapas) mapaEtapas.style.display = estadoMapa;
+        if (headerPdf && headerPdf.parentNode) headerPdf.parentNode.removeChild(headerPdf);
+        if (footerPdf && footerPdf.parentNode) footerPdf.parentNode.removeChild(footerPdf);
+        window.scrollTo(0, scrollPrevio);
+        if (btn) {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+    };
+
+    // Pausa de 120ms para asegurar que el navegador aplique los estilos compactos antes de renderizar
+    setTimeout(() => {
+        if (typeof html2pdf !== 'undefined') {
+            html2pdf().set(opciones).from(contenedorOriginal).save().then(() => {
+                cleanup();
+                if (btn) {
+                    btn.innerHTML = '<span style="font-size:0.95rem; line-height:1;">✅</span><span>¡1 Hoja Descargada!</span>';
+                    setTimeout(() => {
+                        btn.innerHTML = textoOriginal;
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    }, 2500);
+                }
+            }).catch(err => {
+                console.error("Error al generar PDF con html2pdf:", err);
+                cleanup();
+                imprimirDiagramaDirecto();
+            });
+        } else {
+            cleanup();
+            imprimirDiagramaDirecto();
+        }
+    }, 120);
+}
+
+function imprimirDiagramaDirecto() {
+    const contenedor = document.querySelector('.flujo-contenedor-principal');
+    if (!contenedor) return;
+
+    const ventana = window.open('', '_blank');
+    if (!ventana) {
+        alert("Por favor permite las ventanas emergentes para imprimir o guardar el diagrama como PDF.");
+        return;
+    }
+    ventana.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Diagrama de Flujo de Trabajo Operativo - Flota Automotriz</title>
+            <style>
+                body {
+                    background: #081322;
+                    color: #ffffff;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    padding: 15px;
+                    margin: 0;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    max-width: 100% !important;
+                }
+                * { box-sizing: border-box; }
+                a, .nav-rapida-paso, .mapa-etapas-contenedor, button, p { display: none !important; }
+                .flujo-box { padding: 9px 12px !important; margin-bottom: 0 !important; }
+                .flujo-box h4, .flujo-box h5 { margin: 0 !important; font-size: 0.92rem !important; }
+                .lane-cotizacion { min-width: 0 !important; flex: 1 !important; padding: 10px 8px !important; }
+                .flujo-flecha-conector { margin: 2px 0 !important; }
+                .flujo-flecha-linea { height: 7px !important; }
+                .etapa-header-bar { padding: 7px 12px !important; margin: 10px 0 6px 0 !important; }
+                @page {
+                    size: letter portrait;
+                    margin: 8mm;
+                }
+                @media print {
+                    body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    .flujo-box, .etapa-header-bar, .lane-cotizacion, .flujo-flecha-conector {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div style="text-align: center; margin-bottom: 18px; border-bottom: 2px solid #1f395a; padding-bottom: 10px;">
+                <h1 style="color: #ffffff; margin: 0 0 5px 0; font-size: 1.45rem;">SISTEMA INTEGRAL DE FLOTA AUTOMOTRIZ • DIAGRAMA DE FLUJO DE TRABAJO</h1>
+                <p style="display:block !important; margin: 0; color: #94a3b8; font-size: 0.88rem;">Procedimiento Operativo Oficial de Gestión y Liquidación de Tickets de Servicio</p>
+            </div>
+            ${contenedor.innerHTML}
+            <script>
+                window.onload = function() {
+                    setTimeout(function() {
+                        window.print();
+                    }, 500);
+                };
+            <\/script>
+        </body>
+        </html>
+    `);
+    ventana.document.close();
+}
+
+window.descargarDiagramaFlujo = descargarDiagramaFlujo;
+window.imprimirDiagramaDirecto = imprimirDiagramaDirecto;
+
