@@ -262,6 +262,9 @@ def renovar_password():
             nueva_pass = ''.join(random.choice(string.ascii_letters + string.digits) for i in range(8))
             u['password'] = nueva_pass
             escribir_json('usuarios.json', usuarios_data)
+            if 'usuario' in session and session['usuario'].get('usuario') == usuario_id:
+                session['usuario']['datos_perfil'] = u['datos_perfil']
+                session.modified = True
             return jsonify({"status": "success", "message": f"Contraseña renovada correctamente.\nNueva clave: {nueva_pass}"})
     return jsonify({"status": "error", "message": "Usuario no encontrado."})
 
@@ -333,6 +336,9 @@ def editar_usuario():
                 foto_nueva.save(os.path.join(CARPETAS[rol], nombre_unico))
                 u['datos_perfil']['foto_ruta'] = nombre_unico
             escribir_json('usuarios.json', usuarios_data)
+            if 'usuario' in session and session['usuario'].get('usuario') == usuario_id:
+                session['usuario']['datos_perfil'] = u['datos_perfil']
+                session.modified = True
             return jsonify({"status": "success", "message": "Perfil actualizado correctamente."})
     return jsonify({"status": "error", "message": "No se pudo actualizar."})
 

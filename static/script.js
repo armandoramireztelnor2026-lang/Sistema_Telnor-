@@ -476,7 +476,7 @@ window.abrirVistaDelegada = function(tipo) {
 function cambiarVistaAdmin(vista) {
     localStorage.setItem('activeViewAdmin', vista);
     marcarBotonActivo(vista);
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica', 'retrabajo', 'tiempo-garantia', 'flujo-trabajo'];
+    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica', 'retrabajo', 'tiempo-garantia', 'flujo-trabajo', 'liberar-retrabajo'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';
@@ -488,6 +488,7 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'liberar_doc_contable') vistaId = 'liberar-doc-contable';
     if (vista === 'tiempo_garantia') vistaId = 'tiempo-garantia';
     if (vista === 'flujo_trabajo') vistaId = 'flujo-trabajo';
+    if (vista === 'liberar_retrabajo') vistaId = 'liberar-retrabajo';
 
     let elVista = document.getElementById('vista-' + vistaId);
     if (elVista) elVista.style.display = 'block';
@@ -514,6 +515,12 @@ function cambiarVistaAdmin(vista) {
     }
     if ((vista === 'facturas' || vista === 'facturas_finales' || vista === 'facturas-finales' || vista === 'documentos_contables' || vista === 'documentos-contables' || vista === 'liberar-doc-contable' || vista === 'liberar_doc_contable' || vista === 'archivo') && typeof cargarFacturas === 'function') cargarFacturas();
     if (vista === 'cotizaciones-10k' && typeof cargarCotizaciones10k === 'function') cargarCotizaciones10k();
+    if (vista === 'liberar-retrabajo' || vista === 'liberar_retrabajo') {
+        if (typeof cargarLiberarRetrabajosSupervisor === 'function') cargarLiberarRetrabajosSupervisor();
+    }
+    if (typeof actualizarBadgeLiberarRetrabajoSupervisor === 'function') {
+        actualizarBadgeLiberarRetrabajoSupervisor();
+    }
 }
 
 function cambiarVistaProv(vista) {
@@ -551,6 +558,10 @@ function cambiarVistaProv(vista) {
             document.getElementById('vista-retrabajo').style.display = 'block';
         }
         if (typeof cargarRetrabajosProveedor === 'function') cargarRetrabajosProveedor();
+    }
+
+    if (typeof actualizarBadgeRetrabajoProveedor === 'function') {
+        actualizarBadgeRetrabajoProveedor();
     }
 }
 
@@ -1078,7 +1089,9 @@ window.cargarRetrabajosProveedor = async function() {
         if (badgeProv) {
             if (retrabajos.length > 0) {
                 badgeProv.innerText = retrabajos.length;
-                badgeProv.style.display = 'inline-block';
+                badgeProv.style.display = 'inline-flex';
+                badgeProv.style.alignItems = 'center';
+                badgeProv.style.justifyContent = 'center';
             } else {
                 badgeProv.style.display = 'none';
             }
@@ -1109,15 +1122,15 @@ window.cargarRetrabajosProveedor = async function() {
                     </td>
                     <td style="white-space: nowrap; vertical-align: middle;"><span style="color: #cbd5e1;">${supervisor}</span></td>
                     <td style="white-space: nowrap; vertical-align: middle; text-align: center;">${badgeEstado}</td>
-                    <td style="white-space: nowrap; vertical-align: middle; text-align: center;">
-                        <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
-                            <button class="btn-info" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; white-space: nowrap; cursor: pointer; background: #0284c7; color: white; border: none;" onclick="abrirDetallesTicketRetrabajo('${ticketId}', '${r.factura_id || ''}')">
+                    <td style="white-space: nowrap; vertical-align: middle; text-align: center; padding: 12px 10px;">
+                        <div style="display: flex; flex-direction: column; gap: 8px; justify-content: center; align-items: center; width: 100%;">
+                            <button type="button" class="btn-accion-retrabajo-prov btn-accion-retrabajo-detalles" onclick="abrirDetallesTicketRetrabajo('${ticketId}', '${r.factura_id || ''}')">
                                 Ver Detalles
                             </button>
-                            <button class="btn-success" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; white-space: nowrap; cursor: pointer; background: #10b981; color: white; border: none;" onclick="abrirDetalleRetrabajo('${ticketId}')">
+                            <button type="button" class="btn-accion-retrabajo-prov btn-accion-retrabajo-ver" onclick="abrirDetalleRetrabajo('${ticketId}')">
                                 Ver Retrabajo
                             </button>
-                            <button class="btn-primary" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; white-space: nowrap; cursor: pointer; background: #16a34a; color: white; border: none;" onclick="marcarRetrabajoFinalizado('${ticketId}')">
+                            <button type="button" class="btn-accion-retrabajo-prov btn-accion-retrabajo-finalizar" onclick="marcarRetrabajoFinalizado('${ticketId}')">
                                 Retrabajo Finalizado
                             </button>
                         </div>
@@ -1154,7 +1167,7 @@ window.marcarRetrabajoFinalizado = async function(ticketId) {
         return;
     }
 
-    const confirmar = confirm(`⚠️ ¿Confirmas que los trabajos de retrabajo / garantía para el ticket ${ticketId} han sido FINALIZADOS por el taller?\n\nAl confirmar, la orden de retrabajo concluirá y se desbloquearán las acciones del ticket.`);
+    const confirmar = confirm(`⚠️ ¿Confirmas que los trabajos de retrabajo / garantía para el ticket ${ticketId} han sido concluidos por el taller?\n\nAl confirmar, el ticket se enviará a Supervisión al módulo "Liberar/Retrabajo" para su validación final.`);
     if (!confirmar) return;
 
     try {
@@ -1165,7 +1178,7 @@ window.marcarRetrabajoFinalizado = async function(ticketId) {
         });
         let data = await res.json();
         if (data.status === 'success') {
-            alert(data.message || 'Retrabajo finalizado con éxito.');
+            alert(data.message || 'La unidad ha sido marcada como lista y enviada a Supervisión para su liberación.');
             if (typeof cargarRetrabajosProveedor === 'function') {
                 cargarRetrabajosProveedor();
             }
@@ -2436,6 +2449,9 @@ window.addEventListener('load', function() {
                 cambiarVistaAdmin('pendientes');
             } else if (subrolActual === 'Supervisor') {
                 cambiarVistaAdmin('reportes');
+                if (typeof actualizarBadgeLiberarRetrabajoSupervisor === 'function') {
+                    actualizarBadgeLiberarRetrabajoSupervisor();
+                }
             } else if (subrolActual === 'Administrador') {
                 if (typeof verCotizacionesMas10000 === 'function') {
                     verCotizacionesMas10000();
@@ -2446,15 +2462,13 @@ window.addEventListener('load', function() {
                 cambiarVistaAdmin('reportes'); 
             }
         }
-    }
-    if (document.getElementById('vista-reportes-prov')) { 
+    } else if (rolActual === 'proveedores' || document.getElementById('vista-reportes-prov')) { 
         let savedView = localStorage.getItem('activeViewProv');
         cambiarVistaProv(savedView ? savedView : 'reportes'); 
         if (typeof actualizarBadgeRetrabajoProveedor === 'function') {
             actualizarBadgeRetrabajoProveedor();
         }
-    }
-    if (document.getElementById('vista-cotizaciones-corp')) { 
+    } else if (rolActual === 'corporativos' || document.getElementById('vista-cotizaciones-corp')) { 
         let savedView = localStorage.getItem('activeViewCorp');
         cambiarVistaCorp(savedView ? savedView : 'cotizaciones'); 
     }
@@ -3076,10 +3090,243 @@ window.actualizarBadgeRetrabajoProveedor = async function() {
         if (badgeProv) {
             if (retrabajos.length > 0) {
                 badgeProv.innerText = retrabajos.length;
-                badgeProv.style.display = 'inline-block';
+                badgeProv.style.display = 'inline-flex';
+                badgeProv.style.alignItems = 'center';
+                badgeProv.style.justifyContent = 'center';
             } else {
                 badgeProv.style.display = 'none';
             }
+        }
+    } catch(e) {}
+};
+
+
+window.abrirLiberarRetrabajoEnDesarrollo = function() {
+    alert("⚠️ Módulo de 'Liberar/Retrabajo' actualmente en desarrollo.");
+};
+
+
+// ============================================================
+// FUNCIONES PARA EL MÓDULO SUPERVISOR: LIBERAR / RETRABAJO
+// ============================================================
+
+window.cargarLiberarRetrabajosSupervisor = async function() {
+    const tbody = document.getElementById('tabla-liberar-retrabajo');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px; color:#94a3b8;">Cargando retrabajos listos para liberar...</td></tr>';
+
+    try {
+        const res = await fetch('/api/garantia/supervisor/por_liberar');
+        const data = await res.json();
+        const retrabajos = data.retrabajos || [];
+
+        const badge = document.getElementById('badge-liberar-retrabajo');
+        if (badge) {
+            if (retrabajos.length > 0) {
+                badge.innerText = retrabajos.length;
+                badge.style.display = 'inline-flex';
+                badge.style.alignItems = 'center';
+                badge.style.justifyContent = 'center';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        if (retrabajos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:25px; color:#94a3b8;">No hay unidades con retrabajo concluido por el taller pendientes de liberación.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        retrabajos.forEach(r => {
+            let ticketId = r.ticket_original || r.ticket || r.id;
+            let unidadStr = r.unidad ? (r.unidad.startsWith('8090-') ? r.unidad : `8090-${r.unidad}`) : '--';
+            let fechaReasig = r.fecha_reasignacion || r.fecha_solicitud || '--';
+            let fechaListoTaller = r.fecha_finalizacion_taller || '--';
+            let taller = r.proveedor || (r.seccion_2 && r.seccion_2.proveedor) || 'Taller';
+            let chofer = r.chofer || (r.seccion_1 && r.seccion_1.empleado) || 'Chofer';
+            let motivoLimpio = String(r.motivo_chofer || 'Sin motivo reportado').trim().replace(/^["'«»“”„]+|["'«»“”„]+$/g, '').trim();
+
+            let badgeEstado = `<span style="background:rgba(56, 189, 248, 0.15); color:#38bdf8; border:1px solid #38bdf8; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:0.82rem; display:inline-block; white-space:nowrap;">🔧 Listo en Taller</span>`;
+
+            let ticketEscaped = String(ticketId).replace(/'/g, "\\'");
+            let unidadEscaped = String(unidadStr).replace(/'/g, "\\'");
+            let tallerEscaped = String(taller).replace(/'/g, "\\'");
+            let choferEscaped = String(chofer).replace(/'/g, "\\'");
+
+            tbody.innerHTML += `
+                <tr>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #f59e0b; font-size: 0.95rem;">${ticketId}</strong></td>
+                    <td style="white-space: nowrap; vertical-align: middle;">${fechaReasig}</td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #4ade80;">${fechaListoTaller}</strong></td>
+                    <td style="white-space: nowrap; vertical-align: middle;">
+                        <strong style="color: #ffffff;">${unidadStr}</strong><br>
+                        <small style="color: #94a3b8; font-size: 0.75rem;">👤 ${chofer}</small>
+                    </td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><span style="color: #38bdf8; font-weight: 600;">${r.cope || '--'}</span></td>
+                    <td style="white-space: nowrap; vertical-align: middle;">${r.ciudad || '--'}</td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><span style="color: #cbd5e1;">${taller}</span></td>
+                    <td style="white-space: normal; min-width: 260px; max-width: 420px; vertical-align: middle; padding: 10px 12px; line-height: 1.5; word-break: break-word;">
+                        <p style="margin: 0; padding: 0; color: #f1f5f9; font-size: 0.88rem; font-weight: 500; line-height: 1.5; white-space: normal; word-break: break-word; text-align: left;">${motivoLimpio}</p>
+                    </td>
+                    <td style="white-space: nowrap; vertical-align: middle; text-align: center;">${badgeEstado}</td>
+                    <td style="white-space: nowrap; vertical-align: middle; text-align: center; padding: 12px 10px;">
+                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                            <button type="button" class="btn-info" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="abrirDetallesTicketRetrabajo('${ticketEscaped}', '${r.factura_id || ''}')">
+                                Ver Detalles
+                            </button>
+                            <button type="button" class="btn-success" style="padding: 6px 14px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; cursor: pointer; background: #10b981; border: none; color: white;" onclick="abrirModalValidarCodigoLiberacion('${ticketEscaped}', '${unidadEscaped}', '${tallerEscaped}', '${choferEscaped}')">
+                                ✅ Liberar Retrabajo
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        if (typeof aplicarPaginacion === 'function') {
+            aplicarPaginacion('tabla-liberar-retrabajo', 15, true);
+        }
+    } catch (err) {
+        console.error('Error al cargar retrabajos por liberar:', err);
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px; color:#ef4444;">Error al cargar las unidades pendientes de liberación.</td></tr>';
+    }
+};
+
+window.abrirModalValidarCodigoLiberacion = function(ticketId, unidad, taller, chofer) {
+    window._ticketLiberarActual = ticketId;
+    const modal = document.getElementById('modal-validar-codigo-liberacion');
+    if (!modal) {
+        const codigo = prompt(`🔐 Validación de Retrabajo - Ticket ${ticketId} (Unidad ${unidad}):\n\nIngresa el código de 6 dígitos que el chofer recibió en su correo (o el código de respaldo del supervisor):`);
+        if (codigo) {
+            ejecutarLiberacionDirecta(ticketId, codigo);
+        }
+        return;
+    }
+
+    const tEl = document.getElementById('modal-val-ticket');
+    if (tEl) tEl.innerText = ticketId || '--';
+    const uEl = document.getElementById('modal-val-unidad');
+    if (uEl) uEl.innerText = unidad || '--';
+    const talEl = document.getElementById('modal-val-taller');
+    if (talEl) talEl.innerText = taller || '--';
+    const chEl = document.getElementById('modal-val-chofer');
+    if (chEl) chEl.innerText = chofer || 'Chofer';
+
+    const input = document.getElementById('input-codigo-liberacion-retrabajo');
+    if (input) input.value = '';
+
+    const errEl = document.getElementById('modal-val-error');
+    if (errEl) {
+        errEl.style.display = 'none';
+        errEl.innerText = '';
+    }
+
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        if (input) input.focus();
+    }, 100);
+};
+
+window.cerrarModalValidarCodigoLiberacion = function() {
+    const modal = document.getElementById('modal-validar-codigo-liberacion');
+    if (modal) modal.style.display = 'none';
+    window._ticketLiberarActual = null;
+};
+
+window.confirmarValidacionLiberacionRetrabajo = async function() {
+    const ticketId = window._ticketLiberarActual;
+    if (!ticketId) return;
+
+    const input = document.getElementById('input-codigo-liberacion-retrabajo');
+    const codigo = (input?.value || '').trim();
+    const errEl = document.getElementById('modal-val-error');
+
+    if (!codigo) {
+        if (errEl) {
+            errEl.innerText = '⚠️ Por favor ingresa el código de 6 dígitos recibido por el chofer o el código de respaldo.';
+            errEl.style.display = 'block';
+        }
+        if (input) input.focus();
+        return;
+    }
+
+    if (errEl) errEl.style.display = 'none';
+
+    const btn = document.getElementById('btn-confirmar-liberacion-modal');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Validando...';
+    }
+
+    try {
+        const res = await fetch('/api/garantia/supervisor/liberar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticket: ticketId, codigo: codigo })
+        });
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            cerrarModalValidarCodigoLiberacion();
+            alert(data.message || 'Código validado con éxito. Retrabajo liberado y unidad entregada.');
+            cargarLiberarRetrabajosSupervisor();
+            if (typeof actualizarBadgeLiberarRetrabajoSupervisor === 'function') {
+                actualizarBadgeLiberarRetrabajoSupervisor();
+            }
+            if (typeof cargarRetrabajosAdmin === 'function') {
+                cargarRetrabajosAdmin();
+            }
+            if (typeof cargarFacturas === 'function') {
+                cargarFacturas();
+            }
+            if (typeof cargarSeccionReportes === 'function') {
+                cargarSeccionReportes();
+            }
+        } else {
+            if (errEl) {
+                errEl.innerText = data.message || '❌ Código de validación incorrecto.';
+                errEl.style.display = 'block';
+            } else {
+                alert('Error: ' + (data.message || 'Código incorrecto.'));
+            }
+            if (input) {
+                input.select();
+                input.focus();
+            }
+        }
+    } catch (err) {
+        console.error('Error al validar código y liberar retrabajo:', err);
+        if (errEl) {
+            errEl.innerText = 'Ocurrió un error al procesar la validación.';
+            errEl.style.display = 'block';
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerText = '✅ Validar y Liberar';
+        }
+    }
+};
+
+window.liberarRetrabajoSupervisor = function(ticketId, unidad, taller, chofer) {
+    abrirModalValidarCodigoLiberacion(ticketId, unidad, taller, chofer);
+};
+
+window.actualizarBadgeLiberarRetrabajoSupervisor = async function() {
+    const badge = document.getElementById('badge-liberar-retrabajo');
+    if (!badge) return;
+    try {
+        const res = await fetch('/api/garantia/supervisor/por_liberar');
+        const data = await res.json();
+        const count = (data.retrabajos || []).length;
+        if (count > 0) {
+            badge.innerText = count;
+            badge.style.display = 'inline-flex';
+            badge.style.alignItems = 'center';
+            badge.style.justifyContent = 'center';
+        } else {
+            badge.style.display = 'none';
         }
     } catch(e) {}
 };

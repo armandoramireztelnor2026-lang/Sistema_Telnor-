@@ -37,7 +37,8 @@ async function cargarAnalitica() {
         reparada: document.getElementById('analitica-reparada'),
         entregada: document.getElementById('analitica-entregada'),
         rechazada: document.getElementById('analitica-rechazada'),
-        fiscal: document.getElementById('analitica-fiscal')
+        fiscal: document.getElementById('analitica-fiscal'),
+        garantia: document.getElementById('analitica-garantia')
     };
 
     for (let key in divs) {
@@ -78,6 +79,8 @@ async function cargarAnalitica() {
                 setTxt('analitica-flota-circulacion-pct', fm.porcentajes.circulacion + '%');
                 setTxt('analitica-flota-taller', fm.totales.taller);
                 setTxt('analitica-flota-taller-pct', fm.porcentajes.taller + '%');
+                setTxt('analitica-flota-garantia', (fm.totales.garantia !== undefined) ? fm.totales.garantia : 0);
+                setTxt('analitica-flota-garantia-pct', (fm.porcentajes.garantia !== undefined ? fm.porcentajes.garantia : 0) + '%');
                 setTxt('analitica-flota-juridicos', fm.totales.juridicos);
                 setTxt('analitica-flota-juridicos-pct', fm.porcentajes.juridicos + '%');
                 setTxt('analitica-flota-inhabilitadas', fm.totales.inhabilitadas);
@@ -159,6 +162,7 @@ async function cargarAnalitica() {
             if (divs.entregada) divs.entregada.innerHTML = formatData(data.ultima_entregada, true);
             if (divs.rechazada) divs.rechazada.innerHTML = formatData(data.ultima_rechazada, true);
             if (divs.fiscal) divs.fiscal.innerHTML = formatData(data.ultima_fiscal, true);
+            if (divs.garantia) divs.garantia.innerHTML = formatData(data.ultima_garantia, true);
         } else {
             for (let key in divs) {
                 if (divs[key]) divs[key].innerHTML = '<span style="color:#ef4444;">Error al cargar datos</span>';
@@ -317,7 +321,7 @@ async function cargarAnalitica() {
                         labels: dataCharts.pie_flota.labels,
                         datasets: [{
                             data: dataCharts.pie_flota.data,
-                            backgroundColor: ['#10b981', '#0ea5e9', '#8b5cf6', '#ef4444'],
+                            backgroundColor: ['#10b981', '#0ea5e9', '#f59e0b', '#8b5cf6', '#ef4444'],
                             borderColor: '#112641',
                             borderWidth: 2,
                             hoverOffset: 6

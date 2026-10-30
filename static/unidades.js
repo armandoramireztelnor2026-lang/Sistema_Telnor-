@@ -24,6 +24,8 @@ async function cargarUnidades() {
             setTxt('porcentaje-circulacion-unidades', p.circulacion + '%');
             setTxt('metrica-taller-unidades', t.taller);
             setTxt('porcentaje-taller-unidades', p.taller + '%');
+            setTxt('metrica-garantia-unidades', t.garantia !== undefined ? t.garantia : 0);
+            setTxt('porcentaje-garantia-unidades', (p.garantia !== undefined ? p.garantia : 0) + '%');
             setTxt('metrica-juridicos-unidades', t.juridicos);
             setTxt('porcentaje-juridicos-unidades', p.juridicos + '%');
             setTxt('metrica-inhabilitadas-unidades', t.inhabilitadas);
@@ -45,10 +47,13 @@ async function cargarUnidades() {
         for (const [idUnidad, info] of Object.entries(data)) {
             let isInShop = info.activa_en_taller;
             let isJuridico = info.Juridicos === true;
-            let est = info.estado_operativo || (isInShop ? 'En Taller' : (isJuridico ? 'En Jurídicos' : (info.Estado === 'Inactiva' ? 'Inhabilitada' : 'En Circulación')));
+            let isGarantia = info.activa_en_garantia || info.estado_operativo === 'Garantía/Retrabajo' || info.estado_operativo === 'En Garantía';
+            let est = info.estado_operativo || (isGarantia ? 'Garantía/Retrabajo' : (isInShop ? 'En Taller' : (isJuridico ? 'En Jurídicos' : (info.Estado === 'Inactiva' ? 'Inhabilitada' : 'En Circulación'))));
 
             let estadoBadge = '';
-            if (est === 'En Taller') {
+            if (est === 'Garantía/Retrabajo' || est === 'En Garantía') {
+                estadoBadge = '<span class="badge-garantia" style="background:#f59e0b; color:#0f172a; padding:4px 10px; border-radius:6px; font-size:0.82em; font-weight:700; display:inline-flex; align-items:center; gap:5px;">🛡️ Garantía/Retrabajo</span>';
+            } else if (est === 'En Taller') {
                 estadoBadge = '<span class="badge-taller" style="background:#0284c7; color:white; padding:4px 10px; border-radius:6px; font-size:0.82em; font-weight:700; display:inline-flex; align-items:center; gap:5px;">🔧 En Taller</span>';
             } else if (est === 'En Jurídicos') {
                 estadoBadge = '<span class="badge-juridicos" style="background:#6d28d9; color:white; padding:4px 10px; border-radius:6px; font-size:0.82em; font-weight:700; display:inline-flex; align-items:center; gap:5px;">⚖️ En Jurídicos</span>';
@@ -58,15 +63,15 @@ async function cargarUnidades() {
                 estadoBadge = '<span class="badge-circulacion" style="background:#10b981; color:white; padding:4px 10px; border-radius:6px; font-size:0.82em; font-weight:700; display:inline-flex; align-items:center; gap:5px;">🚗 En Circulación</span>';
             }
 
-            let disabledAttr = (isInShop || isJuridico) ? 'disabled' : '';
-            let styleOpacity = (isInShop || isJuridico) ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
-            let tooltip = isInShop ? 'title="Esta unidad tiene un ticket activo y no puede ser modificada"' : (isJuridico ? 'title="Unidad inhabilitada por estar en Jurídicos"' : '');
+            let disabledAttr = (isInShop || isJuridico || isGarantia) ? 'disabled' : '';
+            let styleOpacity = (isInShop || isJuridico || isGarantia) ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
+            let tooltip = isGarantia ? 'title="Unidad en proceso de garantía/retrabajo. Acciones bloqueadas hasta que el taller concluya la reparación."' : (isInShop ? 'title="Esta unidad tiene un ticket activo y no puede ser modificada"' : (isJuridico ? 'title="Unidad inhabilitada por estar en Jurídicos"' : ''));
 
             let juridicoBtnText = isJuridico ? 'Quitar Jurídicos' : 'Jurídicos';
             let juridicoBtnColor = isJuridico ? '#6d28d9' : '#8b5cf6';
 
-            let juridicoDisabledAttr = isInShop ? 'disabled' : '';
-            let juridicoStyleOpacity = isInShop ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
+            let juridicoDisabledAttr = (isInShop || isGarantia) ? 'disabled' : '';
+            let juridicoStyleOpacity = (isInShop || isGarantia) ? 'opacity:0.4; cursor:not-allowed;' : 'cursor:pointer;';
 
             rows += `
                 <tr data-estado="${est}">
@@ -120,6 +125,8 @@ function actualizarBordesTarjetasFiltro() {
         'Todas': 'card-total',
         'En Circulación': 'card-circulacion',
         'En Taller': 'card-taller',
+        'Garantía/Retrabajo': 'card-garantia',
+        'En Garantía': 'card-garantia',
         'En Jurídicos': 'card-juridicos',
         'Inhabilitada': 'card-inhabilitadas'
     };

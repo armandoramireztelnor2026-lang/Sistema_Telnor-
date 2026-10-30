@@ -4,10 +4,13 @@
 # =========================================================
 from flask import Blueprint, request, jsonify, session
 import os
+import re
+import unicodedata
 from werkzeug.utils import secure_filename
 import json
 import datetime
 
+import random
 from notificaciones import (
     enviar_correo_nueva_orden,
     enviar_correo_nuevo_ticket,
@@ -15,6 +18,10 @@ from notificaciones import (
     enviar_correo_ticket_rechazado,
     enviar_correo_retrabajo_taller,
     enviar_correo_cancelacion_retrabajo_chofer,
+    enviar_correo_retrabajo_exitoso_supervisor,
+    enviar_correo_retrabajo_listo_chofer,
+    enviar_correo_retrabajo_listo_taller,
+    enviar_correo_retrabajo_listo_supervisor_respaldo,
 )
 
 reportes_bp = Blueprint("reportes_bp", __name__)
@@ -41,13 +48,22 @@ def nuevo_reporte():
     unidad_req = request.form.get("unidad")
     eco_full = f"8090-{unidad_req}"
     
-    # 0. Check if the unit is inactive or in Juridicos
+    # 0. Check if the unit is inactive, in Juridicos or in Reasignacion/Garantia
     unidades_data = leer_json("unidades.json")
     if unidad_req in unidades_data:
         if unidades_data[unidad_req].get("Juridicos") == True:
             return jsonify({"status": "error", "message": f"La unidad {unidad_req} se encuentra en Jurídicos y no puede ser reportada."})
         if unidades_data[unidad_req].get("Estado") == "Inactiva":
             return jsonify({"status": "error", "message": f"La unidad {unidad_req} se encuentra Inhabilitada/Incosteable y no puede ser reportada."})
+
+    retrabajos_data = leer_json("retrabajos.json").get("retrabajos", [])
+    u_req_norm = str(unidad_req).replace("8090-", "").strip()
+    for ret in retrabajos_data:
+        u_ret = str(ret.get("unidad", "")).replace("8090-", "").strip()
+        st_ret = str(ret.get("estado", "")).strip().lower()
+        if (u_ret == u_req_norm or (len(u_ret) >= 4 and len(u_req_norm) >= 4 and u_ret[-4:] == u_req_norm[-4:])):
+            if st_ret in ["pendiente", "reasignado", "por liberar", "por_liberar", "pendiente liberacion"] or (st_ret not in ["finalizado", "cancelado"] and not ret.get("fecha_liberacion")):
+                return jsonify({"status": "error", "message": f"La unidad {unidad_req} se encuentra actualmente en proceso de reasignación / garantía y no puede ser reportada hasta que sea concluida por el taller."})
 
     
     # 1. Check facturas.json (tickets in taller not yet delivered/closed)
@@ -301,6 +317,7 @@ def obtener_unidades():
         est = estados.get(num, "En Circulación")
         info["estado_operativo"] = est
         info["activa_en_taller"] = (est == "En Taller")
+        info["activa_en_garantia"] = (est in ["Garantía/Retrabajo", "En Garantía"])
         info["inhabilitada_caras"] = (est == "Inhabilitada")
 
     return jsonify(data)
@@ -340,6 +357,14 @@ def is_unidad_active(numero_unidad):
     for r in reportes_data.get("reportes", []):
         if str(r.get("unidad")) == eco_4 and r.get("estado") != "Eliminado":
             if str(r.get("id")) not in facturas_report_ids:
+                return True
+
+    retrabajos_data = leer_json("retrabajos.json")
+    for ret in retrabajos_data.get("retrabajos", []):
+        u_ret = str(ret.get("unidad", "")).replace("8090-", "").strip()
+        st_ret = str(ret.get("estado", "")).strip().lower()
+        if len(u_ret) >= 4 and u_ret[-4:] == eco_4:
+            if st_ret in ["pendiente", "reasignado", "por liberar", "por_liberar", "pendiente liberacion"] or (st_ret not in ["finalizado", "cancelado"] and not ret.get("fecha_liberacion")):
                 return True
                 
     return False
@@ -1139,9 +1164,17 @@ def reasignar_retrabajo():
     apellidos = dp.get("apellido_paterno", "")
     sup_nombre = f"{nombres} {apellidos}".strip() or session["usuario"].get("nombre", "Supervisor")
 
+    s2 = encontrado.get("seccion_2", {})
+    nombre_taller = s2.get("proveedor") or encontrado.get("proveedor", "Taller")
+    unidad = encontrado.get("unidad", "S/N")
+    motivo_chofer = encontrado.get("motivo_chofer", "Falla persistente no reparada de manera correcta")
+    ticket_display = encontrado.get("ticket_original") or encontrado.get("ticket") or ticket
+
     encontrado["estado"] = "Reasignado"
     encontrado["fecha_reasignacion"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     encontrado["supervisor_reasigno"] = sup_nombre
+    if nombre_taller and nombre_taller != "Taller":
+        encontrado["proveedor"] = nombre_taller
     escribir_json("retrabajos.json", retrabajos_data)
 
     # Actualizar en facturas.json si corresponde
@@ -1151,11 +1184,16 @@ def reasignar_retrabajo():
         if str(f.get("id", "")).strip().upper() == f_id or ticket in str(f.get("retro", "")).upper() or str(f.get("id_reporte", "")).upper() == ticket:
             f["retrabajo"] = "Sí"
             f["estado_retrabajo"] = "Reasignado"
+            f["fecha_retrabajo"] = encontrado["fecha_reasignacion"]
+            f["fecha_finalizacion_retrabajo"] = ""
             if "estado_previo" not in f or not f["estado_previo"]:
                 f["estado_previo"] = f.get("estado")
+            # Candado: no duplicar conteo si ya se encontraba en proceso activo de reasignacion
+            if f.get("estado") != "Retrabajo" or f.get("estado_retrabajo") != "Reasignado":
+                f["num_retrabajo"] = int(f.get("num_retrabajo", 0)) + 1
+            elif not f.get("num_retrabajo"):
+                f["num_retrabajo"] = 1
             f["estado"] = "Retrabajo"
-            # Se empieza a contar cuando el supervisor lo vuelve a reasignar al taller
-            f["num_retrabajo"] = int(f.get("num_retrabajo", 0)) + 1
             break
     escribir_json("facturas.json", facturas_data)
 
@@ -1203,6 +1241,33 @@ def reasignar_retrabajo():
         )
     except Exception as e:
         print(f"Error al enviar correo de retrabajo al taller: {e}")
+
+    # Determinar correo del supervisor del ticket
+    correo_supervisor = encontrado.get("supervisor_correo") or dp.get("correo") or session["usuario"].get("correo")
+    nombre_supervisor_dest = sup_nombre or encontrado.get("supervisor_asignado") or "Supervisor"
+
+    if not correo_supervisor:
+        sup_target_user = encontrado.get("supervisor_usuario") or session["usuario"].get("usuario")
+        for u in usuarios_data.get("usuarios", []):
+            if u.get("usuario") == sup_target_user or (u.get("rol") == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"):
+                correo_supervisor = u.get("datos_perfil", {}).get("correo") or u.get("correo")
+                if correo_supervisor:
+                    break
+
+    if not correo_supervisor:
+        correo_supervisor = "armandoramireztelnor2026@gmail.com"
+
+    try:
+        enviar_correo_retrabajo_exitoso_supervisor(
+            correo_supervisor=correo_supervisor,
+            nombre_supervisor=nombre_supervisor_dest,
+            ticket=ticket_display,
+            unidad=unidad,
+            nombre_taller=nombre_taller,
+            motivo_retrabajo=motivo_chofer
+        )
+    except Exception as e:
+        print(f"Error al enviar correo de confirmación de retrabajo al supervisor: {e}")
 
     return jsonify({
         "status": "success",
@@ -1306,29 +1371,69 @@ def cancelar_reasignacion_retrabajo():
 
 @reportes_bp.route("/api/garantia/proveedor/lista", methods=["GET"])
 def obtener_retrabajos_proveedor():
-    if "usuario" not in session or session["usuario"].get("rol") != "proveedores":
+    if "usuario" not in session:
         return jsonify({"status": "error", "message": "No autorizado"}), 403
 
-    dp = session["usuario"].get("datos_perfil", {})
-    mi_proveedor = str(dp.get("nombre_proveedor", "")).strip().upper()
-    mi_usuario = str(session["usuario"].get("usuario", "")).strip().upper()
+    rol = str(session["usuario"].get("rol", "")).strip().lower()
+    if rol not in ["proveedores", "proveedor"]:
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    import unicodedata
+    def _norm(texto):
+        if not texto:
+            return ""
+        t = unicodedata.normalize('NFKD', str(texto)).encode('ASCII', 'ignore').decode('utf-8')
+        return re.sub(r'[^A-Z0-9]', '', t.upper())
+
+    dp = session["usuario"].get("datos_perfil", {}) or {}
+    mi_proveedor = str(dp.get("nombre_proveedor") or session["usuario"].get("nombre_proveedor") or dp.get("nombre") or session["usuario"].get("nombre", "")).strip()
+    mi_usuario = str(session["usuario"].get("usuario", "")).strip()
+
+    mi_prov_norm = _norm(mi_proveedor)
+    mi_usr_norm = _norm(mi_usuario)
 
     retrabajos_data = leer_json("retrabajos.json")
     todos = retrabajos_data.get("retrabajos", [])
 
+    facturas_dict = {}
+    try:
+        facturas_data = leer_json("facturas.json")
+        for f in facturas_data.get("facturas", []):
+            fid = str(f.get("id", "")).strip().upper()
+            if fid:
+                facturas_dict[fid] = f
+    except Exception:
+        pass
+
     filtrados = []
     for ret in todos:
-        s2 = ret.get("seccion_2", {})
-        prov_ret = str(s2.get("proveedor") or ret.get("proveedor") or ret.get("taller") or "").strip().upper()
-        estado = str(ret.get("estado", "")).strip()
-        
-        coincide = False
-        if mi_proveedor and (prov_ret == mi_proveedor or prov_ret in mi_proveedor or mi_proveedor in prov_ret):
-            coincide = True
-        elif mi_usuario and (prov_ret == mi_usuario or mi_usuario in prov_ret):
-            coincide = True
+        s2 = ret.get("seccion_2", {}) or {}
+        prov_ret = str(s2.get("proveedor") or ret.get("proveedor") or ret.get("taller") or "").strip()
+        prov_user = str(ret.get("proveedor_usuario") or ret.get("proveedor_id") or "").strip()
+        estado = str(ret.get("estado", "")).strip().lower()
 
-        if coincide and estado in ["Reasignado", "Reasignado_Taller"]:
+        prov_ret_norm = _norm(prov_ret)
+        prov_user_norm = _norm(prov_user)
+
+        coincide = False
+        if mi_prov_norm and prov_ret_norm:
+            if prov_ret_norm == mi_prov_norm or prov_ret_norm in mi_prov_norm or mi_prov_norm in prov_ret_norm:
+                coincide = True
+        if not coincide and mi_usr_norm:
+            if (prov_ret_norm and (prov_ret_norm == mi_usr_norm or mi_usr_norm in prov_ret_norm)) or                (prov_user_norm and (prov_user_norm == mi_usr_norm or mi_usr_norm in prov_user_norm)):
+                coincide = True
+
+        if not coincide and (mi_prov_norm or mi_usr_norm):
+            f_id = str(ret.get("factura_id", "")).strip().upper()
+            f_obj = facturas_dict.get(f_id)
+            if f_obj:
+                prov_f = _norm(f_obj.get("proveedor") or f_obj.get("taller") or "")
+                if prov_f and mi_prov_norm and (prov_f == mi_prov_norm or prov_f in mi_prov_norm or mi_prov_norm in prov_f):
+                    coincide = True
+                elif prov_f and mi_usr_norm and (prov_f == mi_usr_norm or mi_usr_norm in prov_f):
+                    coincide = True
+
+        if coincide and estado in ["reasignado", "reasignado_taller", "retrabajo"]:
             filtrados.append(ret)
 
     return jsonify({
@@ -1366,34 +1471,260 @@ def finalizar_retrabajo_taller():
     dp = session["usuario"].get("datos_perfil", {})
     taller_nombre = dp.get("nombre_proveedor", "Taller")
 
-    # Actualizar estado en retrabajos.json
-    encontrado["estado"] = "Finalizado"
+    # Generar códigos de validación de 6 dígitos: uno al chofer y otro al supervisor de respaldo
+    codigo_chofer = f"{random.randint(100000, 999999)}"
+    codigo_supervisor = f"{random.randint(100000, 999999)}"
+
+    # Buscar datos del chofer (sección 1 o reportes.json)
+    seccion_1 = encontrado.get("seccion_1") or {}
+    nombre_chofer = seccion_1.get("empleado")
+    correo_chofer = seccion_1.get("email")
+
+    if not correo_chofer or not nombre_chofer:
+        reportes_data = leer_json("reportes.json")
+        for r in reportes_data.get("reportes", []):
+            r_id = str(r.get("id", "")).strip().upper()
+            if r_id == ticket or r_id == str(encontrado.get("ticket_original", "")).strip().upper():
+                if not correo_chofer: correo_chofer = r.get("email") or r.get("correo")
+                if not nombre_chofer: nombre_chofer = r.get("empleado")
+                break
+
+    if not correo_chofer:
+        correo_chofer = "armandoramireztelnor2026@gmail.com"
+    if not nombre_chofer:
+        nombre_chofer = "Chofer"
+
+    # Actualizar estado en retrabajos.json a 'Por Liberar' con sus códigos
+    encontrado["estado"] = "Por Liberar"
     encontrado["fecha_finalizacion_taller"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    encontrado["codigo_chofer"] = codigo_chofer
+    encontrado["codigo_supervisor"] = codigo_supervisor
+    encontrado["chofer"] = nombre_chofer
+    encontrado["correo_chofer"] = correo_chofer
+    encontrado["unidad_entregada"] = "No"
     escribir_json("retrabajos.json", retrabajos_data)
 
-    # Actualizar estado en facturas.json y restaurar estado previo
+    # Actualizar estado en facturas.json (mantiene f['estado'] en Retrabajo hasta que el supervisor lo valide)
+    facturas_data = leer_json("facturas.json")
+    f_id = str(encontrado.get("factura_id", "")).strip().upper()
+    for f in facturas_data.get("facturas", []):
+        if str(f.get("id", "")).strip().upper() == f_id or ticket in str(f.get("retro", "")).upper() or str(f.get("id_reporte", "")).upper() == ticket:
+            f["estado_retrabajo"] = "Por Liberar"
+            f["fecha_finalizacion_retrabajo"] = encontrado["fecha_finalizacion_taller"]
+            f["codigo_chofer_retrabajo"] = codigo_chofer
+            f["codigo_supervisor_retrabajo"] = codigo_supervisor
+            f["retrabajo_unidad_entregada"] = "No"
+            break
+    escribir_json("facturas.json", facturas_data)
+
+    unidad_str = encontrado.get("unidad") or "N/A"
+    ticket_display = encontrado.get("ticket_original") or encontrado.get("ticket") or ticket
+
+    # Enviar notificaciones por correo:
+    # 1. Al Chofer con su código de validación
+    try:
+        enviar_correo_retrabajo_listo_chofer(
+            correo_chofer=correo_chofer,
+            nombre_chofer=nombre_chofer,
+            ticket=ticket_display,
+            unidad=unidad_str,
+            nombre_taller=taller_nombre,
+            codigo_chofer=codigo_chofer
+        )
+    except Exception as e:
+        print(f"Error al enviar correo de retrabajo listo al chofer: {e}")
+
+    # 2. Al Taller confirmando la conclusión
+    correo_taller = dp.get("correo") or session["usuario"].get("correo")
+    if not correo_taller:
+        usuarios_data = leer_json("usuarios.json")
+        for u in usuarios_data.get("usuarios", []):
+            if u.get("usuario") == session["usuario"].get("usuario"):
+                correo_taller = u.get("datos_perfil", {}).get("correo") or u.get("correo")
+                break
+    if not correo_taller:
+        correo_taller = "armandoramireztelnor2026@gmail.com"
+
+    try:
+        enviar_correo_retrabajo_listo_taller(
+            correo_taller=correo_taller,
+            nombre_taller=taller_nombre,
+            ticket=ticket_display,
+            unidad=unidad_str,
+            nombre_chofer=nombre_chofer
+        )
+    except Exception as e:
+        print(f"Error al enviar correo de confirmación de retrabajo listo al taller: {e}")
+
+    # 3. Al Supervisor de respaldo con su código de respaldo
+    correo_supervisor = encontrado.get("supervisor_correo")
+    nombre_supervisor = encontrado.get("supervisor_asignado") or "Supervisor"
+    if not correo_supervisor:
+        usuarios_data = leer_json("usuarios.json")
+        sup_target = encontrado.get("supervisor_usuario")
+        for u in usuarios_data.get("usuarios", []):
+            if (sup_target and u.get("usuario") == sup_target) or (u.get("rol") == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"):
+                correo_supervisor = u.get("datos_perfil", {}).get("correo") or u.get("correo")
+                nombre_supervisor = f"{u.get('datos_perfil', {}).get('nombres', '')} {u.get('datos_perfil', {}).get('apellido_paterno', '')}".strip() or nombre_supervisor
+                if correo_supervisor:
+                    break
+    if not correo_supervisor:
+        correo_supervisor = "armandoramireztelnor2026@gmail.com"
+
+    try:
+        enviar_correo_retrabajo_listo_supervisor_respaldo(
+            correo_supervisor=correo_supervisor,
+            nombre_supervisor=nombre_supervisor,
+            ticket=ticket_display,
+            unidad=unidad_str,
+            nombre_taller=taller_nombre,
+            nombre_chofer=nombre_chofer,
+            codigo_supervisor=codigo_supervisor
+        )
+    except Exception as e:
+        print(f"Error al enviar correo de código de respaldo al supervisor: {e}")
+
+    return jsonify({
+        "status": "success",
+        "message": f"Unidad marcada como LISTA. Se envió código de validación al chofer ({nombre_chofer}) y código de respaldo al supervisor ({nombre_supervisor}) para su liberación y entrega."
+    })
+
+
+@reportes_bp.route("/api/garantia/supervisor/por_liberar", methods=["GET"])
+def obtener_retrabajos_por_liberar():
+    if "usuario" not in session or session["usuario"].get("rol") != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    usuario_sesion = session["usuario"]
+    dp = usuario_sesion.get("datos_perfil", {})
+    subrol = dp.get("subrol", "")
+    mi_cope = str(dp.get("cope", "")).strip().upper()
+    copes_extra = [str(c).strip().upper() for c in dp.get("copes_asignados", [])]
+    copes_permitidos = set([mi_cope] + copes_extra)
+
+    retrabajos_data = leer_json("retrabajos.json")
+    todos = retrabajos_data.get("retrabajos", [])
+
+    filtrados = []
+    for ret in todos:
+        st = str(ret.get("estado", "")).strip().lower()
+        if st in ["por liberar", "por_liberar", "pendiente liberacion", "listo_taller"]:
+            ret_cope = str(ret.get("cope", "")).strip().upper()
+            if subrol in ["Jefatura", "Administrador"]:
+                filtrados.append(ret)
+            elif ret_cope in copes_permitidos or not ret_cope:
+                filtrados.append(ret)
+
+    return jsonify({
+        "status": "success",
+        "total": len(filtrados),
+        "retrabajos": filtrados
+    })
+
+
+@reportes_bp.route("/api/garantia/supervisor/liberar", methods=["POST"])
+def liberar_retrabajo_supervisor():
+    if "usuario" not in session or session["usuario"].get("rol") != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    usuario_sesion = session["usuario"]
+    dp = usuario_sesion.get("datos_perfil", {})
+    sup_nombre = f"{dp.get('nombres', '')} {dp.get('apellido_paterno', '')}".strip() or "Supervisor"
+
+    data = request.get_json() or {}
+    ticket = str(data.get("ticket", "")).strip().upper()
+    codigo_ingresado = str(data.get("codigo", "")).strip()
+
+    if not ticket:
+        return jsonify({"status": "error", "message": "Ticket no especificado"}), 400
+
+    retrabajos_data = leer_json("retrabajos.json")
+    todos = retrabajos_data.get("retrabajos", [])
+
+    encontrado = None
+    for ret in todos:
+        r_id = str(ret.get("id", "")).strip().upper()
+        r_orig = str(ret.get("ticket_original", "")).strip().upper()
+        r_tick = str(ret.get("ticket", "")).strip().upper()
+        if ticket in [r_id, r_orig, r_tick] or (ticket.replace("REP-", "") in [r_id.replace("REP-", ""), r_orig.replace("REP-", "")]):
+            encontrado = ret
+            break
+
+    if not encontrado:
+        return jsonify({"status": "error", "message": "Reporte de retrabajo no encontrado"}), 404
+
+    # Validar código (código del chofer o código de respaldo del supervisor)
+    cod_chofer = str(encontrado.get("codigo_chofer", "")).strip()
+    cod_super = str(encontrado.get("codigo_supervisor", "")).strip()
+
+    es_valido = False
+    tipo_codigo = ""
+
+    if cod_chofer or cod_super:
+        if not codigo_ingresado:
+            return jsonify({
+                "status": "error",
+                "message": "Debes ingresar el código de validación (proporcionado por el chofer o el código de respaldo de supervisión)."
+            }), 400
+
+        if cod_chofer and codigo_ingresado.upper() == cod_chofer.upper():
+            es_valido = True
+            tipo_codigo = "Código de Chofer"
+        elif cod_super and codigo_ingresado.upper() == cod_super.upper():
+            es_valido = True
+            tipo_codigo = "Código de Respaldo de Supervisión"
+
+        if not es_valido:
+            return jsonify({
+                "status": "error",
+                "message": "❌ Código de validación incorrecto. Ingresa el código recibido por el chofer o el código de respaldo del supervisor."
+            }), 400
+    else:
+        # Compatibilidad con tickets previos sin código registrado
+        es_valido = True
+        tipo_codigo = "Autorización Directa"
+
+    fecha_ahora = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # 1. Actualizar estado en retrabajos.json a Finalizado y Entregado
+    encontrado["estado"] = "Finalizado"
+    encontrado["fecha_liberacion"] = fecha_ahora
+    encontrado["supervisor_libero"] = sup_nombre
+    encontrado["unidad_entregada"] = "Sí"
+    encontrado["fecha_entrega"] = fecha_ahora
+    encontrado["codigo_validado_por"] = sup_nombre
+    encontrado["tipo_codigo_validado"] = tipo_codigo
+    escribir_json("retrabajos.json", retrabajos_data)
+
+    # 2. Actualizar estado en facturas.json y marcar entrega
     facturas_data = leer_json("facturas.json")
     f_id = str(encontrado.get("factura_id", "")).strip().upper()
     for f in facturas_data.get("facturas", []):
         if str(f.get("id", "")).strip().upper() == f_id or ticket in str(f.get("retro", "")).upper() or str(f.get("id_reporte", "")).upper() == ticket:
             f["estado_retrabajo"] = "Finalizado"
+            f["fecha_liberacion_retrabajo"] = fecha_ahora
+            f["retrabajo_unidad_entregada"] = "Sí"
+            f["fecha_entrega_retrabajo"] = fecha_ahora
             f["estado"] = f.get("estado_previo") or "Archivado"
             break
     escribir_json("facturas.json", facturas_data)
 
-    # Actualizar estado en reportes.json
+    # 3. Actualizar estado en reportes.json y marcar entrega
     reportes_data = leer_json("reportes.json")
     for r in reportes_data.get("reportes", []):
         r_id_clean = str(r.get("id", "")).strip().upper()
         if r_id_clean == ticket or r_id_clean == str(encontrado.get("ticket_original", "")).strip().upper():
             r["estado"] = r.get("estado_previo") or "Finalizado"
+            r["entregado"] = "Sí"
+            r["retrabajo_entregado"] = "Sí"
+            r["fecha_entrega"] = fecha_ahora
             break
     escribir_json("reportes.json", reportes_data)
 
     ticket_display = encontrado.get("ticket_original") or encontrado.get("ticket") or ticket
     return jsonify({
         "status": "success",
-        "message": f"El retrabajo para el ticket {ticket_display} ha sido marcado como FINALIZADO exitosamente por el taller {taller_nombre}."
+        "message": f"Código validado exitosamente ({tipo_codigo}). El retrabajo para el ticket {ticket_display} ha sido liberado por el supervisor {sup_nombre} y la unidad quedó marcada como ENTREGADA."
     })
 
 

@@ -6,7 +6,7 @@
             "unidad": "8090-1212",
             "responsable": "Andres Avila",
             "telefono": "6634041184",
-            "titulo": "n (+1 m\u00e1s)",
+            "titulo": "n (+1 más)",
             "retro": "[TICKET:REP-20261008131643]\r\nREPORTE ORIGINAL DEL CHOFER: Cambio de wipers",
             "diagnostico": "n",
             "trabajo_realizar": "n",
@@ -22,7 +22,7 @@
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
             "codigo_liberacion": "75437069",
-            "entregado": "S\u00ed",
+            "entregado": "Sí",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
@@ -75,10 +75,12 @@
             "numero_doc50": "500000012",
             "estado_previo": "Archivado",
             "estado": "Retrabajo",
-            "retrabajo": "S\u00ed",
-            "num_retrabajo": 5,
-            "ultimo_motivo_retrabajo": "Ruido reincidente en frenos y suspensi\u00f3n al girar.",
-            "estado_retrabajo": "Reasignado"
+            "retrabajo": "Sí",
+            "num_retrabajo": 1,
+            "ultimo_motivo_retrabajo": "Ruido reincidente en frenos y suspensión al girar.",
+            "estado_retrabajo": "Reasignado",
+            "fecha_retrabajo": "2026-10-29 11:41:38",
+            "fecha_finalizacion_retrabajo": ""
         },
         {
             "id": "20261009110502",
@@ -86,7 +88,7 @@
             "unidad": "8090-1857",
             "responsable": "Luis Ramirez",
             "telefono": "6634041184",
-            "titulo": "n (+1 m\u00e1s)",
+            "titulo": "n (+1 más)",
             "retro": "[TICKET:REP-20261009105612]\r\nREPORTE ORIGINAL DEL CHOFER: Tira agua del tanque del limpiaparabrisas ",
             "diagnostico": "n",
             "trabajo_realizar": "n",
@@ -102,7 +104,7 @@
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
             "codigo_liberacion": "21412154",
-            "entregado": "S\u00ed",
+            "entregado": "Sí",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
@@ -180,7 +182,7 @@
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
             "codigo_liberacion": "92734009",
-            "entregado": "S\u00ed",
+            "entregado": "Sí",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
@@ -238,7 +240,7 @@
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
             "codigo_liberacion": "74282915",
-            "entregado": "S\u00ed",
+            "entregado": "Sí",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
@@ -283,7 +285,7 @@
             "unidad": "8090-1948",
             "responsable": "Luis Ramirez",
             "telefono": "6634041184",
-            "titulo": "Afinacion (+1 m\u00e1s)",
+            "titulo": "Afinacion (+1 más)",
             "retro": "[TICKET:REP-20261016112042]\r\nREPORTE ORIGINAL DEL CHOFER: Tuneup",
             "diagnostico": "Afinacion",
             "trabajo_realizar": "Afinacion",
@@ -299,7 +301,7 @@
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
             "codigo_liberacion": "42304632",
-            "entregado": "S\u00ed",
+            "entregado": "Sí",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
@@ -361,7 +363,7 @@
             "unidad": "8090-1570",
             "responsable": "Dilan Fernandez",
             "telefono": "6634041184",
-            "titulo": "Cambio de balatas (+1 m\u00e1s)",
+            "titulo": "Cambio de balatas (+1 más)",
             "retro": "[TICKET:REP-20261016112126]\r\nFuerte olor a gasolina",
             "diagnostico": "Cambio de Balatas",
             "trabajo_realizar": "Cambio de balatas",
@@ -377,7 +379,7 @@
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
             "codigo_liberacion": "31256467",
-            "entregado": "S\u00ed",
+            "entregado": "Sí",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
@@ -439,7 +441,7 @@
             "responsable": "Andres Avila",
             "telefono": "6634041184",
             "titulo": "cambio de balatas",
-            "retro": "[TICKET:REP-20261020133339]\r\nAfinaci\u00f3n completa, cambio de aceite de motor y filtros, revisi\u00f3n de niveles y calibraci\u00f3n de frenos.",
+            "retro": "[TICKET:REP-20261020133339]\r\nAfinación completa, cambio de aceite de motor y filtros, revisión de niveles y calibración de frenos.",
             "diagnostico": "n",
             "trabajo_realizar": "n",
             "mantenimiento": "Preventivo",
@@ -454,14 +456,14 @@
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
             "codigo_liberacion": "36637950",
-            "entregado": "S\u00ed",
+            "entregado": "Sí",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
                     "precio": 10001.0,
                     "titulo": "cambio de balatas",
                     "mantenimiento": "Preventivo",
-                    "retro": "[TICKET:REP-20261020133339]\r\nAfinaci\u00f3n completa, cambio de aceite de motor y filtros, revisi\u00f3n de niveles y calibraci\u00f3n de frenos.",
+                    "retro": "[TICKET:REP-20261020133339]\r\nAfinación completa, cambio de aceite de motor y filtros, revisión de niveles y calibración de frenos.",
                     "diagnostico": "n",
                     "trabajo_realizar": "n",
                     "fotos_evidencia": [
@@ -516,7 +518,7 @@
             "fotos_cotizacion": [],
             "fotos_evidencia": [],
             "codigo_liberacion": "69815462",
-            "entregado": "No",
+            "entregado": "Sí",
             "cotizaciones": [
                 {
                     "id_cotizacion": "1",
@@ -547,7 +549,8 @@
             "aprobado_admin_10k": true,
             "aprobado_corp": true,
             "liberado_admin": false,
-            "fecha_cierre": "2026-10-22 13:41:31"
+            "fecha_cierre": "2026-10-22 13:41:31",
+            "fecha_entrega": "2026-10-29 18:07:22"
         }
     ]
 }

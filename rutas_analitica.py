@@ -360,6 +360,55 @@ def obtener_datos_auditados(period):
         candidatos_reactivados.sort(key=lambda x: str(x.get('fecha') or ''))
         ultimo_reactivado_caras = candidatos_reactivados[-1]
 
+    # 10. Ultima garantia reasignada (supervisor reasigna un trabajo a un taller)
+    retrabajos_raw = leer_json('retrabajos.json').get('retrabajos', [])
+    candidatos_garantia = []
+    for ret in retrabajos_raw:
+        st_ret = str(ret.get('estado', '')).strip().lower()
+        f_reasig = ret.get('fecha_reasignacion') or ''
+        # Se considera si fue reasignado o tiene fecha de reasignacion registrada
+        if st_ret in ['reasignado', 'en proceso', 'finalizado'] or f_reasig:
+            fecha_ref = f_reasig or ret.get('timestamp') or ret.get('fecha_solicitud') or ''
+            if period != 'Todos' and fecha_ref:
+                parts = period.split('-')
+                target_year = parts[0]
+                target_sem = parts[1] if len(parts) > 1 else None
+                y_ref = str(fecha_ref)[:4]
+                m_ref = str(fecha_ref)[5:7] if len(str(fecha_ref)) >= 7 else '01'
+                try:
+                    sem_ref = 'S1' if int(m_ref) <= 6 else 'S2'
+                except Exception:
+                    sem_ref = 'S1'
+                if target_sem:
+                    if y_ref != target_year or sem_ref != target_sem:
+                        continue
+                else:
+                    if y_ref != target_year:
+                        continue
+
+            cope_val = ret.get('cope') or (ret.get('seccion_1', {}).get('cope')) or 'PE CALLE 10'
+            resp = resolver_responsables(cope_val, cope_map, def_admin, def_super, def_jefe)
+            sup_nombre = ret.get('supervisor_reasigno') or ret.get('supervisor_asignado') or resp['Supervisor']
+            chofer_nombre = ret.get('empleado') or (ret.get('seccion_1', {}).get('empleado')) or ret.get('chofer') or 'Personal Operativo'
+            taller_nombre = ret.get('proveedor') or (ret.get('seccion_2', {}).get('proveedor')) or 'Taller'
+
+            candidatos_garantia.append({
+                "ticket": ret.get('ticket_original') or ret.get('ticket') or ret.get('id', 'N/A'),
+                "chofer": chofer_nombre,
+                "unidad": str(ret.get('unidad', '')).replace('8090-', ''),
+                "taller": taller_nombre,
+                "administrador": resp['Administrador'],
+                "supervisor": sup_nombre,
+                "jefatura": resp['Jefatura'],
+                "fecha": fecha_ref or datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "motivo": ret.get('motivo_chofer', '')
+            })
+
+    ultima_garantia = None
+    if candidatos_garantia:
+        candidatos_garantia.sort(key=lambda x: str(x.get('fecha') or ''))
+        ultima_garantia = candidatos_garantia[-1]
+
     # TOPS
     now = datetime.datetime.now()
     unidades_tiempo = []
@@ -483,7 +532,8 @@ def obtener_datos_auditados(period):
             "ultima_reparada": ultima_reparada,
             "ultima_entregada": ultima_entregada,
             "ultima_rechazada": ultima_rechazada,
-            "ultima_fiscal": ultima_fiscal
+            "ultima_fiscal": ultima_fiscal,
+            "ultima_garantia": ultima_garantia
         },
         "tops": {
             "top_tiempo_taller": top_tiempo_taller,
@@ -494,10 +544,11 @@ def obtener_datos_auditados(period):
         },
         "charts": {
             "pie_flota": {
-                "labels": ["En Circulación", "En Taller", "En Jurídicos", "Inhabilitadas (Caras)"],
+                "labels": ["En Circulación", "En Taller", "Garantía/Retrabajo", "En Jurídicos", "Inhabilitadas (Caras)"],
                 "data": [
                     flota_metricas["totales"]["circulacion"],
                     flota_metricas["totales"]["taller"],
+                    flota_metricas["totales"].get("garantia", 0),
                     flota_metricas["totales"]["juridicos"],
                     flota_metricas["totales"]["inhabilitadas"]
                 ]
@@ -622,7 +673,8 @@ def exportar_analitica_excel():
         ("Última Unidad Reparada", events.get("ultima_reparada")),
         ("Última Unidad Entregada", events.get("ultima_entregada")),
         ("Última Cotización Rechazada", events.get("ultima_rechazada")),
-        ("Última Factura Fiscal", events.get("ultima_fiscal"))
+        ("Última Factura Fiscal", events.get("ultima_fiscal")),
+        ("Última Unidad a Garantía / Retrabajo", events.get("ultima_garantia"))
     ]
 
     row_num = 5

@@ -129,7 +129,7 @@ function renderizarTablaReportes(lista) {
     let pendientesOC = 0;
 
     if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="24" style="text-align: center; color: #a3b1c6; padding: 20px;">No se encontraron resultados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="35" style="text-align: center; color: #a3b1c6; padding: 20px;">No se encontraron resultados.</td></tr>`;
         actualizarKPIs(0, 0, 0);
         return;
     }
@@ -315,6 +315,28 @@ function renderizarTablaReportes(lista) {
         } else {
             isOperando = (f.entregado === 'Sí');
         }
+
+        // Si la unidad está en retrabajo / reasignación, su estado operativo es No Operando
+        let estRetNorm = String(f.estado_retrabajo || '').trim().toLowerCase();
+        let estTicketNorm = String(estado || f.estado || f.estado_calculado || '').trim().toLowerCase();
+        let rawRetNorm = String(f.retrabajo || f.es_retrabajo || '').trim().toLowerCase();
+
+        let estaEnRetrabajoActivo = (
+            estTicketNorm.includes('retrabajo') ||
+            estRetNorm === 'reasignado' ||
+            estRetNorm === 'pendiente' ||
+            rawRetNorm === 'sí' ||
+            rawRetNorm === 'si' ||
+            rawRetNorm === 'pendiente' ||
+            rawRetNorm === 'reasignado'
+        );
+        if (estRetNorm === 'finalizado') {
+            estaEnRetrabajoActivo = false;
+        }
+        if (estaEnRetrabajoActivo) {
+            isOperando = false;
+        }
+
         let statusUnidad = isOperando
             ? '<span style="background:#10b981; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">Operando</span>'
             : '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">No Operando</span>';
@@ -349,6 +371,99 @@ function renderizarTablaReportes(lista) {
         let valNumRetrabajo = (numRet > 0)
             ? `<span style="background:#f59e0b; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">${numRet}</span>`
             : '<span style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No Aplica</span>';
+
+        // ----------------------------------------------------
+        // LOGICA DE LAS 3 COLUMNAS DE REINGRESO / RETRABAJO
+        // 1. FECHA/RETRABAJO: Fecha de ingreso al taller por reingreso
+        // 2. TIEMPO EN TALLER/REINGRESO: Tiempo que tenga en reingreso
+        // 3. FECHA DE FINALIZACION/REINGRESO: Fecha en que se concluyo el reingreso
+        // ----------------------------------------------------
+        let rawEstRet = String(f.estado_retrabajo || '').trim().toLowerCase();
+        let fechaRetRaw = f.fecha_retrabajo || f.fecha_reasignacion || f.fecha_reingreso || '';
+        let fechaFinRetRaw = f.fecha_finalizacion_retrabajo || f.fecha_finalizacion_taller || '';
+
+        let tieneReingreso = false;
+        if (numRet > 0 || rawRetrabajo.toLowerCase() === 'sí' || rawRetrabajo.toLowerCase() === 'si' || rawEstRet === 'reasignado' || rawEstRet === 'finalizado' || fechaRetRaw) {
+            if (rawRetrabajo.toLowerCase() !== 'cancelado') {
+                tieneReingreso = true;
+            }
+        }
+
+        const badgeNoAplicaRet = '<span style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No Aplica</span>';
+
+        let valFechaRetrabajo = badgeNoAplicaRet;
+        let valTiempoReingreso = badgeNoAplicaRet;
+        let valFechaFinReingreso = badgeNoAplicaRet;
+        let valRetrabajoFinalizado = badgeNoAplicaRet;
+        let valRetrabajoUnidadEntregada = badgeNoAplicaRet;
+
+        if (tieneReingreso) {
+            // 1. Fecha / Retrabajo
+            if (fechaRetRaw) {
+                valFechaRetrabajo = `<span style="color:#ffffff; font-size:0.9em; white-space:nowrap;">${fechaRetRaw}</span>`;
+            } else {
+                valFechaRetrabajo = `<span style="color:#ffffff; font-size:0.9em;">En Asignación</span>`;
+            }
+
+            // 2. Tiempo en Taller / Reingreso
+            if (fechaRetRaw) {
+                let dInicio = new Date(fechaRetRaw);
+                if (isNaN(dInicio)) dInicio = new Date(fechaRetRaw.replace(' ', 'T'));
+                if (isNaN(dInicio)) dInicio = new Date(fechaRetRaw.replace(/-/g, '/'));
+
+                let dFin = null;
+                if (fechaFinRetRaw && (rawEstRet === 'finalizado' || f.estado === 'Finalizado')) {
+                    dFin = new Date(fechaFinRetRaw);
+                    if (isNaN(dFin)) dFin = new Date(fechaFinRetRaw.replace(' ', 'T'));
+                    if (isNaN(dFin)) dFin = new Date(fechaFinRetRaw.replace(/-/g, '/'));
+                }
+
+                let dComparar = dFin || new Date();
+                if (!isNaN(dInicio) && !isNaN(dComparar) && dComparar >= dInicio) {
+                    let diffMs = dComparar - dInicio;
+                    let diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    let diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    let diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    let sufijo = dFin ? '' : ' ⏱️';
+                    valTiempoReingreso = `<span style="color:#ffffff; font-size:0.9em; white-space:nowrap;">${diffDays}d ${diffHours}h ${diffMinutes}m${sufijo}</span>`;
+                } else {
+                    valTiempoReingreso = '<span style="color:#ffffff; font-size:0.9em; white-space:nowrap;">0d 0h 0m ⏱️</span>';
+                }
+            } else {
+                valTiempoReingreso = `<span style="color:#ffffff; font-size:0.9em;">Esperando Ingreso</span>`;
+            }
+
+            // 3. Fecha de Finalizacion / Reingreso
+            if (fechaFinRetRaw && (rawEstRet === 'finalizado' || f.estado === 'Finalizado')) {
+                valFechaFinReingreso = `<span style="color:#ffffff; font-size:0.9em; white-space:nowrap;">${fechaFinRetRaw}</span>`;
+            } else {
+                valFechaFinReingreso = `<span style="background:#eab308; color:#0b1c30; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;" title="La unidad se encuentra actualmente en proceso de retrabajo en el taller">En Proceso ⏱️</span>`;
+            }
+
+            // 4. Retrabajo Finalizado (Sí con círculo verde, No con círculo rojo, No Aplica)
+            let estaFinalizado = Boolean(fechaFinRetRaw && (rawEstRet === 'finalizado' || f.estado === 'Finalizado' || f.estado === 'Archivado' || f.estado === 'Finalizado / Histórico'));
+            if (rawEstRet === 'finalizado') {
+                estaFinalizado = true;
+            }
+
+            if (estaFinalizado) {
+                valRetrabajoFinalizado = `<span style="background:#15803d; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Sí</span>`;
+            } else {
+                valRetrabajoFinalizado = `<span style="background:#b91c1c; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No</span>`;
+            }
+
+            // 5. Retrabajo / Unidad Entregada
+            let entRaw = String(f.retrabajo_unidad_entregada || f.unidad_entregada_retrabajo || '').trim().toLowerCase();
+            if (entRaw === 'sí' || entRaw === 'si') {
+                valRetrabajoUnidadEntregada = `<span style="background:#15803d; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Sí</span>`;
+            } else if (entRaw === 'no') {
+                valRetrabajoUnidadEntregada = `<span style="background:#b91c1c; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No</span>`;
+            } else if (f.fecha_liberacion_retrabajo || rawEstRet === 'finalizado') {
+                valRetrabajoUnidadEntregada = `<span style="background:#15803d; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Sí</span>`;
+            } else {
+                valRetrabajoUnidadEntregada = `<span style="background:#b91c1c; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No</span>`;
+            }
+        }
         
         let numCotizaciones = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones.length : 1;
         let costoTotalRow = 0;
@@ -443,38 +558,57 @@ function renderizarTablaReportes(lista) {
             textColorEstado = 'white';
         }
 
+        // Evaluar si el ticket está o estuvo en garantía/retrabajo
+        let rawRetLower = rawRetrabajo.toLowerCase();
+        let estRowLower = String(estado || f.estado || '').toLowerCase();
+        let isRowRetrabajo = false;
+        if (numRet > 0 ||
+            rawRetLower === 'sí' || rawRetLower === 'si' || rawRetLower === 'pendiente' || rawRetLower === 'reasignado' ||
+            estRowLower === 'retrabajo' || estRowLower === 'en asignacion/retrabajo' ||
+            rawEstRet === 'reasignado' || rawEstRet === 'pendiente' || rawEstRet === 'finalizado' ||
+            Boolean(fechaRetRaw) || tieneReingreso) {
+            if (rawRetLower !== 'cancelado' || numRet > 0) {
+                isRowRetrabajo = true;
+            }
+        }
+
         let rowHtml = `
-            <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-cope="${cleanCope}" data-estado="${estado}" data-fecha="${fechaISO}" data-costo="${ticketGasto}" data-pend-doc50="${isRowPendDoc50 ? '1' : '0'}" data-pend-oc="${isRowPendOC ? '1' : '0'}" data-reactivado="${f.reactivado_desde_caras ? '1' : '0'}">
-                <td style="vertical-align:top; padding-top:15px;"><input type="checkbox" class="chk-reporte" value="${ticket}"></td>
-                <td style="vertical-align:top; padding-top:15px;"><span style="color:#0ea5e9; font-weight:bold;">${ticket}</span>${badgeCaras}</td>
-                <td style="vertical-align:top; padding-top:15px;">${numEco}</td>
-                <td style="vertical-align:top; padding-top:15px;">${fechaTicket}</td>
-                <td style="vertical-align:top; padding-top:15px;">${tiempoTicket}</td>
-                <td style="vertical-align:top; padding-top:15px;">${f.fecha_cierre || pendienteHTML}</td>
-                <td style="vertical-align:top; padding-top:15px;"><span style="background:${badgeColorEstado}; color:${textColorEstado}; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">${estado}</span></td>
-                <td style="vertical-align:top; padding-top:15px;">${statusUnidad}</td>
-                <td style="vertical-align:top; padding-top:15px;">${nombreSup}</td>
-                <td style="vertical-align:top; padding-top:15px;">${compania}</td>
-                <td style="vertical-align:top; padding-top:15px;">${departamento}</td>
-                <td style="vertical-align:top; padding-top:15px;">${cope}</td>
-                <td style="vertical-align:top; padding-top:15px;">${ciudad}</td>
-                <td style="vertical-align:top; padding-top:15px;"><div style="max-width:250px; white-space:normal; font-size:0.9em; word-wrap: break-word;">${htmlRetro}</div></td>
-                <td style="vertical-align:top; padding-top:15px;" data-costo="${ticketGasto}"><strong>${htmlCosto}</strong></td>
-                <td style="vertical-align:top; padding-top:15px;">${proveedor}</td>
-                <td style="vertical-align:top; padding-top:15px;">${fechaEntrada}</td>
-                <td style="vertical-align:top; padding-top:15px;">${tiempoTaller}</td>
-                <td style="vertical-align:top; padding-top:15px;">${fechaSalida}</td>
-                <td style="vertical-align:top; padding-top:15px;">${valRetrabajo}</td>
-                <td style="vertical-align:top; padding-top:15px;">${valNumRetrabajo}</td>
-                <td style="vertical-align:top; padding-top:15px;">${htmlNumPedido}</td>
-                <td style="vertical-align:top; padding-top:15px;">${htmlNumOrden}</td>
-                <td style="vertical-align:top; padding-top:15px;">${htmlNumFactura}</td>
-                <td style="vertical-align:top; padding-top:15px;">${htmlBtnPdfFactura}</td>
-                <td style="vertical-align:top; padding-top:15px;">${nombreAdmin}</td>
-                <td style="vertical-align:top; padding-top:15px;">${statusDocContable}</td>
-                <td style="vertical-align:top; padding-top:15px;">${htmlNumContable}</td>
-                <td style="vertical-align:top; padding-top:15px;">${btnComentarios}</td>
-                <td style="vertical-align:top; padding-top:15px;">${nombreJefatura}</td>
+            <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-cope="${cleanCope}" data-estado="${estado}" data-fecha="${fechaISO}" data-costo="${ticketGasto}" data-pend-doc50="${isRowPendDoc50 ? '1' : '0'}" data-pend-oc="${isRowPendOC ? '1' : '0'}" data-reactivado="${f.reactivado_desde_caras ? '1' : '0'}" data-retrabajo="${isRowRetrabajo ? '1' : '0'}">
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px;"><input type="checkbox" class="chk-reporte" value="${ticket}"></td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px;"><span style="color:#0ea5e9; font-weight:bold;">${ticket}</span>${badgeCaras}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${numEco}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${fechaTicket}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${tiempoTicket}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${f.fecha_cierre || pendienteHTML}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px;"><span style="background:${badgeColorEstado}; color:${textColorEstado}; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap;">${estado}</span></td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${statusUnidad}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${nombreSup}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${compania}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${departamento}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${cope}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${ciudad}</td>
+                <td class="td-verde col-verde col-retro-problema" style="vertical-align:top; padding-top:15px; color:#ffffff;"><div class="retro-contenido">${htmlRetro}</div></td>
+                <td class="td-verde col-verde" style="vertical-align:top; padding-top:15px; color:#ffffff;" data-costo="${ticketGasto}"><strong>${htmlCosto}</strong></td>
+                <td class="td-verde col-verde" style="vertical-align:top; padding-top:15px; color:#ffffff;">${proveedor}</td>
+                <td class="td-verde col-verde" style="vertical-align:top; padding-top:15px; color:#ffffff;">${fechaEntrada}</td>
+                <td class="td-verde col-verde" style="vertical-align:top; padding-top:15px; color:#ffffff;">${tiempoTaller}</td>
+                <td class="td-verde col-verde" style="vertical-align:top; padding-top:15px; color:#ffffff;">${fechaSalida}</td>
+                <td class="td-amarillo col-amarillo" style="vertical-align:top; padding-top:15px;">${valRetrabajo}</td>
+                <td class="td-amarillo col-amarillo" style="vertical-align:top; padding-top:15px;">${valNumRetrabajo}</td>
+                <td class="td-amarillo col-amarillo" style="vertical-align:top; padding-top:15px; color:#ffffff;">${valFechaRetrabajo}</td>
+                <td class="td-amarillo col-amarillo" style="vertical-align:top; padding-top:15px; color:#ffffff;">${valTiempoReingreso}</td>
+                <td class="td-amarillo col-amarillo" style="vertical-align:top; padding-top:15px; color:#ffffff;">${valFechaFinReingreso}</td>
+                <td class="td-amarillo col-amarillo" style="vertical-align:top; padding-top:15px; color:#ffffff;">${valRetrabajoFinalizado}</td>
+                <td class="td-amarillo col-amarillo" style="vertical-align:top; padding-top:15px; color:#ffffff;">${valRetrabajoUnidadEntregada}</td>
+                <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${htmlNumPedido}</td>
+                <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${htmlNumOrden}</td>
+                <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${htmlNumFactura}</td>
+                <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${htmlBtnPdfFactura}</td>
+                <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${nombreAdmin}</td>
+                <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${statusDocContable}</td>
+                <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${htmlNumContable}</td>
+                <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${btnComentarios}</td>
+                <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${nombreJefatura}</td>
             </tr>
         `;
         tbody.innerHTML += rowHtml;
@@ -577,6 +711,14 @@ function aplicarFiltrosReportes() {
                 match = false;
             }
         }
+
+        // 7. Filtro Garantía / Retrabajo (botón toggle)
+        if (match && window.filtroGarantiaRetrabajoActivo) {
+            let esRetrabajo = tr.getAttribute('data-retrabajo') === '1';
+            if (!esRetrabajo) {
+                match = false;
+            }
+        }
         
         // Aplicar estado de visibilidad y clase de filtro para paginación
         if (match) {
@@ -606,7 +748,7 @@ function aplicarFiltrosReportes() {
         if (!filaSinResultados) {
             filaSinResultados = document.createElement('tr');
             filaSinResultados.id = 'fila-sin-resultados-reportes';
-            filaSinResultados.innerHTML = `<td colspan="30" style="text-align: center; color: #a3b1c6; padding: 25px; font-weight: bold; background: #0f172a;">🔍 No se encontraron tickets con los filtros seleccionados.</td>`;
+            filaSinResultados.innerHTML = `<td colspan="35" style="text-align: center; color: #a3b1c6; padding: 25px; font-weight: bold; background: #0f172a;">🔍 No se encontraron tickets con los filtros seleccionados.</td>`;
             tbody.appendChild(filaSinResultados);
         } else {
             filaSinResultados.style.display = '';
@@ -622,6 +764,28 @@ function aplicarFiltrosReportes() {
 }
 
 window.filtroReactivadasCarasActivo = false;
+window.filtroGarantiaRetrabajoActivo = false;
+
+function toggleFiltroGarantia() {
+    window.filtroGarantiaRetrabajoActivo = !window.filtroGarantiaRetrabajoActivo;
+    let btn = document.getElementById('btn-filtro-garantia');
+    if (btn) {
+        if (window.filtroGarantiaRetrabajoActivo) {
+            btn.style.background = '#f59e0b';
+            btn.style.color = '#0f172a';
+            btn.style.borderColor = '#d97706';
+            btn.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.4)';
+            btn.innerHTML = '<span style="font-size:1.1em;">🛡️</span> Garantía / Retrabajo';
+        } else {
+            btn.style.background = '#334155';
+            btn.style.color = '#cbd5e1';
+            btn.style.borderColor = '#475569';
+            btn.style.boxShadow = 'none';
+            btn.innerHTML = '<span style="font-size:1.1em;">🛡️</span> Garantía / Retrabajo';
+        }
+    }
+    aplicarFiltrosReportes();
+}
 
 function toggleFiltroReactivadas() {
     window.filtroReactivadasCarasActivo = !window.filtroReactivadasCarasActivo;
@@ -665,6 +829,16 @@ function limpiarFiltrosReportes() {
         btn.style.borderColor = '#475569';
         btn.style.boxShadow = 'none';
         btn.innerHTML = '<span style="font-size:1.1em;">⚠️</span> Reactivadas C/Caras';
+    }
+
+    window.filtroGarantiaRetrabajoActivo = false;
+    let btnGar = document.getElementById('btn-filtro-garantia');
+    if (btnGar) {
+        btnGar.style.background = '#334155';
+        btnGar.style.color = '#cbd5e1';
+        btnGar.style.borderColor = '#475569';
+        btnGar.style.boxShadow = 'none';
+        btnGar.innerHTML = '<span style="font-size:1.1em;">🛡️</span> Garantía / Retrabajo';
     }
 
     aplicarFiltrosReportes();
@@ -944,3 +1118,18 @@ async function eliminarComentario() {
     if (!confirm('¿Estás seguro de eliminar este comentario?')) return;
     await guardarComentario("delete");
 }
+
+// --- MARCADOR DE LINEA COMPLETA AL HACER CLICK EN CUALQUIER CELDA O CUADRO ---
+document.addEventListener('click', function (e) {
+    let tr = e.target.closest('#tabla-exportable-reportes tbody tr');
+    if (!tr) return;
+    let tbody = tr.parentElement;
+    if (!tbody) return;
+    let rows = tbody.querySelectorAll('tr');
+    rows.forEach(r => {
+        r.classList.remove('selected-row');
+        r.classList.remove('fila-marcada');
+    });
+    tr.classList.add('selected-row');
+    tr.classList.add('fila-marcada');
+});

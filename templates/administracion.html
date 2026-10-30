@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="/static/style.css?v=51062">
+    <link rel="stylesheet" href="/static/style.css?v=1000035">
     <link rel="stylesheet" href="/static/manual_sistema.css?v=1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -155,8 +155,8 @@
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-corp')">Lista de Corporativos</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-admin')">Lista Automotriz</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('panel-control')">Panel de Control</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('flujo-trabajo')">Flujo de Trabajo</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
 
@@ -178,6 +178,7 @@
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-admin')">Lista Automotriz</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('unidades')">Unidades</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('accesos')">Accesos (Credenciales)</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('flujo-trabajo')">Flujo de Trabajo</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
@@ -193,6 +194,7 @@
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align: center; color: #4ade80; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
                     <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button" onclick="cambiarVistaAdmin('retrabajo')">Retrabajo</button>
+                    <button class="btn-sidebar btn-sidebar-retrabajo" id="btn-sidebar-liberar-retrabajo" title="Liberar/Retrabajo" type="button" onclick="cambiarVistaAdmin('liberar-retrabajo')">Liberar/Retrabajo <span id="badge-liberar-retrabajo" style="display:none; background:#ef4444; color:white; font-size:0.75rem; padding:2px 7px; border-radius:10px; margin-left:6px; font-weight:800;">0</span></button>
                 </div>
                 {% endif %}
 
@@ -200,6 +202,7 @@
                 {% if usuario.datos_perfil.subrol == 'Administrador' %}
                 <button class="btn-sidebar" onclick="verCotizacionesMas10000()">Cotizaciones +10000</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('liberar-doc-contable')">Liberar Doc. Contable</button>
+                <button class="btn-sidebar" onclick="cambiarVistaAdmin('flujo-trabajo')">Flujo de Trabajo</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
                 <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
@@ -266,6 +269,19 @@
                                 <span id="porcentaje-taller-unidades" style="font-size: 0.85em; color: #38bdf8; font-weight: 600; background: rgba(14, 165, 233, 0.2); padding: 2px 7px; border-radius: 6px;">--%</span>
                             </div>
                             <div style="font-size: 0.8em; color: #94a3b8; margin-top: 6px;">Desde reporte hasta entrega con código</div>
+                        </div>
+
+                        <!-- En Garantía / Retrabajo -->
+                        <div class="card-metrica-flota card-garantia" onclick="filtrarUnidadesPorEstado('Garantía/Retrabajo')" title="Clic para filtrar unidades en garantía / retrabajo" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.05)); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px; padding: 16px 20px; cursor: pointer; transition: all 0.2s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.85em; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px;">Garantía / Retrabajo</span>
+                                <span style="font-size: 1.4em;">🛡️</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                                <span id="metrica-garantia-unidades" style="font-size: 2em; font-weight: 800; color: #ffffff;">--</span>
+                                <span id="porcentaje-garantia-unidades" style="font-size: 0.85em; color: #fbbf24; font-weight: 600; background: rgba(245, 158, 11, 0.2); padding: 2px 7px; border-radius: 6px;">--%</span>
+                            </div>
+                            <div style="font-size: 0.8em; color: #94a3b8; margin-top: 6px;">En garantía / pendiente por reparar</div>
                         </div>
 
                         <!-- En Jurídicos -->
@@ -474,6 +490,110 @@
                     </div>
                 </div>
             </div>
+
+            <!-- VISTA: LIBERAR / RETRABAJO (SUPERVISOR) -->
+            <div id="vista-liberar-retrabajo" style="display: none;">
+                <div class="top-bar">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.8rem;">🛡️</span>
+                        <div>
+                            <h2 style="margin: 0;">Liberación de Retrabajos / Garantías</h2>
+                            <p style="margin: 2px 0 0 0; color: #94a3b8; font-size: 0.85rem;">Unidades marcadas como listas por el taller, en espera de validación y liberación por supervisión</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-container">
+                    <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
+                        <span class="buscador-icono">&#x1F50D;</span>
+                        <input type="text" id="buscador-liberar-retrabajo" class="buscador-pildora"
+                            placeholder="Buscar por ticket, unidad, taller, COPE..."
+                            onkeyup="filtrarTabla('buscador-liberar-retrabajo', 'tabla-liberar-retrabajo')">
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="white-space: nowrap;">Ticket</th>
+                                    <th style="white-space: nowrap;">Fecha Reasignación</th>
+                                    <th style="white-space: nowrap;">Fecha Listo (Taller)</th>
+                                    <th style="white-space: nowrap;">Unidad</th>
+                                    <th style="white-space: nowrap;">COPE / Edificio</th>
+                                    <th style="white-space: nowrap;">Ciudad</th>
+                                    <th style="white-space: nowrap;">Taller / Proveedor</th>
+                                    <th style="min-width: 260px; max-width: 420px;">Motivo de Retrabajo</th>
+                                    <th style="white-space: nowrap; text-align: center;">Estado</th>
+                                    <th style="white-space: nowrap; text-align: center;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-liberar-retrabajo">
+                                <tr>
+                                    <td colspan="10" style="text-align: center; color: #94a3b8; padding: 25px;">
+                                        No hay retrabajos listos pendientes de liberación.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+<!-- MODAL PARA VALIDAR CÓDIGO Y LIBERAR RETRABAJO -->
+<div id="modal-validar-codigo-liberacion" style="display: none; position: fixed; inset: 0; background: rgba(3, 7, 18, 0.78); backdrop-filter: blur(4px); z-index: 999999; align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #0f172a; border: 1.5px solid #38bdf8; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 20px 45px rgba(0,0,0,0.85); overflow: hidden; animation: fadeInModal 0.2s ease;">
+        <div style="background: linear-gradient(135deg, #0b192c 0%, #1e293b 100%); padding: 18px 22px; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.6rem;">🔐</span>
+                <div>
+                    <h3 style="margin: 0; color: #ffffff; font-size: 1.1rem; font-weight: 700;">Validación de Entrega de Unidad</h3>
+                    <p style="margin: 2px 0 0 0; color: #94a3b8; font-size: 0.78rem;">Liberación de Retrabajo / Garantía</p>
+                </div>
+            </div>
+            <button type="button" onclick="cerrarModalValidarCodigoLiberacion()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 2px 6px;">&times;</button>
+        </div>
+        <div style="padding: 22px 24px;">
+            <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; border-radius: 10px; padding: 12px 16px; margin-bottom: 18px; font-size: 0.85rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="color: #94a3b8;">Ticket:</span>
+                    <strong id="modal-val-ticket" style="color: #f59e0b;">--</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="color: #94a3b8;">Unidad:</span>
+                    <strong id="modal-val-unidad" style="color: #38bdf8;">--</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="color: #94a3b8;">Taller:</span>
+                    <span id="modal-val-taller" style="color: #e2e8f0; font-weight: 600;">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #94a3b8;">Chofer Asignado:</span>
+                    <span id="modal-val-chofer" style="color: #10b981; font-weight: 600;">--</span>
+                </div>
+            </div>
+
+            <p style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.5; margin: 0 0 14px 0; text-align: center;">
+                Ingresa el <strong>código de 6 dígitos</strong> que el chofer recibió en su correo al entregarse la unidad, o el <strong>código de respaldo</strong> enviado a supervisión:
+            </p>
+
+            <div style="margin-bottom: 18px; text-align: center;">
+                <input type="text" id="input-codigo-liberacion-retrabajo" maxlength="10" placeholder="000000" autocomplete="off"
+                    style="width: 200px; text-align: center; font-size: 1.8rem; font-weight: 800; letter-spacing: 6px; font-family: monospace; padding: 10px 14px; background: #06111f; border: 2px solid #38bdf8; border-radius: 10px; color: #ffffff; outline: none; box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);"
+                    onkeydown="if(event.key==='Enter') confirmarValidacionLiberacionRetrabajo()">
+            </div>
+
+            <div id="modal-val-error" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; font-size: 0.82rem; padding: 8px 12px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="cerrarModalValidarCodigoLiberacion()" style="padding: 9px 18px; font-size: 0.85rem; font-weight: 600; border-radius: 8px; background: #334155; color: #cbd5e1; border: none; cursor: pointer;">
+                    Cancelar
+                </button>
+                <button type="button" id="btn-confirmar-liberacion-modal" onclick="confirmarValidacionLiberacionRetrabajo()" style="padding: 9px 20px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; background: #10b981; color: #ffffff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);">
+                    ✅ Validar y Liberar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
             <!-- VISTA DE TIEMPO / GARANTÍA (JEFATURA: TODOS LOS TALLERES) -->
             <div id="vista-tiempo-garantia" style="display: none;">
@@ -2595,57 +2715,69 @@
                                 style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
                                 onchange="aplicarFiltrosReportes()">
                         </div>
-                        <div style="display:flex; gap:8px;">
-                            <button id="btn-filtro-reactivadas" type="button" onclick="toggleFiltroReactivadas()"
-                                style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:8px 12px; border-radius:5px; cursor:pointer; height:35px; display:inline-flex; align-items:center; gap:6px; font-size:0.85em; font-weight:600; transition:all 0.2s;"
-                                title="Mostrar sólo cotizaciones reactivadas de cotizaciones caras">
-                                <span style="font-size:1.1em;">⚠️</span> Reactivadas C/Caras
-                            </button>
+                        <div style="display:flex; gap:8px; align-items:flex-end;">
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <button id="btn-filtro-garantia" type="button" onclick="toggleFiltroGarantia()"
+                                    style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:8px 12px; border-radius:5px; cursor:pointer; height:35px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:0.85em; font-weight:600; transition:all 0.2s; box-sizing:border-box; width:100%; white-space:nowrap;"
+                                    title="Mostrar sólo tickets en garantía / retrabajo">
+                                    <span style="font-size:1.1em;">🛡️</span> Garantía / Retrabajo
+                                </button>
+                                <button id="btn-filtro-reactivadas" type="button" onclick="toggleFiltroReactivadas()"
+                                    style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:8px 12px; border-radius:5px; cursor:pointer; height:35px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:0.85em; font-weight:600; transition:all 0.2s; box-sizing:border-box; width:100%; white-space:nowrap;"
+                                    title="Mostrar sólo cotizaciones reactivadas de cotizaciones caras">
+                                    <span style="font-size:1.1em;">⚠️</span> Reactivadas C/Caras
+                                </button>
+                            </div>
                             <button onclick="limpiarFiltrosReportes()"
-                                style="background:#475569; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; height:35px;">Limpiar</button>
+                                style="background:#475569; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; height:35px; align-self:flex-end;">Limpiar</button>
                         </div>
                     </div>
 
-                    <div class="table-responsive" style="overflow-x: auto; max-width: 100%;">
-                        <table style="min-width: 1500px; white-space: nowrap;" id="tabla-exportable-reportes">
+                    <div class="table-responsive contenedor-tabla-reportes" style="overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 280px); min-height: 420px; max-width: 100%; position: relative; border-radius: 8px; border: 1px solid #1f395a; background: #0b1728;">
+                        <table style="min-width: 1500px; white-space: nowrap; margin-top: 0;" id="tabla-exportable-reportes">
                             <thead>
                                 <tr>
-                                    <th><input type="checkbox" id="chk-all-reportes" onclick="toggleAllReportes(this)">
+                                    <th class="th-azul-marino col-azul-marino"><input type="checkbox" id="chk-all-reportes" onclick="toggleAllReportes(this)">
                                     </th>
-                                    <th>TICKET</th>
-                                    <th>NUM. ECO</th>
-                                    <th>FECHA TICKET</th>
-                                    <th>TIEMPO DEL TICKET</th>
-                                    <th>FECHA TICKET FINALIZADO</th>
-                                    <th>ESTADO</th>
-                                    <th>STATUS UNIDAD</th>
-                                    <th>SUPERVISOR</th>
-                                    <th>COMPAÑIA</th>
-                                    <th>DEPARTAMENTO</th>
-                                    <th>COPE/EDIFICIO</th>
-                                    <th>CIUDAD/MUNICIPIO BASE</th>
-                                    <th>RETRO (PROBLEMA)</th>
-                                    <th>COSTO (TOTAL)</th>
-                                    <th>PROVEEDOR/TALLER</th>
-                                    <th>FECHA DE ENTRADA</th>
-                                    <th>TIEMPO EN TALLER</th>
-                                    <th>FECHA DE SALIDA</th>
-                                    <th>RETRABAJO</th>
-                                    <th>NUM/RETRABAJO</th>
-                                    <th>NUM. PEDIDO</th>
-                                    <th>NUM. DE ORDEN</th>
-                                    <th>NUM. FACTURA</th>
-                                    <th>PDF FACTURA</th>
-                                    <th>ADMINISTRADOR</th>
-                                    <th>STATUS DOC. CONTABLE</th>
-                                    <th>NUM DOC. CONTABLE</th>
-                                    <th>COMENTARIOS</th>
-                                    <th>JEFATURA</th>
+                                    <th class="th-azul-marino col-azul-marino">TICKET</th>
+                                    <th class="th-azul-marino col-azul-marino">NUM. ECO</th>
+                                    <th class="th-azul-marino col-azul-marino">FECHA TICKET</th>
+                                    <th class="th-azul-marino col-azul-marino">TIEMPO DEL TICKET</th>
+                                    <th class="th-azul-marino col-azul-marino">FECHA TICKET FINALIZADO</th>
+                                    <th class="th-azul-marino col-azul-marino">ESTADO</th>
+                                    <th class="th-azul-marino col-azul-marino">STATUS UNIDAD</th>
+                                    <th class="th-azul-marino col-azul-marino">SUPERVISOR</th>
+                                    <th class="th-azul-marino col-azul-marino">COMPAÑIA</th>
+                                    <th class="th-azul-marino col-azul-marino">DEPARTAMENTO</th>
+                                    <th class="th-azul-marino col-azul-marino">COPE/EDIFICIO</th>
+                                    <th class="th-azul-marino col-azul-marino">CIUDAD/MUNICIPIO BASE</th>
+                                    <th class="th-verde col-verde col-retro-problema">RETRO (PROBLEMA)</th>
+                                    <th class="th-verde col-verde">COSTO (TOTAL)</th>
+                                    <th class="th-verde col-verde">PROVEEDOR/TALLER</th>
+                                    <th class="th-verde col-verde">FECHA DE ENTRADA</th>
+                                    <th class="th-verde col-verde">TIEMPO EN TALLER</th>
+                                    <th class="th-verde col-verde">FECHA DE SALIDA</th>
+                                    <th class="th-amarillo col-amarillo">RETRABAJO</th>
+                                    <th class="th-amarillo col-amarillo">NUM/RETRABAJO</th>
+                                    <th class="th-amarillo col-amarillo">FECHA/RETRABAJO</th>
+                                    <th class="th-amarillo col-amarillo">TIEMPO EN TALLER/REINGRESO</th>
+                                    <th class="th-amarillo col-amarillo">FECHA DE FINALIZACION/REINGRESO</th>
+                                    <th class="th-amarillo col-amarillo">RETRABAJO FINALIZADO</th>
+                                    <th class="th-amarillo col-amarillo">RETRABAJO/UNIDAD ENTREGADA</th>
+                                    <th class="th-negro col-negro">NUM. PEDIDO</th>
+                                    <th class="th-negro col-negro">NUM. DE ORDEN</th>
+                                    <th class="th-negro col-negro">NUM. FACTURA</th>
+                                    <th class="th-negro col-negro">PDF FACTURA</th>
+                                    <th class="th-negro col-negro">ADMINISTRADOR</th>
+                                    <th class="th-negro col-negro">STATUS DOC. CONTABLE</th>
+                                    <th class="th-negro col-negro">NUM DOC. CONTABLE</th>
+                                    <th class="th-negro col-negro">COMENTARIOS</th>
+                                    <th class="th-negro col-negro">JEFATURA</th>
                                 </tr>
                             </thead>
                             <tbody id="tabla-seccion-reportes">
                                 <tr>
-                                    <td colspan="30" style="text-align: center; color: #a3b1c6; padding: 20px;">Cargando
+                                    <td colspan="35" style="text-align: center; color: #a3b1c6; padding: 20px;">Cargando
                                         base de datos...</td>
                                 </tr>
                             </tbody>
@@ -3020,12 +3152,25 @@
                             </div>
                         </div>
 
+                        <!-- Ultima Garantia / Retrabajo Reasignado -->
+                        <div class="analitica-card analitica-card-amber" style="border-left: 4px solid #f59e0b;">
+                            <div class="analitica-card-header">
+                                <div class="analitica-icon-badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                </div>
+                                <h3 class="analitica-card-title">Última Unidad a Garantía</h3>
+                            </div>
+                            <div id="analitica-garantia" class="analitica-card-body">
+                                Cargando...
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- MONITOR EN TIEMPO REAL: ESTADO OPERATIVO DE LA FLOTA -->
                     <div class="analitica-section-header" style="margin-bottom: 15px;">
                         <h2>Estado Operativo de la Flota Vehicular</h2>
-                        <p>Censo vehicular en tiempo real de unidades en circulación, taller, jurídicos e inhabilitadas.</p>
+                        <p>Censo vehicular en tiempo real de unidades en circulación, taller, garantía/retrabajo, jurídicos e inhabilitadas.</p>
                     </div>
 
                     <div class="analitica-grid-events" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 30px;">
@@ -3082,6 +3227,25 @@
                                 </div>
                                 <div style="font-size: 0.85em; color: #94a3b8; margin-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px;">
                                     Desde reporte hasta entrega con código
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Garantía / Retrabajo -->
+                        <div class="analitica-card analitica-card-amber">
+                            <div class="analitica-card-header">
+                                <div class="analitica-icon-badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">
+                                    🛡️
+                                </div>
+                                <h3 class="analitica-card-title">Garantía / Retrabajo</h3>
+                            </div>
+                            <div class="analitica-card-body" style="padding-top: 5px;">
+                                <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                                    <span id="analitica-flota-garantia" style="font-size: 2.2em; font-weight: 800; color: #ffffff;">--</span>
+                                    <span id="analitica-flota-garantia-pct" style="font-size: 0.9em; color: #fbbf24; font-weight: 700; background: rgba(245, 158, 11, 0.15); padding: 3px 8px; border-radius: 6px;">--%</span>
+                                </div>
+                                <div style="font-size: 0.85em; color: #94a3b8; margin-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px;">
+                                    En garantía / reasignado a taller
                                 </div>
                             </div>
                         </div>
@@ -3873,14 +4037,14 @@
         <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
     </div>
 
-    <script src="/static/script.js?v=1000028"></script>
+    <script src="/static/script.js?v=1000040"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js?v=6"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
-    <script src="/static/unidades.js?v=10"></script>
+    <script src="/static/unidades.js?v=11"></script>
     <script src="/static/facturas_principal.js?v=61"></script>
-    <script src="/static/seccion_reportes.js?v=1000006"></script>
+    <script src="/static/seccion_reportes.js?v=1000020"></script>
     <script src="/static/cotizaciones_10k.js?v=26"></script>
 
     
@@ -4208,16 +4372,14 @@
                 <!-- Inyectado dinámicamente por script.js -->
             </div>
 
-            <!-- Footer Modal Retrabajo: Botones Reasignar y Cancelar Reasignación arriba del botón Cancelar con diseño homogéneo -->
-            <div style="background: #081322; padding: 16px 24px; border-top: 1px solid #1f395a; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
-                <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; align-items: center;">
-                    <button type="button" id="btn-reasignar-retrabajo" class="btn-footer-retrabajo btn-footer-retrabajo-reasignar" onclick="accionReasignarRetrabajo()">
-                        Reasignar
-                    </button>
-                    <button type="button" id="btn-cancelar-reasignacion" class="btn-footer-retrabajo btn-footer-retrabajo-cancelar-reasig" onclick="abrirModalCancelarReasignacion()">
-                        Cancelar Reasignacion
-                    </button>
-                </div>
+            <!-- Footer Modal Retrabajo: 3 Botones ordenados de arriba hacia abajo con el mismo diseño y tamaño -->
+            <div style="background: #081322; padding: 18px 24px; border-top: 1px solid #1f395a; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                <button type="button" id="btn-reasignar-retrabajo" class="btn-footer-retrabajo btn-footer-retrabajo-reasignar" onclick="accionReasignarRetrabajo()">
+                    Reasignar
+                </button>
+                <button type="button" id="btn-cancelar-reasignacion" class="btn-footer-retrabajo btn-footer-retrabajo-cancelar-reasig" onclick="abrirModalCancelarReasignacion()">
+                    Cancelar Reasignacion
+                </button>
                 <button type="button" class="btn-footer-retrabajo btn-footer-retrabajo-cerrar" onclick="cerrarModal('modal-detalle-retrabajo')">
                     Cancelar
                 </button>

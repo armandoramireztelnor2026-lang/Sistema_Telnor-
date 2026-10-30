@@ -614,6 +614,10 @@
 
         function enviarReporte() {
             const marca = document.getElementById('marca-input').value;
+            if (marca.includes('REASIGNACIÓN') || marca.includes('GARANTÍA')) {
+                alert("⚠️ ATENCIÓN: La unidad seleccionada se encuentra actualmente en proceso de reasignación / garantía y no puede ser reportada hasta que sea reparada nuevamente por el taller.");
+                return;
+            }
             if (marca === '' || marca === 'UNIDAD INACTIVA') {
                 alert("La unidad ingresada no es válida o se encuentra Inactiva. Verifique el número.");
                 return;
@@ -692,37 +696,7 @@
         }
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            let unidadesData = {};
-            try {
-                const res = await fetch('/api/unidades');
-                unidadesData = await res.json();
-            } catch(e) {
-                console.error("Error cargando unidades:", e);
-            }
-            
-            const unidadInput = document.getElementById('unidad-input');
-            const marcaInput = document.getElementById('marca-input');
-            const modeloInput = document.getElementById('modelo-input');
-            
-            if (unidadInput && marcaInput && modeloInput) {
-                unidadInput.addEventListener('input', () => {
-                    // Remover maxLength temporalmente si el usuario dijo que podía ser más largo, pero el form actual tiene , lo respetamos.
-                    // (Actually the user JSON has IDs like "80901231" which are 8 digits!)
-                    // Let's remove the  in case they have longer IDs.
-                    const val = unidadInput.value.trim();
-                    if (unidadesData[val]) {
-                        marcaInput.value = unidadesData[val].Marca || '';
-                        modeloInput.value = unidadesData[val].Modelo || '';
-                    } else {
-                        marcaInput.value = '';
-                        modeloInput.value = '';
-                    }
-                });
-            }
-        });
-    </script>
+
 
     <script>
         let globalUnidadesData = {};
@@ -737,6 +711,8 @@
             }
         }
         
+        window.lastAlertEcoGarantia = null;
+
         function checkAutoFill() {
             const unidadInput = document.getElementById('unidad-input');
             const marcaInput = document.getElementById('marca-input');
@@ -747,10 +723,26 @@
             
             const rawVal = unidadInput.value.trim();
             const val = "8090" + rawVal;
+
+            if (rawVal.length < 4) {
+                window.lastAlertEcoGarantia = null;
+            }
             
             if (globalUnidadesData[val]) {
                 const info = globalUnidadesData[val];
-                if (info.Juridicos === true) {
+                if (info.activa_en_garantia === true || info.estado_operativo === 'Garantía/Retrabajo' || info.estado_operativo === 'En Garantía') {
+                    marcaInput.value = 'UNIDAD EN REASIGNACIÓN (GARANTÍA)';
+                    modeloInput.value = 'BLOQUEADA';
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerText = 'Unidad en Reasignación (Garantía)';
+                        btnSubmit.style.background = '#f59e0b';
+                    }
+                    if (rawVal.length === 4 && window.lastAlertEcoGarantia !== val) {
+                        window.lastAlertEcoGarantia = val;
+                        alert("⚠️ ATENCIÓN: La unidad 8090-" + rawVal + " se encuentra actualmente en proceso de reasignación / garantía y no puede ser reportada hasta que sea reparada nuevamente por el taller.");
+                    }
+                } else if (info.Juridicos === true) {
                     marcaInput.value = 'UNIDAD EN JURÍDICOS';
                     modeloInput.value = 'BLOQUEADA';
                     if(btnSubmit) {

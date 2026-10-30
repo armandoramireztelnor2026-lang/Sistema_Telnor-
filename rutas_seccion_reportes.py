@@ -172,6 +172,17 @@ def obtener_lista_seccion_reportes():
     reporte_a_cope = {str(r.get("id")): r.get("cope", "") for r in todos_reportes}
     reporte_a_reactivado = {str(r.get("id")): r.get("reactivado_desde_caras", False) for r in todos_reportes}
 
+    # Precalcular datos de retrabajos para cruzar fechas de reingreso
+    retrabajos_data = leer_json('retrabajos.json')
+    retrabajos_map = {}
+    for ret in retrabajos_data.get('retrabajos', []):
+        t_orig = str(ret.get('ticket_original') or ret.get('ticket') or ret.get('id', '')).strip().upper()
+        f_id_ret = str(ret.get('factura_id', '')).strip().upper()
+        if t_orig:
+            retrabajos_map[t_orig] = ret
+        if f_id_ret:
+            retrabajos_map[f_id_ret] = ret
+
     # 2. Asignar nombres al ticket y calcular estado
     for f in todos_combinados:
         cope_f = f.get('cope', '')
@@ -202,6 +213,22 @@ def obtener_lista_seccion_reportes():
         f['administrador_nombre'] = admin_nombre
         f['jefatura_nombre'] = nombre_jefatura
         f['estado_calculado'] = determinar_estado_ticket(f)
+
+        # Cruzar con retrabajos.json para obtener los datos de reingreso
+        t_key = str(f.get("id", "")).strip().upper()
+        r_key = str(r_id or "").strip().upper()
+        ret_obj = retrabajos_map.get(t_key) or retrabajos_map.get(r_key)
+        if ret_obj:
+            f['fecha_retrabajo'] = ret_obj.get("fecha_reasignacion") or ret_obj.get("fecha_ingreso") or f.get("fecha_retrabajo")
+            if ret_obj.get("estado") == "Finalizado":
+                f['fecha_finalizacion_retrabajo'] = ret_obj.get("fecha_finalizacion_taller") or f.get("fecha_finalizacion_retrabajo")
+            else:
+                f['fecha_finalizacion_retrabajo'] = f.get("fecha_finalizacion_retrabajo") or ""
+            f['estado_retrabajo'] = ret_obj.get("estado") or f.get("estado_retrabajo")
+            if not f.get("num_retrabajo"):
+                f["num_retrabajo"] = 1
+            if not f.get("retrabajo"):
+                f["retrabajo"] = "Sí"
 
     # Recopilar lista completa de todos los estados posibles del sistema y base de datos
     estados_disponibles = list(ESTADOS_SISTEMA_TICKET)
