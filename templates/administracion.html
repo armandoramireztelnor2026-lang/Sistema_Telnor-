@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="/static/style.css?v=1000035">
+    <link rel="stylesheet" href="/static/style.css?v=1000048">
     <link rel="stylesheet" href="/static/manual_sistema.css?v=1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -125,6 +125,14 @@
 </head>
 
 <body>
+    <!-- PANTALLA DE CARGA FLOTANTE -->
+    <div id="loader-confirmacion">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <div class="loader-text" id="loader-txt-main">Procesando...</div>
+            <div style="color: #a3b1c6; font-size: 0.85em; margin-top:-10px;" id="loader-txt-sub">Por favor espera un momento...</div>
+        </div>
+    </div>
     <!-- VARIABLES OCULTAS PARA EL CONTROL DE ACCESO (RBAC) -->
     <input type="hidden" id="rol-actual" value="administracion">
     <input type="hidden" id="subrol-actual" value="{{ usuario.datos_perfil.subrol }}">
@@ -165,6 +173,12 @@
                     <div style="text-align: center; color: #4ade80; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
                     <button class="btn-sidebar btn-sidebar-retrabajo" title="Tiempo/Garantía" type="button" onclick="cambiarVistaAdmin('tiempo-garantia')">Tiempo/Garantía</button>
                 </div>
+
+                <!-- Módulo de Configuraciones (Jefatura) -->
+                <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="text-align: center; color: #cbd5e1; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Configuraciones</div>
+                    <button class="btn-sidebar" title="Cambiar configuraciones" type="button" onclick="if(window.abrirConfiguracionesEnDesarrollo){abrirConfiguracionesEnDesarrollo(event);}else{alert('En desarrollo');}">Cambiar configuraciones</button>
+                </div>
                 {% endif %}
 
                 <!-- ========== SUPERVISOR ========== -->
@@ -194,7 +208,7 @@
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align: center; color: #4ade80; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
                     <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button" onclick="cambiarVistaAdmin('retrabajo')">Retrabajo</button>
-                    <button class="btn-sidebar btn-sidebar-retrabajo" id="btn-sidebar-liberar-retrabajo" title="Liberar/Retrabajo" type="button" onclick="cambiarVistaAdmin('liberar-retrabajo')">Liberar/Retrabajo <span id="badge-liberar-retrabajo" style="display:none; background:#ef4444; color:white; font-size:0.75rem; padding:2px 7px; border-radius:10px; margin-left:6px; font-weight:800;">0</span></button>
+                    <button class="btn-sidebar btn-sidebar-retrabajo" id="btn-sidebar-liberar-retrabajo" title="Liberar/Retrabajo" type="button" onclick="cambiarVistaAdmin('liberar-retrabajo')">Liberar/Retrabajo</button>
                 </div>
                 {% endif %}
 
@@ -4037,15 +4051,15 @@
         <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
     </div>
 
-    <script src="/static/script.js?v=1000040"></script>
+    <script src="/static/script.js?v=1000054"></script>
     <script src="/static/liberacion.js"></script>
     <script src="/static/facturas_herramientas.js?v=6"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
     <script src="/static/unidades.js?v=11"></script>
-    <script src="/static/facturas_principal.js?v=61"></script>
-    <script src="/static/seccion_reportes.js?v=1000020"></script>
-    <script src="/static/cotizaciones_10k.js?v=26"></script>
+    <script src="/static/facturas_principal.js?v=71"></script>
+    <script src="/static/seccion_reportes.js?v=1000031"></script>
+    <script src="/static/cotizaciones_10k.js?v=28"></script>
 
     
     <!-- MODAL AJUSTAR TIEMPO DE GARANTÍA POR JEFATURA -->

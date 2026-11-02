@@ -215,6 +215,26 @@ def lista_reportes():
             copes_permitidos = [mi_cope] + copes_asignados
             # Solo dejamos los reportes que coincidan con el COPE (o COPEs extra) del Supervisor
             data['reportes'] = [r for r in data.get('reportes', []) if r.get('cope') in copes_permitidos]
+
+    try:
+        retrabajos_data = leer_json("retrabajos.json").get("retrabajos", [])
+        retrabajo_set = set()
+        for ret in retrabajos_data:
+            st = str(ret.get("estado", "")).strip().lower()
+            if st != "cancelado":
+                for k in ["ticket_original", "ticket", "id"]:
+                    val = str(ret.get(k) or "").strip().upper()
+                    if val:
+                        retrabajo_set.add(val)
+                        retrabajo_set.add(val.replace("REP-", ""))
+        for r in data.get("reportes", []):
+            r_id = str(r.get("id", "")).strip().upper()
+            if r_id in retrabajo_set or r_id.replace("REP-", "") in retrabajo_set:
+                r["es_retrabajo"] = True
+                if not r.get("retrabajo"):
+                    r["retrabajo"] = "Sí"
+    except Exception as e:
+        print(f"Error enriqueciendo reportes con retrabajo: {e}")
             
     return jsonify(data)
 
@@ -1030,6 +1050,7 @@ def aplicar_garantia():
         "supervisor_usuario": sup_usuario,
         "supervisor_correo": sup_correo,
         "estado": "Pendiente",
+        "reactivado_desde_caras": bool(factura_correspondiente.get("reactivado_desde_caras") or reporte_encontrado.get("reactivado_desde_caras")),
         "seccion_1": seccion_1,
         "seccion_2": seccion_2
     }
@@ -1045,8 +1066,9 @@ def aplicar_garantia():
         if str(f.get("id")) == str(factura_correspondiente.get("id")):
             f["retrabajo"] = "Pendiente"
             f["estado_retrabajo"] = "Pendiente"
-            if "estado_previo" not in f or not f["estado_previo"]:
-                f["estado_previo"] = f.get("estado")
+            if "estado_previo" not in f or not f["estado_previo"] or f["estado_previo"] in ["Retrabajo", "En Asignacion/Retrabajo"]:
+                curr_st = f.get("estado")
+                f["estado_previo"] = curr_st if curr_st not in ["Retrabajo", "En Asignacion/Retrabajo"] else ("Archivado" if f.get("doc_contable_50") or f.get("archivado") else "pendiente")
             f["estado"] = "En Asignacion/Retrabajo"
             f["ultimo_motivo_retrabajo"] = motivo
             # NOTA: NO se incrementa num_retrabajo aquí porque apenas se va a reasignar o cancelar
@@ -1057,8 +1079,9 @@ def aplicar_garantia():
     reportes_data = leer_json("reportes.json")
     for r in reportes_data.get("reportes", []):
         if str(r.get("id")) == str(ticket_original_val):
-            if "estado_previo" not in r or not r["estado_previo"]:
-                r["estado_previo"] = r.get("estado")
+            if "estado_previo" not in r or not r["estado_previo"] or r["estado_previo"] in ["Retrabajo", "En Asignacion/Retrabajo"]:
+                curr_st_r = r.get("estado")
+                r["estado_previo"] = curr_st_r if curr_st_r not in ["Retrabajo", "En Asignacion/Retrabajo"] else ("Finalizado" if r.get("fecha_cierre") or r.get("entregado") == "Sí" else "Asignado")
             r["estado"] = "En Asignacion/Retrabajo"
             break
     escribir_json("reportes.json", reportes_data)
@@ -1103,8 +1126,25 @@ def obtener_retrabajos_supervisor():
                         ret["fecha_salida_taller"] = f_sal
                     break
 
+    # Enriquecer con reactivado_desde_caras si aplica
+    if facturas_data_cache is None:
+        facturas_data_cache = leer_json("facturas.json").get("facturas", [])
+    caras_set = set()
+    for f_item in facturas_data_cache:
+        if f_item.get("reactivado_desde_caras"):
+            f_rep_id = str(f_item.get("id_reporte") or f_item.get("numero_reporte") or f_item.get("id") or "").strip().upper()
+            if f_rep_id:
+                caras_set.add(f_rep_id)
+                caras_set.add(f_rep_id.replace("REP-", ""))
+
     filtrados = []
     for ret in todos:
+        st_ret = str(ret.get("estado", "")).strip().lower()
+        if st_ret in ["finalizado", "cancelado", "entregado"] or str(ret.get("unidad_entregada", "")).strip().lower() in ["sí", "si"]:
+            continue
+        t_check = str(ret.get("ticket_original") or ret.get("ticket") or ret.get("id") or "").strip().upper()
+        if t_check in caras_set or t_check.replace("REP-", "") in caras_set:
+            ret["reactivado_desde_caras"] = True
         ret_cope = str(ret.get("cope", "")).strip().upper()
         if subrol in ["Jefatura", "Administrador"]:
             filtrados.append(ret)
@@ -1186,8 +1226,9 @@ def reasignar_retrabajo():
             f["estado_retrabajo"] = "Reasignado"
             f["fecha_retrabajo"] = encontrado["fecha_reasignacion"]
             f["fecha_finalizacion_retrabajo"] = ""
-            if "estado_previo" not in f or not f["estado_previo"]:
-                f["estado_previo"] = f.get("estado")
+            if "estado_previo" not in f or not f["estado_previo"] or f["estado_previo"] in ["Retrabajo", "En Asignacion/Retrabajo"]:
+                curr_st = f.get("estado")
+                f["estado_previo"] = curr_st if curr_st not in ["Retrabajo", "En Asignacion/Retrabajo"] else ("Archivado" if f.get("doc_contable_50") or f.get("archivado") else "pendiente")
             # Candado: no duplicar conteo si ya se encontraba en proceso activo de reasignacion
             if f.get("estado") != "Retrabajo" or f.get("estado_retrabajo") != "Reasignado":
                 f["num_retrabajo"] = int(f.get("num_retrabajo", 0)) + 1
@@ -1202,8 +1243,9 @@ def reasignar_retrabajo():
     for r in reportes_data.get("reportes", []):
         r_id_clean = str(r.get("id", "")).strip().upper()
         if r_id_clean == ticket or r_id_clean == str(encontrado.get("ticket_original", "")).strip().upper():
-            if "estado_previo" not in r or not r["estado_previo"]:
-                r["estado_previo"] = r.get("estado")
+            if "estado_previo" not in r or not r["estado_previo"] or r["estado_previo"] in ["Retrabajo", "En Asignacion/Retrabajo"]:
+                curr_st_r = r.get("estado")
+                r["estado_previo"] = curr_st_r if curr_st_r not in ["Retrabajo", "En Asignacion/Retrabajo"] else ("Finalizado" if r.get("fecha_cierre") or r.get("entregado") == "Sí" else "Asignado")
             r["estado"] = "Retrabajo"
             break
     escribir_json("reportes.json", reportes_data)
@@ -1434,6 +1476,11 @@ def obtener_retrabajos_proveedor():
                     coincide = True
 
         if coincide and estado in ["reasignado", "reasignado_taller", "retrabajo"]:
+            if estado in ["finalizado", "cancelado", "entregado"] or str(ret.get("unidad_entregada", "")).strip().lower() in ["sí", "si"]:
+                continue
+            f_asoc = facturas_dict.get(str(ret.get("factura_id", "")).strip().upper())
+            if f_asoc and f_asoc.get("reactivado_desde_caras"):
+                ret["reactivado_desde_caras"] = True
             filtrados.append(ret)
 
     return jsonify({
@@ -1534,41 +1581,20 @@ def finalizar_retrabajo_taller():
     except Exception as e:
         print(f"Error al enviar correo de retrabajo listo al chofer: {e}")
 
-    # 2. Al Taller confirmando la conclusión
-    correo_taller = dp.get("correo") or session["usuario"].get("correo")
-    if not correo_taller:
-        usuarios_data = leer_json("usuarios.json")
-        for u in usuarios_data.get("usuarios", []):
-            if u.get("usuario") == session["usuario"].get("usuario"):
-                correo_taller = u.get("datos_perfil", {}).get("correo") or u.get("correo")
-                break
-    if not correo_taller:
-        correo_taller = "armandoramireztelnor2026@gmail.com"
-
-    try:
-        enviar_correo_retrabajo_listo_taller(
-            correo_taller=correo_taller,
-            nombre_taller=taller_nombre,
-            ticket=ticket_display,
-            unidad=unidad_str,
-            nombre_chofer=nombre_chofer
-        )
-    except Exception as e:
-        print(f"Error al enviar correo de confirmación de retrabajo listo al taller: {e}")
-
-    # 3. Al Supervisor de respaldo con su código de respaldo
+    # 2. Al Supervisor de respaldo con su código de respaldo
     correo_supervisor = encontrado.get("supervisor_correo")
     nombre_supervisor = encontrado.get("supervisor_asignado") or "Supervisor"
-    if not correo_supervisor:
+    if not correo_supervisor or "@telnor.com" in str(correo_supervisor).lower():
         usuarios_data = leer_json("usuarios.json")
         sup_target = encontrado.get("supervisor_usuario")
         for u in usuarios_data.get("usuarios", []):
             if (sup_target and u.get("usuario") == sup_target) or (u.get("rol") == "administracion" and u.get("datos_perfil", {}).get("subrol") == "Supervisor"):
-                correo_supervisor = u.get("datos_perfil", {}).get("correo") or u.get("correo")
-                nombre_supervisor = f"{u.get('datos_perfil', {}).get('nombres', '')} {u.get('datos_perfil', {}).get('apellido_paterno', '')}".strip() or nombre_supervisor
-                if correo_supervisor:
+                posible_correo = u.get("datos_perfil", {}).get("correo") or u.get("correo")
+                if posible_correo and "@telnor.com" not in str(posible_correo).lower():
+                    correo_supervisor = posible_correo
+                    nombre_supervisor = f"{u.get('datos_perfil', {}).get('nombres', '')} {u.get('datos_perfil', {}).get('apellido_paterno', '')}".strip() or nombre_supervisor
                     break
-    if not correo_supervisor:
+    if not correo_supervisor or "@telnor.com" in str(correo_supervisor).lower():
         correo_supervisor = "armandoramireztelnor2026@gmail.com"
 
     try:
@@ -1608,8 +1634,19 @@ def obtener_retrabajos_por_liberar():
     filtrados = []
     for ret in todos:
         st = str(ret.get("estado", "")).strip().lower()
+        if st in ["finalizado", "cancelado", "entregado"] or str(ret.get("unidad_entregada", "")).strip().lower() in ["sí", "si"]:
+            continue
         if st in ["por liberar", "por_liberar", "pendiente liberacion", "listo_taller"]:
             ret_cope = str(ret.get("cope", "")).strip().upper()
+            f_id_lib = str(ret.get("factura_id", "")).strip().upper()
+            try:
+                for f_lib in leer_json("facturas.json").get("facturas", []):
+                    if str(f_lib.get("id", "")).strip().upper() == f_id_lib or str(ret.get("ticket_original", "")).strip().upper() in str(f_lib.get("retro", "")).upper():
+                        if f_lib.get("reactivado_desde_caras"):
+                            ret["reactivado_desde_caras"] = True
+                        break
+            except Exception:
+                pass
             if subrol in ["Jefatura", "Administrador"]:
                 filtrados.append(ret)
             elif ret_cope in copes_permitidos or not ret_cope:
@@ -1705,7 +1742,17 @@ def liberar_retrabajo_supervisor():
             f["fecha_liberacion_retrabajo"] = fecha_ahora
             f["retrabajo_unidad_entregada"] = "Sí"
             f["fecha_entrega_retrabajo"] = fecha_ahora
-            f["estado"] = f.get("estado_previo") or "Archivado"
+            
+            # Restaurar a donde se quedó del proceso si seguía activo, o a Archivado si ya estaba archivado
+            est_previo = f.get("estado_previo")
+            if est_previo and est_previo not in ["Retrabajo", "En Asignacion/Retrabajo"]:
+                f["estado"] = est_previo
+            elif f.get("doc_contable_50") or f.get("archivado") or f.get("fecha_cierre"):
+                f["estado"] = "Archivado"
+            else:
+                f["estado"] = "Archivado" if f.get("fecha_cierre") else "pendiente"
+
+            f["en_retrabajo_activo"] = False
             break
     escribir_json("facturas.json", facturas_data)
 
@@ -1714,7 +1761,13 @@ def liberar_retrabajo_supervisor():
     for r in reportes_data.get("reportes", []):
         r_id_clean = str(r.get("id", "")).strip().upper()
         if r_id_clean == ticket or r_id_clean == str(encontrado.get("ticket_original", "")).strip().upper():
-            r["estado"] = r.get("estado_previo") or "Finalizado"
+            est_previo_r = r.get("estado_previo")
+            if est_previo_r and est_previo_r not in ["Retrabajo", "En Asignacion/Retrabajo"]:
+                r["estado"] = est_previo_r
+            elif f.get("estado") == "Archivado" or r.get("fecha_cierre") or r.get("entregado") == "Sí":
+                r["estado"] = "Finalizado"
+            else:
+                r["estado"] = "Asignado"
             r["entregado"] = "Sí"
             r["retrabajo_entregado"] = "Sí"
             r["fecha_entrega"] = fecha_ahora

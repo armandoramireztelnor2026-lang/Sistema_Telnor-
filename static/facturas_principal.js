@@ -489,6 +489,29 @@ async function cargarFacturas() {
                     return; // skip active trays
                 }
 
+                // ==========================================
+                // REGLA: TICKET EN RETRABAJO ACTIVO
+                // Si el ticket está en proceso de garantía / retrabajo activo,
+                // se retira de Archivo General (Administración), de Archivo Histórico (Taller)
+                // y de cualquier bandeja operativa normal (cotizaciones, facturas, doc contables).
+                // Permanecerá exclusivamente en los botones de garantía (Retrabajo / Liberar Retrabajo)
+                // hasta que el retrabajo sea finalizado mediante validación del código por el supervisor.
+                // Una vez validado y finalizado el retrabajo, regresará al Archivo General y Archivo Histórico.
+                // ==========================================
+                let enRetrabajoActivo = Boolean(
+                    f.en_retrabajo_activo ||
+                    f.estado === 'Retrabajo' ||
+                    f.estado === 'En Asignacion/Retrabajo' ||
+                    f.estado_retrabajo === 'Pendiente' ||
+                    f.estado_retrabajo === 'Reasignado' ||
+                    f.estado_retrabajo === 'Por Liberar' ||
+                    (f.retrabajo === 'Sí' && f.estado_retrabajo !== 'Finalizado' && f.estado_retrabajo !== 'Cancelado' && f.retrabajo_unidad_entregada !== 'Sí')
+                );
+
+                if (enRetrabajoActivo) {
+                    return; // Vive exclusivamente en las bandejas/botones de Garantía mientras esté en proceso
+                }
+
                 if (f.estado === 'Archivado' || (rolUsuario === 'proveedores' && f.validacion_fiscal === 'Aprobada') || (rolUsuario === 'corporativos' && confirmadaTotal)) {
 
                     let numCots = (f.cotizaciones && f.cotizaciones.length > 0) ? f.cotizaciones.length : 1;
@@ -537,15 +560,17 @@ async function cargarFacturas() {
                         </div>`;
                         let idReporteAsociado = obtenerIdReporte(f) || 'N/A';
                         let badgeCarasArch = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-                        tbodyArchivo.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idReporteAsociado}</span>${badgeCarasArch}</td><td style="vertical-align:top;">${doc50Html}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
+                        let badgeRetrabajoArch = (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado' || f.estado_retrabajo === 'Pendiente' || f.estado_retrabajo === 'Por Liberar' || f.retrabajo === 'Sí' || f.estado_retrabajo === 'Finalizado' || (f.num_retrabajo && Number(f.num_retrabajo) > 0)) ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
+                        tbodyArchivo.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idReporteAsociado}</span>${badgeCarasArch}${badgeRetrabajoArch}</td><td style="vertical-align:top;">${doc50Html}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                         countArchivo++;
                     }
 
                     if (tbodyArchivoProv && rolUsuario === 'proveedores' && f.proveedor === nombreProveedorActual) {
                         let idRepArchProv = obtenerIdReporte(f) || 'S/T';
                         let badgeCarasArchProv = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                        let badgeRetrabajoArchProv = (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado' || f.estado_retrabajo === 'Pendiente' || f.estado_retrabajo === 'Por Liberar' || f.retrabajo === 'Sí' || f.estado_retrabajo === 'Finalizado' || (f.num_retrabajo && Number(f.num_retrabajo) > 0)) ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
                         let btnVerExp = `<button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                        tbodyArchivoProv.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idRepArchProv}</span>${badgeCarasArchProv}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
+                        tbodyArchivoProv.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idRepArchProv}</span>${badgeCarasArchProv}${badgeRetrabajoArchProv}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                         countArchivoProv++;
                     }
 
@@ -557,8 +582,9 @@ async function cargarFacturas() {
                         if (esMas10kArch) {
                             let idRepArchCorp = obtenerIdReporte(f) || 'S/T';
                             let badgeCarasArchCorp = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                            let badgeRetrabajoArchCorp = (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado' || f.estado_retrabajo === 'Pendiente' || f.estado_retrabajo === 'Por Liberar' || f.retrabajo === 'Sí' || f.estado_retrabajo === 'Finalizado' || (f.num_retrabajo && Number(f.num_retrabajo) > 0)) ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
                             let btnVerExp = `<button class="btn-info" style="display:block; width:100%; margin:0;" onclick="abrirDetalles('${f.id}')">Ver Detalles</button>`;
-                            tbodyArchivoCorp.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idRepArchCorp}</span>${badgeCarasArchCorp}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
+                            tbodyArchivoCorp.innerHTML += `<tr><td style="vertical-align:top;"><span style="color:#ffffff; font-weight:bold;">${idRepArchCorp}</span>${badgeCarasArchCorp}${badgeRetrabajoArchCorp}</td><td style="vertical-align:top;">${folioHtml}</td><td style="vertical-align:top;">${f.unidad}</td><td style="vertical-align:top;">${provHtml}</td><td style="vertical-align:top;">${tituloHtml}</td><td style="vertical-align:top;">${precioHtml}</td><td style="vertical-align:top;">${btnVerExp}</td></tr>`;
                             countArchivoCorp++;
                         }
                     }
@@ -699,7 +725,7 @@ async function cargarFacturas() {
                     } else if (confirmadaTotal && entregadoTexto === 'Sí' && f.liberado_admin === false) {
                         // Unidad entregada, pendiente de liberación por Admin
                         if (subrolAct === 'Supervisor') {
-                            btnAccion += `<button class="btn-cobertura" style="font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; border:none; margin-top:2px; font-weight:bold; cursor:pointer; border-radius:6px;" onclick="delegarLiberarTicket('${f.id}', '${f.unidad || ''}')">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
+                            btnAccion += `<span style="color:#f59e0b; font-size:0.8em; font-weight:bold; margin-top:3px; text-align:center;">⌛ Pendiente Liberación (Admin)</span>`;
                             btnAccion += `<button class="btn-info" style="background:#f59e0b; color:white; font-size:0.75em; padding:6px 10px; width:100%; box-sizing: border-box; border:none; margin-top:3px; font-weight:bold; cursor:pointer; border-radius:4px;" onclick="notificarAdminLiberacion('${f.id}')">🔔 Notificar al Administrador</button>`;
                         } else {
                             btnAccion += `<button class="btn-liberar-facturacion" onclick="liberarTicketAdmin('${f.id}')" style="margin-top:2px;">
@@ -817,7 +843,8 @@ async function cargarFacturas() {
 
                 let idRepForTable = obtenerIdReporte(f) || 'S/T';
                 let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-                let tdTicket = `<td><span style="color:#ffffff; font-weight:bold;">${idRepForTable}</span>${badgeCaras}</td>`;
+                let badgeRetrabajo = (enRetrabajoBloqueo || f.estado === 'Retrabajo' || f.estado_retrabajo === 'Por Liberar' || f.retrabajo === 'Sí') ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
+                let tdTicket = `<td><span style="color:#ffffff; font-weight:bold;">${idRepForTable}</span>${badgeCaras}${badgeRetrabajo}</td>`;
                 let tdCompania = `<td><strong style="color:#ffffff;">${f.compania || 'RUMN'}</strong></td>`;
 
 
@@ -859,9 +886,10 @@ async function cargarFacturas() {
 
                         let idRepTable = obtenerIdReporte(f) || 'S/T';
                         let badgeCarasDoc = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                        let badgeRetrabajoDoc = (enRetrabajoBloqueo || f.estado === 'Retrabajo' || f.estado_retrabajo === 'Por Liberar' || f.retrabajo === 'Sí') ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
                         let pFormat = f.precio ? parseFloat(f.precio).toLocaleString('en-US') : '0';
 
-                        tbodyDocContables.innerHTML += `<tr><td><span style="color:#ffffff; font-weight:bold;">${idRepTable}</span>${badgeCarasDoc}</td><td><span style="color:#10b981; font-weight:bold;">${ffStr}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><span style="color:#a3b1c6;">${indStrLocal}</span></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
+                        tbodyDocContables.innerHTML += `<tr><td><span style="color:#ffffff; font-weight:bold;">${idRepTable}</span>${badgeCarasDoc}${badgeRetrabajoDoc}</td><td><span style="color:#10b981; font-weight:bold;">${ffStr}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><span style="color:#a3b1c6;">${indStrLocal}</span></td><td><strong>$${pFormat} MXN</strong></td><td>${btnDoc}</td></tr>`;
                         countDocContables++;
                     }
                 }
@@ -913,9 +941,10 @@ async function cargarFacturas() {
 
                         let idRepTableLib = obtenerIdReporte(f) || 'S/T';
                         let badgeCarasDocLib = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+                        let badgeRetrabajoDocLib = (enRetrabajoBloqueo || f.estado === 'Retrabajo' || f.estado_retrabajo === 'Por Liberar' || f.retrabajo === 'Sí') ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
                         let pFormatLib = f.precio ? parseFloat(f.precio).toLocaleString('en-US') : '0';
 
-                        tbodyLiberarDoc.innerHTML += `<tr><td><span style="color:#ffffff; font-weight:bold;">${idRepTableLib}</span>${badgeCarasDocLib}</td><td><span style="color:#10b981; font-weight:bold;">${ffStrLib}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><span style="color:#a3b1c6;">${indStrLocalLib}</span></td><td><strong>$${pFormatLib} MXN</strong></td><td>${btnLiberar}</td></tr>`;
+                        tbodyLiberarDoc.innerHTML += `<tr><td><span style="color:#ffffff; font-weight:bold;">${idRepTableLib}</span>${badgeCarasDocLib}${badgeRetrabajoDocLib}</td><td><span style="color:#10b981; font-weight:bold;">${ffStrLib}</span></td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${tituloCompleto}</td><td><span style="color:#a3b1c6;">${indStrLocalLib}</span></td><td><strong>$${pFormatLib} MXN</strong></td><td>${btnLiberar}</td></tr>`;
                         countLiberarDoc++;
                     }
                 }
@@ -955,7 +984,7 @@ async function cargarFacturas() {
                             // Nuevo botón manual para notificar al Admin
                             if (f.liberado_admin === false) {
                                 if (subrolAct === 'Supervisor') {
-                                    btnAdminExtra += `<button class="btn-cobertura" onclick="delegarLiberarTicket('${f.id}', '${f.unidad || ''}')" style="display:block; width:100%; margin:0; margin-top:5px;">🛡️ Asumir Proceso (Liberar por Ausencia)</button>`;
+                                    btnAdminExtra += `<span style="color:#f59e0b; font-size:0.8em; font-weight:bold; margin-top:5px; text-align:center;">⌛ Pendiente Liberación (Admin)</span>`;
                                 } else {
                                     btnAdminExtra += `<button class="btn-liberar-facturacion" onclick="liberarTicketAdmin('${f.id}')" style="display:block; width:100%; margin:0; margin-top:5px;">🔓 Liberar Facturación</button>`;
                                 }
@@ -2611,8 +2640,24 @@ async function cargarReportesAdmin() {
             if (!fallaTexto) fallaTexto = rawFalla;
             let tdFalla = `<td style="white-space: normal; min-width: 260px; max-width: 400px; line-height: 1.4; word-break: break-word;">${fallaTexto}</td>`;
 
-            let badgeCaras = r.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-            tbody.innerHTML += `<tr><td><span style="color:#ffffff; font-weight:bold;">${r.id}</span>${badgeCaras}</td><td>${r.fecha}</td><td><strong>${unidadStr}</strong></td><td><strong>${choferStr}</strong></td><td><strong>${deptoStr}</strong></td>${tdFalla}<td>${r.mantenimiento}</td><td>${estadoBadge}</td><td>${btnAccion}</td></tr>`;
+            let fMatch = facturasGlobal.find(f => obtenerIdReporte(f) === String(r.id));
+            let isCara = Boolean(r.reactivado_desde_caras || (fMatch && fMatch.reactivado_desde_caras));
+            let isRet = Boolean(
+                r.retrabajo === 'Sí' || r.retrabajo === 'Si' || r.retrabajo === 'Pendiente' ||
+                r.estado === 'Retrabajo' || r.estado === 'En Asignacion/Retrabajo' ||
+                r.estado_retrabajo === 'Reasignado' || r.estado_retrabajo === 'Pendiente' || r.estado_retrabajo === 'Por Liberar' ||
+                r.es_retrabajo ||
+                (r.num_retrabajo && Number(r.num_retrabajo) > 0) ||
+                (fMatch && (
+                    fMatch.retrabajo === 'Sí' || fMatch.retrabajo === 'Si' || fMatch.retrabajo === 'Pendiente' ||
+                    fMatch.estado === 'Retrabajo' || fMatch.estado === 'En Asignacion/Retrabajo' ||
+                    fMatch.estado_retrabajo === 'Reasignado' || fMatch.estado_retrabajo === 'Pendiente' || fMatch.estado_retrabajo === 'Por Liberar' ||
+                    (fMatch.num_retrabajo && Number(fMatch.num_retrabajo) > 0)
+                ))
+            );
+            let badgeCaras = isCara ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
+            let badgeRetrabajo = isRet ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
+            tbody.innerHTML += `<tr><td><span style="color:#ffffff; font-weight:bold;">${r.id}</span>${badgeCaras}${badgeRetrabajo}</td><td>${r.fecha}</td><td><strong>${unidadStr}</strong></td><td><strong>${choferStr}</strong></td><td><strong>${deptoStr}</strong></td>${tdFalla}<td>${r.mantenimiento}</td><td>${estadoBadge}</td><td>${btnAccion}</td></tr>`;
         });
     } catch (err) { console.error(err); }
 }
@@ -2790,7 +2835,25 @@ async function cargarReportesProv() {
             if (fallaP.length > 0) fallaP = fallaP.charAt(0).toUpperCase() + fallaP.slice(1);
             if (!fallaP) fallaP = rawFallaP;
             let fallaSub = fallaP.length > 35 ? (fallaP.substring(0, 35) + '...') : fallaP;
-            tbody.innerHTML += `<tr><td><strong>${r.id}</strong></td><td>${r.fecha}</td><td>8090-${r.unidad}</td><td>${fallaSub}</td><td>${r.mantenimiento}</td><td>${btnAccion}</td></tr>`;
+
+            let fMatchP = facturasGlobal.find(f => obtenerIdReporte(f) === String(r.id));
+            let isCaraP = Boolean(r.reactivado_desde_caras || (fMatchP && fMatchP.reactivado_desde_caras));
+            let isRetP = Boolean(
+                r.retrabajo === 'Sí' || r.retrabajo === 'Si' || r.retrabajo === 'Pendiente' ||
+                r.estado === 'Retrabajo' || r.estado === 'En Asignacion/Retrabajo' ||
+                r.estado_retrabajo === 'Reasignado' || r.estado_retrabajo === 'Pendiente' || r.estado_retrabajo === 'Por Liberar' ||
+                r.es_retrabajo ||
+                (r.num_retrabajo && Number(r.num_retrabajo) > 0) ||
+                (fMatchP && (
+                    fMatchP.retrabajo === 'Sí' || fMatchP.retrabajo === 'Si' || fMatchP.retrabajo === 'Pendiente' ||
+                    fMatchP.estado === 'Retrabajo' || fMatchP.estado === 'En Asignacion/Retrabajo' ||
+                    fMatchP.estado_retrabajo === 'Reasignado' || fMatchP.estado_retrabajo === 'Pendiente' || fMatchP.estado_retrabajo === 'Por Liberar' ||
+                    (fMatchP.num_retrabajo && Number(fMatchP.num_retrabajo) > 0)
+                ))
+            );
+            let badgeCarasP = isCaraP ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
+            let badgeRetrabajoP = isRetP ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
+            tbody.innerHTML += `<tr><td><strong style="color:#ffffff;">${r.id}</strong>${badgeCarasP}${badgeRetrabajoP}</td><td>${r.fecha}</td><td>8090-${r.unidad}</td><td>${fallaSub}</td><td>${r.mantenimiento}</td><td>${btnAccion}</td></tr>`;
         });
     } catch (err) { console.error(err); }
 }

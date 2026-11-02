@@ -396,6 +396,48 @@ def listar_facturas():
     except Exception as e:
         pass
 
+    # INYECTAR ESTADO DE RETRABAJO ACTIVO
+    try:
+        retrabajos_data = leer_json("retrabajos.json").get("retrabajos", [])
+        activos_retrabajo = {}
+        for ret in retrabajos_data:
+            st = str(ret.get("estado", "")).strip().lower()
+            if st not in ["finalizado", "cancelado"]:
+                for key_name in ["id", "ticket", "ticket_original", "factura_id"]:
+                    val = str(ret.get(key_name) or "").strip().upper()
+                    if val:
+                        activos_retrabajo[val] = ret.get("estado")
+                        activos_retrabajo[val.replace("REP-", "")] = ret.get("estado")
+
+        for f in facturas:
+            fid = str(f.get("id", "")).strip().upper()
+            frep = str(f.get("id_reporte") or f.get("numero_reporte") or "").strip().upper()
+            retro = str(f.get("retro", "")).upper()
+            m = re.search(r"\[TICKET:(.*?)\]", retro)
+            fretro_rep = m.group(1).strip().upper() if m else ""
+
+            keys_to_test = [fid, frep, frep.replace("REP-", ""), fretro_rep, fretro_rep.replace("REP-", "")]
+            es_activo = False
+            for k in keys_to_test:
+                if k and k in activos_retrabajo:
+                    es_activo = True
+                    if not f.get("estado_retrabajo"):
+                        f["estado_retrabajo"] = activos_retrabajo[k]
+                    break
+
+            st_ret = str(f.get("estado_retrabajo", "")).strip().lower()
+            if st_ret in ["pendiente", "reasignado", "por liberar", "por_liberar", "listo_taller"]:
+                es_activo = True
+            if str(f.get("estado", "")).strip().lower() in ["retrabajo", "en asignacion/retrabajo"]:
+                es_activo = True
+
+            if es_activo and st_ret != "finalizado" and str(f.get("retrabajo_unidad_entregada", "")).strip().lower() not in ["sí", "si"]:
+                f["en_retrabajo_activo"] = True
+            else:
+                f["en_retrabajo_activo"] = False
+    except Exception as e:
+        print(f"Error enriqueciendo facturas con retrabajo activo: {e}")
+
     return jsonify({"facturas": facturas})
 
 
@@ -2270,6 +2312,28 @@ def lista_archivados():
             if str(r.get('id')) == ticket_id:
                 f['unidad'] = r.get('unidad', f.get('unidad', 'N/A'))
                 break
+
+    try:
+        retrabajos_data = leer_json("retrabajos.json").get("retrabajos", [])
+        activos_set = set()
+        for ret in retrabajos_data:
+            st = str(ret.get("estado", "")).strip().lower()
+            if st not in ["finalizado", "cancelado"]:
+                for k in ["id", "ticket", "ticket_original", "factura_id"]:
+                    val = str(ret.get(k) or "").strip().upper()
+                    if val:
+                        activos_set.add(val)
+                        activos_set.add(val.replace("REP-", ""))
+
+        archivados = [
+            f for f in archivados
+            if str(f.get("id", "")).strip().upper() not in activos_set
+            and str(f.get("id_reporte", "") or f.get("numero_reporte", "")).strip().upper() not in activos_set
+            and str(f.get("estado", "")).strip().lower() not in ["retrabajo", "en asignacion/retrabajo"]
+            and str(f.get("estado_retrabajo", "")).strip().lower() not in ["pendiente", "reasignado", "por liberar", "por_liberar", "listo_taller"]
+        ]
+    except Exception as e:
+        print(f"Error filtrando archivados activos en retrabajo: {e}")
                 
     return jsonify({"status": "success", "archivados": archivados})
 

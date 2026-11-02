@@ -15,7 +15,8 @@ function previsualizarFactura() {
             document.getElementById('pdf-seccion-reporte').style.display = 'block';
             let emailStatus = (r.email && r.email.trim() !== "" && r.email.trim() !== "No proporcionado") ? r.email : "No proporcionado";
             let badgeStr = (r.reactivado_desde_caras) ? ` <br><span style="color:#f59e0b; font-size:0.85em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-            document.getElementById('prev-rep-ticket').innerHTML = r.id + badgeStr; 
+            let badgeRetrabajo = (r.estado === 'Retrabajo' || r.retrabajo === 'Sí' || r.es_retrabajo || r.estado_retrabajo) ? ` <br><span style="color:#ef4444; font-size:0.85em; font-weight:bold;">⚠️ Retrabajo</span>` : '';
+            document.getElementById('prev-rep-ticket').innerHTML = r.id + badgeStr + badgeRetrabajo; 
             document.getElementById('prev-rep-fecha').innerText = r.fecha; 
             document.getElementById('prev-rep-unidad').innerText = "8090-" + r.unidad;
             document.getElementById('prev-rep-marca').innerText = r.marca + " " + r.modelo;
@@ -73,7 +74,8 @@ function generarPDFSilencioso(idFactura) {
             document.getElementById('pdf-seccion-reporte').style.display = 'block';
             let emailStatus = (r.email && r.email.trim() !== "" && r.email.trim() !== "No proporcionado") ? r.email : "No proporcionado";
             let badgeStr2 = (r.reactivado_desde_caras || f.reactivado_desde_caras) ? ` <br><span style="color:#f59e0b; font-size:0.85em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-            document.getElementById('prev-rep-ticket').innerHTML = r.id + badgeStr2; 
+            let badgeRetrabajo2 = (r.estado === 'Retrabajo' || r.retrabajo === 'Sí' || r.es_retrabajo || r.estado_retrabajo || f.estado === 'Retrabajo' || f.estado_retrabajo || f.retrabajo === 'Sí') ? ` <br><span style="color:#ef4444; font-size:0.85em; font-weight:bold;">⚠️ Retrabajo</span>` : '';
+            document.getElementById('prev-rep-ticket').innerHTML = r.id + badgeStr2 + badgeRetrabajo2; 
             document.getElementById('prev-rep-fecha').innerText = r.fecha; 
             document.getElementById('prev-rep-unidad').innerText = "8090-" + r.unidad;
             document.getElementById('prev-rep-marca').innerText = r.marca + " " + r.modelo;

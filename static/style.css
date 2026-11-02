@@ -2710,6 +2710,87 @@ td.col-negro {
 }
 
 /* ========================================================
+   FIJACIÓN VISUAL DE COLUMNA Y CUADRO DE CRUCE EN SECCIÓN DE REPORTES
+   ======================================================== */
+#tabla-exportable-reportes thead th:not(:first-child) {
+    cursor: pointer !important;
+    user-select: none !important;
+    transition: filter 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+#tabla-exportable-reportes thead th:not(:first-child):hover {
+    filter: brightness(1.22) !important;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5) !important;
+}
+
+#tabla-exportable-reportes thead th.columna-fijada-th {
+    border-top: 3px solid #38bdf8 !important;
+    border-left: 3px solid #38bdf8 !important;
+    border-right: 3px solid #38bdf8 !important;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.8), inset 0 0 10px rgba(56, 189, 248, 0.4) !important;
+    filter: brightness(1.3) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 35 !important;
+}
+
+#tabla-exportable-reportes tbody td.columna-fijada-td {
+    border-left: 2px solid #38bdf8 !important;
+    border-right: 2px solid #38bdf8 !important;
+    box-shadow: inset 1px 0 0 #38bdf8, inset -1px 0 0 #38bdf8 !important;
+}
+
+#tabla-exportable-reportes tbody td.columna-fijada-td.td-azul-marino,
+#tabla-exportable-reportes tbody td.columna-fijada-td.col-azul-marino {
+    background-color: #17386d !important;
+}
+
+#tabla-exportable-reportes tbody td.columna-fijada-td.td-verde,
+#tabla-exportable-reportes tbody td.columna-fijada-td.col-verde {
+    background-color: #11422b !important;
+}
+
+#tabla-exportable-reportes tbody td.columna-fijada-td.td-amarillo,
+#tabla-exportable-reportes tbody td.columna-fijada-td.col-amarillo {
+    background-color: #553908 !important;
+}
+
+#tabla-exportable-reportes tbody td.columna-fijada-td.td-negro,
+#tabla-exportable-reportes tbody td.columna-fijada-td.col-negro {
+    background-color: #2b2b32 !important;
+}
+
+/* Cuadro en el cruce exacto entre la fila marcada y la columna fijada */
+#tabla-exportable-reportes tbody tr.selected-row td.celda-cruce-marcada,
+#tabla-exportable-reportes tbody tr.fila-marcada td.celda-cruce-marcada {
+    border: 3px solid #f59e0b !important;
+    box-shadow: inset 0 0 0 2px #fef08a, 0 0 18px rgba(245, 158, 11, 0.95), inset 0 0 12px rgba(245, 158, 11, 0.5) !important;
+    position: relative !important;
+    z-index: 25 !important;
+    font-weight: 800 !important;
+}
+
+#tabla-exportable-reportes tbody tr.selected-row td.celda-cruce-marcada.td-azul-marino,
+#tabla-exportable-reportes tbody tr.fila-marcada td.celda-cruce-marcada.td-azul-marino {
+    background-color: #23477e !important;
+}
+
+#tabla-exportable-reportes tbody tr.selected-row td.celda-cruce-marcada.td-verde,
+#tabla-exportable-reportes tbody tr.fila-marcada td.celda-cruce-marcada.td-verde {
+    background-color: #175237 !important;
+}
+
+#tabla-exportable-reportes tbody tr.selected-row td.celda-cruce-marcada.td-amarillo,
+#tabla-exportable-reportes tbody tr.fila-marcada td.celda-cruce-marcada.td-amarillo {
+    background-color: #6d4b0d !important;
+}
+
+#tabla-exportable-reportes tbody tr.selected-row td.celda-cruce-marcada.td-negro,
+#tabla-exportable-reportes tbody tr.fila-marcada td.celda-cruce-marcada.td-negro {
+    background-color: #35353d !important;
+}
+
+/* ========================================================
    TAMAÑO DE LETRA AUMENTADO EN BANDEJA SECCION DE REPORTES
    ======================================================== */
 #tabla-exportable-reportes {
@@ -2823,3 +2904,56 @@ td.col-negro {
     z-index: 30 !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6) !important;
 }
+
+
+/* ========================================================
+   COLUMNA CHECKBOX FIJA / ESTATICA EN SECCION DE REPORTES
+   Permite marcar tickets al desplazarse horizontalmente
+   ======================================================== */
+#tabla-exportable-reportes thead th:first-child,
+#tabla-exportable-reportes th:first-child {
+    position: sticky !important;
+    left: 0 !important;
+    top: 0 !important;
+    z-index: 45 !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 52px !important;
+    text-align: center !important;
+    background-color: #1e3a8a !important;
+    background: linear-gradient(180deg, #1e40af 0%, #172554 100%) !important;
+    border-right: 2px solid #3b82f6 !important;
+    box-shadow: 3px 0 8px rgba(0, 0, 0, 0.45) !important;
+}
+
+#tabla-exportable-reportes tbody tr:not(#fila-sin-resultados-reportes) td:first-child {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 20 !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 52px !important;
+    text-align: center !important;
+    background-color: #0c1e38 !important;
+    border-right: 2px solid #1f395a !important;
+    box-shadow: 3px 0 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+#tabla-exportable-reportes tbody tr:not(#fila-sin-resultados-reportes):hover td:first-child {
+    background-color: #173360 !important;
+    border-right: 2px solid #38bdf8 !important;
+}
+
+#tabla-exportable-reportes tbody tr:not(#fila-sin-resultados-reportes).selected-row td:first-child,
+#tabla-exportable-reportes tbody tr:not(#fila-sin-resultados-reportes).fila-marcada td:first-child {
+    background-color: #1e3f77 !important;
+    border-left: 4px solid #38bdf8 !important;
+    border-right: 2px solid #38bdf8 !important;
+    z-index: 22 !important;
+}
+
+#tabla-exportable-reportes tbody tr:not(#fila-sin-resultados-reportes).selected-row:hover td:first-child,
+#tabla-exportable-reportes tbody tr:not(#fila-sin-resultados-reportes).fila-marcada:hover td:first-child {
+    background-color: #254d90 !important;
+}
+

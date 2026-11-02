@@ -14,6 +14,14 @@
 </head>
 
 <body>
+    <!-- PANTALLA DE CARGA FLOTANTE -->
+    <div id="loader-confirmacion">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <div class="loader-text" id="loader-txt-main">Procesando...</div>
+            <div style="color: #a3b1c6; font-size: 0.85em; margin-top:-10px;" id="loader-txt-sub">Por favor espera un momento...</div>
+        </div>
+    </div>
     <input type="hidden" id="rol-actual" value="proveedores">
     <input type="hidden" id="nombre-proveedor-actual" value="{{ usuario.datos_perfil.nombre_proveedor }}">
     <div class="dashboard-container">
@@ -584,13 +592,13 @@
         </div>
     </div>
 
-    <script src="/static/script.js?v=1000038"></script>
+    <script src="/static/script.js?v=1000051"></script>
 
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js?v=6"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
-    <script src="/static/facturas_principal.js?v=61"></script>
+    <script src="/static/facturas_principal.js?v=70"></script>
     <script src="/static/manual_sistema.js?v=1"></script>
 {% include 'chat_widget.html' %}
 </body>

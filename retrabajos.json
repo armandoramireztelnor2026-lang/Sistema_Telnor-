@@ -13,11 +13,11 @@
             "fecha_salida": "2026-10-08",
             "fecha_salida_taller": "2026-10-08",
             "timestamp": "2026-10-23T13:48:40.667788",
-            "motivo_chofer": "Ruido reincidente en frenos y suspensión al girar.",
+            "motivo_chofer": "Ruido reincidente en frenos y suspensi\u00f3n al girar.",
             "supervisor_asignado": "Samuel Giron",
             "supervisor_usuario": "Samuel_Giron-RUMN-2026-admin",
-            "supervisor_correo": "supervisor_prueba@telnor.com",
-            "estado": "Reasignado",
+            "supervisor_correo": "armandoramireztelnor2026@gmail.com",
+            "estado": "Finalizado",
             "seccion_1": {
                 "ticket": "REP-20261008131643",
                 "fecha": "2026-10-08",
@@ -43,7 +43,7 @@
                 "responsable": "Andres Avila",
                 "fecha_ingreso": "2026-10-08",
                 "precio_total": 7600.0,
-                "titulo": "n (+1 más)",
+                "titulo": "n (+1 m\u00e1s)",
                 "retro": "[TICKET:REP-20261008131643]\r\nREPORTE ORIGINAL DEL CHOFER: Cambio de wipers",
                 "diagnostico": "n",
                 "trabajo_realizar": "n",
@@ -79,8 +79,18 @@
             },
             "fecha_reasignacion": "2026-10-29 11:41:38",
             "supervisor_reasigno": "Samuel Giron",
-            "fecha_finalizacion_taller": "2026-10-28 13:45:28",
-            "proveedor": "AUTOPARTES Y MOTORES B.C."
+            "fecha_finalizacion_taller": "2026-11-02 12:45:17",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "codigo_chofer": "748804",
+            "codigo_supervisor": "626266",
+            "chofer": "Doroteo Arango",
+            "correo_chofer": "efrain.perusquia@hotmail.com",
+            "unidad_entregada": "S\u00ed",
+            "fecha_liberacion": "2026-11-02 13:06:04",
+            "supervisor_libero": "Samuel Giron",
+            "fecha_entrega": "2026-11-02 13:06:04",
+            "codigo_validado_por": "Samuel Giron",
+            "tipo_codigo_validado": "C\u00f3digo de Chofer"
         }
     ]
 }

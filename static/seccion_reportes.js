@@ -546,8 +546,23 @@ function renderizarTablaReportes(lista) {
         let cleanCope = cope === pendienteHTML ? 'pendiente' : cope.toLowerCase().replace(/<[^>]*>?/gm, '');
         let cleanEco = numEco === pendienteHTML ? 'pendiente' : numEco.replace(/<[^>]*>?/gm, '');
 
-        // Set row info for filtering
-        let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
+        // Evaluar si el ticket está o estuvo en garantía/retrabajo
+        let rawRetLower = rawRetrabajo.toLowerCase();
+        let estRowLower = String(estado || f.estado || '').toLowerCase();
+        let isRowRetrabajo = false;
+        if (numRet > 0 ||
+            rawRetLower === 'sí' || rawRetLower === 'si' || rawRetLower === 'pendiente' || rawRetLower === 'reasignado' ||
+            estRowLower === 'retrabajo' || estRowLower === 'en asignacion/retrabajo' ||
+            rawEstRet === 'reasignado' || rawEstRet === 'pendiente' || rawEstRet === 'por liberar' || rawEstRet === 'por_liberar' || rawEstRet === 'finalizado' ||
+            Boolean(fechaRetRaw) || tieneReingreso) {
+            if (rawRetLower !== 'cancelado' || numRet > 0) {
+                isRowRetrabajo = true;
+            }
+        }
+
+        // Set row info for filtering and badges
+        let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
+        let badgeRetrabajo = isRowRetrabajo ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
         let badgeColorEstado = '#0ea5e9';
         let textColorEstado = 'white';
         if (estado === 'En Asignacion/Retrabajo') {
@@ -558,24 +573,10 @@ function renderizarTablaReportes(lista) {
             textColorEstado = 'white';
         }
 
-        // Evaluar si el ticket está o estuvo en garantía/retrabajo
-        let rawRetLower = rawRetrabajo.toLowerCase();
-        let estRowLower = String(estado || f.estado || '').toLowerCase();
-        let isRowRetrabajo = false;
-        if (numRet > 0 ||
-            rawRetLower === 'sí' || rawRetLower === 'si' || rawRetLower === 'pendiente' || rawRetLower === 'reasignado' ||
-            estRowLower === 'retrabajo' || estRowLower === 'en asignacion/retrabajo' ||
-            rawEstRet === 'reasignado' || rawEstRet === 'pendiente' || rawEstRet === 'finalizado' ||
-            Boolean(fechaRetRaw) || tieneReingreso) {
-            if (rawRetLower !== 'cancelado' || numRet > 0) {
-                isRowRetrabajo = true;
-            }
-        }
-
         let rowHtml = `
             <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-cope="${cleanCope}" data-estado="${estado}" data-fecha="${fechaISO}" data-costo="${ticketGasto}" data-pend-doc50="${isRowPendDoc50 ? '1' : '0'}" data-pend-oc="${isRowPendOC ? '1' : '0'}" data-reactivado="${f.reactivado_desde_caras ? '1' : '0'}" data-retrabajo="${isRowRetrabajo ? '1' : '0'}">
                 <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px;"><input type="checkbox" class="chk-reporte" value="${ticket}"></td>
-                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px;"><span style="color:#0ea5e9; font-weight:bold;">${ticket}</span>${badgeCaras}</td>
+                <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px;"><span style="color:#0ea5e9; font-weight:bold;">${ticket}</span>${badgeCaras}${badgeRetrabajo}</td>
                 <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${numEco}</td>
                 <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${fechaTicket}</td>
                 <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${tiempoTicket}</td>
@@ -619,6 +620,7 @@ function renderizarTablaReportes(lista) {
     if (typeof aplicarPaginacion === 'function') {
         aplicarPaginacion('tabla-seccion-reportes', 20, true);
     }
+    actualizarMarcadoColumnaYCruceReportes();
 }
 
 // ==========================================
@@ -761,6 +763,7 @@ function aplicarFiltrosReportes() {
     if (typeof aplicarPaginacion === 'function') {
         aplicarPaginacion('tabla-seccion-reportes', 20, true);
     }
+    actualizarMarcadoColumnaYCruceReportes();
 }
 
 window.filtroReactivadasCarasActivo = false;
@@ -1119,17 +1122,118 @@ async function eliminarComentario() {
     await guardarComentario("delete");
 }
 
-// --- MARCADOR DE LINEA COMPLETA AL HACER CLICK EN CUALQUIER CELDA O CUADRO ---
-document.addEventListener('click', function (e) {
-    let tr = e.target.closest('#tabla-exportable-reportes tbody tr');
-    if (!tr) return;
-    let tbody = tr.parentElement;
-    if (!tbody) return;
-    let rows = tbody.querySelectorAll('tr');
-    rows.forEach(r => {
-        r.classList.remove('selected-row');
-        r.classList.remove('fila-marcada');
+// ========================================================
+// FIJACIÓN DE COLUMNA Y CRUCE DE FILA/COLUMNA EN SECCIÓN DE REPORTES
+// ========================================================
+window.columnaFijadaReportesIndex = null;
+
+function actualizarMarcadoColumnaYCruceReportes() {
+    const tabla = document.getElementById('tabla-exportable-reportes');
+    if (!tabla) return;
+
+    const colIndex = window.columnaFijadaReportesIndex;
+
+    // 1. Actualizar encabezados
+    const ths = tabla.querySelectorAll('thead th');
+    ths.forEach((th, idx) => {
+        if (colIndex !== null && idx === colIndex) {
+            th.classList.add('columna-fijada-th');
+            th.setAttribute('title', 'Columna fijada (haz clic para desfijar)');
+        } else {
+            th.classList.remove('columna-fijada-th');
+            if (idx > 0) {
+                th.setAttribute('title', 'Haz clic para fijar esta columna');
+            }
+        }
     });
-    tr.classList.add('selected-row');
-    tr.classList.add('fila-marcada');
+
+    // 2. Actualizar celdas del cuerpo (tbody)
+    const rows = tabla.querySelectorAll('tbody tr');
+    rows.forEach(tr => {
+        if (tr.id === 'fila-sin-resultados-reportes') return;
+        const isRowMarcada = tr.classList.contains('selected-row') || tr.classList.contains('fila-marcada');
+        const cells = tr.children;
+
+        for (let i = 0; i < cells.length; i++) {
+            const td = cells[i];
+            const isColFijada = (colIndex !== null && i === colIndex);
+
+            if (isColFijada) {
+                td.classList.add('columna-fijada-td');
+            } else {
+                td.classList.remove('columna-fijada-td');
+            }
+
+            // Marcar cuadro en la celda donde haya cruce entre fila y columna
+            if (isColFijada && isRowMarcada) {
+                td.classList.add('celda-cruce-marcada');
+            } else {
+                td.classList.remove('celda-cruce-marcada');
+            }
+        }
+    });
+}
+
+// Escuchador de clic para fijar columnas y marcar filas
+document.addEventListener('click', function (e) {
+    // A) Clic en el encabezado de la columna (nombre de columna en thead)
+    let th = e.target.closest('#tabla-exportable-reportes thead th');
+    if (th) {
+        // Ignorar checkbox de selección total de la primera columna
+        if (th.cellIndex === 0 || e.target.id === 'chk-all-reportes' || e.target.classList.contains('chk-reporte')) {
+            return;
+        }
+
+        let colIndex = th.cellIndex;
+        if (window.columnaFijadaReportesIndex === colIndex) {
+            // Si hace clic en la misma columna ya fijada, se desfija (toggle)
+            window.columnaFijadaReportesIndex = null;
+        } else {
+            // Fijar la columna seleccionada
+            window.columnaFijadaReportesIndex = colIndex;
+        }
+
+        actualizarMarcadoColumnaYCruceReportes();
+        return;
+    }
+
+    // B) Clic en cualquier celda o renglón de la tabla (tbody)
+    let tr = e.target.closest('#tabla-exportable-reportes tbody tr');
+    if (tr) {
+        if (tr.id === 'fila-sin-resultados-reportes') return;
+        let tbody = tr.parentElement;
+        if (!tbody) return;
+
+        let yaEstabaMarcada = tr.classList.contains('selected-row') || tr.classList.contains('fila-marcada');
+
+        // Si se hizo clic directamente en el checkbox de selección del ticket
+        if (e.target.classList.contains('chk-reporte') || (e.target.type === 'checkbox' && e.target.closest('td') && e.target.closest('td').cellIndex === 0)) {
+            if (!yaEstabaMarcada) {
+                let rows = tbody.querySelectorAll('tr');
+                rows.forEach(r => {
+                    r.classList.remove('selected-row');
+                    r.classList.remove('fila-marcada');
+                });
+                tr.classList.add('selected-row');
+                tr.classList.add('fila-marcada');
+                actualizarMarcadoColumnaYCruceReportes();
+            }
+            return;
+        }
+
+        // Toggle: Si la fila ya estaba marcada, al hacer clic de nuevo se desmarca.
+        // Si no estaba marcada, se limpian las demás y se marca esta fila.
+        let rows = tbody.querySelectorAll('tr');
+        rows.forEach(r => {
+            r.classList.remove('selected-row');
+            r.classList.remove('fila-marcada');
+        });
+
+        if (!yaEstabaMarcada) {
+            tr.classList.add('selected-row');
+            tr.classList.add('fila-marcada');
+        }
+
+        actualizarMarcadoColumnaYCruceReportes();
+    }
 });

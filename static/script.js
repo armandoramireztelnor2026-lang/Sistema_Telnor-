@@ -684,9 +684,19 @@ async function cargarRetrabajosAdmin() {
                 preciosHTML = `<span style="color: #94a3b8; font-size: 0.82rem;">--</span>`;
             }
 
+            let yaCaraAdmin = Boolean(
+                r.reactivado_desde_caras ||
+                (r.seccion_1 && r.seccion_1.reactivado_desde_caras) ||
+                (r.seccion_2 && r.seccion_2.reactivado_desde_caras) ||
+                (typeof facturasGlobal !== 'undefined' && facturasGlobal.some(f => (obtenerIdReporte(f) === String(ticketId) || String(f.id) === String(r.factura_id)) && f.reactivado_desde_caras)) ||
+                (typeof reportesGlobal !== 'undefined' && reportesGlobal.some(rep => String(rep.id) === String(ticketId) && rep.reactivado_desde_caras))
+            );
+            let badgeCarasAdmin = yaCaraAdmin ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
+            let badgeRetrabajoAdmin = `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>`;
+
             tbody.innerHTML += `
                 <tr>
-                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #f59e0b; font-size: 0.95rem;">${ticketId}</strong></td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #f59e0b; font-size: 0.95rem;">${ticketId}</strong>${badgeCarasAdmin}${badgeRetrabajoAdmin}</td>
                     <td style="white-space: nowrap; vertical-align: middle;">${r.fecha_solicitud || '--'}</td>
                     <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #38bdf8;">${fechaSalida}</strong></td>
                     <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #ffffff;">${unidadStr}</strong></td>
@@ -1087,14 +1097,7 @@ window.cargarRetrabajosProveedor = async function() {
 
         const badgeProv = document.getElementById('badge-retrabajo-prov');
         if (badgeProv) {
-            if (retrabajos.length > 0) {
-                badgeProv.innerText = retrabajos.length;
-                badgeProv.style.display = 'inline-flex';
-                badgeProv.style.alignItems = 'center';
-                badgeProv.style.justifyContent = 'center';
-            } else {
-                badgeProv.style.display = 'none';
-            }
+            badgeProv.style.display = 'none';
         }
 
         if (retrabajos.length === 0) {
@@ -1112,9 +1115,19 @@ window.cargarRetrabajosProveedor = async function() {
 
             let badgeEstado = `<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-weight:bold; font-size:0.82rem; display:inline-block; white-space:nowrap;">Retrabajo</span>`;
 
+            let yaCaraProv = Boolean(
+                r.reactivado_desde_caras ||
+                (r.seccion_1 && r.seccion_1.reactivado_desde_caras) ||
+                (r.seccion_2 && r.seccion_2.reactivado_desde_caras) ||
+                (typeof facturasGlobal !== 'undefined' && facturasGlobal.some(f => (obtenerIdReporte(f) === String(ticketId) || String(f.id) === String(r.factura_id)) && f.reactivado_desde_caras)) ||
+                (typeof reportesGlobal !== 'undefined' && reportesGlobal.some(rep => String(rep.id) === String(ticketId) && rep.reactivado_desde_caras))
+            );
+            let badgeCarasProv = yaCaraProv ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
+            let badgeRetrabajoProv = `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>`;
+
             tbody.innerHTML += `
                 <tr>
-                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #f59e0b; font-size: 0.95rem;">${ticketId}</strong></td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #f59e0b; font-size: 0.95rem;">${ticketId}</strong>${badgeCarasProv}${badgeRetrabajoProv}</td>
                     <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #38bdf8;">${fechaReasig}</strong></td>
                     <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #ffffff;">${unidadStr}</strong></td>
                     <td style="white-space: normal; min-width: 260px; max-width: 420px; vertical-align: middle; padding: 10px 12px; line-height: 1.5; word-break: break-word;">
@@ -1170,6 +1183,12 @@ window.marcarRetrabajoFinalizado = async function(ticketId) {
     const confirmar = confirm(`⚠️ ¿Confirmas que los trabajos de retrabajo / garantía para el ticket ${ticketId} han sido concluidos por el taller?\n\nAl confirmar, el ticket se enviará a Supervisión al módulo "Liberar/Retrabajo" para su validación final.`);
     if (!confirmar) return;
 
+    if (typeof window.mostrarLoaderDinamico === 'function') {
+        window.mostrarLoaderDinamico('Notificando Entrega...', 'Generando códigos de validación y enviando correos al chofer y supervisor 📧');
+    } else if (typeof mostrarLoaderDinamico === 'function') {
+        mostrarLoaderDinamico('Notificando Entrega...', 'Generando códigos de validación y enviando correos al chofer y supervisor 📧');
+    }
+
     try {
         let res = await fetch('/api/garantia/taller/finalizar', {
             method: 'POST',
@@ -1191,6 +1210,12 @@ window.marcarRetrabajoFinalizado = async function(ticketId) {
     } catch (err) {
         console.error('Error al finalizar retrabajo:', err);
         alert('Ocurrió un error al marcar el retrabajo como finalizado.');
+    } finally {
+        if (typeof window.ocultarLoaderDinamico === 'function') {
+            window.ocultarLoaderDinamico();
+        } else if (typeof ocultarLoaderDinamico === 'function') {
+            ocultarLoaderDinamico();
+        }
     }
 };
 
@@ -2477,6 +2502,8 @@ window.addEventListener('load', function() {
 document.addEventListener('click', function (e) {
     let tr = e.target.closest('tbody tr');
     if (!tr) return;
+    // La sección de reportes gestiona su propio marcado, desmarcado (toggle) y cruce con columnas fijadas
+    if (tr.closest('#tabla-exportable-reportes')) return;
     let tbody = tr.closest('tbody');
     if (!tbody) return;
     let rows = tbody.querySelectorAll('tr');
@@ -3088,14 +3115,7 @@ window.actualizarBadgeRetrabajoProveedor = async function() {
         const retrabajos = data.retrabajos || [];
         const badgeProv = document.getElementById('badge-retrabajo-prov');
         if (badgeProv) {
-            if (retrabajos.length > 0) {
-                badgeProv.innerText = retrabajos.length;
-                badgeProv.style.display = 'inline-flex';
-                badgeProv.style.alignItems = 'center';
-                badgeProv.style.justifyContent = 'center';
-            } else {
-                badgeProv.style.display = 'none';
-            }
+            badgeProv.style.display = 'none';
         }
     } catch(e) {}
 };
@@ -3122,14 +3142,7 @@ window.cargarLiberarRetrabajosSupervisor = async function() {
 
         const badge = document.getElementById('badge-liberar-retrabajo');
         if (badge) {
-            if (retrabajos.length > 0) {
-                badge.innerText = retrabajos.length;
-                badge.style.display = 'inline-flex';
-                badge.style.alignItems = 'center';
-                badge.style.justifyContent = 'center';
-            } else {
-                badge.style.display = 'none';
-            }
+            badge.style.display = 'none';
         }
 
         if (retrabajos.length === 0) {
@@ -3154,9 +3167,19 @@ window.cargarLiberarRetrabajosSupervisor = async function() {
             let tallerEscaped = String(taller).replace(/'/g, "\\'");
             let choferEscaped = String(chofer).replace(/'/g, "\\'");
 
+            let yaCaraLib = Boolean(
+                r.reactivado_desde_caras ||
+                (r.seccion_1 && r.seccion_1.reactivado_desde_caras) ||
+                (r.seccion_2 && r.seccion_2.reactivado_desde_caras) ||
+                (typeof facturasGlobal !== 'undefined' && facturasGlobal.some(f => (obtenerIdReporte(f) === String(ticketId) || String(f.id) === String(r.factura_id)) && f.reactivado_desde_caras)) ||
+                (typeof reportesGlobal !== 'undefined' && reportesGlobal.some(rep => String(rep.id) === String(ticketId) && rep.reactivado_desde_caras))
+            );
+            let badgeCarasLib = yaCaraLib ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
+            let badgeRetrabajoLib = `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>`;
+
             tbody.innerHTML += `
                 <tr>
-                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #f59e0b; font-size: 0.95rem;">${ticketId}</strong></td>
+                    <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #f59e0b; font-size: 0.95rem;">${ticketId}</strong>${badgeCarasLib}${badgeRetrabajoLib}</td>
                     <td style="white-space: nowrap; vertical-align: middle;">${fechaReasig}</td>
                     <td style="white-space: nowrap; vertical-align: middle;"><strong style="color: #4ade80;">${fechaListoTaller}</strong></td>
                     <td style="white-space: nowrap; vertical-align: middle;">
@@ -3170,12 +3193,12 @@ window.cargarLiberarRetrabajosSupervisor = async function() {
                         <p style="margin: 0; padding: 0; color: #f1f5f9; font-size: 0.88rem; font-weight: 500; line-height: 1.5; white-space: normal; word-break: break-word; text-align: left;">${motivoLimpio}</p>
                     </td>
                     <td style="white-space: nowrap; vertical-align: middle; text-align: center;">${badgeEstado}</td>
-                    <td style="white-space: nowrap; vertical-align: middle; text-align: center; padding: 12px 10px;">
-                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
-                            <button type="button" class="btn-info" style="padding: 6px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; cursor: pointer;" onclick="abrirDetallesTicketRetrabajo('${ticketEscaped}', '${r.factura_id || ''}')">
+                    <td style="white-space: nowrap; vertical-align: middle; text-align: center; padding: 10px 12px;">
+                        <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; min-width: 145px; box-sizing: border-box;">
+                            <button type="button" class="btn-info" style="display: block; width: 100%; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; cursor: pointer; text-align: center; box-sizing: border-box; margin: 0; border: none;" onclick="abrirDetallesTicketRetrabajo('${ticketEscaped}', '${r.factura_id || ''}')">
                                 Ver Detalles
                             </button>
-                            <button type="button" class="btn-success" style="padding: 6px 14px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; cursor: pointer; background: #10b981; border: none; color: white;" onclick="abrirModalValidarCodigoLiberacion('${ticketEscaped}', '${unidadEscaped}', '${tallerEscaped}', '${choferEscaped}')">
+                            <button type="button" class="btn-success" style="display: block; width: 100%; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; cursor: pointer; text-align: center; box-sizing: border-box; margin: 0; background: #10b981; border: none; color: white;" onclick="abrirModalValidarCodigoLiberacion('${ticketEscaped}', '${unidadEscaped}', '${tallerEscaped}', '${choferEscaped}')">
                                 ✅ Liberar Retrabajo
                             </button>
                         </div>
@@ -3259,6 +3282,12 @@ window.confirmarValidacionLiberacionRetrabajo = async function() {
         btn.innerText = 'Validando...';
     }
 
+    if (typeof window.mostrarLoaderDinamico === 'function') {
+        window.mostrarLoaderDinamico('Validando Código...', 'Finalizando retrabajo y actualizando estatus del ticket ⏳');
+    } else if (typeof mostrarLoaderDinamico === 'function') {
+        mostrarLoaderDinamico('Validando Código...', 'Finalizando retrabajo y actualizando estatus del ticket ⏳');
+    }
+
     try {
         const res = await fetch('/api/garantia/supervisor/liberar', {
             method: 'POST',
@@ -3302,6 +3331,11 @@ window.confirmarValidacionLiberacionRetrabajo = async function() {
             errEl.style.display = 'block';
         }
     } finally {
+        if (typeof window.ocultarLoaderDinamico === 'function') {
+            window.ocultarLoaderDinamico();
+        } else if (typeof ocultarLoaderDinamico === 'function') {
+            ocultarLoaderDinamico();
+        }
         if (btn) {
             btn.disabled = false;
             btn.innerText = '✅ Validar y Liberar';
@@ -3315,18 +3349,13 @@ window.liberarRetrabajoSupervisor = function(ticketId, unidad, taller, chofer) {
 
 window.actualizarBadgeLiberarRetrabajoSupervisor = async function() {
     const badge = document.getElementById('badge-liberar-retrabajo');
-    if (!badge) return;
-    try {
-        const res = await fetch('/api/garantia/supervisor/por_liberar');
-        const data = await res.json();
-        const count = (data.retrabajos || []).length;
-        if (count > 0) {
-            badge.innerText = count;
-            badge.style.display = 'inline-flex';
-            badge.style.alignItems = 'center';
-            badge.style.justifyContent = 'center';
-        } else {
-            badge.style.display = 'none';
-        }
-    } catch(e) {}
+    if (badge) badge.style.display = 'none';
+};
+
+window.abrirConfiguracionesEnDesarrollo = function(event) {
+    if (event) {
+        if (typeof event.preventDefault === 'function') event.preventDefault();
+        if (typeof event.stopPropagation === 'function') event.stopPropagation();
+    }
+    alert("En desarrollo");
 };

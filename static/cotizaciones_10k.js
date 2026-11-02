@@ -41,7 +41,8 @@ async function cargarCotizaciones10k() {
                 let ap10k = f.aprobado_admin_10k !== undefined ? f.aprobado_admin_10k : false;
                 let supAsignado = f.aprobado_admin === true;
                 let cancelado = f.estado === 'Cancelado_Cotizacion_Cara' || f.estado === 'Archivado' || f.estado === 'Rechazado_Con_Recomendaciones';
-                return p >= 10001 && ap10k === false && supAsignado && !cancelado;
+                let enRetrabajoActivo = Boolean(f.en_retrabajo_activo || f.estado === 'Retrabajo' || f.estado === 'En Asignacion/Retrabajo' || f.estado_retrabajo === 'Pendiente' || f.estado_retrabajo === 'Reasignado' || f.estado_retrabajo === 'Por Liberar');
+                return p >= 10001 && ap10k === false && supAsignado && !cancelado && !enRetrabajoActivo;
             });
 
             facturas10kGlobal = pendientes;
@@ -101,7 +102,8 @@ async function cargarCotizaciones10k() {
 
                 let idRepForTable = typeof obtenerIdReporte === 'function' ? obtenerIdReporte(f) : (f.id || 'S/T');
                 let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold;">⚠️ Reactivada C/cara</span>` : '';
-                tbody.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepForTable}</span>${badgeCaras}</td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${f.titulo}</td><td><strong>$${pFormat} MXN</strong></td>${tdPrecioInd}<td>${acciones}</td></tr>`;
+                let badgeRetrabajo = (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado' || f.estado_retrabajo === 'Pendiente' || f.estado_retrabajo === 'Por Liberar' || f.retrabajo === 'Sí') ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
+                tbody.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepForTable}</span>${badgeCaras}${badgeRetrabajo}</td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${f.titulo}</td><td><strong>$${pFormat} MXN</strong></td>${tdPrecioInd}<td>${acciones}</td></tr>`;
             });
         } else {
             tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#ef4444;">Error al cargar datos del servidor.</td></tr>`;
