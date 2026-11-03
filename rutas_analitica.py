@@ -1,3 +1,17 @@
+def obtener_limite_cotizaciones_caras():
+    try:
+        import os, json
+        conf_path = os.path.join(os.path.dirname(__file__), "configuracion_sistema.json")
+        if os.path.exists(conf_path):
+            with open(conf_path, "r", encoding="utf-8") as f:
+                conf = json.load(f)
+                val = conf.get("limite_cotizaciones_caras")
+                if val is not None:
+                    return float(val)
+    except Exception:
+        pass
+    return 10000.0
+
 from flask import Blueprint, jsonify, request, send_file
 import json
 import os
@@ -276,7 +290,7 @@ def obtener_datos_auditados(period):
     ultimo_caro = None
     for f in reversed(facturas):
         p = float(f.get('precio_estimado', f.get('precio', 0)) or 0)
-        if p >= 10001:
+        if p >= obtener_limite_cotizaciones_caras():
             ultimo_caro = extract_factura_info(f)
             break
     if not ultimo_caro and facturas:

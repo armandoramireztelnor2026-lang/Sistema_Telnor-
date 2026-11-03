@@ -49,6 +49,140 @@ def escribir_json(archivo, data):
 # BUG #10 FIX: alias para compatibilidad entre módulos
 guardar_json = escribir_json
 
+def obtener_limite_cotizaciones_caras():
+    """Obtiene el umbral para cotizaciones caras desde configuracion_sistema.json (por defecto 10000.0)."""
+    try:
+        conf_path = os.path.join(os.path.dirname(__file__), "configuracion_sistema.json")
+        if os.path.exists(conf_path):
+            with open(conf_path, "r", encoding="utf-8") as f:
+                conf = json.load(f)
+                val = conf.get("limite_cotizaciones_caras")
+                if val is not None:
+                    return float(val)
+    except Exception:
+        pass
+    return 10000.0
+
+
+def despachar_orden_al_taller(f):
+    """
+    Despacha las notificaciones por correo para que el taller comience a trabajar
+    y para que el administrador quede avisado de la espera de liberación contable (Doc 50).
+    """
+    try:
+        from notificaciones import enviar_correo_taller_aprobado, enviar_correo_esperando_liberacion
+        cope_fact = obtener_cope_de_factura(f)
+        correo_admin, nombre_admin = encontrar_admin_por_cope(cope_fact)
+        nombre_sup = f.get("supervisor_aprobador") or f.get("responsable") or "Supervisor"
+
+        if correo_admin and f.get("liberado_admin") is False:
+            try:
+                enviar_correo_esperando_liberacion(
+                    correo_admin,
+                    nombre_admin,
+                    f.get("id_reporte", f.get("id", "N/A")),
+                    f.get("unidad", ""),
+                    f.get("numero_orden", "N/A"),
+                    f.get("numero_cotizacion_asignacion", "N/A"),
+                    nombre_supervisor=nombre_sup
+                )
+            except Exception as e:
+                print("Error enviando esperando liberacion:", e)
+
+        proveedor_nombre = f.get('proveedor', '')
+        usuarios_data = leer_json("usuarios.json")
+        correo_prov = ""
+        for u in usuarios_data.get("usuarios", []):
+            if u.get('rol') == 'proveedores' and u.get('datos_perfil', {}).get('nombre_proveedor') == proveedor_nombre:
+                correo_prov = u.get('datos_perfil', {}).get('correo', '')
+                break
+
+        if correo_prov:
+            vehiculo_info = f.get("vehiculo", "Vehículo no especificado")
+            enviar_correo_taller_aprobado(
+                correo_prov,
+                proveedor_nombre,
+                f.get("id", "N/A"),
+                f.get("unidad", "S/N"),
+                vehiculo_info,
+                nombre_supervisor=nombre_sup
+            )
+    except Exception as e:
+        print("Error en despachar_orden_al_taller:", e)
+
+
+def revaluar_cotizaciones_por_limite(nuevo_limite):
+    """
+    Aplica las 3 reglas de negocio al cambiar el límite global de cotizaciones caras:
+    Regla 1: Si un ticket ya fue aprobado por el supervisor para que empiece a trabajar el taller
+             (o ya está trabajando, reparado, finalizado o entregado), NO le afecta si la cotización era cara o no.
+    Regla 2: Si el ticket está en proceso de aprobación, se aplica en automático el cambio
+             (según si el precio ahora es mayor o menor al nuevo límite) para que vaya a corporativos o no.
+    Regla 3: Si un ticket era cotización cara y tocaba que lo apruebe el administrador porque el supervisor
+             ya la aprobó, si ahora con el nuevo límite deja de ser cara (precio < nuevo_limite),
+             se va DIRECTO a que la arregle el taller porque ya no requiere aprobación corporativa.
+    """
+    data = leer_json("facturas.json")
+    modificado = False
+    tickets_a_taller = []
+
+    for f in data.get("facturas", []):
+        st = str(f.get("estado", "")).lower()
+        entregado = f.get("entregado") in ["Sí", "Si", "S"]
+
+        # Regla 1: Ya finalizado, archivado, cancelado o entregado -> Inmutable
+        if st in ["archivado", "archivado_final", "finalizado", "entregado", "cancelado", "rechazado", "eliminado"] or entregado:
+            continue
+
+        # Regla 1: Si ya fue aprobado y el taller ya está trabajando o concluyó el trabajo -> Inmutable
+        if f.get("taller_trabajando") or f.get("reparado") or (f.get("aprobado_admin") and f.get("aprobado_corp") and f.get("liberado_admin") is not None):
+            continue
+
+        precio_float = float(f.get("precio_estimado", f.get("precio", 0)) or 0)
+        es_cara = precio_float >= float(nuevo_limite)
+        sup_aprobado = (f.get("aprobado_admin") is True)
+
+        # Si el supervisor aún NO la aprueba (proceso de cotización inicial):
+        if not sup_aprobado:
+            if es_cara:
+                if f.get("aprobado_corp") is not False:
+                    f["aprobado_corp"] = False
+                    f["aprobado_admin_10k"] = False
+                    modificado = True
+            else:
+                if f.get("aprobado_corp") is False:
+                    f["aprobado_corp"] = True
+                    modificado = True
+
+        # Regla 3: Era cotización cara detenida esperando Admin/Corp, pero el supervisor ya la había aprobado.
+        # Al subir el límite global (o bajar el precio), el ticket ahora es MENOR al límite (< nuevo_limite):
+        # ¡Se va directo a que la arregle el taller sin pasar por corporativos!
+        elif sup_aprobado and not es_cara:
+            # Estaba pendiente de aprobación de corporativos o admin_10k
+            if (not f.get("aprobado_corp") or not f.get("aprobado_admin_10k")) and f.get("liberado_admin") is None:
+                f["aprobado_admin_10k"] = True
+                f["aprobado_corp"] = True
+                f["liberado_admin"] = False
+                f["estado_custom"] = "Exenta de Corporativos por ajuste de límite global"
+                modificado = True
+                tickets_a_taller.append(f)
+
+        # Regla 2: Si ahora califica como cara (precio >= nuevo_limite) y estaba en proceso de aprobación
+        # pero aún no se despachaba al taller, debe canalizarse a Corporativos:
+        elif sup_aprobado and es_cara:
+            if f.get("aprobado_corp") is True and f.get("liberado_admin") is None:
+                f["aprobado_corp"] = False
+                f["aprobado_admin_10k"] = False
+                f["estado_custom"] = "Canalizada a Validación +10,000 por nuevo límite global"
+                modificado = True
+
+    if modificado:
+        escribir_json("facturas.json", data)
+        for t in tickets_a_taller:
+            despachar_orden_al_taller(t)
+
+    return len(tickets_a_taller)
+
 def es_ticket_corporativo(factura):
     """
     Determina si un ticket/factura pertenece al cliente o ámbito de 'Corporativos'.
@@ -90,7 +224,7 @@ def es_ticket_corporativo(factura):
 def procesar_liberacion_si_aplica(f):
     precio_float = float(f.get("precio_estimado", f.get("precio", 0)))
 
-    if precio_float >= 10001.0:
+    if precio_float >= obtener_limite_cotizaciones_caras():
         admin_ok = f.get("aprobado_admin_10k", False)
     else:
         admin_ok = f.get("aprobado_admin", False)
@@ -162,7 +296,7 @@ def nueva_factura():
         precio_limpio = "".join(c for c in precio_str if c.isdigit() or c == ".")
         precio_float = float(precio_limpio) if precio_limpio else 0.0
         precio_total = precio_float
-        necesita_corp = precio_float >= 10001.0
+        necesita_corp = precio_float >= obtener_limite_cotizaciones_caras()
 
         cot = {
             "id_cotizacion": "1",
@@ -200,7 +334,7 @@ def nueva_factura():
                 precio_val = 0.0
 
             precio_total += precio_val
-            if precio_val >= 10001.0:
+            if precio_val >= obtener_limite_cotizaciones_caras():
                 necesita_corp = True
 
             cot = {
@@ -337,7 +471,7 @@ def listar_facturas():
             facturas = [f for f in facturas if f.get("proveedor") == proveedor_actual]
             
         elif rol == "corporativos":
-            facturas = [f for f in facturas if float(f.get("precio", 0)) >= 10001.0]
+            facturas = [f for f in facturas if float(f.get("precio", 0)) >= obtener_limite_cotizaciones_caras()]
             
         elif rol == "administracion":
             # --- FILTRO POR COPE PARA SUPERVISORES ---
@@ -372,7 +506,7 @@ def listar_facturas():
                 facturas = [
                     f for f in facturas
                     if get_cope_factura(f) in copes_permitidos or (
-                        float(f.get("precio_estimado") or f.get("precio") or 0) >= 10001.0
+                        float(f.get("precio_estimado") or f.get("precio") or 0) >= obtener_limite_cotizaciones_caras()
                         and f.get("aprobado_admin") is True
                         and not f.get("aprobado_admin_10k")
                     ) or (
@@ -694,6 +828,24 @@ def confirmar_admin():
     
     for f in data.get("facturas", []):
         if str(f["id"]) == str(factura_id):
+            precio_float = float(f.get("precio", 0) or f.get("precio_estimado", 0) or 0)
+
+            # VALIDACIÓN ESTRICTA DE PRESUPUESTO (SUPERVISORES / JEFATURA):
+            # Si el presupuesto no alcanza, el sistema no deja aprobarla y avisa que no hay presupuesto
+            if not f.get("aprobado_admin"):
+                try:
+                    from rutas_configuracion import obtener_configuracion, calcular_metricas_presupuesto
+                    conf = obtener_configuracion()
+                    metricas = calcular_metricas_presupuesto(conf)
+                    saldo_disponible = float(metricas.get("presupuesto_restante", 0.0))
+                    if precio_float > saldo_disponible or saldo_disponible <= 0:
+                        return jsonify({
+                            "status": "error",
+                            "message": f"🚫 Presupuesto Insuficiente: No se puede aprobar la cotización. El costo (${precio_float:,.2f} MXN) excede el saldo de presupuesto disponible ($ {saldo_disponible:,.2f} MXN). Contacte a Jefatura para ampliar o resetear el presupuesto."
+                        }), 400
+                except Exception as ex_pres:
+                    print("Error verificando presupuesto en confirmar_admin:", ex_pres)
+
             f["aprobado_admin"] = True
             f["timestamp_aprobacion"] = datetime.datetime.now().isoformat()
             f["estado_custom"] = ""
@@ -745,7 +897,7 @@ def confirmar_admin():
 
             # REGLA DE COTIZACIONES (EXCEPCIÓN CORPORATIVA PARA SUPLENCIA):
             if subrol_actor == "Administrador":
-                if precio_float >= 10001.0 and es_ticket_corporativo(f):
+                if precio_float >= obtener_limite_cotizaciones_caras() and es_ticket_corporativo(f):
                     return jsonify({
                         "status": "error",
                         "message": "🔒 Flujo Estricto: Las cotizaciones mayores a $10,000 pertenecientes a Corporativos requieren revisión y asignación del Supervisor titular (sin excepciones de cobertura)."
@@ -760,7 +912,7 @@ def confirmar_admin():
             else:
                 f["supervisor_aprobador"] = nombre_sup_aprobador
 
-            if precio_float >= 10001.0:
+            if precio_float >= obtener_limite_cotizaciones_caras():
                 escribir_json("facturas.json", data)
                 msg_base = "Órdenes asignadas por el Supervisor. Enviando a Administrador para revisión..."
                 usuarios_data = leer_json("usuarios.json")
@@ -1060,12 +1212,27 @@ def aprobar_10k():
             precio_float = float(f.get("precio", 0))
 
             if accion == "aprobar":
+                # VALIDACIÓN ESTRICTA DE PRESUPUESTO (SUPERVISORES / JEFATURA):
+                if not f.get("aprobado_admin_10k") and not f.get("aprobado_corp"):
+                    try:
+                        from rutas_configuracion import obtener_configuracion, calcular_metricas_presupuesto
+                        conf = obtener_configuracion()
+                        metricas = calcular_metricas_presupuesto(conf)
+                        saldo_disponible = float(metricas.get("presupuesto_restante", 0.0))
+                        if precio_float > saldo_disponible or saldo_disponible <= 0:
+                            return jsonify({
+                                "status": "error",
+                                "message": f"🚫 Presupuesto Insuficiente: No se puede aprobar la cotización. El costo (${precio_float:,.2f} MXN) excede el saldo de presupuesto disponible ($ {saldo_disponible:,.2f} MXN). Contacte a Jefatura para ampliar o resetear el presupuesto."
+                            }), 400
+                    except Exception as ex_pres:
+                        print("Error verificando presupuesto en aprobar_10k:", ex_pres)
+
                 # REGLA DE COTIZACIONES (EXCEPCIÓN CORPORATIVA PARA SUPLENCIA):
                 # Si la cotización es > 10,000 y el cliente/ticket pertenece a 'Corporativos',
                 # la suplencia está prohibida, obligando a seguir el flujo estricto sin excepciones.
                 es_corp = es_ticket_corporativo(f)
                 if subrol == "Supervisor":
-                    if precio_float >= 10001.0 and es_corp:
+                    if precio_float >= obtener_limite_cotizaciones_caras() and es_corp:
                         return jsonify({
                             "status": "error",
                             "message": "🔒 Flujo Estricto: Las cotizaciones mayores a $10,000 pertenecientes a Corporativos requieren aprobación exclusiva del Administrador titular (sin excepciones de cobertura)."
@@ -1226,7 +1393,7 @@ def confirmar_corp():
         if f["id"] == factura_id:
             precio_float = float(f.get("precio_estimado", f.get("precio", 0)))
 
-            if precio_float >= 10001.0:
+            if precio_float >= obtener_limite_cotizaciones_caras():
                 sup_approved = f.get("aprobado_admin", False)
                 if not sup_approved:
                     return jsonify({"status": "error", "message": "Esta cotización debe ser asignada y aprobada por Supervisión primero."})
@@ -1409,7 +1576,7 @@ def rechazar_corp():
         if f["id"] == factura_id:
             precio_float = float(f.get("precio_estimado", f.get("precio", 0)))
 
-            if precio_float >= 10001.0:
+            if precio_float >= obtener_limite_cotizaciones_caras():
                 sup_approved = f.get("aprobado_admin", False)
                 admin_approved = f.get("aprobado_admin_10k", False)
                 if not sup_approved or not admin_approved:
@@ -1677,14 +1844,31 @@ def editar_factura():
             precio_limpio = "".join(c for c in precio_str if c.isdigit() or c == ".")
             precio_float = float(precio_limpio)
             f["precio"] = precio_float
-            necesita_corp = precio_float >= 10001.0
-            f["aprobado_admin"] = True
-            if necesita_corp:
-                f["aprobado_corp"] = False
-                f["estado_custom"] = "Actualizada por sistema (Pend. Corp)"
-            else:
-                f["aprobado_corp"] = True
-                f["estado_custom"] = "Actualizada por sistema"
+            limite_actual = obtener_limite_cotizaciones_caras()
+            necesita_corp = precio_float >= limite_actual
+
+            # Regla 1: Si ya fue aprobado y el taller ya empezó a trabajar o concluyó, su estatus de taller no se altera
+            ya_en_taller = f.get("taller_trabajando") or f.get("reparado") or f.get("entregado") in ["Sí", "Si", "S"] or (f.get("aprobado_admin") and f.get("aprobado_corp") and f.get("liberado_admin") is not None)
+
+            if not ya_en_taller:
+                sup_aprobado = (f.get("aprobado_admin") is True)
+                if sup_aprobado:
+                    # Regla 3: Si el supervisor ya la aprobó y el precio baja del límite, se va directo al taller
+                    if not necesita_corp:
+                        f["aprobado_admin_10k"] = True
+                        f["aprobado_corp"] = True
+                        f["liberado_admin"] = False
+                        f["estado_custom"] = "Aprobada por Supervisor (Precio ajustado < límite)"
+                        despachar_orden_al_taller(f)
+                    else:
+                        # Regla 2: Si el precio sube o se mantiene sobre el límite, requiere Corporativos
+                        f["aprobado_admin_10k"] = False
+                        f["aprobado_corp"] = False
+                        f["estado_custom"] = "Actualizada por sistema (Pend. Corp)"
+                else:
+                    # Aún pendiente de aprobación de supervisor
+                    f["aprobado_corp"] = not necesita_corp
+                    f["estado_custom"] = "Actualizada por sistema"
             
             coti_guardadas = json.loads(request.form.get("cotizaciones_guardadas", "[]"))
             evi_guardadas = json.loads(request.form.get("evidencias_guardadas", "[]"))
@@ -2658,7 +2842,7 @@ def notificar_corporativos():
         return jsonify({"status": "error", "message": "Factura no encontrada"}), 404
 
     precio = float(factura.get("precio", 0))
-    if precio < 10001:
+    if precio < obtener_limite_cotizaciones_caras():
         return jsonify({"status": "error", "message": "Esta cotización no requiere autorización de Corporativos (monto menor a $10,001)."})
 
     # Obtener lista de correos de corporativos

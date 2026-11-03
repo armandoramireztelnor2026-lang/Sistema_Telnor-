@@ -464,7 +464,7 @@ async function cargarFacturas() {
                 let apCorp = f.aprobado_corp !== undefined ? f.aprobado_corp : (f.estado === 'Confirmada');
 
                 let apAdminTotal = apAdmin;
-                if (precioParaAp >= 10001) {
+                if (precioParaAp >= (window.LIMITE_COTIZACIONES_CARAS || 10000)) {
                     apAdminTotal = (f.aprobado_admin === true && f.aprobado_admin_10k === true);
                 }
                 let confirmadaTotal = (apAdminTotal && apCorp);
@@ -575,9 +575,9 @@ async function cargarFacturas() {
                     }
 
                     if (tbodyArchivoCorp && rolUsuario === 'corporativos') {
-                        let esMas10kArch = precioParaAp >= 10001;
+                        let esMas10kArch = precioParaAp >= (window.LIMITE_COTIZACIONES_CARAS || 10000);
                         if (!esMas10kArch && f.cotizaciones && f.cotizaciones.length > 0) {
-                            esMas10kArch = f.cotizaciones.some(c => parseFloat(c.precio || 0) >= 10001);
+                            esMas10kArch = f.cotizaciones.some(c => parseFloat(c.precio || 0) >= (window.LIMITE_COTIZACIONES_CARAS || 10000));
                         }
                         if (esMas10kArch) {
                             let idRepArchCorp = obtenerIdReporte(f) || 'S/T';
@@ -598,9 +598,9 @@ async function cargarFacturas() {
                 // formalmente su turno de aprobar (debe estar aprobado por Supervisión Y por Administración).
                 // ==========================================
                 if (rolUsuario === 'corporativos') {
-                    let esMas10k = precioParaAp >= 10001;
+                    let esMas10k = precioParaAp >= (window.LIMITE_COTIZACIONES_CARAS || 10000);
                     if (!esMas10k && f.cotizaciones && f.cotizaciones.length > 0) {
-                        esMas10k = f.cotizaciones.some(c => parseFloat(c.precio || 0) >= 10001);
+                        esMas10k = f.cotizaciones.some(c => parseFloat(c.precio || 0) >= (window.LIMITE_COTIZACIONES_CARAS || 10000));
                     }
                     let turnoCorp = esMas10k && (f.aprobado_admin === true) && (f.aprobado_admin_10k === true);
                     if (!turnoCorp || f.estado === 'Rechazado_Con_Recomendaciones') {
@@ -621,7 +621,7 @@ async function cargarFacturas() {
                 else if (confirmadaTotal) { badgeColor = '#2d6a4f'; textoEstado = 'Aprobada (Con Orden)'; }
                 else {
                     badgeColor = '#b45309';
-                    if (precioParaAp >= 10001) {
+                    if (precioParaAp >= (window.LIMITE_COTIZACIONES_CARAS || 10000)) {
                         if (!f.aprobado_admin) {
                             textoEstado = 'Pendiente: Supervisor';
                         } else if (f.aprobado_admin === true && !f.aprobado_admin_10k) {
@@ -690,7 +690,7 @@ async function cargarFacturas() {
                     } else if (!apAdmin) {
                         if (subrolAct === 'Administrador') {
                             let esCorp = esTicketCorporativo(f);
-                            if (precioParaAp >= 10001 && esCorp) {
+                            if (precioParaAp >= (window.LIMITE_COTIZACIONES_CARAS || 10000) && esCorp) {
                                 btnAccion += `<button class="btn-cobertura-disabled" disabled style="display:block; width:100%; margin:0;" title="Excepción Corporativa: Prohibida suplencia en cotizaciones > $10,000 de Corporativos. Requiere Supervisor titular.">🔒 Flujo Estricto Corp (Sin Cobertura)</button><span class="badge-estricto-corp">Requiere Supervisor Titular</span>`;
                             } else {
                                 btnAccion += `<button class="btn-cobertura" onclick="delegarAutorizarRevision('${f.id}', '${f.unidad || ''}')" style="display:block; width:100%; margin:0;">🛡️ Asumir Proceso (Autorizar por Ausencia)</button>`;
@@ -701,7 +701,7 @@ async function cargarFacturas() {
                     } else {
                         btnAccion += `<button class="btn-info" onclick="abrirDetalles('${f.id}')" style="display:block; width:100%; margin:0;">Ver Detalles</button>`;
 
-                        if (!confirmadaTotal && subrolAct === 'Supervisor' && precioParaAp >= 10001) {
+                        if (!confirmadaTotal && subrolAct === 'Supervisor' && precioParaAp >= (window.LIMITE_COTIZACIONES_CARAS || 10000)) {
                             if (!f.aprobado_admin_10k) {
                                 btnAccion += `<button class="btn-info" style="background:#f59e0b; color:white; font-size:0.8em; padding:8px 10px; width:100%; box-sizing: border-box; border:none; margin-top:5px; font-weight:bold;" onclick="notificarAdmin10k('${f.id}')">🔔 Notificar Admin</button>`;
                             } else if (f.aprobado_admin_10k && !f.aprobado_corp) {
@@ -1916,8 +1916,13 @@ function confirmarFacturaAdmin() {
     fetch('/api/facturas/confirmar_admin', {
         method: 'POST',
         body: formData
-    }).then(res => res.json()).then(data => {
+    }).then(async res => {
+        const data = await res.json();
         ocultarLoaderDinamico();
+        if (!res.ok || data.status === 'error') {
+            alert(data.message || "Error al procesar la cotización.");
+            return;
+        }
         alert(data.message);
         document.getElementById('modal-revision-admin').style.display = 'none';
         cargarFacturas();

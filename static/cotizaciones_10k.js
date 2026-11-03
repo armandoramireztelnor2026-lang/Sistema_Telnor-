@@ -42,7 +42,8 @@ async function cargarCotizaciones10k() {
                 let supAsignado = f.aprobado_admin === true;
                 let cancelado = f.estado === 'Cancelado_Cotizacion_Cara' || f.estado === 'Archivado' || f.estado === 'Rechazado_Con_Recomendaciones';
                 let enRetrabajoActivo = Boolean(f.en_retrabajo_activo || f.estado === 'Retrabajo' || f.estado === 'En Asignacion/Retrabajo' || f.estado_retrabajo === 'Pendiente' || f.estado_retrabajo === 'Reasignado' || f.estado_retrabajo === 'Por Liberar');
-                return p >= 10001 && ap10k === false && supAsignado && !cancelado && !enRetrabajoActivo;
+                let lim10k = window.LIMITE_COTIZACIONES_CARAS || 10000;
+                return p >= lim10k && ap10k === false && supAsignado && !cancelado && !enRetrabajoActivo;
             });
 
             facturas10kGlobal = pendientes;
@@ -74,7 +75,8 @@ async function cargarCotizaciones10k() {
 
                 if (subrolActual === 'Supervisor') {
                     // El Supervisor actúa bajo cobertura de ausencia del Administrador
-                    if (pNum >= 10001 && esCorp) {
+                    let lim10k = window.LIMITE_COTIZACIONES_CARAS || 10000;
+                    if (pNum >= lim10k && esCorp) {
                         // REGLA DE COTIZACIONES (EXCEPCIÓN CORPORATIVA):
                         // Si la cotización es > 10,000 y pertenece a 'Corporativos', la cobertura se deshabilita/oculta
                         btnAprobar = `<button class="btn-cobertura-disabled" disabled style="${btnStyle}" title="Excepción Corporativa: Prohibida suplencia en cotizaciones > $10,000 de Corporativos. Requiere Administrador titular.">🔒 Flujo Estricto Corp (Sin Cobertura)</button>

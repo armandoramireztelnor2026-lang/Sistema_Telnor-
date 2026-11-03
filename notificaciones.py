@@ -13,6 +13,27 @@ import json
 CORREO_REMITENTE = "armandoramireztelnor2026@gmail.com" 
 CONTRASENA_REMITENTE = "zgdhbgcpuobszybi" 
 
+def obtener_credenciales_correo():
+    """Obtiene las credenciales activas del cartero desde configuracion_sistema.json o valores por defecto."""
+    try:
+        conf_path = os.path.join(os.path.dirname(__file__), "configuracion_sistema.json")
+        if os.path.exists(conf_path):
+            with open(conf_path, "r", encoding="utf-8") as f:
+                conf = json.load(f)
+                if conf.get("envio_automatico_activo") is False:
+                    return None, None, None, None
+                correo = str(conf.get("correo_emisor", "")).strip()
+                codigo = str(conf.get("codigo_emisor", "")).strip()
+                server = str(conf.get("servidor_smtp", "")).strip() or "smtp.gmail.com"
+                port = int(conf.get("puerto_smtp", 587) or 587)
+                if correo and codigo:
+                    return correo, codigo, server, port
+                return None, None, None, None
+    except Exception as e:
+        print(f"Error leyendo credenciales de configuracion_sistema.json: {e}")
+    return CORREO_REMITENTE, CONTRASENA_REMITENTE, "smtp.gmail.com", 587
+
+
 def generar_codigo_liberacion():
     """Genera un número aleatorio de 8 dígitos matemáticamente seguro."""
     return str(random.randint(10000000, 99999999))
@@ -389,8 +410,13 @@ def disparar_correo(destino, asunto, cuerpo_html, adjuntos=None):
             else:
                 cuerpo_html = cuerpo_html.replace('</body>', f'{autor_box}\n</body>')
 
+    remitente_act, clave_act, host_smtp_act, puerto_smtp_act = obtener_credenciales_correo()
+    if not remitente_act or not clave_act:
+        print(f"Aviso: Envíos automáticos de correo desactivados por Jefatura. Correo a {destino} omitido.")
+        return False, "Envíos automáticos desactivados por Jefatura"
+
     msg = MIMEMultipart()
-    msg['From'] = CORREO_REMITENTE
+    msg['From'] = remitente_act
     msg['To'] = destino
     msg['Subject'] = asunto
     msg.attach(MIMEText(cuerpo_html, 'html', 'utf-8'))
@@ -407,9 +433,9 @@ def disparar_correo(destino, asunto, cuerpo_html, adjuntos=None):
                     print(f"Error adjuntando {adjunto}: {ex}")
 
     try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server = smtplib.SMTP(host_smtp_act, puerto_smtp_act)
         server.starttls()
-        server.login(CORREO_REMITENTE, CONTRASENA_REMITENTE)
+        server.login(remitente_act, clave_act)
         server.send_message(msg)
         server.quit()
         return True, "Enviado"

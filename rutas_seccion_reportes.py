@@ -1,3 +1,17 @@
+def obtener_limite_cotizaciones_caras():
+    try:
+        import os, json
+        conf_path = os.path.join(os.path.dirname(__file__), "configuracion_sistema.json")
+        if os.path.exists(conf_path):
+            with open(conf_path, "r", encoding="utf-8") as f:
+                conf = json.load(f)
+                val = conf.get("limite_cotizaciones_caras")
+                if val is not None:
+                    return float(val)
+    except Exception:
+        pass
+    return 10000.0
+
 import os
 import json
 from flask import Blueprint, jsonify, session
@@ -46,7 +60,7 @@ def determinar_estado_ticket(f):
             precio = float(f.get('precio', 0) or 0)
         except Exception:
             precio = 0
-        is_cara = precio >= 10001
+        is_cara = precio >= obtener_limite_cotizaciones_caras()
         ap_super = f.get('aprobado_admin') is True
         ap_admin = f.get('aprobado_admin_10k') is True
         ap_corp = f.get('aprobado_corp') is True

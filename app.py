@@ -21,6 +21,7 @@ from rutas_panel_control import panel_control_bp
 from rutas_ciudades_copes import ciudades_copes_bp
 from rutas_analitica import analitica_bp
 from rutas_chat import chat_bp
+from rutas_configuracion import configuracion_bp
 # Rutas y módulos del Sistema de Facturacion Central
 app = Flask(__name__)
 app.secret_key = "clave_secreta_super_segura_2026"
@@ -32,6 +33,7 @@ app.register_blueprint(panel_control_bp)
 app.register_blueprint(ciudades_copes_bp)
 app.register_blueprint(analitica_bp)
 app.register_blueprint(chat_bp)
+app.register_blueprint(configuracion_bp)
 
 CARPETAS = {
     "temporal": "static/registros_confirmar",
