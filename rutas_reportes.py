@@ -1140,7 +1140,7 @@ def obtener_retrabajos_supervisor():
     filtrados = []
     for ret in todos:
         st_ret = str(ret.get("estado", "")).strip().lower()
-        if st_ret in ["finalizado", "cancelado", "entregado"] or str(ret.get("unidad_entregada", "")).strip().lower() in ["sí", "si"]:
+        if st_ret in ["finalizado", "cancelado", "entregado", "por liberar", "por_liberar", "pendiente liberacion", "listo_taller"] or str(ret.get("unidad_entregada", "")).strip().lower() in ["sí", "si"]:
             continue
         t_check = str(ret.get("ticket_original") or ret.get("ticket") or ret.get("id") or "").strip().upper()
         if t_check in caras_set or t_check.replace("REP-", "") in caras_set:
@@ -1167,6 +1167,23 @@ def obtener_detalle_retrabajo(ticket_id):
         r_orig = str(ret.get("ticket_original", "")).strip().upper()
         r_tick = str(ret.get("ticket", "")).strip().upper()
         if t_clean in [r_id, r_orig, r_tick] or (t_clean and t_clean.replace("REP-", "") in [r_id.replace("REP-", ""), r_orig.replace("REP-", "")]):
+            # Calcular número de veces que ha estado en retrabajo
+            facturas_data = leer_json("facturas.json").get("facturas", [])
+            num_ret = 1
+            for f in facturas_data:
+                f_id = str(f.get("id", "")).strip().upper()
+                f_rep = str(f.get("id_reporte", "")).strip().upper()
+                f_retro = str(f.get("retro", "")).strip().upper()
+                if f_id == str(ret.get("factura_id", "")).strip().upper() or r_orig in f_retro or f_rep == r_orig:
+                    if f.get("num_retrabajo"):
+                        num_ret = int(f.get("num_retrabajo", 1))
+                    break
+            conteo = sum(1 for x in retrabajos_data.get("retrabajos", []) 
+                         if str(x.get("ticket_original", "")).strip().upper() == r_orig 
+                         and str(x.get("estado", "")).lower() != "cancelado")
+            num_veces = max(num_ret, conteo, int(ret.get("num_retrabajo", 1)))
+            ret["num_retrabajo"] = num_veces
+
             return jsonify({
                 "status": "success",
                 "retrabajo": ret

@@ -643,6 +643,13 @@ async function cargarRetrabajosAdmin() {
         const res = await fetch('/api/garantia/supervisor/lista');
         const data = await res.json();
         const retrabajos = data.retrabajos || [];
+        for (let i = retrabajos.length - 1; i >= 0; i--) {
+            let st = String(retrabajos[i].estado || '').trim().toLowerCase();
+            let ent = String(retrabajos[i].unidad_entregada || '').trim().toLowerCase();
+            if (['finalizado', 'cancelado', 'entregado', 'por liberar', 'por_liberar', 'pendiente liberacion', 'listo_taller'].includes(st) || ['sí', 'si'].includes(ent)) {
+                retrabajos.splice(i, 1);
+            }
+        }
         window.retrabajosSupervisorGlobal = retrabajos;
         
         if (retrabajos.length === 0) {

@@ -8,8 +8,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="/static/style.css?v=1000048">
-    <link rel="stylesheet" href="/static/manual_sistema.css?v=1">
+    <link rel="stylesheet" href="/static/style.css?v=1000049">
+    <link rel="stylesheet" href="/static/manual_sistema.css?v=2">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .asignacion-zona {
@@ -64,6 +64,16 @@
             border-color: #f59e0b;
             box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
             background: #0b1c30;
+        }
+
+        .buscador-pildora:-webkit-autofill,
+        .buscador-pildora:-webkit-autofill:hover,
+        .buscador-pildora:-webkit-autofill:focus,
+        .buscador-pildora:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px #081422 inset !important;
+            -webkit-text-fill-color: #ffffff !important;
+            box-shadow: 0 0 0 1000px #081422 inset !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
 
         .lista-flotante {
@@ -328,7 +338,7 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; flex-wrap:wrap; gap:10px;">
                         <div class="buscador-wrapper-div" style="max-width: 500px; margin:0; flex:1;">
                             <span class="buscador-icono">&#x1F50D;</span>
-                            <input type="text" id="search-unidades" placeholder="Buscar por Unidad, Marca, Modelo o Estado..."
+                            <input type="search" id="search-unidades" name="search_search-unidades_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Buscar por Unidad, Marca, Modelo o Estado..."
                                 class="buscador-pildora" onkeyup="aplicarFiltroUnidades()">
                         </div>
                         <button onclick="abrirModalUnidad('agregar')" class="btn-info"
@@ -364,7 +374,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-facturas" class="buscador-pildora"
+                        <input type="search" id="buscador-facturas" name="search_buscador-facturas_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por unidad, orden, ticket, taller..."
                             onkeyup="filtrarTabla('buscador-facturas', 'tabla-facturas')">
                     </div>
@@ -398,7 +408,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-facturas-finales" class="buscador-pildora"
+                        <input type="search" id="buscador-facturas-finales" name="search_buscador-facturas-finales_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por folio, unidad, taller..."
                             onkeyup="filtrarTabla('buscador-facturas-finales', 'tabla-facturas-finales')">
                     </div>
@@ -433,7 +443,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-reportes" class="buscador-pildora"
+                        <input type="search" id="buscador-reportes" name="search_buscador-reportes_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por folio de ticket, unidad, chofer..."
                             onkeyup="filtrarTabla('buscador-reportes', 'tabla-reportes')">
                     </div>
@@ -472,7 +482,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-retrabajos" class="buscador-pildora"
+                        <input type="search" id="buscador-retrabajos" name="search_buscador-retrabajos_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por ticket, unidad, COPE, chofer..."
                             onkeyup="filtrarTabla('buscador-retrabajos', 'tabla-retrabajos')">
                     </div>
@@ -519,7 +529,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-liberar-retrabajo" class="buscador-pildora"
+                        <input type="search" id="buscador-liberar-retrabajo" name="search_buscador-liberar-retrabajo_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por ticket, unidad, taller, COPE..."
                             onkeyup="filtrarTabla('buscador-liberar-retrabajo', 'tabla-liberar-retrabajo')">
                     </div>
@@ -623,7 +633,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-tiempo-garantia" class="buscador-pildora"
+                        <input type="search" id="buscador-tiempo-garantia" name="search_buscador-tiempo-garantia_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar taller, encargado, ciudad..."
                             onkeyup="filtrarTabla('buscador-tiempo-garantia', 'tabla-tiempo-garantia')">
                     </div>
@@ -713,7 +723,7 @@
                                     <span>Correo Remitente Oficial:</span>
                                     <span style="color: #64748b; font-size: 0.75rem; font-weight: 400;">(Gmail / Institucional)</span>
                                 </label>
-                                <input type="email" id="cfg-correo-emisor" class="buscador-pildora" placeholder="ejemplo@gmail.com" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 14px; border-radius: 8px; font-size: 0.92rem;">
+                                <input type="email" id="cfg-correo-emisor" placeholder="ejemplo@gmail.com" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 14px; border-radius: 8px; font-size: 0.92rem;">
                             </div>
 
                             <!-- Cuadro 2: Contraseña de Aplicación -->
@@ -723,7 +733,7 @@
                                     <span style="color: #64748b; font-size: 0.75rem; font-weight: 400;">(16 dígitos de Google)</span>
                                 </label>
                                 <div style="position: relative; width: 100%; height: 44px; display: flex; align-items: center;">
-                                    <input type="password" id="cfg-codigo-emisor" class="buscador-pildora" placeholder="zgdhbgcpuobszybi" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 44px 0 14px; border-radius: 8px; font-size: 0.92rem;">
+                                    <input type="password" id="cfg-codigo-emisor" placeholder="zgdhbgcpuobszybi" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 44px 0 14px; border-radius: 8px; font-size: 0.92rem;">
                                     <button type="button" onclick="toggleMostrarPassword('cfg-codigo-emisor', this)" style="position: absolute; right: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #94a3b8; transition: color 0.2s ease;" title="Mostrar código"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
                                 </div>
                             </div>
@@ -734,7 +744,7 @@
                                     <span>Servidor SMTP (Host):</span>
                                     <span style="color: #64748b; font-size: 0.75rem; font-weight: 400;">(Default: smtp.gmail.com)</span>
                                 </label>
-                                <input type="text" id="cfg-servidor-smtp" class="buscador-pildora" value="smtp.gmail.com" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 14px; border-radius: 8px; font-size: 0.92rem;">
+                                <input type="text" id="cfg-servidor-smtp" value="smtp.gmail.com" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 14px; border-radius: 8px; font-size: 0.92rem;">
                             </div>
 
                             <!-- Cuadro 4: Puerto SMTP -->
@@ -743,7 +753,7 @@
                                     <span>Puerto SMTP (TLS / SSL):</span>
                                     <span style="color: #64748b; font-size: 0.75rem; font-weight: 400;">(Default: 587)</span>
                                 </label>
-                                <input type="number" id="cfg-puerto-smtp" class="buscador-pildora" value="587" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 14px; border-radius: 8px; font-size: 0.92rem;">
+                                <input type="number" id="cfg-puerto-smtp" value="587" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 14px; border-radius: 8px; font-size: 0.92rem;">
                             </div>
                         </div>
 
@@ -874,6 +884,75 @@
                                     <button type="button" onclick="resetearPresupuestoUtilizado()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; height: 42px; padding: 0 22px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
                                         <span>🗑️</span> <span>Resetear Dinero Utilizado</span>
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- DESGLOSE DE COTIZACIONES (CONSUMO DEL PRESUPUESTO - ACORDEÓN DESPLEGABLE) -->
+                        <!-- ==================================================== -->
+                        <div style="margin-top: 24px; background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+                            <!-- Botón de despliegue / retracción interactivo -->
+                            <button type="button" id="btn-toggle-desglose-presupuesto" onclick="toggleDesglosePresupuesto()" onmouseenter="this.style.background='#112239'" onmouseleave="this.style.background='#0b1523'" style="width: 100%; background: #0b1523; border: none; padding: 18px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; text-align: left; transition: all 0.25s ease;">
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    <span style="font-size: 1.5rem;">📑</span>
+                                    <div>
+                                        <div style="color: #ffffff; font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                            <span id="cfg-txt-titulo-desglose">Ver Desglose de Cotizaciones que han Consumido Presupuesto</span>
+                                            <span id="cfg-total-confirmadas-txt" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; padding: 3px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">
+                                                0 Cotizaciones Confirmadas
+                                            </span>
+                                        </div>
+                                        <div style="color: #94a3b8; font-size: 0.83rem; margin-top: 4px;">
+                                            Presiona este botón para desplegar o retraer el listado detallado de tickets que han descontado saldo presupuestal.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span id="cfg-badge-toggle-desglose" style="background: #1e293b; color: #38bdf8; padding: 8px 16px; border-radius: 8px; font-size: 0.88rem; font-weight: 700; border: 1px solid #334155; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                                        <span>Desplegar Desglose</span> <span id="cfg-arrow-desglose" style="font-size: 0.82rem;">▼</span>
+                                    </span>
+                                </div>
+                            </button>
+
+                            <!-- Contenedor Desplegable (Oculto por defecto) -->
+                            <div id="contenedor-desglose-presupuesto" style="display: none; padding: 22px 24px; border-top: 1px solid #1e293b; background: #0f172a;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;">
+                                    <div style="color: #94a3b8; font-size: 0.84rem;">
+                                        Detalle completo de cotizaciones aprobadas en el ciclo activo. Puedes filtrar o exportar a Excel:
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                        <button type="button" onclick="descargarExcelPresupuesto()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; height: 36px; padding: 0 16px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;" title="Descargar archivo Excel con el desglose de cotizaciones">
+                                            <span>📥</span> <span>Descargar Excel</span>
+                                        </button>
+                                        <div style="position: relative; width: 240px;">
+                                            <span style="position: absolute; left: 12px; top: 9px; color: #64748b; font-size: 0.85rem;">🔍</span>
+                                            <input type="text" id="buscar-cotizaciones-presupuesto" placeholder="Buscar ticket, unidad, taller..." onkeyup="filtrarCotizacionesPresupuesto()" style="width: 100%; height: 36px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 12px 0 32px; border-radius: 6px; font-size: 0.85rem;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+                                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+                                        <thead>
+                                            <tr style="background: #1e293b; color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 2;">
+                                                <th style="padding: 10px 14px;">Ticket</th>
+                                                <th style="padding: 10px 14px;">Unidad</th>
+                                                <th style="padding: 10px 14px;">Taller / Proveedor</th>
+                                                <th style="padding: 10px 14px;">COPE</th>
+                                                <th style="padding: 10px 14px;">Monto Recortado (s/IVA)</th>
+                                                <th style="padding: 10px 14px;">Estado</th>
+                                                <th style="padding: 10px 14px;">Fecha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabla-cotizaciones-presupuesto">
+                                            <tr>
+                                                <td colspan="7" style="text-align: center; padding: 25px; color: #94a3b8;">
+                                                    Cargando cotizaciones confirmadas...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -1434,7 +1513,6 @@
                         <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
                         <span class="role-pill role-pill-admin">🏢 Administrador</span>
                         <span class="role-pill role-pill-corp">💼 Corporativos</span>
-                        <span class="role-pill role-pill-jefatura">👑 Jefatura</span>
                     </div>
                 </div>
 
@@ -1447,7 +1525,7 @@
                                 🗺️ MAPA DE ETAPAS (HAZ CLIC PARA ENFOCAR CADA SECCIÓN)
                             </span>
                             <span style="color: #64748b; font-size: 0.72rem; font-weight: 600;">
-                                11 pasos operativos de punta a punta
+                                12 pasos operativos de punta a punta (con circuito completo de retrabajo)
                             </span>
                         </div>
                         <div class="mapa-etapas-grid">
@@ -1495,6 +1573,10 @@
                                 <span class="nav-rapida-num" style="color: #c084fc;">PASO 11</span>
                                 <span class="nav-rapida-nombre">🛡️ Garantía</span>
                             </a>
+                            <a href="#etapa-12-retrabajo" onclick="enfocarPasoFlujo('etapa-12-retrabajo', event)" class="nav-rapida-paso" style="border-top: 3px solid #10b981;">
+                                <span class="nav-rapida-num" style="color: #86efac;">PASO 12</span>
+                                <span class="nav-rapida-nombre">🔄 Retrabajo y Salida</span>
+                            </a>
 
                         </div>
                     </div>
@@ -1518,8 +1600,7 @@
                                     <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
                                     <span class="role-pill role-pill-chofer">🚗 Chofer (Emisor)</span>
                                     <span style="color: #64748b; font-size: 0.8rem;">➔</span>
-                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
-                                    <span class="role-pill role-pill-jefatura">👑 Jefatura (Receptores)</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor (Receptor)</span>
                                 </div>
                             </div>
 
@@ -1527,9 +1608,6 @@
                             <div class="flujo-box flujo-box-chofer">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; color: #38bdf8; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            ⚡ ACCIÓN 1.1
-                                        </span>
                                         <span class="role-pill role-pill-chofer">🚗 Chofer</span>
                                     </div>
                                     <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -1565,11 +1643,7 @@
                             <div class="flujo-box flujo-box-supervisor">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            📬 BANDEJA 1.2
-                                        </span>
                                         <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
-                                        <span class="role-pill role-pill-jefatura">👑 Jefatura</span>
                                     </div>
                                     <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
                                         ESTADO: PENDIENTE
@@ -1584,7 +1658,7 @@
                                             Recepción en "Bandeja de Reportes (Tickets Externos)"
                                         </h4>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
-                                            El reporte se enlista con estatus <em>Pendiente</em> para que el Supervisor y Jefatura evalúen la falla y la zona de la unidad.
+                                            El reporte se enlista con estatus <em>Pendiente</em> para que el Supervisor evalúe la falla y la zona de la unidad.
                                         </p>
                                     </div>
                                 </div>
@@ -1624,9 +1698,6 @@
                             <div class="flujo-box flujo-box-supervisor">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            ⚡ ACCIÓN 2.1
-                                        </span>
                                         <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
                                     </div>
                                     <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid #0284c7; color: #38bdf8; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -1662,9 +1733,6 @@
                             <div class="flujo-box flujo-box-taller">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            📬 BANDEJA 2.2
-                                        </span>
                                         <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
                                     </div>
                                     <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid #0284c7; color: #38bdf8; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -1721,9 +1789,6 @@
                             <div class="flujo-box flujo-box-taller">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            ⚡ ACCIÓN 3.1
-                                        </span>
                                         <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
                                     </div>
                                     <span style="background: rgba(168, 85, 247, 0.15); border: 1px solid #a855f7; color: #c084fc; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -1759,9 +1824,6 @@
                             <div class="flujo-box flujo-box-admin">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #a5b4fc; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            📬 BANDEJA 3.2
-                                        </span>
                                         <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
                                         <span class="role-pill role-pill-admin">🏢 Administrador</span>
                                     </div>
@@ -1849,9 +1911,6 @@
 
                                     <div class="flujo-box flujo-box-taller" style="border-color: #10b981;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                            <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #86efac; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
-                                                PASO 4.1A
-                                            </span>
                                             <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
                                         </div>
                                         <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
@@ -1873,9 +1932,6 @@
 
                                     <div class="flujo-box flujo-box-taller" style="border-color: #10b981;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                            <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #86efac; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
-                                                PASO 4.2A
-                                            </span>
                                             <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
                                         </div>
                                         <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
@@ -1909,9 +1965,6 @@
 
                                     <div class="flujo-box flujo-box-supervisor" style="border-color: #f59e0b;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                            <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fde047; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
-                                                PASO 4.1B
-                                            </span>
                                             <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
                                         </div>
                                         <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
@@ -1933,9 +1986,6 @@
 
                                     <div class="flujo-box flujo-box-admin" style="border-color: #6366f1;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                            <span style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #a5b4fc; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
-                                                PASO 4.2B
-                                            </span>
                                             <span class="role-pill role-pill-admin">🏢 Administrador</span>
                                         </div>
                                         <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
@@ -1957,9 +2007,6 @@
 
                                     <div class="flujo-box flujo-box-corp" style="border-color: #a855f7;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                                            <span style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #c084fc; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
-                                                PASO 4.3B
-                                            </span>
                                             <span class="role-pill role-pill-corp">💼 Corporativos</span>
                                         </div>
                                         <h5 style="margin: 0 0 4px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
@@ -1968,6 +2015,26 @@
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
                                             Emite el visto bueno final. Si no está, firma su <strong>Delegado por Ausencia</strong>.
                                         </p>
+                                    </div>
+
+                                    <!-- REGLAS Y POLÍTICAS OPERATIVAS DE COTIZACIONES CARAS -->
+                                    <div class="flujo-box" style="border: 1.5px solid #f59e0b; background: rgba(245, 158, 11, 0.08); margin-top: 10px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                            <span style="background: rgba(245, 158, 11, 0.25); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">
+                                                ⚖️ POLÍTICAS Y REGLAS DE COTIZACIONES CARAS
+                                            </span>
+                                            <span class="role-pill role-pill-admin">🏢 Administración</span>
+                                        </div>
+                                        <h5 style="margin: 0 0 6px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Reglas Operativas del Umbral Flexible
+                                        </h5>
+                                        <ul style="margin: 0; padding-left: 18px; color: #cbd5e1; font-size: 0.78rem; line-height: 1.45;">
+                                            <li style="margin-bottom: 4px;"><strong>Límite Configurable:</strong> Se define el monto umbral (default $10,000 MXN s/IVA o nuevo monto fijado).</li>
+                                            <li style="margin-bottom: 4px;"><strong>Órdenes ya Aprobadas:</strong> Si el supervisor ya autorizó un ticket y el taller comenzó la reparación, ya NO le afecta si la cotización era cara o no.</li>
+                                            <li style="margin-bottom: 4px;"><strong>Ajuste Dinámico al Vuelo:</strong> Si se modifica el límite mientras una cotización se está aprobando, el cambio se aplica al instante.</li>
+                                            <li style="margin-bottom: 4px;"><strong>Paso Directo a Taller si Baja el Límite:</strong> Si un ticket que era caro estaba pendiente de aprobación por el Administrador, y el límite sube o el monto de la cotización baja, pasa directo a que la repare el taller sin pasar por Corporativos.</li>
+                                            <li><strong>Validación de Presupuesto:</strong> El supervisor no puede autorizar ninguna cotización (normal o cara) si no hay saldo presupuestal disponible suficiente.</li>
+                                        </ul>
                                     </div>
 
                                 </div>
@@ -2008,9 +2075,6 @@
                             <div class="flujo-box flujo-box-taller">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            ⚡ ACCIÓN 5.1
-                                        </span>
                                         <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
                                     </div>
                                     <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -2046,9 +2110,6 @@
                             <div class="flujo-box flujo-box-chofer">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; color: #38bdf8; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            📬 DESTINO 5.2
-                                        </span>
                                         <span class="role-pill role-pill-chofer">🚗 Chofer</span>
                                     </div>
                                     <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -2104,9 +2165,6 @@
                             <div class="flujo-box flujo-box-taller">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            ⚡ ACCIÓN 6.1
-                                        </span>
                                         <span class="role-pill role-pill-taller">🔧 Taller</span>
                                         <span class="role-pill role-pill-chofer">🚗 Chofer</span>
                                     </div>
@@ -2143,10 +2201,7 @@
                             <div class="flujo-box" style="border: 2px solid #a855f7; background: rgba(168, 85, 247, 0.08);">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #c084fc; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            HITO 6.2
-                                        </span>
-                                        <span class="role-pill role-pill-jefatura">👑 Jefatura</span>
+                                        <span class="role-pill role-pill-admin">🏢 Administración</span>
                                         <span class="role-pill role-pill-taller">🔧 Taller</span>
                                     </div>
                                     <span style="background: rgba(168, 85, 247, 0.25); border: 1px solid #a855f7; color: #e9d5ff; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -2162,7 +2217,7 @@
                                             Arranque del tiempo de garantía ofrecido por ese taller
                                         </h4>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
-                                            Inicia el conteo regresivo exacto (días, horas, minutos y segundos) configurado por Jefatura para este taller.
+                                            Inicia el conteo regresivo exacto (días, horas, minutos y segundos) configurado para este taller.
                                         </p>
                                     </div>
                                 </div>
@@ -2202,9 +2257,6 @@
                             <div class="flujo-box flujo-box-admin">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #a5b4fc; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            ⚡ ACCIÓN 7.1
-                                        </span>
                                         <span class="role-pill role-pill-admin">🏢 Administrador</span>
                                     </div>
                                     <span style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #a5b4fc; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -2339,9 +2391,6 @@
                             <div class="flujo-box flujo-box-taller">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            ⚡ ACCIÓN 8.1
-                                        </span>
                                         <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
                                     </div>
                                     <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -2515,7 +2564,7 @@
                                     <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
                                     <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
                                     <span style="color: #64748b; font-size: 0.8rem;">➔</span>
-                                    <span class="role-pill role-pill-jefatura">👑 Jefatura (Archivo y Liquidación)</span>
+                                    <span class="role-pill role-pill-admin">🏢 Administrador (Archivo y Liquidación)</span>
                                 </div>
                             </div>
 
@@ -2523,9 +2572,6 @@
                             <div class="flujo-box flujo-box-supervisor">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            ⚡ ACCIÓN 10.1
-                                        </span>
                                         <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
                                     </div>
                                     <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #86efac; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -2561,10 +2607,7 @@
                             <div class="flujo-box" style="border: 2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.98));">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: #10b981; color: #022c22; font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            🏁 HITO FINAL 10.2
-                                        </span>
-                                        <span class="role-pill role-pill-jefatura">👑 Jefatura</span>
+                                        <span class="role-pill role-pill-admin">🏢 Administración</span>
                                         <span class="role-pill role-pill-admin">🏢 Administrador</span>
                                     </div>
                                     <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981; color: #86efac; font-size: 0.75rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -2608,7 +2651,7 @@
                                 <div class="etapa-header-roles" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                                     <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
                                     <span class="role-pill role-pill-chofer">🚗 Chofer</span>
-                                    <span class="role-pill role-pill-jefatura">👑 Jefatura</span>
+                                    <span class="role-pill role-pill-admin">🏢 Administración</span>
                                     <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
                                     <span class="role-pill role-pill-taller">🔧 Taller</span>
                                     <button type="button" onclick="descargarDiagramaFlujo()" style="margin-left: 8px; padding: 4px 10px; border-radius: 6px; border: 1px solid #10b981; background: rgba(16, 185, 129, 0.25); color: #86efac; font-size: 0.73rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
@@ -2621,9 +2664,6 @@
                             <div class="flujo-box flujo-box-chofer">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; color: #38bdf8; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
-                                            ⚡ ACCIÓN 11.1
-                                        </span>
                                         <span class="role-pill role-pill-chofer">🚗 Chofer</span>
                                     </div>
                                     <span style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #c084fc; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
@@ -2764,6 +2804,193 @@
 
                         </div>
 
+                        <!-- FLECHA DE CONEXIÓN A PASO 12 -->
+                        <div class="flujo-flecha-conector flujo-step-garantia">
+                            <div class="flujo-flecha-linea" style="background: #a855f7; height: 22px;"></div>
+                            <div class="flujo-flecha-badge" style="border-color: #a855f7; color: #c084fc;">
+                                <span>🛡️ Solicitud de Garantía aprobada: Turna a Bandeja de Retrabajos de Supervisión</span>
+                            </div>
+                            <div class="flujo-flecha-linea" style="background: #a855f7; height: 22px;"></div>
+                            <div class="flujo-flecha-punta" style="color: #a855f7;">▼</div>
+                        </div>
+
+                        <!-- ==================================================== -->
+                        <!-- PASO 12: CIRCUITO DE RETRABAJO Y LIBERACIÓN          -->
+                        <!-- ==================================================== -->
+                        <div id="etapa-12-retrabajo" class="flujo-step-box flujo-step-todos flujo-step-garantia">
+                            
+                            <!-- Barra de Etapa con Roles -->
+                            <div class="etapa-header-bar" style="border-left: 4px solid #10b981;">
+                                <div class="etapa-header-title">
+                                    <span style="color: #34d399;">PASO 12:</span> Circuito de Retrabajo, Reparación en Taller y Liberación Final
+                                </div>
+                                <div class="etapa-header-roles">
+                                    <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
+                                    <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                    <span class="role-pill role-pill-taller">🔧 Taller</span>
+                                    <span style="color: #64748b; font-size: 0.8rem;">➔</span>
+                                    <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                </div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 12.1: RECEPCIÓN EN RETRABAJO DEL SUPERVISOR -->
+                            <div class="flujo-box flujo-box-supervisor">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    </div>
+                                    <span style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        BANDEJA DE RETRABAJO
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        🛡️
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            El ticket llega a "Garantías y Retrabajos" del Supervisor
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            El supervisor analiza el reporte de reincidencia del chofer (Sección 1) y el diagnóstico previo del taller (Sección 2) para dictaminar la procedencia del retrabajo.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLECHA SEPARADORA -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #6366f1;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #6366f1; color: #a5b4fc;">
+                                    <span>⚖️ Evaluación de procedencia por el Supervisor</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #6366f1;"></div>
+                                <div class="flujo-flecha-punta" style="color: #6366f1;">▼</div>
+                            </div>
+
+                            <!-- BIFURCACIÓN DE EVALUACIÓN DEL RETRABAJO -->
+                            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 18px;">
+                                
+                                <!-- CAMINO A: NO PASA / RECHAZADO -->
+                                <div class="lane-cotizacion" style="background: rgba(239, 68, 68, 0.04); border: 2px solid #ef4444;">
+                                    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 12px;">
+                                        <span style="background: #ef4444; color: #ffffff; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
+                                            ❌ SI NO PASA LA EVALUACIÓN
+                                        </span>
+                                        <h5 style="margin: 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Se Regresa con Observaciones
+                                        </h5>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #ef4444;">
+                                        <h5 style="margin: 0 0 4px 0; color: #fca5a5; font-size: 0.92rem; font-weight: 800;">
+                                            Supervisor regresa el reporte
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            Si la unidad ingresada es incorrecta, la redacción de la falla no se entiende o no corresponde al trabajo previo cubierto por la garantía, el supervisor cancela/regresa el retrabajo notificando formalmente las causas al chofer.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- CAMINO B: SÍ PASA / REASIGNADO AL TALLER -->
+                                <div class="lane-cotizacion" style="background: rgba(16, 185, 129, 0.04); border: 2px solid #10b981;">
+                                    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 12px;">
+                                        <span style="background: #10b981; color: #022c22; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
+                                            ✅ SI PASA LA EVALUACIÓN
+                                        </span>
+                                        <h5 style="margin: 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Canalización al Taller del Ticket
+                                        </h5>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #10b981;">
+                                        <h5 style="margin: 0 0 4px 0; color: #86efac; font-size: 0.92rem; font-weight: 800;">
+                                            Supervisor presiona "Reasignar a Taller"
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            El supervisor valida la reincidencia y canaliza el ticket directamente al botón de <strong>Retrabajos del Taller</strong> que realizó la reparación original (a costo $0).
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- FLECHA DE CONEXIÓN A TRABAJO EN TALLER -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #10b981; color: #34d399;">
+                                    <span>🔧 Taller corrige la falla bajo garantía y presiona "Retrabajo Finalizado"</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                                <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 12.3: ACCIÓN TALLER Y CÓDIGO SEGURO -->
+                            <div class="flujo-box flujo-box-taller">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="role-pill role-pill-taller">🔧 Taller Mecánico</span>
+                                    </div>
+                                    <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        RETRABAJO FINALIZADO
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                        🛠️
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
+                                            Taller concluye compostura y genera Códigos de Seguridad
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
+                                            Una vez arreglada la falla, el taller presiona <strong>"Retrabajo Finalizado"</strong>. En ese instante, el sistema genera automáticamente un <strong>código seguro que llega al correo del Chofer</strong>, enviando simultáneamente un <strong>código de respaldo al Supervisor</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLECHA DE CONEXIÓN A LIBERACIÓN FINAL -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #0284c7; height: 20px;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #0284c7; color: #38bdf8;">
+                                    <span>🔑 Chofer presenta su código ante Supervisión para recoger el auto</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #0284c7; height: 20px;"></div>
+                                <div class="flujo-flecha-punta" style="color: #0284c7;">▼</div>
+                            </div>
+
+                            <!-- TARJETA SEPARADA 12.4: VALIDACIÓN Y CIERRE DE RETRABAJO -->
+                            <div class="flujo-box" style="border: 2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.98));">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                        <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                                    </div>
+                                    <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981; color: #86efac; font-size: 0.75rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
+                                        ENTREGA EXITOSA
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                                    <div style="background: #10b981; color: #022c22; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; font-weight: 800;">
+                                        ✅
+                                    </div>
+                                    <div>
+                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.15rem; font-weight: 800;">
+                                            Supervisor valida el Código en "Liberar Retrabajo" y entrega la unidad
+                                        </h4>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.85rem; line-height: 1.5;">
+                                            El supervisor abre el módulo <strong>"Liberar Retrabajo"</strong>, captura el código proporcionado por el chofer (o el de respaldo) y confirma la liberación. El sistema autentica la salida, actualiza el estatus a <strong>Finalizado / Entregado</strong> y <strong>aquí concluye todo el flujo de retrabajo</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -2778,7 +3005,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-pendientes" class="buscador-pildora"
+                        <input type="search" id="buscador-pendientes" name="search_buscador-pendientes_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por nombre, empresa, portal..."
                             onkeyup="filtrarTabla('buscador-pendientes', 'tabla-pendientes')">
                     </div>
@@ -2805,7 +3032,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-corp" class="buscador-pildora"
+                        <input type="search" id="buscador-corp" name="search_buscador-corp_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por nombre, empleado, ciudad..."
                             onkeyup="filtrarTabla('buscador-corp', 'tabla-lista-corp')">
                     </div>
@@ -2835,7 +3062,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-admin" class="buscador-pildora"
+                        <input type="search" id="buscador-admin" name="search_buscador-admin_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por nombre, empleado, ciudad..."
                             onkeyup="filtrarTabla('buscador-admin', 'tabla-lista-admin')">
                     </div>
@@ -2868,7 +3095,7 @@
                         automáticamente.</p>
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-accesos" class="buscador-pildora"
+                        <input type="search" id="buscador-accesos" name="search_buscador-accesos_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por nombre o usuario generado..."
                             onkeyup="filtrarTabla('buscador-accesos', 'tabla-accesos')">
                     </div>
@@ -2988,11 +3215,8 @@
                     <h2>Sección de Reportes Analíticos</h2>
                     <div style="display:flex; gap:10px;">
                         <button class="btn-primary" onclick="exportarExcel()"
-                            style="background:#10b981; border:none; padding:8px 15px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">📊
+                            style="background:#10b981; border:none; padding:8px 18px; border-radius:8px; color:white; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 2px 6px rgba(16,185,129,0.3);" title="Exportar reporte analítico con formato profesional a Excel (.xlsx)">📊
                             Exportar a Excel</button>
-                        <button class="btn-primary" onclick="imprimirSeleccion()"
-                            style="background:#3b82f6; border:none; padding:8px 15px; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">🖨️
-                            Imprimir Selección</button>
                     </div>
                 </div>
 
@@ -3168,7 +3392,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-prov" class="buscador-pildora"
+                        <input type="search" id="buscador-prov" name="search_buscador-prov_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por nombre, ciudad, correo..."
                             onkeyup="filtrarTabla('buscador-prov', 'tabla-lista-prov')">
                     </div>
@@ -3202,7 +3426,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-doc-contables" class="buscador-pildora"
+                        <input type="search" id="buscador-doc-contables" name="search_buscador-doc-contables_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por folio, unidad, proveedor..."
                             onkeyup="filtrarTabla('buscador-doc-contables', 'tabla-doc-contables')">
                     </div>
@@ -3234,7 +3458,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-liberar-doc" class="buscador-pildora"
+                        <input type="search" id="buscador-liberar-doc" name="search_buscador-liberar-doc_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por ticket, unidad, proveedor..."
                             onkeyup="filtrarTabla('buscador-liberar-doc', 'tabla-liberar-doc')">
                     </div>
@@ -3277,7 +3501,7 @@
                     <div id="contenedor-archivo-normal">
                         <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                             <span class="buscador-icono">&#x1F50D;</span>
-                            <input type="text" id="buscador-archivo" class="buscador-pildora"
+                            <input type="search" id="buscador-archivo" name="search_buscador-archivo_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                                 placeholder="Buscar por folio, unidad, doc contable..."
                                 onkeyup="filtrarTabla('buscador-archivo', 'tabla-archivo')">
                         </div>
@@ -3302,7 +3526,7 @@
                     <div id="contenedor-archivo-cancelado" style="display:none;">
                         <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                             <span class="buscador-icono">&#x1F50D;</span>
-                            <input type="text" id="buscador-archivo-cancelado" class="buscador-pildora"
+                            <input type="search" id="buscador-archivo-cancelado" name="search_buscador-archivo-cancelado_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                                 placeholder="Buscar tickets cancelados..."
                                 onkeyup="filtrarTabla('buscador-archivo-cancelado', 'tabla-archivo-cancelado')">
                         </div>
@@ -3331,7 +3555,7 @@
                 <div class="admin-container">
                     <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
                         <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="text" id="buscador-cotizaciones-10k" class="buscador-pildora"
+                        <input type="search" id="buscador-cotizaciones-10k" name="search_buscador-cotizaciones-10k_query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="buscador-pildora"
                             placeholder="Buscar por ticket, unidad, proveedor..."
                             onkeyup="filtrarTabla('buscador-cotizaciones-10k', 'tabla-cotizaciones-10k')">
                     </div>
@@ -4390,15 +4614,15 @@
         <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
     </div>
 
-    <script src="/static/configuraciones_jefatura.js?v=5"></script>
-    <script src="/static/script.js?v=1000054"></script>
-    <script src="/static/liberacion.js"></script>
-    <script src="/static/facturas_herramientas.js?v=6"></script>
+    <script src="/static/configuraciones_jefatura.js?v=8"></script>
+    <script src="/static/script.js?v=1000056"></script>
+    <script src="/static/liberacion.js?v=2"></script>
+    <script src="/static/facturas_herramientas.js?v=7"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
     <script src="/static/unidades.js?v=11"></script>
-    <script src="/static/facturas_principal.js?v=72"></script>
-    <script src="/static/seccion_reportes.js?v=1000031"></script>
+    <script src="/static/facturas_principal.js?v=80"></script>
+    <script src="/static/seccion_reportes.js?v=1000033"></script>
     <script src="/static/cotizaciones_10k.js?v=29"></script>
 
     
@@ -4803,7 +5027,7 @@
     <script src="/static/panel_control.js?v=1"></script>
     <script src="/static/ciudades_copes.js?v=1"></script>
     <script src="/static/analitica.js?v=4"></script>
-    <script src="/static/manual_sistema.js?v=1"></script>
+    <script src="/static/manual_sistema.js?v=2"></script>
     <!-- FOOLPROOF FALLBACK -->
     <script>
         setTimeout(function() {

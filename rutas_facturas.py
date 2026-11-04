@@ -49,6 +49,100 @@ def escribir_json(archivo, data):
 # BUG #10 FIX: alias para compatibilidad entre módulos
 guardar_json = escribir_json
 
+def es_numero_valido(v):
+    if v is None:
+        return False
+    s = str(v).strip().upper()
+    return s not in ["", "PENDIENTE", "N/A", "NONE", "NINGUNO", "S/T", "NULL", "UNDEFINED"]
+
+def validar_unicidad_numeros_facturas(tipo_campo, lista_valores, factura_id_actual=None):
+    """
+    Valida que los números no se repitan:
+    - Ni entre sí en la misma petición (intra-ticket para multi-cotizaciones)
+    - Ni contra otros tickets existentes en facturas.json o tickets_archivados.json
+    
+    tipo_campo: 'pedido' | 'orden' | 'factura' | 'doc_contable'
+    lista_valores: lista de strings o string individual
+    factura_id_actual: ID del ticket/factura que se está editando (para no colisionar consigo mismo)
+    
+    Retorna: (True, "") si es válido, o (False, "Mensaje explicativo") si hay duplicado.
+    """
+    campos_meta = {
+        'pedido': {'nombre': 'Número de Pedido', 'clave': 'numero_cotizacion_asignacion', 'emoji': '📋'},
+        'orden': {'nombre': 'Número de Orden', 'clave': 'numero_orden', 'emoji': '🔢'},
+        'factura': {'nombre': 'Folio / Número de Factura', 'clave': 'factura_folio', 'emoji': '🧾'},
+        'doc_contable': {'nombre': 'Número de Documento Contable', 'clave': 'numero_doc50', 'emoji': '📑'}
+    }
+    meta = campos_meta.get(tipo_campo, {'nombre': tipo_campo, 'clave': tipo_campo, 'emoji': '⚠️'})
+    
+    if isinstance(lista_valores, str):
+        lista_valores = [lista_valores]
+
+    # 1. Validar duplicados intra-lista (en la misma petición)
+    vistos = set()
+    for val in lista_valores:
+        if not es_numero_valido(val):
+            continue
+        val_norm = str(val).strip().upper()
+        if val_norm in vistos:
+            return False, f"🚫 {meta['emoji']} {meta['nombre']} duplicado: No puedes ingresar el mismo número ('{val.strip()}') en más de una cotización del mismo ticket."
+        vistos.add(val_norm)
+
+    # 2. Cargar tickets de facturas.json y tickets_archivados.json
+    data_fac = leer_json("facturas.json")
+    todos_tickets = list(data_fac.get("facturas", []))
+
+    if os.path.exists("tickets_archivados.json"):
+        try:
+            data_arch = leer_json("tickets_archivados.json")
+            todos_tickets.extend(data_arch.get("facturas", []))
+        except Exception:
+            pass
+
+    # 3. Comparar contra otros tickets
+    clave_campo = meta['clave']
+    for f_db in todos_tickets:
+        if factura_id_actual:
+            id_db = str(f_db.get('id', '')).strip()
+            id_rep = str(f_db.get('id_reporte', '')).strip()
+            id_num_rep = str(f_db.get('numero_reporte', '')).strip()
+            target_id = str(factura_id_actual).strip()
+            if target_id and (target_id == id_db or target_id == id_rep or target_id == id_num_rep):
+                continue
+
+        ticket_lbl = f_db.get('id_reporte') or f_db.get('numero_reporte') or f_db.get('id') or 'Ticket'
+        retro = str(f_db.get('retro', ''))
+        import re as _re_ticket
+        m = _re_ticket.search(r'\[TICKET:(.*?)\]', retro)
+        if m:
+            ticket_lbl = m.group(1).strip()
+
+        unidad_lbl = f_db.get('unidad', '')
+        if unidad_lbl and not str(unidad_lbl).startswith('8090-'):
+            unidad_lbl = f'8090-{unidad_lbl}'
+        info_ubicacion = f'ticket {ticket_lbl}' + (f' (Unidad {unidad_lbl})' if unidad_lbl else '')
+
+        valores_ticket = []
+        val_raiz = f_db.get(clave_campo)
+        if es_numero_valido(val_raiz):
+            valores_ticket.append(str(val_raiz).strip())
+
+        for cot_db in f_db.get('cotizaciones', []):
+            val_cot = cot_db.get(clave_campo)
+            if es_numero_valido(val_cot):
+                valores_ticket.append(str(val_cot).strip())
+
+        for val_nuevo in lista_valores:
+            if not es_numero_valido(val_nuevo):
+                continue
+            val_nuevo_norm = str(val_nuevo).strip().upper()
+            for val_existente in valores_ticket:
+                if val_nuevo_norm == val_existente.strip().upper():
+                    return False, f"🚫 {meta['emoji']} {meta['nombre']} duplicado: El número '{val_nuevo.strip()}' ya se encuentra registrado en el {info_ubicacion}. Por favor ingresa un número diferente."
+
+    return True, ""
+
+
 def obtener_limite_cotizaciones_caras():
     """Obtiene el umbral para cotizaciones caras desde configuracion_sistema.json (por defecto 10000.0)."""
     try:
@@ -824,6 +918,17 @@ def confirmar_admin():
         pdf = request.files.get("pdf_cotizacion")
         if pdf: pdfs_orden = [pdf]
 
+    # VALIDACIÓN DE UNICIDAD: Número de Orden y Número de Pedido
+    if nums_orden:
+        valido_ord, err_ord = validar_unicidad_numeros_facturas('orden', nums_orden, factura_id)
+        if not valido_ord:
+            return jsonify({"status": "error", "message": err_ord}), 400
+
+    if nums_cotizacion:
+        valido_ped, err_ped = validar_unicidad_numeros_facturas('pedido', nums_cotizacion, factura_id)
+        if not valido_ped:
+            return jsonify({"status": "error", "message": err_ped}), 400
+
     data = leer_json("facturas.json")
     
     for f in data.get("facturas", []):
@@ -994,6 +1099,17 @@ def actualizar_ordenes_admin():
     factura_id = request.form.get("id")
     nums_orden = request.form.getlist("numero_orden[]")
     nums_cotizacion = request.form.getlist("numero_cotizacion[]")
+
+    # VALIDACIÓN DE UNICIDAD: Número de Orden y Número de Pedido
+    if nums_orden:
+        valido_ord, err_ord = validar_unicidad_numeros_facturas('orden', nums_orden, factura_id)
+        if not valido_ord:
+            return jsonify({"status": "error", "message": err_ord}), 400
+
+    if nums_cotizacion:
+        valido_ped, err_ped = validar_unicidad_numeros_facturas('pedido', nums_cotizacion, factura_id)
+        if not valido_ped:
+            return jsonify({"status": "error", "message": err_ped}), 400
 
     data = leer_json("facturas.json")
     
@@ -1839,7 +1955,12 @@ def editar_factura():
             f["diagnostico"] = request.form.get("diagnostico", "")
             f["trabajo_realizar"] = request.form.get("trabajo_realizar", "")
             f["mantenimiento"] = request.form.get("mantenimiento")
-            f["numero_orden"] = request.form.get("numero_orden")
+            num_ord_edit = request.form.get("numero_orden")
+            if num_ord_edit:
+                valido_ord, err_ord = validar_unicidad_numeros_facturas('orden', [num_ord_edit], factura_id)
+                if not valido_ord:
+                    return jsonify({"status": "error", "message": err_ord}), 400
+                f["numero_orden"] = num_ord_edit
             precio_str = request.form.get("precio", "0")
             precio_limpio = "".join(c for c in precio_str if c.isdigit() or c == ".")
             precio_float = float(precio_limpio)
@@ -2092,26 +2213,12 @@ def subir_factura_final():
     if not pdfs_factura:
         return jsonify({"status": "error", "message": "Debe subir los archivos PDF."})
         
-    folios_limpios = [str(fol).strip().upper() for fol in folios if str(fol).strip()]
-    if len(folios_limpios) != len(set(folios_limpios)):
-        return jsonify({"status": "error", "message": "No puedes ingresar folios repetidos para distintas cotizaciones en el mismo ticket."})
-        
+    # VALIDACIÓN DE UNICIDAD: Num de Factura (Folio Fiscal)
+    valido_fac, err_fac = validar_unicidad_numeros_facturas('factura', folios, factura_id)
+    if not valido_fac:
+        return jsonify({"status": "error", "message": err_fac}), 400
+
     data = leer_json('facturas.json')
-    
-    todos_los_folios = set()
-    for f_db in data.get('facturas', []):
-        # Excluir el ticket actual de la validación global por si se están resubiendo
-        if str(f_db.get('id')) == str(factura_id):
-            continue
-        if f_db.get('factura_folio'):
-            todos_los_folios.add(str(f_db['factura_folio']).strip().upper())
-        for c_db in f_db.get('cotizaciones', []):
-            if c_db.get('factura_folio'):
-                todos_los_folios.add(str(c_db['factura_folio']).strip().upper())
-                
-    for fol in folios_limpios:
-        if fol in todos_los_folios:
-            return jsonify({"status": "error", "message": f"El folio fiscal '{fol}' ya se encuentra registrado en otro ticket del sistema."})
 
     for f in data.get('facturas', []):
         if str(f['id']) == str(factura_id):
@@ -2168,7 +2275,7 @@ def subir_factura_final():
                         )
 
 
-            return jsonify({"status": "success", "message": "Facturas fiscales subidas correctamente. Se notificó al Supervisor y al Taller."})
+            return jsonify({"status": "success", "message": "Facturas fiscales subidas correctamente. Se notificó al Supervisor."})
             
     return jsonify({"status": "error", "message": "No se encontró el registro."})
             
@@ -2203,7 +2310,10 @@ def validar_fiscal():
                     correo_prov = u.get('datos_perfil', {}).get('correo', '')
                     break
 
-            msg_val = "Factura validada correctamente por cobertura (Administrador). Ya puedes ingresar el Documento Contable." if subrol == "Administrador" else "Factura validada correctamente. Ya puedes ingresar el número de Documento Contable 50."
+            if subrol == "Administrador":
+                msg_val = "Factura validada correctamente por cobertura (Administrador). El ticket ha pasado a la captura del Documento Contable (último paso del proceso)."
+            else:
+                msg_val = "Factura validada correctamente. El ticket ha pasado a la captura del Documento Contable (último paso del proceso)."
             return jsonify({"status": "success", "message": msg_val})
     return jsonify({"status": "error", "message": "Factura no encontrada."})
 
@@ -2294,6 +2404,11 @@ def doc50():
 
     if not nums_doc50:
         return jsonify({'status': 'error', 'message': 'Faltan números de documento contable.'})
+
+    # VALIDACIÓN DE UNICIDAD: Número de Documento Contable (Doc 50)
+    valido_doc, err_doc = validar_unicidad_numeros_facturas('doc_contable', nums_doc50, factura_id)
+    if not valido_doc:
+        return jsonify({"status": "error", "message": err_doc}), 400
 
     data = leer_json('facturas.json')
     for f in data.get('facturas', []):
@@ -2421,6 +2536,12 @@ def actualizar_doc50():
     if not factura_id:
         return jsonify({"status": "error", "message": "Falta el identificador del ticket."})
 
+    # VALIDACIÓN DE UNICIDAD: Número de Documento Contable (Doc 50)
+    if nums_doc50:
+        valido_doc, err_doc = validar_unicidad_numeros_facturas('doc_contable', nums_doc50, factura_id)
+        if not valido_doc:
+            return jsonify({"status": "error", "message": err_doc}), 400
+
     actualizado = False
 
     # 1. Actualizar en facturas.json
@@ -2533,6 +2654,23 @@ def editar_seccion_especifica():
     
     if not all([id_factura, seccion, identificador, pdf_file]):
         return jsonify({"status": "error", "message": "Faltan datos requeridos."})
+
+    # VALIDACIÓN DE UNICIDAD SEGÚN LA SECCIÓN QUE SE ESTÁ EDITANDO
+    if seccion == "orden":
+        valido_ord, err_ord = validar_unicidad_numeros_facturas('orden', [identificador], id_factura)
+        if not valido_ord:
+            return jsonify({"status": "error", "message": err_ord}), 400
+        valido_ped, err_ped = validar_unicidad_numeros_facturas('pedido', [identificador], id_factura)
+        if not valido_ped:
+            return jsonify({"status": "error", "message": err_ped}), 400
+    elif seccion == "factura":
+        valido_fac, err_fac = validar_unicidad_numeros_facturas('factura', [identificador], id_factura)
+        if not valido_fac:
+            return jsonify({"status": "error", "message": err_fac}), 400
+    elif seccion == "doc_contable":
+        valido_doc, err_doc = validar_unicidad_numeros_facturas('doc_contable', [identificador], id_factura)
+        if not valido_doc:
+            return jsonify({"status": "error", "message": err_doc}), 400
         
     data = leer_json("facturas.json")
     factura = next((f for f in data.get("facturas", []) if str(f["id"]) == str(id_factura)), None)
@@ -2814,7 +2952,10 @@ def liberar_doc50():
                     nombre_admin=nombre_adm_act
                 )
                 
-            msg_liberado = "Ticket liberado correctamente en cobertura por ausencia del Administrador. Se ha notificado al Taller." if subrol == "Supervisor" else "Ticket liberado correctamente para captura de Doc Contable. Se ha notificado al Supervisor."
+            if subrol == "Supervisor":
+                msg_liberado = "¡Ticket liberado exitosamente en cobertura! Se ha liberado la captura del Documento Contable y se ha habilitado el campo para que el taller suba su factura."
+            else:
+                msg_liberado = "¡Ticket liberado exitosamente! Se ha liberado la captura del Documento Contable y se ha habilitado el campo para que el taller suba su factura."
             return jsonify({"status": "success", "message": msg_liberado})
             
     return jsonify({"status": "error", "message": "Factura no encontrada."})
@@ -3132,3 +3273,20 @@ def eliminar_permanente():
                 break
 
     return jsonify({"status": "success", "message": "Ticket y reporte eliminados permanentemente."})
+
+
+@facturas_bp.route("/api/facturas/validar_unicidad", methods=["GET", "POST"])
+def api_validar_unicidad():
+    if request.method == "POST":
+        req_data = request.get_json(silent=True) or request.form
+    else:
+        req_data = request.args
+    tipo = req_data.get("tipo", "").strip()
+    valor = req_data.get("valor", "").strip()
+    factura_id = req_data.get("factura_id", "").strip()
+    
+    if not tipo or not valor:
+        return jsonify({"valido": True, "message": ""})
+        
+    valido, mensaje = validar_unicidad_numeros_facturas(tipo, [valor], factura_id)
+    return jsonify({"valido": valido, "message": mensaje})

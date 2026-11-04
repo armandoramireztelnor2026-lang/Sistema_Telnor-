@@ -74,3 +74,16 @@ function ocultarLoaderDinamico() {
     let loader = document.getElementById('loader-confirmacion');
     if (loader) loader.style.display = 'none';
 }
+
+
+function mostrarMiniLoader(textoPrincipal = "Cargando...", textoSecundario = "Por favor espera un momento...") {
+    if (typeof window.mostrarMiniLoader === 'function') {
+        window.mostrarMiniLoader(textoPrincipal, textoSecundario);
+    }
+}
+
+function ocultarMiniLoader() {
+    if (typeof window.ocultarMiniLoader === 'function') {
+        window.ocultarMiniLoader();
+    }
+}

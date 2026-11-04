@@ -14,7 +14,12 @@ def obtener_limite_cotizaciones_caras():
 
 import os
 import json
-from flask import Blueprint, jsonify, session
+from flask import Blueprint, jsonify, session, request, send_file
+import io
+import datetime
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 def leer_json(archivo):
     if not os.path.exists(archivo): return {}
@@ -391,3 +396,398 @@ def guardar_comentario():
         "autor_comentario": nombre_completo,
         "eliminado_por": eliminado_por
     })
+
+@seccion_reportes_bp.route('/api/seccion_reportes/exportar_excel', methods=['POST', 'GET'])
+def exportar_seccion_reportes_excel():
+    if "usuario" not in session or session["usuario"].get("rol") != "administracion":
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    payload = request.get_json(silent=True) or {}
+    headers = payload.get("headers", [])
+    rows = payload.get("rows", [])
+    kpis = payload.get("kpis", {})
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Sección de Reportes"
+    ws.views.sheetView[0].showGridLines = True
+
+    # PALETA DE COLORES DE ANALÍTICA Y SECCIÓN DE REPORTES
+    fill_navy = PatternFill(start_color="112641", end_color="112641", fill_type="solid")
+    fill_sub_header = PatternFill(start_color="1F395A", end_color="1F395A", fill_type="solid")
+    fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+
+    # 4 Colores exactos de los encabezados de la tabla de Sección de Reportes
+    fill_th_azul = PatternFill(start_color="1F395A", end_color="1F395A", fill_type="solid")      # Azul marino
+    fill_th_verde = PatternFill(start_color="40916C", end_color="40916C", fill_type="solid")     # Verde analítica
+    fill_th_amarillo = PatternFill(start_color="D97706", end_color="D97706", fill_type="solid")  # Ámbar retrabajo
+    fill_th_negro = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid")     # Grafito/Negro administrativo
+
+    fill_card_blue = PatternFill(start_color="E0F2FE", end_color="E0F2FE", fill_type="solid")
+    fill_card_amber = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+    fill_card_green = PatternFill(start_color="D1FAE5", end_color="D1FAE5", fill_type="solid")
+
+    font_title = Font(name="Segoe UI", size=14, bold=True, color="FFFFFF")
+    font_sub = Font(name="Segoe UI", size=10, italic=True, color="CBD5E1")
+    font_section = Font(name="Segoe UI", size=11, bold=True, color="FFFFFF")
+    font_th = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    font_normal = Font(name="Segoe UI", size=9, color="1E293B")
+    font_bold = Font(name="Segoe UI", size=9, bold=True, color="1E293B")
+    font_amber = Font(name="Segoe UI", size=9, bold=True, color="B45309")
+    font_blue = Font(name="Segoe UI", size=9, bold=True, color="0284C7")
+    font_green = Font(name="Segoe UI", size=9, bold=True, color="047857")
+    font_total = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+
+    border_thin = Border(
+        left=Side(style="thin", color="CBD5E1"),
+        right=Side(style="thin", color="CBD5E1"),
+        top=Side(style="thin", color="CBD5E1"),
+        bottom=Side(style="thin", color="CBD5E1")
+    )
+
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+
+    num_cols = max(len(headers), 1)
+    last_col_letter = get_column_letter(num_cols)
+
+    # 1. ENCABEZADO SUPERIOR
+    ws.merge_cells(f"A1:{last_col_letter}1")
+    ws["A1"] = "SISTEMA DE FACTURACION CENTRAL - SECCIÓN DE REPORTES ANALÍTICOS"
+    ws["A1"].font = font_title
+    ws["A1"].fill = fill_navy
+    ws["A1"].alignment = align_center
+    ws.row_dimensions[1].height = 36
+
+    ws.merge_cells(f"A2:{last_col_letter}2")
+    ws["A2"] = f"Reporte Consolidado de Mantenimiento y Flota | Generado: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')} | Total Registros: {len(rows)} | Telnor / RUMN"
+    ws["A2"].font = font_sub
+    ws["A2"].fill = fill_navy
+    ws["A2"].alignment = align_center
+    ws.row_dimensions[2].height = 22
+
+    # 2. RESUMEN DE KPIS (Filas 4 y 5)
+    ws.merge_cells("A4:B4")
+    ws["A4"] = "REGISTROS EXPORTADOS"
+    ws["A4"].font = Font(name="Segoe UI", size=9, bold=True, color="0369A1")
+    ws["A4"].fill = fill_card_blue
+    ws["A4"].alignment = align_center
+    for c in ["A4", "B4"]: ws[c].border = border_thin
+
+    ws.merge_cells("A5:B5")
+    ws["A5"] = f"{len(rows)} tickets"
+    ws["A5"].font = Font(name="Segoe UI", size=12, bold=True, color="0284C7")
+    ws["A5"].fill = fill_card_blue
+    ws["A5"].alignment = align_center
+    for c in ["A5", "B5"]: ws[c].border = border_thin
+
+    ws.merge_cells("C4:D4")
+    ws["C4"] = "PENDIENTES DOC 50"
+    ws["C4"].font = Font(name="Segoe UI", size=9, bold=True, color="B45309")
+    ws["C4"].fill = fill_card_amber
+    ws["C4"].alignment = align_center
+    for c in ["C4", "D4"]: ws[c].border = border_thin
+
+    ws.merge_cells("C5:D5")
+    ws["C5"] = str(kpis.get("pendientesDoc50", "--"))
+    ws["C5"].font = Font(name="Segoe UI", size=12, bold=True, color="D97706")
+    ws["C5"].fill = fill_card_amber
+    ws["C5"].alignment = align_center
+    for c in ["C5", "D5"]: ws[c].border = border_thin
+
+    ws.merge_cells("E4:F4")
+    ws["E4"] = "GASTO TOTAL EN REPORTES"
+    ws["E4"].font = Font(name="Segoe UI", size=9, bold=True, color="047857")
+    ws["E4"].fill = fill_card_green
+    ws["E4"].alignment = align_center
+    for c in ["E4", "F4"]: ws[c].border = border_thin
+
+    total_gasto_val = 0.0
+    try:
+        total_gasto_val = float(str(kpis.get("totalGasto", "0")).replace("$", "").replace(",", "").strip() or 0)
+    except Exception:
+        total_gasto_val = 0.0
+
+    ws.merge_cells("E5:F5")
+    ws["E5"] = f"${total_gasto_val:,.2f} MXN"
+    ws["E5"].font = Font(name="Segoe UI", size=12, bold=True, color="10B981")
+    ws["E5"].fill = fill_card_green
+    ws["E5"].alignment = align_center
+    for c in ["E5", "F5"]: ws[c].border = border_thin
+
+    ws.row_dimensions[4].height = 18
+    ws.row_dimensions[5].height = 24
+
+    # 3. BARRA SECCIÓN TABLA
+    ws.merge_cells(f"A7:{last_col_letter}7")
+    ws["A7"] = "📋 DETALLE COMPLETO DE EXPEDIENTES Y TICKETS (SECCIÓN DE REPORTES)"
+    ws["A7"].font = font_section
+    ws["A7"].fill = fill_sub_header
+    ws["A7"].alignment = align_left
+    ws.row_dimensions[7].height = 24
+
+    # 4. ENCABEZADOS DE COLUMNAS CON SUS 4 COLORES DE LA WEB
+    for col_idx, h_text in enumerate(headers, 1):
+        cell = ws.cell(row=8, column=col_idx, value=h_text)
+        cell.font = font_th
+        cell.alignment = align_center
+        cell.border = border_thin
+
+        # Asignar color por grupo semántico
+        if col_idx <= 12:
+            cell.fill = fill_th_azul
+        elif col_idx <= 18:
+            cell.fill = fill_th_verde
+        elif col_idx <= 25:
+            cell.fill = fill_th_amarillo
+        else:
+            cell.fill = fill_th_negro
+
+    ws.row_dimensions[8].height = 28
+
+    # 5. FILAS DE DATOS
+    costo_col_idx = -1
+    for i, h in enumerate(headers, 1):
+        if "COSTO" in h.upper():
+            costo_col_idx = i
+            break
+
+    row_num = 9
+    costo_acumulado = 0.0
+
+    for r_vals in rows:
+        is_zebra = (row_num % 2 == 0)
+        for col_idx, val in enumerate(r_vals, 1):
+            cell = ws.cell(row=row_num, column=col_idx)
+            cell.border = border_thin
+            if is_zebra:
+                cell.fill = fill_zebra
+
+            val_str = str(val if val is not None else "").strip()
+
+            if col_idx == costo_col_idx:
+                try:
+                    num_val = float(val_str.replace("$", "").replace(",", "").strip())
+                    cell.value = num_val
+                    cell.number_format = "$#,##0.00"
+                    cell.font = font_green
+                    cell.alignment = align_right
+                    costo_acumulado += num_val
+                except Exception:
+                    cell.value = val_str
+                    cell.font = font_normal
+                    cell.alignment = align_right
+            elif col_idx == 1:
+                cell.value = val_str
+                cell.font = font_amber
+                cell.alignment = align_center
+            elif col_idx == 2:
+                cell.value = val_str
+                cell.font = font_blue
+                cell.alignment = align_center
+            elif col_idx in [3, 4, 5, 6, 7, 10, 11, 12, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 30, 31, 32]:
+                cell.value = val_str
+                cell.font = font_normal
+                cell.alignment = align_center
+            else:
+                cell.value = val_str
+                cell.font = font_normal
+                cell.alignment = align_left
+
+        ws.row_dimensions[row_num].height = 22
+        row_num += 1
+
+    # 6. FILA DE TOTALES AL FINAL
+    if row_num > 9 and costo_col_idx > 0:
+        merge_end_letter = get_column_letter(costo_col_idx - 1)
+        ws.merge_cells(f"A{row_num}:{merge_end_letter}{row_num}")
+        ws[f"A{row_num}"] = "TOTAL GASTO REGISTRADO EN ESTOS REPORTES:"
+        ws[f"A{row_num}"].font = font_total
+        ws[f"A{row_num}"].fill = fill_navy
+        ws[f"A{row_num}"].alignment = align_right
+
+        for ci in range(1, costo_col_idx):
+            ws[f"{get_column_letter(ci)}{row_num}"].border = border_thin
+            ws[f"{get_column_letter(ci)}{row_num}"].fill = fill_navy
+
+        c_sum = ws.cell(row=row_num, column=costo_col_idx)
+        c_sum.value = f"=SUM({get_column_letter(costo_col_idx)}9:{get_column_letter(costo_col_idx)}{row_num-1})"
+        c_sum.font = font_total
+        c_sum.fill = fill_navy
+        c_sum.alignment = align_right
+        c_sum.number_format = "$#,##0.00"
+        c_sum.border = border_thin
+
+        for ci in range(costo_col_idx + 1, num_cols + 1):
+            c_b = ws.cell(row=row_num, column=ci, value="")
+            c_b.fill = fill_navy
+            c_b.border = border_thin
+
+        ws.row_dimensions[row_num].height = 26
+
+    # Autoajuste de anchos de columnas
+    for col in ws.columns:
+        col_letter = get_column_letter(col[0].column)
+        max_len = max(len(str(c.value or '')) for c in col)
+        ws.column_dimensions[col_letter].width = max(min(max_len + 4, 45), 14)
+
+    # 7. HOJA 2: RESUMEN POR TALLER Y COPE
+    ws2 = wb.create_sheet(title="Resumen por Taller y COPE")
+    ws2.views.sheetView[0].showGridLines = True
+
+    ws2.merge_cells("A1:E1")
+    ws2["A1"] = "SECCIÓN DE REPORTES - RESUMEN POR TALLER Y COPE"
+    ws2["A1"].font = font_title
+    ws2["A1"].fill = fill_navy
+    ws2["A1"].alignment = align_center
+    ws2.row_dimensions[1].height = 36
+
+    ws2.merge_cells("A2:E2")
+    ws2["A2"] = f"Agrupación Estadística de los Registros Filtrados | Generado: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}"
+    ws2["A2"].font = font_sub
+    ws2["A2"].fill = fill_navy
+    ws2["A2"].alignment = align_center
+    ws2.row_dimensions[2].height = 22
+
+    taller_idx = -1
+    cope_idx = -1
+    for i, h in enumerate(headers):
+        hu = h.upper()
+        if "PROVEEDOR" in hu or "TALLER" in hu: taller_idx = i
+        if "COPE" in hu: cope_idx = i
+
+    taller_map = {}
+    cope_map = {}
+    for r_vals in rows:
+        t_val = r_vals[taller_idx].strip() if taller_idx >= 0 and taller_idx < len(r_vals) else "Sin especificar"
+        cp_val = r_vals[cope_idx].strip() if cope_idx >= 0 and cope_idx < len(r_vals) else "No especificado"
+        costo_v = 0.0
+        if costo_col_idx > 0 and (costo_col_idx - 1) < len(r_vals):
+            try:
+                costo_v = float(str(r_vals[costo_col_idx - 1]).replace("$", "").replace(",", "").strip() or 0)
+            except Exception:
+                costo_v = 0.0
+
+        if not t_val or t_val == "--": t_val = "Sin especificar"
+        if not cp_val or cp_val == "--": cp_val = "No especificado"
+
+        if t_val not in taller_map: taller_map[t_val] = {"count": 0, "monto": 0.0}
+        taller_map[t_val]["count"] += 1
+        taller_map[t_val]["monto"] += costo_v
+
+        if cp_val not in cope_map: cope_map[cp_val] = {"count": 0, "monto": 0.0}
+        cope_map[cp_val]["count"] += 1
+        cope_map[cp_val]["monto"] += costo_v
+
+    # Tabla Talleres
+    ws2.merge_cells("A4:E4")
+    ws2["A4"] = "🔧 GASTO Y TICKETS POR TALLER PROVEEDOR"
+    ws2["A4"].font = font_section
+    ws2["A4"].fill = fill_sub_header
+    ws2["A4"].alignment = align_left
+    ws2.row_dimensions[4].height = 24
+
+    h_t = ["Taller Mecánico / Proveedor", "Tickets", "Gasto Total (s/IVA)", "% del Total", "Promedio por Ticket"]
+    for c_i, h in enumerate(h_t, 1):
+        cell = ws2.cell(row=5, column=c_i, value=h)
+        cell.font = font_th
+        cell.fill = fill_th_verde
+        cell.alignment = align_center
+        cell.border = border_thin
+    ws2.row_dimensions[5].height = 26
+
+    r_cur = 6
+    tot_gastado = sum(v["monto"] for v in taller_map.values()) or 1.0
+
+    for t_nom, t_data in sorted(taller_map.items(), key=lambda x: x[1]["monto"], reverse=True):
+        m = t_data["monto"]
+        c = t_data["count"]
+        pct = (m / tot_gastado) * 100
+        prom = m / c if c > 0 else 0
+
+        c1 = ws2.cell(row=r_cur, column=1, value=t_nom)
+        c1.alignment = align_left
+        c2 = ws2.cell(row=r_cur, column=2, value=c)
+        c2.alignment = align_center
+        c3 = ws2.cell(row=r_cur, column=3, value=m)
+        c3.alignment = align_right
+        c3.number_format = "$#,##0.00"
+        c4 = ws2.cell(row=r_cur, column=4, value=f"{pct:.2f} %")
+        c4.alignment = align_center
+        c5 = ws2.cell(row=r_cur, column=5, value=prom)
+        c5.alignment = align_right
+        c5.number_format = "$#,##0.00"
+
+        for ci in range(1, 6):
+            obj = ws2.cell(row=r_cur, column=ci)
+            obj.font = font_normal
+            obj.border = border_thin
+            if r_cur % 2 == 0: obj.fill = fill_zebra
+        ws2.row_dimensions[r_cur].height = 22
+        r_cur += 1
+
+    # Tabla COPEs
+    r_cope_s = r_cur + 2
+    ws2.merge_cells(f"A{r_cope_s}:E{r_cope_s}")
+    ws2[f"A{r_cope_s}"] = "🏢 GASTO Y TICKETS POR CENTRO DE TRABAJO (COPE)"
+    ws2[f"A{r_cope_s}"].font = font_section
+    ws2[f"A{r_cope_s}"].fill = fill_sub_header
+    ws2[f"A{r_cope_s}"].alignment = align_left
+    ws2.row_dimensions[r_cope_s].height = 24
+
+    for c_i, h in enumerate(["Centro de Trabajo (COPE)", "Tickets", "Gasto Total (s/IVA)", "% del Total", "Promedio por Ticket"], 1):
+        cell = ws2.cell(row=r_cope_s+1, column=c_i, value=h)
+        cell.font = font_th
+        cell.fill = fill_th_verde
+        cell.alignment = align_center
+        cell.border = border_thin
+    ws2.row_dimensions[r_cope_s+1].height = 26
+
+    r_cur2 = r_cope_s + 2
+    for cp_nom, cp_data in sorted(cope_map.items(), key=lambda x: x[1]["monto"], reverse=True):
+        m = cp_data["monto"]
+        c = cp_data["count"]
+        pct = (m / tot_gastado) * 100
+        prom = m / c if c > 0 else 0
+
+        c1 = ws2.cell(row=r_cur2, column=1, value=cp_nom)
+        c1.alignment = align_left
+        c2 = ws2.cell(row=r_cur2, column=2, value=c)
+        c2.alignment = align_center
+        c3 = ws2.cell(row=r_cur2, column=3, value=m)
+        c3.alignment = align_right
+        c3.number_format = "$#,##0.00"
+        c4 = ws2.cell(row=r_cur2, column=4, value=f"{pct:.2f} %")
+        c4.alignment = align_center
+        c5 = ws2.cell(row=r_cur2, column=5, value=prom)
+        c5.alignment = align_right
+        c5.number_format = "$#,##0.00"
+
+        for ci in range(1, 6):
+            obj = ws2.cell(row=r_cur2, column=ci)
+            obj.font = font_normal
+            obj.border = border_thin
+            if r_cur2 % 2 == 0: obj.fill = fill_zebra
+        ws2.row_dimensions[r_cur2].height = 22
+        r_cur2 += 1
+
+    for col in ws2.columns:
+        col_letter = get_column_letter(col[0].column)
+        max_len = max(len(str(c.value or '')) for c in col)
+        ws2.column_dimensions[col_letter].width = max(max_len + 4, 20)
+    ws2.column_dimensions['A'].width = 32
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"Reporte_Seccion_Reportes_{ts}.xlsx"
+
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=filename
+    )

@@ -655,6 +655,7 @@ th {
     padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
+    font-size: 0.85em !important;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(45, 106, 79, 0.35);
     transition: all 0.25s ease;
@@ -2957,3 +2958,51 @@ td.col-negro {
     background-color: #254d90 !important;
 }
 
+
+
+/* Contenedor estandarizado de acciones para Facturas y Cotizaciones */
+.contenedor-acciones-facturas {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+    width: 100% !important;
+    min-width: 145px !important;
+    box-sizing: border-box !important;
+}
+
+.contenedor-acciones-facturas button,
+.contenedor-acciones-facturas .btn-info,
+.contenedor-acciones-facturas .btn-success,
+.contenedor-acciones-facturas .btn-danger-sm,
+.contenedor-acciones-facturas .btn-actualizar-orden,
+.contenedor-acciones-facturas .btn-ver-factura-pdf,
+.contenedor-acciones-facturas .btn-liberar-facturacion,
+.contenedor-acciones-facturas .btn-esperando-factura,
+.contenedor-acciones-facturas .btn-cobertura,
+.contenedor-acciones-facturas .btn-cobertura-disabled {
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 8px 12px !important;
+    font-size: 0.85em !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    line-height: 1.25 !important;
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+}
+
+.contenedor-acciones-facturas span {
+    margin: 0 !important;
+    text-align: center !important;
+    padding: 2px 0 !important;
+}
+
+#tabla-facturas-finales td:last-child,
+#tabla-facturas td:last-child {
+    vertical-align: middle !important;
+    min-width: 155px !important;
+}

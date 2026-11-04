@@ -4,7 +4,11 @@ import datetime
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, send_file
+import io
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 configuracion_bp = Blueprint('configuracion', __name__)
 
@@ -599,3 +603,391 @@ def guardar_limite_caras():
         "tickets_liberados": tickets_despachados
     })
 
+@configuracion_bp.route("/api/configuracion/presupuesto/exportar_excel", methods=["GET"])
+def exportar_presupuesto_excel():
+    if not es_usuario_autorizado():
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
+
+    conf = obtener_configuracion()
+    metricas = calcular_metricas_presupuesto(conf)
+    cotizaciones = metricas.get("cotizaciones_confirmadas", [])
+
+    wb = openpyxl.Workbook()
+
+    # PALETA DE COLORES INSTITUCIONAL ANALÍTICA / CONFIGURACIONES
+    fill_navy = PatternFill(start_color="112641", end_color="112641", fill_type="solid")
+    fill_green = PatternFill(start_color="40916C", end_color="40916C", fill_type="solid")
+    fill_sub_header = PatternFill(start_color="1F395A", end_color="1F395A", fill_type="solid")
+    fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    fill_card = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+    fill_card_amber = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+    fill_card_green = PatternFill(start_color="D1FAE5", end_color="D1FAE5", fill_type="solid")
+    fill_card_blue = PatternFill(start_color="E0F2FE", end_color="E0F2FE", fill_type="solid")
+
+    font_title = Font(name="Segoe UI", size=14, bold=True, color="FFFFFF")
+    font_subtitle = Font(name="Segoe UI", size=10, italic=True, color="CBD5E1")
+    font_header = Font(name="Segoe UI", size=11, bold=True, color="FFFFFF")
+    font_section = Font(name="Segoe UI", size=11, bold=True, color="FFFFFF")
+    font_normal = Font(name="Segoe UI", size=10, color="1E293B")
+    font_bold = Font(name="Segoe UI", size=10, bold=True, color="1E293B")
+    font_total = Font(name="Segoe UI", size=11, bold=True, color="FFFFFF")
+    font_amber_bold = Font(name="Segoe UI", size=10, bold=True, color="B45309")
+    font_green_bold = Font(name="Segoe UI", size=10, bold=True, color="047857")
+    font_blue_bold = Font(name="Segoe UI", size=10, bold=True, color="0284C7")
+
+    border_thin = Border(
+        left=Side(style="thin", color="CBD5E1"),
+        right=Side(style="thin", color="CBD5E1"),
+        top=Side(style="thin", color="CBD5E1"),
+        bottom=Side(style="thin", color="CBD5E1")
+    )
+
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+
+    # =========================================================
+    # HOJA 1: DESGLOSE PRESUPUESTO
+    # =========================================================
+    ws1 = wb.active
+    ws1.title = "Desglose Presupuesto"
+    ws1.views.sheetView[0].showGridLines = True
+
+    ws1.merge_cells("A1:G1")
+    ws1["A1"] = "SISTEMA DE FACTURACION CENTRAL - CONTROL PRESUPUESTAL Y DESGLOSE"
+    ws1["A1"].font = font_title
+    ws1["A1"].fill = fill_navy
+    ws1["A1"].alignment = align_center
+    ws1.row_dimensions[1].height = 36
+
+    ws1.merge_cells("A2:G2")
+    ws1["A2"] = f"Reporte de Desglose de Cotizaciones Confirmadas | Generado: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')} | Jefatura Automotriz"
+    ws1["A2"].font = font_subtitle
+    ws1["A2"].fill = fill_navy
+    ws1["A2"].alignment = align_center
+    ws1.row_dimensions[2].height = 22
+
+    # SECCIÓN METRICAS
+    ws1.merge_cells("A4:G4")
+    ws1["A4"] = "📊 BALANCE FINANCIERO DEL CICLO ACTUAL (CONFIGURACIONES DE JEFATURA)"
+    ws1["A4"].font = font_section
+    ws1["A4"].fill = fill_sub_header
+    ws1["A4"].alignment = align_left
+    ws1.row_dimensions[4].height = 24
+
+    total_pres = float(metricas.get("presupuesto_total", 0))
+    comp_pres = float(metricas.get("dinero_comprometido", 0))
+    rest_pres = float(metricas.get("presupuesto_restante", 0))
+    pct_pres = float(metricas.get("porcentaje_consumido", 0))
+
+    # Tarjetas Fila 5 (Etiquetas) y Fila 6 (Valores)
+    ws1.merge_cells("A5:B5")
+    ws1["A5"] = "PRESUPUESTO ASIGNADO"
+    ws1["A5"].font = Font(name="Segoe UI", size=9, bold=True, color="0369A1")
+    ws1["A5"].fill = fill_card_blue
+    ws1["A5"].alignment = align_center
+    for c in ["A5", "B5"]: ws1[c].border = border_thin
+
+    ws1.merge_cells("A6:B6")
+    ws1["A6"] = f"${total_pres:,.2f} MXN"
+    ws1["A6"].font = Font(name="Segoe UI", size=13, bold=True, color="0284C7")
+    ws1["A6"].fill = fill_card_blue
+    ws1["A6"].alignment = align_center
+    for c in ["A6", "B6"]: ws1[c].border = border_thin
+
+    ws1.merge_cells("C5:D5")
+    ws1["C5"] = "DINERO EN COTIZACIONES"
+    ws1["C5"].font = Font(name="Segoe UI", size=9, bold=True, color="B45309")
+    ws1["C5"].fill = fill_card_amber
+    ws1["C5"].alignment = align_center
+    for c in ["C5", "D5"]: ws1[c].border = border_thin
+
+    ws1.merge_cells("C6:D6")
+    ws1["C6"] = f"${comp_pres:,.2f} MXN"
+    ws1["C6"].font = Font(name="Segoe UI", size=13, bold=True, color="D97706")
+    ws1["C6"].fill = fill_card_amber
+    ws1["C6"].alignment = align_center
+    for c in ["C6", "D6"]: ws1[c].border = border_thin
+
+    ws1.merge_cells("E5:F5")
+    ws1["E5"] = "PRESUPUESTO DISPONIBLE"
+    ws1["E5"].font = Font(name="Segoe UI", size=9, bold=True, color="047857")
+    ws1["E5"].fill = fill_card_green
+    ws1["E5"].alignment = align_center
+    for c in ["E5", "F5"]: ws1[c].border = border_thin
+
+    ws1.merge_cells("E6:F6")
+    ws1["E6"] = f"${rest_pres:,.2f} MXN"
+    ws1["E6"].font = Font(name="Segoe UI", size=13, bold=True, color="10B981")
+    ws1["E6"].fill = fill_card_green
+    ws1["E6"].alignment = align_center
+    for c in ["E6", "F6"]: ws1[c].border = border_thin
+
+    ws1["G5"] = "% UTILIZADO"
+    ws1["G5"].font = Font(name="Segoe UI", size=9, bold=True, color="475569")
+    ws1["G5"].fill = fill_card
+    ws1["G5"].alignment = align_center
+    ws1["G5"].border = border_thin
+
+    ws1["G6"] = f"{pct_pres:.2f} %"
+    ws1["G6"].font = Font(name="Segoe UI", size=13, bold=True, color="0F172A")
+    ws1["G6"].fill = fill_card
+    ws1["G6"].alignment = align_center
+    ws1["G6"].border = border_thin
+
+    ws1.row_dimensions[5].height = 20
+    ws1.row_dimensions[6].height = 26
+
+    # TABLA DE COTIZACIONES
+    ws1.merge_cells("A8:G8")
+    ws1["A8"] = f"📋 LISTADO DETALLADO DE COTIZACIONES CONFIRMADAS ({len(cotizaciones)} tickets que restan presupuesto)"
+    ws1["A8"].font = font_section
+    ws1["A8"].fill = fill_sub_header
+    ws1["A8"].alignment = align_left
+    ws1.row_dimensions[8].height = 24
+
+    headers = [
+        "No. Ticket / Folio",
+        "No. Unidad (Eco)",
+        "Taller Mecánico / Proveedor",
+        "Centro de Trabajo (COPE)",
+        "Monto Recortado (s/IVA)",
+        "Estado Operativo",
+        "Fecha Confirmación"
+    ]
+
+    for col_idx, h in enumerate(headers, 1):
+        cell = ws1.cell(row=9, column=col_idx, value=h)
+        cell.font = font_header
+        cell.fill = fill_green
+        cell.alignment = align_center
+        cell.border = border_thin
+    ws1.row_dimensions[9].height = 28
+
+    row_num = 10
+    for item in cotizaciones:
+        p = float(item.get("precio", 0) or 0)
+        raw_u = str(item.get("unidad", "")).strip()
+        u_str = raw_u if raw_u.startswith("8090-") else (f"8090-{raw_u}" if raw_u else "--")
+        is_zebra = (row_num % 2 == 0)
+
+        c1 = ws1.cell(row=row_num, column=1, value=str(item.get("id_reporte") or item.get("id") or ""))
+        c1.font = font_amber_bold
+        c1.alignment = align_center
+
+        c2 = ws1.cell(row=row_num, column=2, value=u_str)
+        c2.font = font_blue_bold
+        c2.alignment = align_center
+
+        c3 = ws1.cell(row=row_num, column=3, value=str(item.get("proveedor") or "Sin especificar"))
+        c3.font = font_normal
+        c3.alignment = align_left
+
+        c4 = ws1.cell(row=row_num, column=4, value=str(item.get("cope") or "--"))
+        c4.font = font_normal
+        c4.alignment = align_center
+
+        c5 = ws1.cell(row=row_num, column=5, value=p)
+        c5.font = font_green_bold
+        c5.alignment = align_right
+        c5.number_format = "$#,##0.00"
+
+        c6 = ws1.cell(row=row_num, column=6, value=str(item.get("estado") or "Confirmada"))
+        c6.font = font_normal
+        c6.alignment = align_center
+
+        c7 = ws1.cell(row=row_num, column=7, value=str(item.get("fecha") or "--"))
+        c7.font = font_normal
+        c7.alignment = align_center
+
+        for c_i in range(1, 8):
+            c_obj = ws1.cell(row=row_num, column=c_i)
+            c_obj.border = border_thin
+            if is_zebra: c_obj.fill = fill_zebra
+
+        ws1.row_dimensions[row_num].height = 22
+        row_num += 1
+
+    # Fila de Totales
+    if row_num > 10:
+        ws1.merge_cells(f"A{row_num}:D{row_num}")
+        ws1[f"A{row_num}"] = "TOTAL COMPROMETIDO EN EL CICLO ACTUAL:"
+        ws1[f"A{row_num}"].font = font_total
+        ws1[f"A{row_num}"].fill = fill_navy
+        ws1[f"A{row_num}"].alignment = align_right
+
+        for ci in range(1, 5):
+            ws1[f"{get_column_letter(ci)}{row_num}"].border = border_thin
+            ws1[f"{get_column_letter(ci)}{row_num}"].fill = fill_navy
+
+        c_sum = ws1[f"E{row_num}"]
+        c_sum.value = f"=SUM(E10:E{row_num-1})"
+        c_sum.font = font_total
+        c_sum.fill = fill_navy
+        c_sum.alignment = align_right
+        c_sum.number_format = "$#,##0.00"
+        c_sum.border = border_thin
+
+        for ci in (6, 7):
+            c_b = ws1[f"{get_column_letter(ci)}{row_num}"]
+            c_b.value = ""
+            c_b.fill = fill_navy
+            c_b.border = border_thin
+
+        ws1.row_dimensions[row_num].height = 26
+
+    for col in ws1.columns:
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        col_letter = get_column_letter(col[0].column)
+        ws1.column_dimensions[col_letter].width = max(max_len + 4, 18)
+    ws1.column_dimensions['C'].width = 34
+    ws1.column_dimensions['E'].width = 24
+
+    # =========================================================
+    # HOJA 2: RESUMEN POR TALLER Y COPE
+    # =========================================================
+    ws2 = wb.create_sheet(title="Resumen por Taller y COPE")
+    ws2.views.sheetView[0].showGridLines = True
+
+    ws2.merge_cells("A1:E1")
+    ws2["A1"] = "DISTRIBUCIÓN DEL GASTO PRESUPUESTAL POR TALLER Y POR COPE"
+    ws2["A1"].font = font_title
+    ws2["A1"].fill = fill_navy
+    ws2["A1"].alignment = align_center
+    ws2.row_dimensions[1].height = 36
+
+    ws2.merge_cells("A2:E2")
+    ws2["A2"] = f"Agrupación y Estadísticas de Presupuesto Comprometido | Jefatura Automotriz"
+    ws2["A2"].font = font_subtitle
+    ws2["A2"].fill = fill_navy
+    ws2["A2"].alignment = align_center
+    ws2.row_dimensions[2].height = 22
+
+    # Agrupar por Taller
+    taller_gastos = {}
+    taller_counts = {}
+    cope_gastos = {}
+    cope_counts = {}
+
+    for it in cotizaciones:
+        t = str(it.get("proveedor") or "Sin especificar")
+        cp = str(it.get("cope") or "No especificado")
+        pr = float(it.get("precio", 0) or 0)
+
+        taller_gastos[t] = taller_gastos.get(t, 0.0) + pr
+        taller_counts[t] = taller_counts.get(t, 0) + 1
+        cope_gastos[cp] = cope_gastos.get(cp, 0.0) + pr
+        cope_counts[cp] = cope_counts.get(cp, 0) + 1
+
+    # Tabla Talleres
+    ws2.merge_cells("A4:E4")
+    ws2["A4"] = "🔧 CONSUMO DE PRESUPUESTO POR TALLER MECÁNICO PROVEEDOR"
+    ws2["A4"].font = font_section
+    ws2["A4"].fill = fill_sub_header
+    ws2["A4"].alignment = align_left
+    ws2.row_dimensions[4].height = 24
+
+    h_taller = ["Taller Mecánico / Proveedor", "Tickets Atendidos", "Monto Total Consumido (s/IVA)", "% del Gasto Comprometido", "Ticket Promedio"]
+    for col_idx, h in enumerate(h_taller, 1):
+        cell = ws2.cell(row=5, column=col_idx, value=h)
+        cell.font = font_header
+        cell.fill = fill_green
+        cell.alignment = align_center
+        cell.border = border_thin
+    ws2.row_dimensions[5].height = 26
+
+    r_t = 6
+    total_gastado = sum(taller_gastos.values()) or 1.0
+
+    for t_nom, monto in sorted(taller_gastos.items(), key=lambda x: x[1], reverse=True):
+        cnt = taller_counts.get(t_nom, 0)
+        pct = (monto / total_gastado) * 100
+        prom = monto / cnt if cnt > 0 else 0
+
+        c1 = ws2.cell(row=r_t, column=1, value=t_nom)
+        c1.alignment = align_left
+        c2 = ws2.cell(row=r_t, column=2, value=cnt)
+        c2.alignment = align_center
+        c3 = ws2.cell(row=r_t, column=3, value=monto)
+        c3.alignment = align_right
+        c3.number_format = "$#,##0.00"
+        c4 = ws2.cell(row=r_t, column=4, value=f"{pct:.2f} %")
+        c4.alignment = align_center
+        c5 = ws2.cell(row=r_t, column=5, value=prom)
+        c5.alignment = align_right
+        c5.number_format = "$#,##0.00"
+
+        for ci in range(1, 6):
+            c_obj = ws2.cell(row=r_t, column=ci)
+            c_obj.font = font_normal
+            c_obj.border = border_thin
+            if r_t % 2 == 0: c_obj.fill = fill_zebra
+
+        ws2.row_dimensions[r_t].height = 22
+        r_t += 1
+
+    # Tabla COPEs
+    r_c_start = r_t + 2
+    ws2.merge_cells(f"A{r_c_start}:E{r_c_start}")
+    ws2[f"A{r_c_start}"] = "🏢 CONSUMO DE PRESUPUESTO POR CENTRO DE TRABAJO (COPE)"
+    ws2[f"A{r_c_start}"].font = font_section
+    ws2[f"A{r_c_start}"].fill = fill_sub_header
+    ws2[f"A{r_c_start}"].alignment = align_left
+    ws2.row_dimensions[r_c_start].height = 24
+
+    h_cope = ["Centro de Trabajo (COPE)", "Tickets Confirmados", "Monto Total Consumido (s/IVA)", "% del Gasto Comprometido", "Ticket Promedio"]
+    for col_idx, h in enumerate(h_cope, 1):
+        cell = ws2.cell(row=r_c_start+1, column=col_idx, value=h)
+        cell.font = font_header
+        cell.fill = fill_green
+        cell.alignment = align_center
+        cell.border = border_thin
+    ws2.row_dimensions[r_c_start+1].height = 26
+
+    r_c = r_c_start + 2
+    for cp_nom, monto in sorted(cope_gastos.items(), key=lambda x: x[1], reverse=True):
+        cnt = cope_counts.get(cp_nom, 0)
+        pct = (monto / total_gastado) * 100
+        prom = monto / cnt if cnt > 0 else 0
+
+        c1 = ws2.cell(row=r_c, column=1, value=cp_nom)
+        c1.alignment = align_left
+        c2 = ws2.cell(row=r_c, column=2, value=cnt)
+        c2.alignment = align_center
+        c3 = ws2.cell(row=r_c, column=3, value=monto)
+        c3.alignment = align_right
+        c3.number_format = "$#,##0.00"
+        c4 = ws2.cell(row=r_c, column=4, value=f"{pct:.2f} %")
+        c4.alignment = align_center
+        c5 = ws2.cell(row=r_c, column=5, value=prom)
+        c5.alignment = align_right
+        c5.number_format = "$#,##0.00"
+
+        for ci in range(1, 6):
+            c_obj = ws2.cell(row=r_c, column=ci)
+            c_obj.font = font_normal
+            c_obj.border = border_thin
+            if r_c % 2 == 0: c_obj.fill = fill_zebra
+
+        ws2.row_dimensions[r_c].height = 22
+        r_c += 1
+
+    for col in ws2.columns:
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        col_letter = get_column_letter(col[0].column)
+        ws2.column_dimensions[col_letter].width = max(max_len + 4, 20)
+    ws2.column_dimensions['A'].width = 34
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    nombre_archivo = f"Desglose_Presupuesto_Jefatura_{timestamp}.xlsx"
+
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=nombre_archivo
+    )

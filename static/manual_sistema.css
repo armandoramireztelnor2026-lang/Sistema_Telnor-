@@ -85,6 +85,7 @@
 .badge-taller { background: #059669; color: #ffffff; box-shadow: 0 0 10px rgba(5, 150, 105, 0.4); }
 .badge-chofer { background: #f59e0b; color: #ffffff; box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
 .badge-corp { background: #6366f1; color: #ffffff; box-shadow: 0 0 10px rgba(99, 102, 241, 0.4); }
+.badge-jefa { background: #7c3aed; color: #ffffff; box-shadow: 0 0 10px rgba(124, 58, 237, 0.4); }
 
 .manual-btn-close {
     background: #1e293b;
@@ -327,6 +328,7 @@
 .badge-btn-cyan { background: #0891b2; color: #ffffff; }
 .badge-btn-purple { background: #7c3aed; color: #ffffff; }
 .badge-btn-gray { background: #475569; color: #ffffff; }
+.badge-btn-dark { background: #0f172a; color: #ffffff; border: 1px solid #334155; }
 
 .manual-btn-title {
     font-size: 0.95rem;
@@ -371,7 +373,7 @@
 /* Filas informativas dentro del acordeón */
 .manual-info-row {
     display: grid;
-    grid-template-columns: 180px 1fr;
+    grid-template-columns: 215px 1fr;
     gap: 15px;
     font-size: 0.9rem;
     line-height: 1.5;

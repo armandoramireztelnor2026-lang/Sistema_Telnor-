@@ -23,8 +23,14 @@ function procesarValidacionCodigo() {
     }
 
     const btn = document.getElementById('btn-verificar-codigo');
-    btn.innerText = "Verificando código...";
-    btn.disabled = true;
+    if (btn) {
+        btn.innerText = "Verificando código...";
+        btn.disabled = true;
+    }
+
+    if (typeof mostrarLoaderDinamico === 'function') {
+        mostrarLoaderDinamico("Validando Código de Entrega...", "Verificando autenticidad del PIN y registrando entrega física de la unidad 🔑");
+    }
 
     // Viaja al backend a preguntar si el código hace match
     fetch('/api/facturas/validar_codigo', {
@@ -37,8 +43,11 @@ function procesarValidacionCodigo() {
     })
     .then(res => res.json())
     .then(data => {
-        btn.innerText = "Verificar Código";
-        btn.disabled = false;
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
+        if (btn) {
+            btn.innerText = "Verificar Código";
+            btn.disabled = false;
+        }
 
         if(data.status === 'success') {
             // ¡Match Perfecto! Cerramos ventana y actualizamos tabla
@@ -54,9 +63,12 @@ function procesarValidacionCodigo() {
         }
     })
     .catch(err => {
+        if (typeof ocultarLoaderDinamico === 'function') ocultarLoaderDinamico();
         console.error(err);
         alert("❌ Hubo un error de conexión con el servidor.");
-        btn.innerText = "Verificar Código";
-        btn.disabled = false;
+        if (btn) {
+            btn.innerText = "Verificar Código";
+            btn.disabled = false;
+        }
     });
 }

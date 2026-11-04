@@ -3,7 +3,7 @@
     "codigo_emisor": "zgdhbgcpuobszybi",
     "servidor_smtp": "smtp.gmail.com",
     "puerto_smtp": 587,
-    "nombre_remitente": "Sistema Automotriz Telnor",
+    "nombre_remitente": "Principal (Gmail)",
     "cuentas_correo": [
         {
             "id": "1",
@@ -18,6 +18,8 @@
     ],
     "presupuesto_total": 500000.0,
     "limite_cotizaciones_caras": 10000.0,
-    "fecha_actualizacion": "2026-11-02 23:35:00",
-    "actualizado_por": "Jefatura: jefatura_admin"
+    "fecha_actualizacion": "2026-11-03 23:15:24",
+    "actualizado_por": "Jefatura: jefatura_admin",
+    "envio_automatico_activo": true,
+    "correo_emisor_anterior": "armandoramireztelnor2026@gmail.com"
 }

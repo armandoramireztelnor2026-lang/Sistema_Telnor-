@@ -110,7 +110,7 @@ window.cargarConfiguracionesJefatura = async function() {
 
         // Renderizar tabla de cotizaciones confirmadas
         window._cotizacionesPresupuestoGlobal = pres.cotizaciones_confirmadas || [];
-        // renderizarTablaCotizacionesPresupuesto removida
+        renderizarTablaCotizacionesPresupuesto(window._cotizacionesPresupuestoGlobal);
 
         // 1.4 Llenar sección de Límite de Cotizaciones Caras
         const elLimiteActual = document.getElementById('cfg-badge-limite-actual');
@@ -400,33 +400,59 @@ window.guardarPresupuestoTotal = async function() {
     }
 };
 
-function renderizarTablaCotizacionesPresupuesto(lista) {
+window.renderizarTablaCotizacionesPresupuesto = function(lista) {
     const tbody = document.getElementById('tabla-cotizaciones-presupuesto');
     if (!tbody) return;
 
     if (!lista || lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">No hay cotizaciones confirmadas registradas en el periodo.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:25px; color:#94a3b8; font-weight: 500;">No hay cotizaciones confirmadas registradas en el ciclo actual.</td></tr>';
         return;
     }
 
     tbody.innerHTML = '';
     lista.forEach(item => {
-        let precioFmt = item.precio ? `$ ${parseFloat(item.precio).toLocaleString('en-US', { minimumFractionDigits: 2 })} MXN` : '$ 0.00 MXN';
-        let unidadStr = item.unidad ? (item.unidad.startsWith('8090-') ? item.unidad : `8090-${item.unidad}`) : '--';
+        let precioFmt = item.precio ? `$ ${parseFloat(item.precio).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN` : '$ 0.00 MXN';
+        let rawUnidad = String(item.unidad || '').trim();
+        let unidadStr = rawUnidad ? (rawUnidad.startsWith('8090-') ? rawUnidad : `8090-${rawUnidad}`) : '--';
 
         tbody.innerHTML += `
-            <tr style="border-bottom: 1px solid #1e293b;">
-                <td style="font-weight: 700; color: #f59e0b;">${item.id_reporte || item.id}</td>
-                <td style="font-weight: 600; color: #38bdf8;">${unidadStr}</td>
-                <td style="color: #cbd5e1;">${item.proveedor}</td>
-                <td style="color: #94a3b8;">${item.cope}</td>
-                <td style="font-weight: 700; color: #10b981; font-size: 0.95rem;">${precioFmt}</td>
-                <td><span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">${item.estado}</span></td>
-                <td style="color: #94a3b8; font-size: 0.85rem;">${item.fecha}</td>
+            <tr style="border-bottom: 1px solid #1e293b; transition: background 0.2s ease;">
+                <td style="padding: 10px 14px; font-weight: 700; color: #f59e0b;">${item.id_reporte || item.id}</td>
+                <td style="padding: 10px 14px; font-weight: 600; color: #38bdf8;">${unidadStr}</td>
+                <td style="padding: 10px 14px; color: #cbd5e1;">${item.proveedor}</td>
+                <td style="padding: 10px 14px; color: #94a3b8;">${item.cope}</td>
+                <td style="padding: 10px 14px; font-weight: 700; color: #10b981; font-size: 0.95rem;">${precioFmt}</td>
+                <td style="padding: 10px 14px;"><span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">${item.estado}</span></td>
+                <td style="padding: 10px 14px; color: #94a3b8; font-size: 0.85rem;">${item.fecha}</td>
             </tr>
         `;
     });
-}
+};
+const renderizarTablaCotizacionesPresupuesto = window.renderizarTablaCotizacionesPresupuesto;
+
+
+window.toggleDesglosePresupuesto = function() {
+    const contenedor = document.getElementById('contenedor-desglose-presupuesto');
+    const badge = document.getElementById('cfg-badge-toggle-desglose');
+    const btnTitulo = document.getElementById('cfg-txt-titulo-desglose');
+
+    if (!contenedor) return;
+
+    const estaOculto = contenedor.style.display === 'none' || contenedor.style.display === '';
+
+    if (estaOculto) {
+        contenedor.style.display = 'block';
+        if (badge) badge.innerHTML = '<span>Ocultar Desglose</span> <span id="cfg-arrow-desglose" style="font-size: 0.82rem;">▲</span>';
+        if (btnTitulo) btnTitulo.innerText = 'Desglose de Cotizaciones que han Consumido Presupuesto';
+        if (typeof renderizarTablaCotizacionesPresupuesto === 'function' && window._cotizacionesPresupuestoGlobal) {
+            renderizarTablaCotizacionesPresupuesto(window._cotizacionesPresupuestoGlobal);
+        }
+    } else {
+        contenedor.style.display = 'none';
+        if (badge) badge.innerHTML = '<span>Desplegar Desglose</span> <span id="cfg-arrow-desglose" style="font-size: 0.82rem;">▼</span>';
+        if (btnTitulo) btnTitulo.innerText = 'Ver Desglose de Cotizaciones que han Consumido Presupuesto';
+    }
+};
 
 window.filtrarCotizacionesPresupuesto = function() {
     const input = document.getElementById('buscar-cotizaciones-presupuesto');
@@ -676,4 +702,8 @@ window.resetearPresupuestoUtilizado = async function() {
         console.error("Error al resetear presupuesto:", err);
         alert("❌ Error de comunicación con el servidor.");
     }
+};
+
+window.descargarExcelPresupuesto = function() {
+    window.location.href = '/api/configuracion/presupuesto/exportar_excel';
 };

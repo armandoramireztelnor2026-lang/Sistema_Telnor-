@@ -839,10 +839,16 @@
 
                 <div>
                     <label for="input-buscar-ticket-garantia" style="display:block; color:#cbd5e1; font-size:13px; font-weight:600; margin-bottom:8px;">Número de Ticket:</label>
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="input-buscar-ticket-garantia" placeholder="Ej. REP-20261008131643" onkeydown="if(event.key==='Enter') buscarTicketGarantia()" style="flex:1; min-width:0; box-sizing:border-box; padding:12px 14px; border-radius:8px; border:1px solid #1f395a; background:#112641; color:#ffffff; font-size:15px; outline:none; transition:border-color 0.2s;" onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#1f395a'">
+                    <div style="display:flex; gap:8px; align-items:stretch;">
+                        <div style="display:flex; align-items:center; flex:1; min-width:0; border:1.5px solid #1f395a; border-radius:8px; background:#112641; overflow:hidden;">
+                            <span style="background:#0f172a; color:#f59e0b; font-weight:800; font-size:15px; padding:12px 14px; border-right:1.5px solid #1f395a; user-select:none; display:flex; align-items:center; letter-spacing:0.5px;">REP-</span>
+                            <input type="text" id="input-buscar-ticket-garantia" inputmode="numeric" pattern="[0-9]*" placeholder="Ingresa solo los números (ej. 20261008131643)" oninput="this.value = this.value.replace(/[^0-9]/g, '')" onkeydown="if(event.key==='Enter') buscarTicketGarantia()" style="flex:1; min-width:0; box-sizing:border-box; padding:12px 14px; border:none; background:transparent; color:#ffffff; font-size:15px; outline:none;">
+                        </div>
                         <button type="button" id="btn-buscar-ticket" class="btn-buscar-ticket-mobile" onclick="buscarTicketGarantia()" style="padding:12px 22px; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border:none; color:#0b1c30; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(245, 158, 11, 0.35); white-space:nowrap; flex-shrink:0;">Buscar</button>
                     </div>
+                    <p style="color:#94a3b8; font-size:12px; margin:7px 0 0 0; line-height:1.4;">
+                        <span style="color:#f59e0b; font-weight:700;">⚠️ Importante:</span> Solo debes ingresar los números de tu ticket. El prefijo <strong>"REP-"</strong> ya está integrado automáticamente.
+                    </p>
                     <div id="error-buscar-garantia" style="display:none; color:#f87171; font-size:13px; margin-top:10px; background:rgba(239, 68, 68, 0.1); border:1px solid #ef4444; border-radius:6px; padding:9px 12px; line-height:1.4;"></div>
                 </div>
             </div>
@@ -1107,18 +1113,20 @@
 
         async function buscarTicketGarantia() {
             const inp = document.getElementById('input-buscar-ticket-garantia');
-            const ticket = inp ? inp.value.trim() : '';
+            const rawDigits = inp ? inp.value.trim().replace(/[^0-9]/g, '') : '';
             const divErr = document.getElementById('error-buscar-garantia');
             const btn = document.getElementById('btn-buscar-ticket');
 
-            if (!ticket) {
+            if (!rawDigits) {
                 if (divErr) {
-                    divErr.innerText = 'Por favor ingresa el número de ticket.';
+                    divErr.innerText = 'Por favor ingresa únicamente los dígitos numéricos de tu ticket.';
                     divErr.style.display = 'block';
                 }
                 if (inp) inp.focus();
                 return;
             }
+
+            const ticket = `REP-${rawDigits}`;
 
             if (divErr) divErr.style.display = 'none';
             if (btn) {

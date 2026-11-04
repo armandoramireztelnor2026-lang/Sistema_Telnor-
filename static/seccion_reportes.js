@@ -1000,56 +1000,94 @@ function imprimirSeleccion() {
     }, 500);
 }
 
-function exportarExcel() {
-    // Si no hay seleccionados, exportamos todos los visibles
-    let rows = getSelectedRows();
+async function exportarExcel() {
+    let rows = typeof getSelectedRows === 'function' ? getSelectedRows() : [];
     let table = document.getElementById('tabla-exportable-reportes');
+    if (!table) return;
+
     let trs = table.getElementsByTagName('tr');
     let targetRows = rows.length > 0 ? rows : Array.from(trs).slice(1).filter(tr => tr.style.display !== 'none' && tr.cells.length > 1);
-    
-    if(targetRows.length === 0) {
-        alert("No hay datos para exportar.");
-        return;
-    }
-    
-    if(!confirm("¿Estás seguro de que deseas exportar a Excel " + targetRows.length + " registros?")) {
+
+    if (targetRows.length === 0) {
+        alert("No hay registros disponibles para exportar con los filtros seleccionados.");
         return;
     }
 
-    let csvContent = "\uFEFF"; // BOM for UTF-8 in Excel
-    
-    // Headers (skip checkbox)
+    const detalleRegistros = rows.length > 0 
+        ? `${targetRows.length} registros seleccionados manualmente` 
+        : `${targetRows.length} registros actualmente visibles`;
+
+    const confirmar = confirm(`¿Confirmas que deseas generar y descargar el reporte en Excel (.xlsx)?\n\n📊 Se exportarán: ${detalleRegistros}.\n🎨 El libro incluirá diseño analítico institucional y desglose por Taller y COPE.`);
+    if (!confirmar) {
+        return;
+    }
+
+    // Extraer encabezados (omitiendo la columna 0 del checkbox)
     let ths = trs[0].querySelectorAll('th');
     let headerRow = [];
-    for(let i=1; i<ths.length; i++) {
-        headerRow.push(`"${ths[i].innerText.replace(/"/g, '""')}"`);
+    for (let i = 1; i < ths.length; i++) {
+        headerRow.push(ths[i].innerText.trim());
     }
-    csvContent += headerRow.join(",") + "\r\n";
-    
-    // Data (targetRows was already defined above)
-    
+
+    // Extraer datos de cada fila
+    let matrix = [];
     targetRows.forEach(tr => {
         let rowData = [];
         let tds = tr.querySelectorAll('td');
-        for(let i=1; i<tds.length; i++) {
-            let text = tds[i].innerText.replace(/"/g, '""');
-            // Remove newlines
-            text = text.replace(/\r?\n|\r/g, ' | ');
-            rowData.push(`"${text}"`);
+        for (let i = 1; i < tds.length; i++) {
+            let text = tds[i].innerText || "";
+            text = text.replace(/\r?\n|\r/g, ' ').replace(/\s+/g, ' ').trim();
+            rowData.push(text);
         }
-        csvContent += rowData.join(",") + "\r\n";
+        matrix.push(rowData);
     });
-    
-    let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    let link = document.createElement("a");
-    if (link.download !== undefined) {
-        let url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "reporte_mantenimiento.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+
+    // Extraer KPIs actuales
+    let pendientesDoc50 = document.getElementById('kpi-pendientes-doc50')?.innerText || "0";
+    let totalGastoTxt = document.getElementById('kpi-total-gasto')?.innerText || "0";
+
+    if (typeof mostrarLoaderDinamico === 'function') {
+        mostrarLoaderDinamico("Generando Excel...", "Diseñando libro con formato institucional de Analítica 📊");
+    }
+
+    try {
+        const response = await fetch('/api/seccion_reportes/exportar_excel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                headers: headerRow,
+                rows: matrix,
+                kpis: {
+                    pendientesDoc50: pendientesDoc50,
+                    totalGasto: totalGastoTxt,
+                    totalRegistros: matrix.length
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Error en la respuesta del servidor al generar Excel.");
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        const now = new Date();
+        const ts = now.toISOString().slice(0, 10).replace(/-/g, '') + '_' + now.toTimeString().slice(0, 8).replace(/:/g, '');
+        a.download = `Reporte_Seccion_Reportes_${ts}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+    } catch (err) {
+        console.error("Error al exportar Excel:", err);
+        alert("Ocurrió un error al generar el archivo Excel institucional.");
+    } finally {
+        if (typeof ocultarLoaderDinamico === 'function') {
+            ocultarLoaderDinamico();
+        }
     }
 }
 
