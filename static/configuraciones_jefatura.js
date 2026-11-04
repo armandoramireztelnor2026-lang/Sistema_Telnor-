@@ -35,15 +35,21 @@ window.cargarConfiguracionesJefatura = async function() {
         const inputServidor = document.getElementById('cfg-servidor-smtp');
         const inputPuerto = document.getElementById('cfg-puerto-smtp');
         const badgeCorreoActivo = document.getElementById('cfg-badge-correo-activo');
-        const txtUltimaActualizacion = document.getElementById('cfg-txt-ultima-actualizacion');
 
         if (inputCorreo) inputCorreo.value = cfg.correo_emisor || '';
         if (inputCodigo) inputCodigo.value = cfg.codigo_emisor || '';
         if (inputServidor) inputServidor.value = cfg.servidor_smtp || 'smtp.gmail.com';
         if (inputPuerto) inputPuerto.value = cfg.puerto_smtp || 587;
         if (badgeCorreoActivo) badgeCorreoActivo.innerText = cfg.correo_emisor || 'No configurado';
-        if (txtUltimaActualizacion) {
-            txtUltimaActualizacion.innerText = `Última actualización: ${cfg.fecha_actualizacion || '--'} por ${cfg.actualizado_por || 'Jefatura'}`;
+        // Registrar valores iniciales y bloquear campos
+        window._valoresOriginalesCorreo = {
+            correo: (inputCorreo ? inputCorreo.value : '').trim(),
+            codigo: (inputCodigo ? inputCodigo.value : '').trim(),
+            servidor: (inputServidor ? inputServidor.value : '').trim(),
+            puerto: (inputPuerto ? String(inputPuerto.value) : '').trim()
+        };
+        if (typeof window.bloquearCamposCorreoEmisor === 'function') {
+            window.bloquearCamposCorreoEmisor();
         }
 
         // Renderizar tabla de cuentas de correo
@@ -192,11 +198,121 @@ function renderizarTablaCuentasCorreo(cuentas, correoActivo, envioActivo = true)
     });
 }
 
+// Variable de control para modo de edición de correo emisor
+window._modoEdicionCorreo = false;
+window._valoresOriginalesCorreo = null;
+
+window.bloquearCamposCorreoEmisor = function() {
+    window._modoEdicionCorreo = false;
+    const campos = ['cfg-correo-emisor', 'cfg-codigo-emisor', 'cfg-servidor-smtp', 'cfg-puerto-smtp'];
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.disabled = true;
+            el.style.cursor = 'not-allowed';
+            el.style.background = '#0f172a';
+            el.style.borderColor = '#1e293b';
+            el.style.color = '#94a3b8';
+            el.style.opacity = '0.85';
+        }
+    });
+
+    const btnGuardar = document.getElementById('btn-guardar-correo-emisor');
+    const txtGuardar = document.getElementById('btn-guardar-correo-emisor-txt');
+    const icoGuardar = document.getElementById('btn-guardar-correo-emisor-icon');
+    const btnCancelar = document.getElementById('btn-cancelar-correo-emisor');
+
+    if (btnGuardar) {
+        btnGuardar.style.background = '#000000';
+        btnGuardar.style.border = '1px solid #334155';
+        btnGuardar.style.boxShadow = '0 4px 10px rgba(2, 132, 199, 0.25)';
+    }
+    if (txtGuardar) txtGuardar.innerText = 'Actualizar datos';
+    if (icoGuardar) icoGuardar.innerText = '✏️';
+    if (btnCancelar) btnCancelar.style.display = 'none';
+};
+
+window.desbloquearCamposCorreoEmisor = function() {
+    window._modoEdicionCorreo = true;
+    const campos = ['cfg-correo-emisor', 'cfg-codigo-emisor', 'cfg-servidor-smtp', 'cfg-puerto-smtp'];
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.disabled = false;
+            el.style.cursor = 'text';
+            el.style.background = '#1e293b';
+            el.style.borderColor = '#38bdf8';
+            el.style.color = '#ffffff';
+            el.style.opacity = '1';
+        }
+    });
+
+    const btnGuardar = document.getElementById('btn-guardar-correo-emisor');
+    const txtGuardar = document.getElementById('btn-guardar-correo-emisor-txt');
+    const icoGuardar = document.getElementById('btn-guardar-correo-emisor-icon');
+    const btnCancelar = document.getElementById('btn-cancelar-correo-emisor');
+
+    if (btnGuardar) {
+        btnGuardar.style.background = '#000000';
+        btnGuardar.style.border = '1px solid #38bdf8';
+        btnGuardar.style.boxShadow = '0 4px 10px rgba(16, 185, 129, 0.25)';
+    }
+    if (txtGuardar) txtGuardar.innerText = 'Guardar credenciales de correo';
+    if (icoGuardar) icoGuardar.innerText = '💾';
+    if (btnCancelar) btnCancelar.style.display = 'inline-flex';
+
+    const inputCorreo = document.getElementById('cfg-correo-emisor');
+    if (inputCorreo) inputCorreo.focus();
+};
+
+window.cancelarEdicionCorreoEmisor = function() {
+    const orig = window._valoresOriginalesCorreo;
+    if (orig) {
+        const elCorreo = document.getElementById('cfg-correo-emisor');
+        const elCodigo = document.getElementById('cfg-codigo-emisor');
+        const elServidor = document.getElementById('cfg-servidor-smtp');
+        const elPuerto = document.getElementById('cfg-puerto-smtp');
+
+        if (elCorreo) elCorreo.value = orig.correo || '';
+        if (elCodigo) elCodigo.value = orig.codigo || '';
+        if (elServidor) elServidor.value = orig.servidor || 'smtp.gmail.com';
+        if (elPuerto) elPuerto.value = orig.puerto || '587';
+    }
+    window.bloquearCamposCorreoEmisor();
+};
+
 window.guardarCorreoEmisor = async function() {
-    const correo = document.getElementById('cfg-correo-emisor')?.value.trim();
-    const codigo = document.getElementById('cfg-codigo-emisor')?.value.trim();
-    const servidor = document.getElementById('cfg-servidor-smtp')?.value.trim() || 'smtp.gmail.com';
-    const puerto = document.getElementById('cfg-puerto-smtp')?.value.trim() || '587';
+    // Si los campos están bloqueados, este clic entra en modo de edición ("Actualizar datos")
+    if (!window._modoEdicionCorreo) {
+        window._valoresOriginalesCorreo = {
+            correo: (document.getElementById('cfg-correo-emisor')?.value || '').trim(),
+            codigo: (document.getElementById('cfg-codigo-emisor')?.value || '').trim(),
+            servidor: (document.getElementById('cfg-servidor-smtp')?.value || '').trim(),
+            puerto: (document.getElementById('cfg-puerto-smtp')?.value || '').trim()
+        };
+        window.desbloquearCamposCorreoEmisor();
+        return;
+    }
+
+    // Si ya estamos en modo edición, el botón dice "Guardar credenciales de correo"
+    const correo = (document.getElementById('cfg-correo-emisor')?.value || '').trim();
+    const codigo = (document.getElementById('cfg-codigo-emisor')?.value || '').trim();
+    const servidor = (document.getElementById('cfg-servidor-smtp')?.value || '').trim() || 'smtp.gmail.com';
+    const puerto = (document.getElementById('cfg-puerto-smtp')?.value || '').trim() || '587';
+
+    // Validar si NO se ha modificado nada
+    const orig = window._valoresOriginalesCorreo || {};
+    const noModificoNada = (
+        correo === (orig.correo || '') &&
+        codigo === (orig.codigo || '') &&
+        servidor === (orig.servidor || '') &&
+        puerto === (orig.puerto || '')
+    );
+
+    if (noModificoNada) {
+        alert("⚠️ Debes actualizar como mínimo un dato.");
+        return;
+    }
 
     if (!correo || !correo.includes('@')) {
         alert("⚠️ Por favor ingresa un correo electrónico válido.");
@@ -230,6 +346,8 @@ window.guardarCorreoEmisor = async function() {
         if (data.status === 'success') {
             alert(data.message || "Credenciales guardadas exitosamente.");
             cargarConfiguracionesJefatura();
+        } else if (data.status === 'no_change') {
+            alert("⚠️ Debes actualizar como mínimo un dato.");
         } else {
             alert("Error: " + (data.message || "No se pudo guardar la configuración."));
         }
@@ -593,6 +711,9 @@ window.cambiarTabConfiguracion = function(tabName) {
         // Mostrar estrictamente solo la actividad seleccionada
         if (sec) {
             sec.style.display = (t === tabName) ? 'block' : 'none';
+        }
+        if (tabName !== 'correo' && window._modoEdicionCorreo && typeof window.cancelarEdicionCorreoEmisor === 'function') {
+            window.cancelarEdicionCorreoEmisor();
         }
 
         // Estilizar los botones de las actividades independientes

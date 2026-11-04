@@ -107,6 +107,10 @@ async function cargarCotizaciones10k() {
                 let badgeRetrabajo = (f.estado === 'Retrabajo' || f.estado_retrabajo === 'Reasignado' || f.estado_retrabajo === 'Pendiente' || f.estado_retrabajo === 'Por Liberar' || f.retrabajo === 'Sí') ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
                 tbody.innerHTML += `<tr><td><span style="color:#0ea5e9; font-weight:bold;">${idRepForTable}</span>${badgeCaras}${badgeRetrabajo}</td><td>${f.fecha}</td><td><strong>${f.proveedor}</strong></td><td>${f.unidad}</td><td>${f.titulo}</td><td><strong>$${pFormat} MXN</strong></td>${tdPrecioInd}<td>${acciones}</td></tr>`;
             });
+
+            if (typeof aplicarPaginacion === 'function') {
+                aplicarPaginacion('tabla-cotizaciones-10k', 20, true);
+            }
         } else {
             tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#ef4444;">Error al cargar datos del servidor.</td></tr>`;
         }

@@ -190,6 +190,12 @@ def guardar_correo_emisor():
         return jsonify({"status": "error", "message": "Debes proporcionar el código o contraseña de aplicación."}), 400
 
     conf = obtener_configuracion()
+    if (str(conf.get("correo_emisor", "")).strip().lower() == correo.lower() and
+        str(conf.get("codigo_emisor", "")).strip() == codigo and
+        str(conf.get("servidor_smtp", "smtp.gmail.com")).strip().lower() == servidor.lower() and
+        int(conf.get("puerto_smtp", 587) or 587) == puerto):
+        return jsonify({"status": "no_change", "message": "⚠️ Debes actualizar como mínimo un dato."}), 200
+
     conf["correo_emisor"] = correo
     conf["codigo_emisor"] = codigo
     conf["servidor_smtp"] = servidor

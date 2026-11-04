@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="/static/style.css?v=1000049">
+    <link rel="stylesheet" href="/static/style.css?v=1000051">
     <link rel="stylesheet" href="/static/manual_sistema.css?v=2">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -187,7 +187,7 @@
                 <!-- Módulo de Configuraciones (Jefatura) -->
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align: center; color: #cbd5e1; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Configuraciones</div>
-                    <button class="btn-sidebar" title="Cambiar configuraciones" type="button" onclick="cambiarVistaAdmin('configuraciones')">Cambiar configuraciones</button>
+                    <button class="btn-sidebar btn-sidebar-configuraciones" title="Cambiar configuraciones" type="button" onclick="cambiarVistaAdmin('configuraciones')">Cambiar configuraciones</button>
                 </div>
                 {% endif %}
 
@@ -218,6 +218,7 @@
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align: center; color: #4ade80; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
                     <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button" onclick="cambiarVistaAdmin('retrabajo')">Retrabajo</button>
+                    <button class="btn-sidebar btn-sidebar-retrabajo" title="Retrabajo/Cotizaciones Caras" type="button" onclick="cambiarVistaAdmin('retrabajo-cotizaciones-caras')">Retrabajo/Cotizaciones Caras</button>
                     <button class="btn-sidebar btn-sidebar-retrabajo" id="btn-sidebar-liberar-retrabajo" title="Liberar/Retrabajo" type="button" onclick="cambiarVistaAdmin('liberar-retrabajo')">Liberar/Retrabajo</button>
                 </div>
                 {% endif %}
@@ -563,6 +564,120 @@
                 </div>
             </div>
 
+
+            <!-- VISTA: RETRABAJO DE COTIZACIONES CARAS -->
+            <div id="vista-retrabajo-cotizaciones-caras" style="display: none;">
+                <div class="top-bar">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.8rem;">🏷️</span>
+                        <div>
+                            <h2 style="margin: 0;">Retrabajo de Cotizaciones caras</h2>
+                            <p style="margin: 2px 0 0 0; color: #94a3b8; font-size: 0.85rem;">Módulo de retrabajos vinculados a cotizaciones extraordinarias</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
+                        <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 0; flex: 1; min-width: 280px;">
+                            <span class="buscador-icono">&#x1F50D;</span>
+                            <input type="search" id="buscador-retrabajo-cotizaciones-caras" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')" class="buscador-pildora"
+                                placeholder="Buscar por ticket, unidad, COPE, chofer, taller..."
+                                onkeyup="filtrarTabla('buscador-retrabajo-cotizaciones-caras', 'tabla-retrabajo-cotizaciones-caras')">
+                        </div>
+                        <button type="button" class="btn-sidebar-retrabajo" onclick="abrirModalGarantiaCotizacionesCaras()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; color: #ffffff !important; border: 1px solid #059669 !important; font-weight: 700; padding: 10px 22px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35); font-size: 0.95rem; white-space: nowrap;">
+                            <span>🛡️</span> <span>Aplicar garantia/Cotizaciones Caras</span>
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="white-space: nowrap;">Ticket</th>
+                                    <th style="white-space: nowrap;">Fecha Solicitud</th>
+                                    <th style="white-space: nowrap;">Fecha de Salida (Taller)</th>
+                                    <th style="white-space: nowrap;">Unidad</th>
+                                    <th style="white-space: nowrap;">COPE / Edificio</th>
+                                    <th style="white-space: nowrap;">Ciudad</th>
+                                    <th style="white-space: nowrap;">Taller Previo</th>
+                                    <th style="white-space: nowrap; text-align: right;">Precio Cotizaciones</th>
+                                    <th style="min-width: 260px; max-width: 420px;">Motivo de Garantía</th>
+                                    <th style="white-space: nowrap; text-align: center;">Estado</th>
+                                    <th style="white-space: nowrap; text-align: center;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-retrabajo-cotizaciones-caras">
+                                <tr>
+                                    <td colspan="11" style="text-align: center; color: #94a3b8; padding: 25px;">
+                                        No hay retrabajos de cotizaciones caras registrados.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+    <!-- Modal 1: Buscar Ticket de Garantía (Cotizaciones Caras) -->
+    <div id="modal-buscar-garantia-caras" class="modal-touch-overlay">
+        <div class="modal-touch-card modal-garantia-sm">
+            <div class="modal-card-header">
+                <span style="font-size:22px; line-height:1; flex-shrink:0;">🛡️</span>
+                <div style="flex:1; min-width:0;">
+                    <h2 class="modal-header-title" style="color:#f59e0b; margin:0; font-size:1.2rem; font-weight:700;">Aplicar Garantía / Cotizaciones Caras</h2>
+                </div>
+                <button type="button" class="btn-modal-close-touch" onclick="cerrarModalGarantiaCotizacionesCaras()" title="Cerrar">&times;</button>
+            </div>
+            
+            <div class="modal-card-body" style="padding-bottom:16px;">
+                <p style="color:#94a3b8; font-size:13px; margin-top:0; margin-bottom:16px; line-height:1.5;">
+                    Ingresa el número de ticket atendido para buscar los datos del reporte original con cotización extraordinaria.
+                </p>
+
+                <div>
+                    <label for="input-buscar-ticket-garantia-caras" style="display:block; color:#cbd5e1; font-size:13px; font-weight:600; margin-bottom:8px;">Número de Ticket:</label>
+                    <div style="display:flex; gap:8px; align-items:stretch;">
+                        <div style="display:flex; align-items:center; flex:1; min-width:0; border:1.5px solid #1f395a; border-radius:8px; background:#112641; overflow:hidden;">
+                            <span style="background:#0f172a; color:#f59e0b; font-weight:800; font-size:15px; padding:12px 14px; border-right:1.5px solid #1f395a; user-select:none; display:flex; align-items:center; letter-spacing:0.5px;">REP-</span>
+                            <input type="text" id="input-buscar-ticket-garantia-caras" inputmode="numeric" pattern="[0-9]*" placeholder="Ingresa solo los números (ej. 20261008131643)" oninput="this.value = this.value.replace(/[^0-9]/g, '')" onkeydown="if(event.key==='Enter') buscarTicketGarantiaCaras()" style="flex:1; min-width:0; box-sizing:border-box; padding:12px 14px; border:none; background:transparent; color:#ffffff; font-size:15px; outline:none;">
+                        </div>
+                        <button type="button" id="btn-buscar-ticket-caras" onclick="buscarTicketGarantiaCaras()" style="padding:12px 22px; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border:none; color:#0b1c30; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(245, 158, 11, 0.35); white-space:nowrap; flex-shrink:0;">Buscar</button>
+                    </div>
+                    <p style="color:#94a3b8; font-size:12px; margin:7px 0 0 0; line-height:1.4;">
+                        <span style="color:#f59e0b; font-weight:700;">⚠️ Importante:</span> Solo debes ingresar los números de tu ticket. El prefijo <strong>"REP-"</strong> ya está integrado automáticamente.
+                    </p>
+                    <div id="error-buscar-garantia-caras" style="display:none; color:#f87171; font-size:13px; margin-top:10px; background:rgba(239, 68, 68, 0.1); border:1px solid #ef4444; border-radius:6px; padding:9px 12px; line-height:1.4;"></div>
+                </div>
+            </div>
+
+            <div class="modal-card-footer">
+                <button type="button" class="gar-btn-secondary" style="width:100%;" onclick="cerrarModalGarantiaCotizacionesCaras()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- Modal 2: Datos Originales del Reporte (Sección 1 y 2) + Falla que persiste + Botones (Cotizaciones Caras) -->
+    <div id="modal-datos-garantia-caras" class="modal-touch-overlay" style="display: none; z-index: 10006;">
+        <div class="modal-touch-card" style="max-width: 1000px; width: 95vw; max-height: 90vh; max-height: 90dvh; display: flex; flex-direction: column; overflow: hidden; padding: 0; background: #0b1c30; border: 1.5px solid #f59e0b; border-radius: 14px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);">
+            <!-- Header Modal -->
+            <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f59e0b; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 26px;">🛡️</span>
+                    <div>
+                        <h3 style="margin: 0; color: #ffffff; font-size: 1.25rem; font-weight: 700; letter-spacing: 0.5px;" id="modal-garantia-caras-titulo">Garantía / Retrabajo de Cotizaciones Caras</h3>
+                        <p style="margin: 2px 0 0 0; color: #f59e0b; font-size: 0.85rem;" id="modal-garantia-caras-subtitulo">Revisión de Sección 1 y 2 para emitir Retrabajo</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="cerrarModalDatosGarantiaCaras()" style="position: static; font-size: 26px; color: #e2e8f0; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">&times;</button>
+            </div>
+
+            <!-- Contenido Scrollable con Sección 1, Sección 2, Cuadro de falla que persiste y Botones -->
+            <div id="contenido-datos-garantia-caras" style="padding: 24px; overflow-y: auto; flex: 1; color: #e2e8f0;">
+                <!-- Inyectado dinámicamente por buscarTicketGarantiaCaras() -->
+            </div>
+        </div>
+    </div>
+
+
 <!-- MODAL PARA VALIDAR CÓDIGO Y LIBERAR RETRABAJO -->
 <div id="modal-validar-codigo-liberacion" style="display: none; position: fixed; inset: 0; background: rgba(3, 7, 18, 0.78); backdrop-filter: blur(4px); z-index: 999999; align-items: center; justify-content: center; padding: 16px;">
     <div style="background: #0f172a; border: 1.5px solid #38bdf8; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 20px 45px rgba(0,0,0,0.85); overflow: hidden; animation: fadeInModal 0.2s ease;">
@@ -677,9 +792,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div id="cfg-txt-ultima-actualizacion" style="color: #64748b; font-size: 0.82rem; font-weight: 500; background: #0f172a; padding: 6px 14px; border-radius: 8px; border: 1px solid #1e293b;">
-                            Última actualización: --
-                        </div>
+
                     </div>
                 </div>
 
@@ -725,7 +838,7 @@
                                     <span>Correo Remitente Oficial:</span>
                                     <span style="color: #64748b; font-size: 0.75rem; font-weight: 400;">(Gmail / Institucional)</span>
                                 </label>
-                                <input type="email" id="cfg-correo-emisor" placeholder="ejemplo@gmail.com" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 14px; border-radius: 8px; font-size: 0.92rem;">
+                                <input type="email" id="cfg-correo-emisor" disabled placeholder="ejemplo@gmail.com" style="width: 100%; height: 44px; box-sizing: border-box; background: #0f172a; border: 1px solid #1e293b; color: #94a3b8; padding: 0 14px; border-radius: 8px; font-size: 0.92rem; cursor: not-allowed; opacity: 0.85;">
                             </div>
 
                             <!-- Cuadro 2: Contraseña de Aplicación -->
@@ -735,7 +848,7 @@
                                     <span style="color: #64748b; font-size: 0.75rem; font-weight: 400;">(16 dígitos de Google)</span>
                                 </label>
                                 <div style="position: relative; width: 100%; height: 44px; display: flex; align-items: center;">
-                                    <input type="password" id="cfg-codigo-emisor" autocomplete="new-password" placeholder="zgdhbgcpuobszybi" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 44px 0 14px; border-radius: 8px; font-size: 0.92rem;">
+                                    <input type="password" id="cfg-codigo-emisor" disabled autocomplete="new-password" placeholder="zgdhbgcpuobszybi" style="width: 100%; height: 44px; box-sizing: border-box; background: #0f172a; border: 1px solid #1e293b; color: #94a3b8; padding: 0 44px 0 14px; border-radius: 8px; font-size: 0.92rem; cursor: not-allowed; opacity: 0.85;">
                                     <button type="button" onclick="toggleMostrarPassword('cfg-codigo-emisor', this)" style="position: absolute; right: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: #94a3b8; transition: color 0.2s ease;" title="Mostrar código"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
                                 </div>
                             </div>
@@ -746,7 +859,7 @@
                                     <span>Servidor SMTP (Host):</span>
                                     <span style="color: #64748b; font-size: 0.75rem; font-weight: 400;">(Default: smtp.gmail.com)</span>
                                 </label>
-                                <input type="text" id="cfg-servidor-smtp" value="smtp.gmail.com" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 14px; border-radius: 8px; font-size: 0.92rem;">
+                                <input type="text" id="cfg-servidor-smtp" disabled value="smtp.gmail.com" style="width: 100%; height: 44px; box-sizing: border-box; background: #0f172a; border: 1px solid #1e293b; color: #94a3b8; padding: 0 14px; border-radius: 8px; font-size: 0.92rem; cursor: not-allowed; opacity: 0.85;">
                             </div>
 
                             <!-- Cuadro 4: Puerto SMTP -->
@@ -755,14 +868,17 @@
                                     <span>Puerto SMTP (TLS / SSL):</span>
                                     <span style="color: #64748b; font-size: 0.75rem; font-weight: 400;">(Default: 587)</span>
                                 </label>
-                                <input type="number" id="cfg-puerto-smtp" value="587" style="width: 100%; height: 44px; box-sizing: border-box; background: #1e293b; border: 1px solid #334155; color: #ffffff; padding: 0 14px; border-radius: 8px; font-size: 0.92rem;">
+                                <input type="number" id="cfg-puerto-smtp" disabled value="587" style="width: 100%; height: 44px; box-sizing: border-box; background: #0f172a; border: 1px solid #1e293b; color: #94a3b8; padding: 0 14px; border-radius: 8px; font-size: 0.92rem; cursor: not-allowed; opacity: 0.85;">
                             </div>
                         </form>
 
                         <!-- Botones de Acción de Correo (Simétricos y Balanceados) -->
                         <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; align-items: center;">
-                            <button type="button" class="btn-success" onclick="guardarCorreoEmisor()" style="background: #10b981; color: white; border: none; height: 42px; padding: 0 22px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);">
-                                <span>💾</span> <span>Guardar Credenciales de Correo</span>
+                            <button type="button" id="btn-guardar-correo-emisor" onclick="guardarCorreoEmisor()" style="background: #000000; color: white; border: 1px solid #334155; height: 42px; padding: 0 22px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25); transition: all 0.2s ease;">
+                                <span id="btn-guardar-correo-emisor-icon">✏️</span> <span id="btn-guardar-correo-emisor-txt">Actualizar datos</span>
+                            </button>
+                            <button type="button" id="btn-cancelar-correo-emisor" class="btn-secondary" onclick="cancelarEdicionCorreoEmisor()" style="display: none; background: #334155; color: #f8fafc; border: 1px solid #475569; height: 42px; padding: 0 18px; border-radius: 8px; font-weight: 600; cursor: pointer; align-items: center; gap: 8px; transition: all 0.2s ease;">
+                                <span>❌</span> <span>Cancelar</span>
                             </button>
                             <button type="button" class="btn-secondary" onclick="abrirModalProbarCorreo()" style="background: #0284c7; color: white; border: none; height: 42px; padding: 0 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);">
                                 <span>✉️</span> <span>Enviar Correo de Prueba</span>
@@ -4616,16 +4732,16 @@
         <video id="lightbox-vid" class="lightbox-content" controls style="display:none; background:#000;"></video>
     </div>
 
-    <script src="/static/configuraciones_jefatura.js?v=8"></script>
-    <script src="/static/script.js?v=1000056"></script>
+    <script src="/static/configuraciones_jefatura.js?v=12"></script>
+    <script src="/static/script.js?v=1000059"></script>
     <script src="/static/liberacion.js?v=2"></script>
     <script src="/static/facturas_herramientas.js?v=7"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
     <script src="/static/unidades.js?v=12"></script>
-    <script src="/static/facturas_principal.js?v=81"></script>
-    <script src="/static/seccion_reportes.js?v=1000033"></script>
-    <script src="/static/cotizaciones_10k.js?v=29"></script>
+    <script src="/static/facturas_principal.js?v=83"></script>
+    <script src="/static/seccion_reportes.js?v=1000034"></script>
+    <script src="/static/cotizaciones_10k.js?v=30"></script>
 
     
     <!-- MODAL AJUSTAR TIEMPO DE GARANTÍA POR JEFATURA -->
@@ -5063,6 +5179,289 @@
         }, 300);
     </script>
 {% include 'chat_widget.html' %}
+
+<script>
+function abrirModalGarantiaCotizacionesCaras() {
+    const modal = document.getElementById('modal-buscar-garantia-caras');
+    if (modal) {
+        modal.style.display = 'flex';
+        const err = document.getElementById('error-buscar-garantia-caras');
+        if (err) err.style.display = 'none';
+        const inp = document.getElementById('input-buscar-ticket-garantia-caras');
+        if (inp) {
+            inp.value = '';
+            setTimeout(() => inp.focus(), 100);
+        }
+    }
+}
+
+function cerrarModalGarantiaCotizacionesCaras() {
+    const modal = document.getElementById('modal-buscar-garantia-caras');
+    if (modal) modal.style.display = 'none';
+}
+
+function cerrarModalDatosGarantiaCaras() {
+    const modal = document.getElementById('modal-datos-garantia-caras');
+    if (modal) modal.style.display = 'none';
+}
+
+async function buscarTicketGarantiaCaras() {
+    const inp = document.getElementById('input-buscar-ticket-garantia-caras');
+    const rawDigits = inp ? inp.value.trim().replace(/[^0-9]/g, '') : '';
+    const divErr = document.getElementById('error-buscar-garantia-caras');
+    const btn = document.getElementById('btn-buscar-ticket-caras');
+
+    if (!rawDigits) {
+        if (divErr) {
+            divErr.innerText = 'Por favor ingresa únicamente los dígitos numéricos de tu ticket.';
+            divErr.style.display = 'block';
+        }
+        if (inp) inp.focus();
+        return;
+    }
+
+    const ticket = `REP-${rawDigits}`;
+    if (divErr) divErr.style.display = 'none';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Buscando...';
+    }
+
+    try {
+        const res = await fetch(`/api/garantia/buscar_ticket/${encodeURIComponent(ticket)}?tipo=caras`);
+        const data = await res.json();
+
+        if (data.status === 'success' && (data.reporte || data.seccion_1)) {
+            const s1 = data.seccion_1 || data.reporte || {};
+            const s2 = data.seccion_2 || {};
+            cerrarModalGarantiaCotizacionesCaras();
+
+            const tit = document.getElementById('modal-garantia-caras-titulo');
+            const sub = document.getElementById('modal-garantia-caras-subtitulo');
+            const ticketVal = s1.ticket || s1.id || ticket;
+            if (tit) tit.innerText = `🛡️ Retrabajo / Cotizaciones Caras - Ticket: ${ticketVal}`;
+            if (sub) sub.innerText = `Unidad: 8090-${s1.unidad} | COPE: ${s1.cope} | Taller: ${s2.proveedor || '--'}`;
+
+            const cont = document.getElementById('contenido-datos-garantia-caras');
+            if (!cont) return;
+
+            // Firma del Chofer si existe
+            let firmaHTML = '';
+            if (s1.firma_chofer && String(s1.firma_chofer).startsWith('data:image')) {
+                firmaHTML = `
+                    <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid #1f395a; text-align: center;">
+                        <span style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 6px;">✍️ Firma del Chofer / Operador:</span>
+                        <img src="${s1.firma_chofer}" alt="Firma del Chofer" style="background: white; border-radius: 8px; max-width: 260px; max-height: 90px; border: 2px solid #1f395a; padding: 4px;">
+                    </div>
+                `;
+            }
+
+            // Cotizaciones y Diagnóstico Taller (Sección 2)
+            let cotizacionesHTML = '';
+            const cots = s2.cotizaciones || [];
+            cots.forEach((c, idx) => {
+                let numCotStr = cots.length > 1 ? ` (Cotización #${idx + 1})` : '';
+
+                let pdfLink = '';
+                if (c.pdf_cotizacion) {
+                    let nombreArchivo = String(c.pdf_cotizacion);
+                    pdfLink = `
+                        <div style="margin-top: 10px; max-width: 100%; box-sizing: border-box;">
+                            <span style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 5px;">Documento de Cotización Adjunto:</span>
+                            <a href="/static/facturas_archivos/${c.pdf_cotizacion}" target="_blank" 
+                               style="display: inline-flex; align-items: flex-start; gap: 8px; max-width: 100%; background: #081422; border: 1px solid #1e3a5f; padding: 8px 14px; border-radius: 8px; color: #38bdf8; font-weight: 600; font-size: 0.85rem; text-decoration: none; box-sizing: border-box; word-break: break-all; overflow-wrap: anywhere; line-height: 1.45; transition: all 0.2s;" 
+                               onmouseover="this.style.borderColor='#38bdf8'; this.style.background='#0d1e33';" 
+                               onmouseout="this.style.borderColor='#1e3a5f'; this.style.background='#081422';"
+                               title="${nombreArchivo}">
+                                <span style="font-size: 18px; flex-shrink: 0; margin-top: 1px;">📄</span>
+                                <span style="word-break: break-all; overflow-wrap: anywhere;">
+                                    <span style="font-weight: 700; color: #38bdf8; text-decoration: underline;">Ver Archivo</span>
+                                    <span style="color: #94a3b8; font-size: 0.82rem; font-weight: 400; margin-left: 4px;">(${nombreArchivo})</span>
+                                </span>
+                            </a>
+                        </div>
+                    `;
+                }
+
+                let evidenciasHTML = '';
+                if (c.fotos_evidencia && c.fotos_evidencia.length > 0) {
+                    evidenciasHTML = `
+                        <div style="margin-top: 10px;">
+                            <span style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 6px;">Evidencias Adjuntas del Taller:</span>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    `;
+                    c.fotos_evidencia.forEach(foto => {
+                        const fLow = String(foto).toLowerCase();
+                        if (fLow.endsWith('.mp4') || fLow.endsWith('.mov') || fLow.endsWith('.webm')) {
+                            evidenciasHTML += `
+                                <a href="/static/facturas_archivos/${foto}" target="_blank" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 85px; height: 85px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; text-decoration: none; color: #38bdf8; font-size: 11px;">
+                                    <span style="font-size: 24px;">🎥</span>
+                                    <span style="font-size: 9px; text-align: center; overflow: hidden; text-overflow: ellipsis; max-width: 75px;">Video</span>
+                                </a>
+                            `;
+                        } else {
+                            evidenciasHTML += `
+                                <a href="/static/facturas_archivos/${foto}" target="_blank" style="display: block; width: 85px; height: 85px; border-radius: 8px; overflow: hidden; border: 1px solid #334155;">
+                                    <img src="/static/facturas_archivos/${foto}" alt="Evidencia" style="width: 100%; height: 100%; object-fit: cover;">
+                                </a>
+                            `;
+                        }
+                    });
+                    evidenciasHTML += `</div></div>`;
+                }
+
+                cotizacionesHTML += `
+                    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #1e3a5f; border-radius: 8px; padding: 14px; margin-top: 10px; max-width: 100%; box-sizing: border-box; overflow: hidden;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed #1e3a5f; padding-bottom: 6px;">
+                            <span style="color: #38bdf8; font-weight: 700; font-size: 0.95rem;">${c.titulo || 'Detalle de Reparación'}${numCotStr}</span>
+                            <div style="text-align: right;">
+                                <span style="color: #94a3b8; font-size: 0.72rem; display: block; font-weight: 600; text-transform: uppercase;">Precio Individual:</span>
+                                <span style="background: #064e3b; color: #4ade80; border: 1px solid #22c55e; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.88rem; display: inline-block;">$${Number(c.precio || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN</span>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 0.88rem;">
+                            <div><strong style="color: #94a3b8;">Mantenimiento:</strong> <span style="color: #ffffff;">${c.mantenimiento || 'Correctivo'}</span></div>
+                            <div><strong style="color: #94a3b8;">Diagnóstico del Mecánico:</strong> <div style="background: #09131f; padding: 8px 12px; border-radius: 6px; margin-top: 3px; color: #f1f5f9; border-left: 3px solid #38bdf8;">${c.diagnostico || 'Sin diagnóstico registrado'}</div></div>
+                            <div><strong style="color: #94a3b8;">Trabajo a Realizar:</strong> <div style="background: #09131f; padding: 8px 12px; border-radius: 6px; margin-top: 3px; color: #f1f5f9; border-left: 3px solid #10b981;">${c.trabajo_realizar || 'Sin trabajo registrado'}</div></div>
+                            ${c.retro ? `<div><strong style="color: #94a3b8;">Retro / Situación:</strong> <div style="background: #09131f; padding: 8px 12px; border-radius: 6px; margin-top: 3px; color: #f1f5f9; font-style: italic;">${c.retro}</div></div>` : ''}
+                        </div>
+                        ${pdfLink}
+                        ${evidenciasHTML}
+                    </div>
+                `;
+            });
+
+            cont.innerHTML = `
+                <!-- BANNER DE COTIZACIÓN CARA -->
+                <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.08)); border: 1.5px solid #f59e0b; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 22px;">💰</span>
+                        <div>
+                            <strong style="color: #fbbf24; font-size: 0.98rem; display: block;">Cotización Cara (+10,000 MXN)</strong>
+                            <span style="color: #cbd5e1; font-size: 0.82rem;">Costo total registrado previo: <strong style="color: #4ade80;">$${Number(s2.precio_total || s2.precio || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN</strong></span>
+                        </div>
+                    </div>
+                    <span style="background: #064e3b; color: #4ade80; border: 1px solid #10b981; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 700;">
+                        ${data.vigente ? '⏱️ Garantía Vigente' : '⏱️ Vigencia: ' + (data.garantia_limite || 'Completada')}
+                    </span>
+                </div>
+
+                <!-- CONTENEDOR CON SECCIÓN 1 Y SECCIÓN 2 (IDÉNTICO A INTERFAZ DE RETRABAJO) -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    
+                    <!-- ■ SECCIÓN 1: REPORTE DE INCIDENCIA ORIGINAL (CHOFER) -->
+                    <div style="background: #0d1e33; border: 1.5px solid #0284c7; border-radius: 12px; padding: 18px 20px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1.5px solid #0284c7; padding-bottom: 8px;">
+                            <span style="color: #38bdf8; font-weight: 800; font-size: 1.05rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                                <span>■</span> SECCIÓN 1: REPORTE DE INCIDENCIA ORIGINAL (CHOFER)
+                            </span>
+                            <span style="background: #0369a1; color: white; padding: 2px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">Ticket: ${s1.ticket || s1.id || ticketVal}</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 0.88rem;">
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Unidad:</span><strong style="color: #ffffff; font-size: 1rem;">8090-${s1.unidad}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Marca y Modelo:</span><strong style="color: #ffffff;">${s1.marca || 'N/A'} ${s1.modelo || 'N/A'}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Fecha y Hora Reporte:</span><strong style="color: #cbd5e1;">${s1.fecha || '--'} ${s1.hora ? s1.hora + ' hrs' : ''}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Kilometraje:</span><strong style="color: #cbd5e1;">${s1.kilometraje || 'No registrado'} km</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Compañía:</span><strong style="color: #10b981;">${s1.compania || 'Telnor'}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Tipo Mantenimiento:</span><strong style="color: ${s1.mantenimiento === 'Preventivo' ? '#38bdf8' : '#ef4444'};">${s1.mantenimiento || 'Correctivo'}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Ciudad y COPE:</span><strong style="color: #38bdf8;">${s1.ciudad || '--'} - ${s1.cope || '--'}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Departamento:</span><strong style="color: #cbd5e1;">${s1.departamento || 'No especificado'}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Chofer / Operador:</span><strong style="color: #ffffff;">${s1.empleado || 'No registrado'}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Teléfono Celular:</span><strong style="color: #cbd5e1;">${s1.celular || 'No registrado'}</strong></div>
+                            <div style="grid-column: 1 / -1;"><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Correo Electrónico:</span><strong style="color: #cbd5e1;">${s1.email || 'No registrado'}</strong></div>
+                            
+                            <div style="grid-column: 1 / -1; margin-top: 5px;">
+                                <span style="color: #f59e0b; font-size: 0.82rem; font-weight: 700; display: block; margin-bottom: 4px;">Falla Original Reportada:</span>
+                                <div style="background: #09131f; padding: 12px 14px; border-radius: 8px; color: #e2e8f0; font-style: italic; border-left: 3px solid #f59e0b;">
+                                    "${s1.falla_original || s1.falla || 'Sin detalle de falla'}"
+                                </div>
+                            </div>
+                        </div>
+                        ${firmaHTML}
+                    </div>
+
+                    <!-- ■ SECCIÓN 2: DIAGNÓSTICO, TRABAJO Y COTIZACIÓN (TALLER PREVIO) -->
+                    <div style="background: #0d1e33; border: 1.5px solid #10b981; border-radius: 12px; padding: 18px 20px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1.5px solid #10b981; padding-bottom: 8px;">
+                            <span style="color: #4ade80; font-weight: 800; font-size: 1.05rem; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+                                <span>■</span> SECCIÓN 2: DIAGNÓSTICO, TRABAJO Y COTIZACIÓN (TALLER PREVIO)
+                            </span>
+                            <span style="background: #064e3b; color: #4ade80; padding: 2px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">Proveedor: ${s2.proveedor || 'Taller'}</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 0.88rem; margin-bottom: 12px;">
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Taller / Proveedor:</span><strong style="color: #ffffff; font-size: 1rem;">${s2.proveedor || 'No asignado'}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Responsable en Turno:</span><strong style="color: #ffffff;">${s2.responsable || 'No registrado'}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Fecha Ingreso a Taller:</span><strong style="color: #cbd5e1;">${s2.fecha_ingreso || s2.fecha || '--'}</strong></div>
+                            <div><span style="color: #94a3b8; font-size: 0.8rem; display: block;">Costo Previo Total (s/IVA):</span><strong style="color: #4ade80; font-size: 1rem;">$${Number(s2.precio_total || s2.precio || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN</strong></div>
+                        </div>
+
+                        <!-- Cotizaciones / Trabajos de Sección 2 -->
+                        ${cotizacionesHTML}
+                    </div>
+
+                </div>
+
+                <!-- CUADRO PARA INGRESAR LA FALLA QUE PERSISTE O NO SE CORRIGIÓ -->
+                <div style="background: #09131f; border: 1.5px solid #f59e0b; border-radius: 12px; padding: 18px 20px; margin-top: 24px; margin-bottom: 20px;">
+                    <label for="gar-caras-falla-persiste" style="color: #fbbf24; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span>⚠️</span> Falla que persiste o no se corrigió:
+                    </label>
+                    <p style="color: #94a3b8; font-size: 0.82rem; margin: 0 0 10px 0; line-height: 1.4;">
+                        Escriba a continuación detalladamente la falla que persiste o que no fue resuelta en el taller:
+                    </p>
+                    <textarea id="gar-caras-falla-persiste" rows="4" placeholder="Escriba aquí detalladamente la falla que persiste o no se corrigió..." style="width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 8px; border: 1px solid #f59e0b; background: #112641; color: #ffffff; font-size: 0.92rem; line-height: 1.5; resize: vertical; outline: none; font-family: inherit; transition: border-color 0.2s;"></textarea>
+                </div>
+
+                <!-- 2 BOTONES CON DISEÑO DE ARRIBA A ABAJO -->
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 10px;">
+                    <button type="button" id="btn-enviar-retrabajo-caras" class="btn-footer-retrabajo" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 8px; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                        <span>🔄</span> Enviar Retrabajo
+                    </button>
+                    <button type="button" class="btn-footer-retrabajo" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 600; background: #1e293b; border: 1px solid #475569; border-radius: 8px; color: #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#1e293b'" onclick="cerrarModalDatosGarantiaCaras()">
+                        Cancelar
+                    </button>
+                </div>
+            `;
+
+            // Configurar botón Enviar Retrabajo (mantiene estado a la espera de instrucciones)
+            const btnEnviar = document.getElementById('btn-enviar-retrabajo-caras');
+            if (btnEnviar) {
+                btnEnviar.onclick = () => {
+                    const falla = document.getElementById('gar-caras-falla-persiste')?.value.trim();
+                    if (!falla) {
+                        alert('Por favor ingrese la falla que persiste o no se corrigió.');
+                        document.getElementById('gar-caras-falla-persiste')?.focus();
+                        return;
+                    }
+                    alert('Falla registrada: ' + falla + '\nInterfaz lista. Esperando instrucciones.');
+                };
+            }
+
+            const modalDatos = document.getElementById('modal-datos-garantia-caras');
+            if (modalDatos) modalDatos.style.display = 'flex';
+        } else {
+            if (divErr) {
+                divErr.innerText = data.message || 'No se encontró ningún reporte con este número de ticket.';
+                divErr.style.display = 'block';
+            }
+        }
+    } catch (e) {
+        if (divErr) {
+            divErr.innerText = 'Error al comunicarse con el servidor.';
+            divErr.style.display = 'block';
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerText = 'Buscar';
+        }
+    }
+}
+
+</script>
+
 </body>
 
 </html>

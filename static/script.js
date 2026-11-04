@@ -35,10 +35,10 @@ if (typeof window.ocultarLoaderDinamico !== 'function') {
 // ==========================================
 window.paginacionEstado = {};
 
-window.cambiarPagina = function(tbodyId, direccion) {
+window.cambiarPagina = function(tbodyId, direccion, itemsPerPage = 20) {
     if (!window.paginacionEstado[tbodyId]) window.paginacionEstado[tbodyId] = 1;
     window.paginacionEstado[tbodyId] += direccion;
-    aplicarPaginacion(tbodyId, 20, false);
+    aplicarPaginacion(tbodyId, itemsPerPage, false);
 };
 
 window.aplicarPaginacion = function(tbodyId, itemsPerPage = 20, resetPage = true) {
@@ -113,9 +113,9 @@ window.aplicarPaginacion = function(tbodyId, itemsPerPage = 20, resetPage = true
         pagContainer.innerHTML = `
             <span style="color:#a3b1c6; font-size:0.9em; font-weight:bold;">Mostrando ${totalItems === 0 ? 0 : startIndex + 1} - ${Math.min(endIndex, totalItems)} de ${totalItems} tickets</span>
             <div style="display:flex; align-items:center;">
-                <button onclick="cambiarPagina('${tbodyId}', -1)" ${currentPage === 1 ? 'disabled style="opacity:0.5; cursor:not-allowed; padding:6px 15px; margin-right:10px; font-size:0.85em; font-weight:bold; background:#334155; color:white; border:none; border-radius:6px;"' : 'style="padding:6px 15px; margin-right:10px; font-size:0.85em; font-weight:bold; background:#0ea5e9; color:white; border:none; border-radius:6px; cursor:pointer;"'}>◄ Anterior</button>
+                <button onclick="event.stopPropagation(); event.preventDefault(); cambiarPagina('${tbodyId}', -1, ${itemsPerPage})" ${currentPage === 1 ? 'disabled style="opacity:0.5; cursor:not-allowed; padding:6px 15px; margin-right:10px; font-size:0.85em; font-weight:bold; background:#334155; color:white; border:none; border-radius:6px;"' : 'style="padding:6px 15px; margin-right:10px; font-size:0.85em; font-weight:bold; background:#0ea5e9; color:white; border:none; border-radius:6px; cursor:pointer;"'}>◄ Anterior</button>
                 <span style="color:white; font-size:0.9em; margin:0 15px; font-weight:bold;">Página ${currentPage} de ${totalPages}</span>
-                <button onclick="cambiarPagina('${tbodyId}', 1)" ${currentPage === totalPages ? 'disabled style="opacity:0.5; cursor:not-allowed; padding:6px 15px; font-size:0.85em; font-weight:bold; background:#334155; color:white; border:none; border-radius:6px;"' : 'style="padding:6px 15px; font-size:0.85em; font-weight:bold; background:#0ea5e9; color:white; border:none; border-radius:6px; cursor:pointer;"'}>Siguiente ►</button>
+                <button onclick="event.stopPropagation(); event.preventDefault(); cambiarPagina('${tbodyId}', 1, ${itemsPerPage})" ${currentPage === totalPages ? 'disabled style="opacity:0.5; cursor:not-allowed; padding:6px 15px; font-size:0.85em; font-weight:bold; background:#334155; color:white; border:none; border-radius:6px;"' : 'style="padding:6px 15px; font-size:0.85em; font-weight:bold; background:#0ea5e9; color:white; border:none; border-radius:6px; cursor:pointer;"'}>Siguiente ►</button>
             </div>
         `;
     }
@@ -256,8 +256,9 @@ function marcarBotonActivo(vista) {
             let matchesFF = ((vista === 'facturas-finales' || vista === 'facturas_finales') && (onclickAttr.includes("facturas-finales") || onclickAttr.includes("facturas_finales")));
             let matchesDoc = ((vista === 'documentos-contables' || vista === 'documentos_contables') && (onclickAttr.includes("documentos-contables") || onclickAttr.includes("documentos_contables")));
             let matchesLib = ((vista === 'liberar-doc-contable' || vista === 'liberar_doc_contable') && (onclickAttr.includes("liberar-doc-contable") || onclickAttr.includes("liberar_doc_contable")));
+            let matchesRetrabajoCaras = (vista === 'retrabajo-cotizaciones-caras' && (onclickAttr.includes("retrabajo-cotizaciones-caras") || onclickAttr.includes("retrabajo_cotizaciones_caras")));
             
-            if (matchesView || matches10k || matchesFF || matchesDoc || matchesLib) {
+            if (matchesView || matches10k || matchesFF || matchesDoc || matchesLib || matchesRetrabajoCaras) {
                 let nav = b.closest('.nav-menu') || b.closest('.sidebar');
                 if (nav) {
                     nav.querySelectorAll('.btn-sidebar').forEach(btn => btn.classList.remove('active'));
@@ -476,7 +477,7 @@ window.abrirVistaDelegada = function(tipo) {
 function cambiarVistaAdmin(vista) {
     localStorage.setItem('activeViewAdmin', vista);
     marcarBotonActivo(vista);
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica', 'retrabajo', 'tiempo-garantia', 'flujo-trabajo', 'liberar-retrabajo', 'configuraciones'];
+    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica', 'retrabajo', 'tiempo-garantia', 'flujo-trabajo', 'liberar-retrabajo', 'configuraciones', 'retrabajo-cotizaciones-caras'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';
@@ -489,6 +490,7 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'tiempo_garantia') vistaId = 'tiempo-garantia';
     if (vista === 'flujo_trabajo') vistaId = 'flujo-trabajo';
     if (vista === 'liberar_retrabajo') vistaId = 'liberar-retrabajo';
+    if (vista === 'retrabajo_cotizaciones_caras' || vista === 'retrabajo-cotizaciones-caras') vistaId = 'retrabajo-cotizaciones-caras';
 
     let elVista = document.getElementById('vista-' + vistaId);
     if (elVista) elVista.style.display = 'block';
@@ -726,7 +728,7 @@ async function cargarRetrabajosAdmin() {
         });
         
         if (typeof aplicarPaginacion === 'function') {
-            aplicarPaginacion('tabla-retrabajos', 15, true);
+            aplicarPaginacion('tabla-retrabajos', 20, true);
         }
     } catch (err) {
         console.error('Error al cargar retrabajos:', err);
@@ -3216,7 +3218,7 @@ window.cargarLiberarRetrabajosSupervisor = async function() {
         });
 
         if (typeof aplicarPaginacion === 'function') {
-            aplicarPaginacion('tabla-liberar-retrabajo', 15, true);
+            aplicarPaginacion('tabla-liberar-retrabajo', 20, true);
         }
     } catch (err) {
         console.error('Error al cargar retrabajos por liberar:', err);

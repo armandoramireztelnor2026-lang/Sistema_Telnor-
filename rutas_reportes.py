@@ -763,8 +763,31 @@ def buscar_ticket_garantia(ticket_query):
             "message": "Este ticket no puede ser enviado a retrabajo porque aún no ha sido atendido ni procesado en taller."
         })
 
+    es_caras_req = (request.args.get("tipo") == "caras")
+    precio_fact = float(factura_correspondiente.get("precio", 0) or 0)
+    limite_caras = 10000.0
+    try:
+        from rutas_facturas import obtener_limite_cotizaciones_caras
+        limite_caras = obtener_limite_cotizaciones_caras()
+    except Exception:
+        pass
+
+    es_ticket_caras = (
+        precio_fact >= limite_caras 
+        or factura_correspondiente.get("reactivado_desde_caras")
+        or "caras" in str(factura_correspondiente.get("estado", "")).lower()
+        or "caras" in str(factura_correspondiente.get("estado_previo", "")).lower()
+    )
+
+    if es_caras_req and not es_ticket_caras:
+        return jsonify({
+            "status": "no_caras",
+            "message": f"El ticket {rep_id_target} no corresponde a una Cotización Cara (el monto de cotización es de ${precio_fact:,.2f} MXN, menor al umbral de ${limite_caras:,.2f} MXN)."
+        })
+
     entregado_val = str(factura_correspondiente.get("entregado", "")).strip().lower()
-    if not (entregado_val in ["sí", "si", "s"] or entregado_val.startswith("s")):
+    es_entregado = (entregado_val in ["sí", "si", "s"] or entregado_val.startswith("s"))
+    if not es_entregado and not es_caras_req:
         return jsonify({
             "status": "no_elegible",
             "message": "Solo se puede mandar a retrabajo una unidad cuando el chofer ya haya verificado su número de confirmación para cuando el taller en teoría la dejó arreglada y lista."
@@ -772,7 +795,7 @@ def buscar_ticket_garantia(ticket_query):
 
     # Validación de vigencia de tiempo de garantía del taller
     vigente, segs_trans, segs_tot, segs_rest, f_entrega, n_taller, txt_trans, txt_lim, txt_rest = verificar_vigencia_garantia(factura_correspondiente)
-    if not vigente:
+    if not vigente and not es_caras_req:
         return jsonify({
             "status": "garantia_expirada",
             "message": f"El tiempo de garantía ya pasó para este ticket. El taller '{n_taller}' ofrece un límite de {txt_lim} de garantía y han transcurrido {txt_trans} desde la entrega ({f_entrega}). Ya no es posible aplicar garantía para este servicio.",
@@ -836,10 +859,75 @@ def buscar_ticket_garantia(ticket_query):
         "garantia_restante": txt_rest
     }
 
+    # Construcción de Sección 1 y Sección 2 para visualización idéntica a detalle de retrabajo
+    cots_raw = factura_correspondiente.get("cotizaciones", [])
+    cotizaciones_sec2 = []
+    for c in cots_raw:
+        cotizaciones_sec2.append({
+            "id_cotizacion": c.get("id_cotizacion"),
+            "titulo": c.get("titulo", "Sin Título"),
+            "mantenimiento": c.get("mantenimiento", "Correctivo"),
+            "precio": c.get("precio", 0.0),
+            "retro": c.get("retro", ""),
+            "diagnostico": c.get("diagnostico", ""),
+            "trabajo_realizar": c.get("trabajo_realizar", ""),
+            "pdf_cotizacion": c.get("pdf_cotizacion"),
+            "fotos_evidencia": c.get("fotos_evidencia", [])
+        })
+
+    seccion_1 = {
+        "ticket": reporte_encontrado.get("id", query),
+        "fecha": reporte_encontrado.get("fecha", "No especificada"),
+        "hora": hora_val,
+        "timestamp": reporte_encontrado.get("timestamp", ""),
+        "unidad": eco,
+        "marca": marca_val,
+        "modelo": modelo_val,
+        "kilometraje": reporte_encontrado.get("kilometraje", "No registrado"),
+        "compania": reporte_encontrado.get("compania") or factura_correspondiente.get("compania", "Telnor"),
+        "mantenimiento": reporte_encontrado.get("mantenimiento", "Correctivo"),
+        "ciudad": reporte_encontrado.get("ciudad") or factura_correspondiente.get("ciudad", "No especificada"),
+        "cope": reporte_encontrado.get("cope") or factura_correspondiente.get("cope", "No especificado"),
+        "departamento": reporte_encontrado.get("departamento", "No especificado"),
+        "empleado": reporte_encontrado.get("empleado") or reporte_encontrado.get("responsable") or "No registrado",
+        "celular": reporte_encontrado.get("celular") or reporte_encontrado.get("telefono") or "No registrado",
+        "email": reporte_encontrado.get("email", "No registrado"),
+        "falla_original": reporte_encontrado.get("falla") or reporte_encontrado.get("retro") or "Falla mecánica reportada",
+        "firma_chofer": reporte_encontrado.get("firma_chofer", "")
+    }
+
+    seccion_2 = {
+        "proveedor": factura_correspondiente.get("proveedor", "Taller No Asignado"),
+        "responsable": factura_correspondiente.get("responsable", "No registrado"),
+        "fecha_ingreso": factura_correspondiente.get("fecha", ""),
+        "precio_total": factura_correspondiente.get("precio", 0.0),
+        "titulo": factura_correspondiente.get("titulo", ""),
+        "retro": factura_correspondiente.get("retro", ""),
+        "diagnostico": factura_correspondiente.get("diagnostico", ""),
+        "trabajo_realizar": factura_correspondiente.get("trabajo_realizar", ""),
+        "cotizaciones": cotizaciones_sec2 if cotizaciones_sec2 else [{
+            "titulo": factura_correspondiente.get("titulo", "Global"),
+            "mantenimiento": factura_correspondiente.get("mantenimiento", "Correctivo"),
+            "precio": factura_correspondiente.get("precio", 0.0),
+            "retro": factura_correspondiente.get("retro", ""),
+            "diagnostico": factura_correspondiente.get("diagnostico", ""),
+            "trabajo_realizar": factura_correspondiente.get("trabajo_realizar", ""),
+            "pdf_cotizacion": (factura_correspondiente.get("fotos_cotizacion") or [None])[0],
+            "fotos_evidencia": factura_correspondiente.get("fotos_evidencia", [])
+        }],
+        "fotos_evidencia": factura_correspondiente.get("fotos_evidencia", [])
+    }
+
     return jsonify({
         "status": "success",
         "encontrado": True,
-        "reporte": datos_reporte
+        "reporte": datos_reporte,
+        "seccion_1": seccion_1,
+        "seccion_2": seccion_2,
+        "vigente": vigente,
+        "garantia_limite": txt_lim,
+        "garantia_transcurrido": txt_trans,
+        "garantia_restante": txt_rest
     })
 
 

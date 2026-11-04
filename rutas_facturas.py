@@ -1150,6 +1150,12 @@ def solicitar_correccion_orden():
     
     for f in data.get("facturas", []):
         if str(f["id"]) == str(factura_id):
+            st_entregado = str(f.get("entregado", "")).strip().lower()
+            if st_entregado not in ["sí", "si"]:
+                return jsonify({
+                    "status": "error",
+                    "message": "⚠️ La solicitud de corrección solo puede enviarse una vez que la unidad haya sido entregada con código del chofer."
+                }), 400
             correo_supervisor, supervisor = obtener_supervisor_de_factura(f)
             if not correo_supervisor:
                 cope_factura = obtener_cope_de_factura(f)
@@ -2894,6 +2900,12 @@ def liberar_doc50():
     data = leer_json("facturas.json")
     for f in data.get("facturas", []):
         if str(f["id"]) == str(factura_id):
+            st_entregado = str(f.get("entregado", "")).strip().lower()
+            if st_entregado not in ["sí", "si"]:
+                return jsonify({
+                    "status": "error",
+                    "message": "⚠️ Este ticket no puede ser liberado aún. La unidad debe estar entregada y el código validado por el chofer antes de su liberación."
+                }), 400
             f["liberado_admin"] = True
             if subrol == "Supervisor":
                 f["liberado_por_suplencia"] = True

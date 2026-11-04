@@ -617,9 +617,10 @@ function renderizarTablaReportes(lista) {
 
     actualizarKPIs(totalGasto, pendientesDoc50, pendientesOC);
 
-    if (typeof aplicarPaginacion === 'function') {
-        aplicarPaginacion('tabla-seccion-reportes', 20, true);
-    }
+    // Sección de reportes no tiene límite de paginación (muestra todas las filas de arriba a abajo)
+    const pagSeccion = document.getElementById('paginacion-tabla-seccion-reportes');
+    if (pagSeccion) pagSeccion.remove();
+
     actualizarMarcadoColumnaYCruceReportes();
 }
 
@@ -759,10 +760,10 @@ function aplicarFiltrosReportes() {
         filaSinResultados.style.display = 'none';
     }
 
-    // Reajustar la paginación según las filas que quedaron visibles
-    if (typeof aplicarPaginacion === 'function') {
-        aplicarPaginacion('tabla-seccion-reportes', 20, true);
-    }
+    // Sección de reportes muestra todas las filas coincidentes sin límite de 20
+    const pagSeccionFiltro = document.getElementById('paginacion-tabla-seccion-reportes');
+    if (pagSeccionFiltro) pagSeccionFiltro.remove();
+
     actualizarMarcadoColumnaYCruceReportes();
 }
 

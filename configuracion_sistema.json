@@ -1,9 +1,9 @@
 {
-    "correo_emisor": "",
+    "correo_emisor": "armandoramireztelnor2026@gmail.com",
     "codigo_emisor": "zgdhbgcpuobszybi",
     "servidor_smtp": "smtp.gmail.com",
     "puerto_smtp": 587,
-    "nombre_remitente": "Principal (Gmail)",
+    "nombre_remitente": "Emisor Principal",
     "cuentas_correo": [
         {
             "id": "1",
@@ -11,15 +11,15 @@
             "codigo": "zgdhbgcpuobszybi",
             "servidor_smtp": "smtp.gmail.com",
             "puerto_smtp": 587,
-            "nombre": "Principal (Gmail)",
-            "activa": false,
+            "nombre": "Emisor Principal",
+            "activa": true,
             "fecha_registro": "2026-11-02 22:45:00"
         }
     ],
     "presupuesto_total": 500000.0,
     "limite_cotizaciones_caras": 10000.0,
-    "fecha_actualizacion": "2026-11-04 11:10:15",
-    "actualizado_por": "Jefatura: jefatura_admin",
-    "envio_automatico_activo": false,
+    "fecha_actualizacion": "2026-11-04 12:51:47",
+    "actualizado_por": "Jefatura: EfrainHumberto_Perusquia -RUMN-2026-admin",
+    "envio_automatico_activo": true,
     "correo_emisor_anterior": "armandoramireztelnor2026@gmail.com"
 }

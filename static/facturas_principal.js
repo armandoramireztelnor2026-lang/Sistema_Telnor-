@@ -1798,7 +1798,9 @@ async function cargarFacturas() {
 
                     // En esta vista solo van tickets pendientes de liberación
 
-                    if (f.liberado_admin === false) {
+                    let estaEntregadaLibDoc = (entregadoTexto === 'Sí' || entregadoTexto === 'Si' || String(f.entregado || '').trim().toLowerCase() === 'sí' || String(f.entregado || '').trim().toLowerCase() === 'si');
+
+                    if (f.liberado_admin === false && estaEntregadaLibDoc) {
 
                         let btnLiberar = '';
 
@@ -4095,6 +4097,15 @@ function guardarActualizarOrdenes() {
 
 function solicitarCorreccionOrden(idFactura) {
 
+    const fx = (typeof facturasGlobal !== 'undefined') ? facturasGlobal.find(x => String(x.id) === String(idFactura)) : null;
+    if (fx) {
+        let stEnt = String(fx.entregado || '').trim().toLowerCase();
+        if (stEnt !== 'sí' && stEnt !== 'si') {
+            alert('⚠️ La solicitud de corrección solo puede enviarse una vez que la unidad haya sido entregada con código del chofer.');
+            return;
+        }
+    }
+
     if (!confirm("¿Deseas enviar una notificación al supervisor para que corrija los números de orden/pedido de este ticket?")) return;
 
 
@@ -5411,6 +5422,10 @@ async function cargarReportesAdmin() {
 
         });
 
+        if (typeof aplicarPaginacion === 'function') {
+            aplicarPaginacion('tabla-reportes', 20, true);
+        }
+
     } catch (err) { console.error(err); }
 
 }
@@ -6602,7 +6617,7 @@ document.addEventListener('click', function (e) {
 
     }
 
-    if (typeof aplicarPaginacion === 'function') aplicarPaginacion('tabla-reportes', 20, true);
+
 
 });
 
@@ -7736,6 +7751,12 @@ function abrirModalLiberarTicket(idFactura) {
 
         return;
 
+    }
+
+    let stEntregado = String(f.entregado || '').trim().toLowerCase();
+    if (stEntregado !== 'sí' && stEntregado !== 'si') {
+        alert('⚠️ Este ticket no puede ser liberado aún. La unidad debe estar entregada y el código validado por el chofer.');
+        return;
     }
 
 
