@@ -109,7 +109,7 @@
             "supervisor_asignado": "Samuel Giron",
             "supervisor_usuario": "Samuel_Giron-RUMN-2026-admin",
             "supervisor_correo": "armandoramireztelnor2026@gmail.com",
-            "estado": "Por Liberar",
+            "estado": "Finalizado",
             "reactivado_desde_caras": false,
             "seccion_1": {
                 "ticket": "REP-20261103120111",
@@ -165,7 +165,12 @@
             "codigo_supervisor": "403857",
             "chofer": "Armando",
             "correo_chofer": "armandoramireztelnor2026@gmail.com",
-            "unidad_entregada": "No"
+            "unidad_entregada": "S\u00ed",
+            "fecha_liberacion": "2026-11-04 10:48:08",
+            "supervisor_libero": "Samuel Giron",
+            "fecha_entrega": "2026-11-04 10:48:08",
+            "codigo_validado_por": "Samuel Giron",
+            "tipo_codigo_validado": "C\u00f3digo de Respaldo de Supervisi\u00f3n"
         }
     ]
 }

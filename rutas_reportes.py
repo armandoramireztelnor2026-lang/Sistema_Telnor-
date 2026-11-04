@@ -62,7 +62,10 @@ def nuevo_reporte():
         u_ret = str(ret.get("unidad", "")).replace("8090-", "").strip()
         st_ret = str(ret.get("estado", "")).strip().lower()
         if (u_ret == u_req_norm or (len(u_ret) >= 4 and len(u_req_norm) >= 4 and u_ret[-4:] == u_req_norm[-4:])):
-            if st_ret in ["pendiente", "reasignado", "por liberar", "por_liberar", "pendiente liberacion"] or (st_ret not in ["finalizado", "cancelado"] and not ret.get("fecha_liberacion")):
+            ent_ret = str(ret.get("unidad_entregada", "")).strip().lower()
+            if ent_ret in ["sí", "si"] or st_ret in ["finalizado", "cancelado", "entregado"] or ret.get("fecha_liberacion"):
+                continue
+            if st_ret in ["pendiente", "reasignado", "por liberar", "por_liberar", "pendiente liberacion", "listo_taller", "en proceso"]:
                 return jsonify({"status": "error", "message": f"La unidad {unidad_req} se encuentra actualmente en proceso de reasignación / garantía y no puede ser reportada hasta que sea concluida por el taller."})
 
     
@@ -384,7 +387,10 @@ def is_unidad_active(numero_unidad):
         u_ret = str(ret.get("unidad", "")).replace("8090-", "").strip()
         st_ret = str(ret.get("estado", "")).strip().lower()
         if len(u_ret) >= 4 and u_ret[-4:] == eco_4:
-            if st_ret in ["pendiente", "reasignado", "por liberar", "por_liberar", "pendiente liberacion"] or (st_ret not in ["finalizado", "cancelado"] and not ret.get("fecha_liberacion")):
+            ent_ret = str(ret.get("unidad_entregada", "")).strip().lower()
+            if ent_ret in ["sí", "si"] or st_ret in ["finalizado", "cancelado", "entregado"] or ret.get("fecha_liberacion"):
+                continue
+            if st_ret in ["pendiente", "reasignado", "por liberar", "por_liberar", "pendiente liberacion", "listo_taller", "en proceso"]:
                 return True
                 
     return False

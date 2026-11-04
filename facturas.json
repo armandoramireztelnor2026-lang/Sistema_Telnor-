@@ -616,16 +616,19 @@
             "fecha_cierre": "2026-11-03 12:07:25",
             "fecha_entrega": "2026-11-03 12:08:38",
             "retrabajo": "S\u00ed",
-            "estado_retrabajo": "Por Liberar",
+            "estado_retrabajo": "Finalizado",
             "estado_previo": "pendiente",
-            "estado": "Retrabajo",
+            "estado": "pendiente",
             "ultimo_motivo_retrabajo": "El fallo no se reparo y se sigue presentando",
             "fecha_retrabajo": "2026-11-03 12:16:24",
             "fecha_finalizacion_retrabajo": "2026-11-03 23:15:44",
             "num_retrabajo": 1,
             "codigo_chofer_retrabajo": "843613",
             "codigo_supervisor_retrabajo": "403857",
-            "retrabajo_unidad_entregada": "No"
+            "retrabajo_unidad_entregada": "S\u00ed",
+            "fecha_liberacion_retrabajo": "2026-11-04 10:48:08",
+            "fecha_entrega_retrabajo": "2026-11-04 10:48:08",
+            "en_retrabajo_activo": false
         }
     ]
 }

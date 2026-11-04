@@ -5252,11 +5252,21 @@ async function cargarReportesAdmin() {
     try {
 
         const _bRep = document.getElementById('buscador-reportes');
-
-        if (_bRep && _bRep.value && (_bRep.value.endsWith('-prov') || _bRep.value.endsWith('-corp') || _bRep.value.endsWith('-admin') || _bRep.value.includes('@'))) {
-
-            _bRep.value = '';
-
+        if (_bRep) {
+            if (_bRep.value && (/-admin|-prov|-corp|-taller|@/.test(_bRep.value))) {
+                _bRep.value = '';
+            }
+            if (!_bRep.dataset.autofillGuarded) {
+                _bRep.dataset.autofillGuarded = 'true';
+                const sanitizar = () => {
+                    if (_bRep.value && (/-admin|-prov|-corp|-taller|@/.test(_bRep.value))) {
+                        _bRep.value = '';
+                    }
+                };
+                _bRep.addEventListener('focus', sanitizar);
+                _bRep.addEventListener('input', sanitizar);
+                _bRep.addEventListener('change', sanitizar);
+            }
         }
 
     } catch(e) {}

@@ -27,10 +27,14 @@ def obtener_metricas_flota():
     unidades_en_taller = set()
     unidades_en_garantia = set()
 
-    # 1. Unidades con garantía / retrabajo en proceso (desde solicitud del chofer hasta finalización en taller)
+    # 1. Unidades con garantía / retrabajo en proceso (desde solicitud del chofer hasta finalización en taller y entrega)
     for ret in retrabajos_data:
         st_ret = str(ret.get("estado", "")).strip().lower()
-        if st_ret in ["pendiente", "reasignado", "por liberar", "por_liberar", "pendiente liberacion"] or (st_ret not in ["finalizado", "cancelado"] and not ret.get("fecha_liberacion")):
+        entregada = str(ret.get("unidad_entregada", "")).strip().lower()
+        # Si ya fue finalizado, entregado o cancelado, o cuenta con fecha de liberación, la unidad ya no está en retrabajo
+        if st_ret in ["finalizado", "cancelado", "entregado"] or entregada in ["sí", "si"] or ret.get("fecha_liberacion"):
+            continue
+        if st_ret in ["pendiente", "reasignado", "por liberar", "por_liberar", "pendiente liberacion", "listo_taller", "en proceso", "en_proceso"]:
             u_raw = str(ret.get("unidad", "")).replace("8090-", "").strip()
             if len(u_raw) >= 4:
                 unidades_en_garantia.add(u_raw[-4:])
@@ -52,9 +56,25 @@ def obtener_metricas_flota():
             st = f.get("estado", "")
             entregado = str(f.get("entregado", "")).strip().lower()
             st_ret_fac = str(f.get("retrabajo", "")).strip().lower()
+            st_ret_estado = str(f.get("estado_retrabajo", "")).strip().lower()
+            ret_entregada = str(f.get("retrabajo_unidad_entregada", "")).strip().lower()
+            en_ret_activo = f.get("en_retrabajo_activo")
 
-            # En garantía/retrabajo según factura
-            if st_ret_fac in ["pendiente", "reasignado", "sí", "si"] or st in ["En Asignacion/Retrabajo", "Retrabajo"]:
+            # Determinar si la factura está en retrabajo activo
+            es_retrabajo_activo = False
+            if en_ret_activo is True:
+                es_retrabajo_activo = True
+            elif st in ["En Asignacion/Retrabajo", "Retrabajo"]:
+                es_retrabajo_activo = True
+            elif st_ret_fac in ["pendiente", "reasignado"] or st_ret_estado in ["pendiente", "reasignado", "por liberar", "por_liberar", "listo_taller"]:
+                es_retrabajo_activo = True
+
+            # Si el retrabajo ya fue finalizado o la unidad entregada, ya no está en garantía activa
+            if st_ret_estado == "finalizado" or ret_entregada in ["sí", "si"] or en_ret_activo is False:
+                if st not in ["En Asignacion/Retrabajo", "Retrabajo"]:
+                    es_retrabajo_activo = False
+
+            if es_retrabajo_activo:
                 unidades_en_garantia.add(u4)
             # En cotizaciones caras:
             elif st == "Cancelado_Cotizacion_Cara":
