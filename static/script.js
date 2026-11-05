@@ -201,8 +201,19 @@ function procesarLogin(rol) {
     fetch('/login', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario, password, rol: rol })
     }).then(res => res.json()).then(data => {
-        if (data.status === 'success') window.location.href = data.redirect;
-        else alert(data.message);
+        if (data.status === 'success') {
+            try {
+                localStorage.removeItem('activeViewAdmin');
+                localStorage.removeItem('activeViewAdmin_Administrador');
+                localStorage.removeItem('activeViewAdmin_Supervisor');
+                localStorage.removeItem('activeViewAdmin_Jefatura');
+                localStorage.removeItem('activeViewProv');
+                localStorage.removeItem('activeViewCorp');
+            } catch (e) {}
+            window.location.href = data.redirect;
+        } else {
+            alert(data.message);
+        }
     });
 }
 
@@ -256,9 +267,8 @@ function marcarBotonActivo(vista) {
             let matchesFF = ((vista === 'facturas-finales' || vista === 'facturas_finales') && (onclickAttr.includes("facturas-finales") || onclickAttr.includes("facturas_finales")));
             let matchesDoc = ((vista === 'documentos-contables' || vista === 'documentos_contables') && (onclickAttr.includes("documentos-contables") || onclickAttr.includes("documentos_contables")));
             let matchesLib = ((vista === 'liberar-doc-contable' || vista === 'liberar_doc_contable') && (onclickAttr.includes("liberar-doc-contable") || onclickAttr.includes("liberar_doc_contable")));
-            let matchesRetrabajoCaras = (vista === 'retrabajo-cotizaciones-caras' && (onclickAttr.includes("retrabajo-cotizaciones-caras") || onclickAttr.includes("retrabajo_cotizaciones_caras")));
             
-            if (matchesView || matches10k || matchesFF || matchesDoc || matchesLib || matchesRetrabajoCaras) {
+            if (matchesView || matches10k || matchesFF || matchesDoc || matchesLib) {
                 let nav = b.closest('.nav-menu') || b.closest('.sidebar');
                 if (nav) {
                     nav.querySelectorAll('.btn-sidebar').forEach(btn => btn.classList.remove('active'));
@@ -409,15 +419,33 @@ window.delegarAprobar10k = window.delegarAprobar10k || function(id, unidad) {
     });
 };
 
-window.cerrarModalAlertaCortaDelegacion = function() {
+window.cerrarModalAlertaCortaDelegacion = function(esCancelacion = true) {
     const modal = document.getElementById('modal-alerta-corta-delegacion');
     if (modal) modal.style.display = 'none';
     window.callbackAlertaCortaDelegacion = null;
+
+    if (esCancelacion) {
+        if (window.botonPrevioDelegacion && document.body.contains(window.botonPrevioDelegacion)) {
+            let nav = window.botonPrevioDelegacion.closest('.nav-menu') || window.botonPrevioDelegacion.closest('.sidebar');
+            if (nav) {
+                nav.querySelectorAll('.btn-sidebar').forEach(b => b.classList.remove('active'));
+                window.botonPrevioDelegacion.classList.add('active');
+            }
+        } else {
+            let subrolActual = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value.trim() : '';
+            let savedView = (subrolActual ? localStorage.getItem('activeViewAdmin_' + subrolActual) : null) || localStorage.getItem('activeViewAdmin');
+            if (savedView && typeof marcarBotonActivo === 'function') {
+                marcarBotonActivo(savedView);
+            }
+        }
+    }
+    window.botonPrevioDelegacion = null;
+    window.vistaPreviaDelegacion = null;
 };
 
 window.confirmarAlertaCortaDelegacion = function() {
     const cb = window.callbackAlertaCortaDelegacion;
-    window.cerrarModalAlertaCortaDelegacion();
+    window.cerrarModalAlertaCortaDelegacion(false);
     if (typeof cb === 'function') {
         cb();
     } else if (typeof cb === 'string') {
@@ -436,6 +464,12 @@ window.mostrarAlertaCortaDelegacion = function(mensaje, callback) {
         const textoPlano = (mensaje || '').replace(/<[^>]*>?/gm, '');
         if (confirm(`⚠️ DELEGACIÓN POR AUSENCIA\n\n${textoPlano}\n\n¿Deseas continuar?`)) {
             if (typeof callback === 'function') callback();
+            window.botonPrevioDelegacion = null;
+            window.vistaPreviaDelegacion = null;
+        } else {
+            if (typeof window.cerrarModalAlertaCortaDelegacion === 'function') {
+                window.cerrarModalAlertaCortaDelegacion(true);
+            }
         }
     }
 };
@@ -470,14 +504,24 @@ window.abrirVistaDelegada = function(tipo) {
         const textoPlano = (mensaje || '').replace(/<[^>]*>?/gm, '');
         if (confirm(`⚠️ DELEGACIÓN POR AUSENCIA\n\n${textoPlano}\n\n¿Deseas continuar?`)) {
             if (callback) callback();
+            window.botonPrevioDelegacion = null;
+            window.vistaPreviaDelegacion = null;
+        } else {
+            if (typeof window.cerrarModalAlertaCortaDelegacion === 'function') {
+                window.cerrarModalAlertaCortaDelegacion(true);
+            }
         }
     }
 };
 
 function cambiarVistaAdmin(vista) {
-    localStorage.setItem('activeViewAdmin', vista);
+    let subrolActual = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value.trim() : '';
+    if (subrolActual) {
+        try { localStorage.setItem('activeViewAdmin_' + subrolActual, vista); } catch(e){}
+    }
+    try { localStorage.setItem('activeViewAdmin', vista); } catch(e){}
     marcarBotonActivo(vista);
-    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica', 'retrabajo', 'tiempo-garantia', 'flujo-trabajo', 'liberar-retrabajo', 'configuraciones', 'retrabajo-cotizaciones-caras'];
+    const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica', 'retrabajo', 'tiempo-garantia', 'flujo-trabajo', 'liberar-retrabajo', 'configuraciones'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
         if (el) el.style.display = 'none';
@@ -490,7 +534,6 @@ function cambiarVistaAdmin(vista) {
     if (vista === 'tiempo_garantia') vistaId = 'tiempo-garantia';
     if (vista === 'flujo_trabajo') vistaId = 'flujo-trabajo';
     if (vista === 'liberar_retrabajo') vistaId = 'liberar-retrabajo';
-    if (vista === 'retrabajo_cotizaciones_caras' || vista === 'retrabajo-cotizaciones-caras') vistaId = 'retrabajo-cotizaciones-caras';
 
     let elVista = document.getElementById('vista-' + vistaId);
     if (elVista) elVista.style.display = 'block';
@@ -646,8 +689,9 @@ async function cargarRetrabajosAdmin() {
         const data = await res.json();
         const retrabajos = data.retrabajos || [];
         for (let i = retrabajos.length - 1; i >= 0; i--) {
-            let st = String(retrabajos[i].estado || '').trim().toLowerCase();
-            let ent = String(retrabajos[i].unidad_entregada || '').trim().toLowerCase();
+            let r = retrabajos[i];
+            let st = String(r.estado || '').trim().toLowerCase();
+            let ent = String(r.unidad_entregada || '').trim().toLowerCase();
             if (['finalizado', 'cancelado', 'entregado', 'por liberar', 'por_liberar', 'pendiente liberacion', 'listo_taller'].includes(st) || ['sí', 'si'].includes(ent)) {
                 retrabajos.splice(i, 1);
             }
@@ -655,7 +699,7 @@ async function cargarRetrabajosAdmin() {
         window.retrabajosSupervisorGlobal = retrabajos;
         
         if (retrabajos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:25px; color:#94a3b8;">No hay solicitudes de garantía o retrabajo registradas para tu supervisión.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:25px; color:#94a3b8;">No hay solicitudes de garantía o retrabajo registradas para tu supervisión.</td></tr>';
             return;
         }
         
@@ -695,13 +739,15 @@ async function cargarRetrabajosAdmin() {
             }
 
             let yaCaraAdmin = Boolean(
+                r.tipo === 'caras' ||
+                r.es_cotizacion_cara ||
                 r.reactivado_desde_caras ||
                 (r.seccion_1 && r.seccion_1.reactivado_desde_caras) ||
                 (r.seccion_2 && r.seccion_2.reactivado_desde_caras) ||
                 (typeof facturasGlobal !== 'undefined' && facturasGlobal.some(f => (obtenerIdReporte(f) === String(ticketId) || String(f.id) === String(r.factura_id)) && f.reactivado_desde_caras)) ||
                 (typeof reportesGlobal !== 'undefined' && reportesGlobal.some(rep => String(rep.id) === String(ticketId) && rep.reactivado_desde_caras))
             );
-            let badgeCarasAdmin = yaCaraAdmin ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
+            let badgeCarasAdmin = yaCaraAdmin ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Cotizaciones Caras</span>` : '';
             let badgeRetrabajoAdmin = `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>`;
 
             tbody.innerHTML += `
@@ -1132,7 +1178,7 @@ window.cargarRetrabajosProveedor = async function() {
                 (typeof facturasGlobal !== 'undefined' && facturasGlobal.some(f => (obtenerIdReporte(f) === String(ticketId) || String(f.id) === String(r.factura_id)) && f.reactivado_desde_caras)) ||
                 (typeof reportesGlobal !== 'undefined' && reportesGlobal.some(rep => String(rep.id) === String(ticketId) && rep.reactivado_desde_caras))
             );
-            let badgeCarasProv = yaCaraProv ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
+            let badgeCarasProv = yaCaraProv ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Cotizaciones Caras</span>` : '';
             let badgeRetrabajoProv = `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>`;
 
             tbody.innerHTML += `
@@ -2467,8 +2513,31 @@ window.addEventListener('load', function() {
     let rolActual = document.getElementById('rol-actual') ? document.getElementById('rol-actual').value : '';
     let subrolActual = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value.trim() : '';
 
+    const vistasPermitidasPorSubrol = {
+        'Administrador': ['cotizaciones-10k', 'liberar-doc-contable', 'flujo-trabajo', 'analitica', 'seccion-reportes', 'archivo', 'facturas', 'facturas_finales', 'facturas-finales'],
+        'Supervisor': ['reportes', 'facturas', 'facturas_finales', 'facturas-finales', 'documentos-contables', 'documentos_contables', 'lista-prov', 'lista-corp', 'lista-admin', 'unidades', 'accesos', 'flujo-trabajo', 'analitica', 'seccion-reportes', 'archivo', 'cotizaciones-10k', 'liberar-doc-contable', 'retrabajo', 'liberar-retrabajo'],
+        'Jefatura': ['pendientes', 'accesos', 'ciudades-copes', 'lista-prov', 'lista-corp', 'lista-admin', 'panel-control', 'flujo-trabajo', 'analitica', 'seccion-reportes', 'archivo', 'tiempo-garantia', 'configuraciones']
+    };
+
+    const vistaDefaultPorSubrol = {
+        'Administrador': 'cotizaciones-10k',
+        'Supervisor': 'reportes',
+        'Jefatura': 'pendientes'
+    };
+
     if (rolActual === 'administracion' || subrolActual !== '' || document.getElementById('vista-pendientes') || document.getElementById('vista-cotizaciones-10k')) { 
-        let savedView = localStorage.getItem('activeViewAdmin');
+        let vistasValidas = vistasPermitidasPorSubrol[subrolActual] || [];
+        let savedView = (subrolActual ? localStorage.getItem('activeViewAdmin_' + subrolActual) : null) || localStorage.getItem('activeViewAdmin');
+        
+        // Validación estricta: Si hay vista guardada pero no pertenece al subrol actual, se invalida
+        if (savedView && vistasValidas.length > 0 && !vistasValidas.includes(savedView)) {
+            savedView = null;
+            try {
+                localStorage.removeItem('activeViewAdmin');
+                if (subrolActual) localStorage.removeItem('activeViewAdmin_' + subrolActual);
+            } catch(e) {}
+        }
+
         if (savedView) {
             if (savedView === 'cotizaciones-10k') {
                 if (typeof verCotizacionesMas10000 === 'function') {
@@ -2480,21 +2549,18 @@ window.addEventListener('load', function() {
                 cambiarVistaAdmin(savedView);
             }
         } else {
-            if (subrolActual === 'Jefatura') {
-                cambiarVistaAdmin('pendientes');
-            } else if (subrolActual === 'Supervisor') {
-                cambiarVistaAdmin('reportes');
-                if (typeof actualizarBadgeLiberarRetrabajoSupervisor === 'function') {
-                    actualizarBadgeLiberarRetrabajoSupervisor();
-                }
-            } else if (subrolActual === 'Administrador') {
+            let defVista = vistaDefaultPorSubrol[subrolActual] || (subrolActual === 'Administrador' ? 'cotizaciones-10k' : (subrolActual === 'Jefatura' ? 'pendientes' : 'reportes'));
+            if (defVista === 'cotizaciones-10k') {
                 if (typeof verCotizacionesMas10000 === 'function') {
                     verCotizacionesMas10000();
                 } else {
                     cambiarVistaAdmin('cotizaciones-10k');
                 }
             } else {
-                cambiarVistaAdmin('reportes'); 
+                cambiarVistaAdmin(defVista);
+            }
+            if (subrolActual === 'Supervisor' && typeof actualizarBadgeLiberarRetrabajoSupervisor === 'function') {
+                actualizarBadgeLiberarRetrabajoSupervisor();
             }
         }
     } else if (rolActual === 'proveedores' || document.getElementById('vista-reportes-prov')) { 
@@ -2527,9 +2593,32 @@ document.addEventListener('click', function (e) {
     if (!btn) return;
     let nav = btn.closest('.nav-menu') || btn.closest('.sidebar');
     if (!nav) return;
+
+    let isDelegacionBtn = btn.classList.contains('btn-sidebar-cobertura') || (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('abrirVistaDelegada'));
+    if (isDelegacionBtn) {
+        let currentActive = nav.querySelector('.btn-sidebar.active');
+        if (currentActive && currentActive !== btn) {
+            window.botonPrevioDelegacion = currentActive;
+            window.vistaPreviaDelegacion = currentActive.getAttribute('onclick') || null;
+        }
+    } else {
+        window.botonPrevioDelegacion = null;
+        window.vistaPreviaDelegacion = null;
+    }
+
     let buttons = nav.querySelectorAll('.btn-sidebar');
     buttons.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+});
+
+// ESC KEY HANDLER PARA CANCELAR ALERTA CORTA DELEGACION
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+        const modal = document.getElementById('modal-alerta-corta-delegacion');
+        if (modal && modal.style.display !== 'none') {
+            window.cerrarModalAlertaCortaDelegacion(true);
+        }
+    }
 });
 
 
@@ -3184,7 +3273,7 @@ window.cargarLiberarRetrabajosSupervisor = async function() {
                 (typeof facturasGlobal !== 'undefined' && facturasGlobal.some(f => (obtenerIdReporte(f) === String(ticketId) || String(f.id) === String(r.factura_id)) && f.reactivado_desde_caras)) ||
                 (typeof reportesGlobal !== 'undefined' && reportesGlobal.some(rep => String(rep.id) === String(ticketId) && rep.reactivado_desde_caras))
             );
-            let badgeCarasLib = yaCaraLib ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
+            let badgeCarasLib = yaCaraLib ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Cotizaciones Caras</span>` : '';
             let badgeRetrabajoLib = `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>`;
 
             tbody.innerHTML += `
@@ -3208,7 +3297,7 @@ window.cargarLiberarRetrabajosSupervisor = async function() {
                             <button type="button" class="btn-info" style="display: block; width: 100%; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; cursor: pointer; text-align: center; box-sizing: border-box; margin: 0; border: none;" onclick="abrirDetallesTicketRetrabajo('${ticketEscaped}', '${r.factura_id || ''}')">
                                 Ver Detalles
                             </button>
-                            <button type="button" class="btn-success" style="display: block; width: 100%; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; cursor: pointer; text-align: center; box-sizing: border-box; margin: 0; background: #10b981; border: none; color: white;" onclick="abrirModalValidarCodigoLiberacion('${ticketEscaped}', '${unidadEscaped}', '${tallerEscaped}', '${choferEscaped}')">
+                            <button type="button" class="btn-success" style="display: block; width: 100%; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; cursor: pointer; text-align: center; box-sizing: border-box; margin: 0; background: #10b981; border: none; color: white;" onclick="abrirModalValidarCodigoLiberacion('${ticketEscaped}', '${unidadEscaped}', '${tallerEscaped}', '${choferEscaped}', ${yaCaraLib})">
                                 ✅ Liberar Retrabajo
                             </button>
                         </div>
@@ -3226,11 +3315,15 @@ window.cargarLiberarRetrabajosSupervisor = async function() {
     }
 };
 
-window.abrirModalValidarCodigoLiberacion = function(ticketId, unidad, taller, chofer) {
+window.abrirModalValidarCodigoLiberacion = function(ticketId, unidad, taller, chofer, esCara) {
     window._ticketLiberarActual = ticketId;
+    window._ticketLiberarEsCara = Boolean(esCara);
     const modal = document.getElementById('modal-validar-codigo-liberacion');
     if (!modal) {
-        const codigo = prompt(`🔐 Validación de Retrabajo - Ticket ${ticketId} (Unidad ${unidad}):\n\nIngresa el código de 6 dígitos que el chofer recibió en su correo (o el código de respaldo del supervisor):`);
+        const msgPrompt = esCara
+            ? `🔐 Validación de Retrabajo (Cotización Cara) - Ticket ${ticketId} (Unidad ${unidad}):\n\nIngresa el código de 6 dígitos enviado exclusivamente a tu correo de supervisor:`
+            : `🔐 Validación de Retrabajo - Ticket ${ticketId} (Unidad ${unidad}):\n\nIngresa el código de 6 dígitos que el chofer recibió en su correo (o el código de respaldo del supervisor):`;
+        const codigo = prompt(msgPrompt);
         if (codigo) {
             ejecutarLiberacionDirecta(ticketId, codigo);
         }
@@ -3245,6 +3338,15 @@ window.abrirModalValidarCodigoLiberacion = function(ticketId, unidad, taller, ch
     if (talEl) talEl.innerText = taller || '--';
     const chEl = document.getElementById('modal-val-chofer');
     if (chEl) chEl.innerText = chofer || 'Chofer';
+
+    const instEl = document.getElementById('modal-val-instruccion');
+    if (instEl) {
+        if (esCara) {
+            instEl.innerHTML = '<span style="color:#f59e0b; font-weight:700;">🏷️ Cotización Cara con Garantía:</span><br>Ingresa el <strong>código de 6 dígitos</strong> enviado exclusivamente a tu correo de supervisión:';
+        } else {
+            instEl.innerHTML = 'Ingresa el <strong>código de 6 dígitos</strong> que el chofer recibió en su correo al entregarse la unidad, o el <strong>código de respaldo</strong> enviado a supervisión:';
+        }
+    }
 
     const input = document.getElementById('input-codigo-liberacion-retrabajo');
     if (input) input.value = '';
@@ -3265,6 +3367,7 @@ window.cerrarModalValidarCodigoLiberacion = function() {
     const modal = document.getElementById('modal-validar-codigo-liberacion');
     if (modal) modal.style.display = 'none';
     window._ticketLiberarActual = null;
+    window._ticketLiberarEsCara = false;
 };
 
 window.confirmarValidacionLiberacionRetrabajo = async function() {
@@ -3277,7 +3380,9 @@ window.confirmarValidacionLiberacionRetrabajo = async function() {
 
     if (!codigo) {
         if (errEl) {
-            errEl.innerText = '⚠️ Por favor ingresa el código de 6 dígitos recibido por el chofer o el código de respaldo.';
+            errEl.innerText = window._ticketLiberarEsCara
+                ? '⚠️ Por favor ingresa el código de 6 dígitos enviado a tu correo de supervisión.'
+                : '⚠️ Por favor ingresa el código de 6 dígitos recibido por el chofer o el código de respaldo.';
             errEl.style.display = 'block';
         }
         if (input) input.focus();

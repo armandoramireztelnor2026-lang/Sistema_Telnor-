@@ -418,6 +418,87 @@ input:focus {
     box-shadow: inset 4px 0 0 #ffffff, 0 4px 12px rgba(5, 150, 105, 0.35) !important;
 }
 
+/* TITULOS DE SECCIONES DEL MENU LATERAL */
+.sidebar-title-flujo {
+    color: #38bdf8 !important;
+}
+
+.sidebar-title-admin {
+    color: #ffffff !important;
+}
+
+/* BOTONES DE FLUJO DEL TICKET EN MENU LATERAL (AZUL) */
+.btn-sidebar-flujo {
+    background: transparent !important;
+    color: #38bdf8 !important;
+    border: 1px solid rgba(56, 189, 248, 0.45) !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 12px !important;
+    padding-left: 20px !important;
+    border-radius: 8px !important;
+    text-align: left !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-sidebar-flujo:hover {
+    background: rgba(14, 165, 233, 0.18) !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25) !important;
+    transform: translateY(-1px) !important;
+    color: #ffffff !important;
+}
+
+.btn-sidebar-flujo:active,
+.btn-sidebar-flujo.active,
+.sidebar-section-flujo .btn-sidebar:active,
+.sidebar-section-flujo .btn-sidebar.active {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    border-color: #38bdf8 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: inset 4px 0 0 #ffffff, 0 4px 12px rgba(2, 132, 199, 0.45) !important;
+}
+
+/* BOTONES DE ADMINISTRACION EN MENU LATERAL (BLANCO) */
+.btn-sidebar-admin {
+    background: transparent !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 12px !important;
+    padding-left: 20px !important;
+    border-radius: 8px !important;
+    text-align: left !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-sidebar-admin:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-1px) !important;
+    color: #ffffff !important;
+}
+
+.btn-sidebar-admin:active,
+.btn-sidebar-admin.active,
+.sidebar-section-admin .btn-sidebar:active,
+.sidebar-section-admin .btn-sidebar.active {
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #0b1c30 !important;
+    font-weight: 700 !important;
+    box-shadow: inset 4px 0 0 #0b1c30, 0 4px 12px rgba(255, 255, 255, 0.35) !important;
+}
+
 /* BOTONES DE ACCION EN MODAL RETRABAJO (DISEÑO HOMOGÉNEO) */
 .btn-footer-retrabajo {
     padding: 10px 24px !important;

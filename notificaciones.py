@@ -1995,3 +1995,54 @@ def enviar_correo_retrabajo_listo_supervisor_respaldo(correo_supervisor, nombre_
         autor_proceso=formatear_nombre_rol(nombre_supervisor, "Supervisor") if nombre_supervisor else None
     )
     return disparar_correo(correo_supervisor, asunto, cuerpo_html)
+
+
+def enviar_correo_retrabajo_caras_listo_supervisor(correo_supervisor, nombre_supervisor, ticket, unidad, nombre_taller, codigo_supervisor):
+    """
+    Notifica al supervisor con su código exclusivo de liberación para un ticket reactivado de cotización cara con garantía.
+    No se envía código al chofer; la liberación depende exclusivamente de este código de supervisión.
+    """
+    if not correo_supervisor or str(correo_supervisor).strip() in ["", "No proporcionado"]:
+        return False, "Sin correo"
+
+    unidad_limpia = str(unidad).replace('8090-', '')
+    asunto = f"🛡️ Código de Liberación (Cotización Cara): Unidad 8090-{unidad_limpia} Lista en Taller - Ticket #{ticket}"
+
+    bloque_codigo = (
+        f'<div style="background-color: #fffbeb; border: 2px dashed #f59e0b; border-radius: 8px; padding: 18px 20px; text-align: center; margin: 18px 0;">'
+        f'<div style="color: #92400e; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">'
+        f'Código Exclusivo de Liberación de Supervisión:'
+        f'</div>'
+        f'<div style="color: #d97706; font-size: 32px; font-weight: 800; letter-spacing: 6px; font-family: monospace; margin: 6px 0;">'
+        f'{codigo_supervisor}'
+        f'</div>'
+        f'<div style="color: #b45309; font-size: 12px; margin-top: 6px;">'
+        f'Por tratarse de una <strong>Cotización Cara con Garantía</strong>, este código es de uso exclusivo del Supervisor en "Liberar/Retrabajo".'
+        f'</div>'
+        f'</div>'
+    )
+
+    cuerpo_html = generar_plantilla_base(
+        titulo_header="Garantía de Cotización Cara Concluida",
+        subtitulo_header="Código Exclusivo de Liberación para Supervisión Vehicular",
+        categoria_badge="COTIZACIÓN CARA - GARANTÍA",
+        color_tema="ambar",
+        saludo=f"Hola <strong>{nombre_supervisor or 'Supervisor'}</strong>,",
+        mensaje_intro=(
+            f"El taller <strong>{nombre_taller}</strong> ha marcado como <strong>reparada y lista</strong> la unidad <strong>8090-{unidad_limpia}</strong> "
+            f"(Ticket <strong>#{ticket}</strong>), correspondiente a un retrabajo de cotización cara.<br><br>"
+            f"Por políticas de control, <strong>el código de validación ha sido enviado exclusivamente a ti como Supervisor</strong> para validar la entrega y liberar la unidad:"
+        ),
+        detalles_items=[
+            ("🎫 Ticket", f"<strong>{ticket}</strong>"),
+            ("🚚 Unidad", f"8090-{unidad_limpia}"),
+            ("🔧 Taller", nombre_taller),
+            ("🏷️ Tipo de Servicio", "<span style='color: #f59e0b; font-weight: bold;'>Garantía / Cotización Cara</span>"),
+            ("🛡️ Código de Liberación", f"<span style='color: #d97706; font-size: 16px; font-weight: 800; font-family: monospace;'>{codigo_supervisor}</span>")
+        ],
+        bloque_destacado=bloque_codigo,
+        callout_texto="Ingresa al botón <strong>Liberar/Retrabajo</strong> en tu panel de supervisión e introduce este código para verificar y liberar la unidad y marcarla como entregada.",
+        callout_tipo="advertencia",
+        autor_proceso=formatear_nombre_rol(nombre_supervisor, "Supervisor") if nombre_supervisor else None
+    )
+    return disparar_correo(correo_supervisor, asunto, cuerpo_html)

@@ -158,6 +158,33 @@ def obtener_limite_cotizaciones_caras():
     return 10000.0
 
 
+def obtener_subrol_actual_sesion():
+    """Obtiene el subrol del usuario en sesión de manera tolerante a mayúsculas, espacios y sincronizada con usuarios.json."""
+    if "usuario" not in session:
+        return ""
+    u = session["usuario"]
+    subrol = u.get("datos_perfil", {}).get("subrol", "")
+    if not subrol:
+        subrol = u.get("subrol", "")
+    
+    usuario_id = u.get("usuario")
+    if usuario_id:
+        try:
+            usuarios_data = leer_json("usuarios.json")
+            for usr in usuarios_data.get("usuarios", []):
+                if usr.get("usuario") == usuario_id:
+                    fresh_subrol = usr.get("datos_perfil", {}).get("subrol") or usr.get("subrol", "")
+                    if fresh_subrol:
+                        subrol = fresh_subrol
+                        if "datos_perfil" in u and isinstance(u["datos_perfil"], dict):
+                            u["datos_perfil"]["subrol"] = fresh_subrol
+                    break
+        except Exception:
+            pass
+    return str(subrol).strip()
+
+
+
 def despachar_orden_al_taller(f):
     """
     Despacha las notificaciones por correo para que el taller comience a trabajar
@@ -570,7 +597,7 @@ def listar_facturas():
         elif rol == "administracion":
             # --- FILTRO POR COPE PARA SUPERVISORES ---
             subrol = session["usuario"]["datos_perfil"].get("subrol", "")
-            if subrol == "Supervisor":
+            if subrol.lower() == "supervisor":
                 usuario_id = session["usuario"]["usuario"]
                 usuarios_data = leer_json("usuarios.json")
                 
@@ -1318,8 +1345,8 @@ def aprobar_10k():
     if "usuario" not in session or session["usuario"].get("rol") != "administracion":
         return jsonify({"status": "error", "message": "No autorizado"}), 403
 
-    subrol = session["usuario"].get("datos_perfil", {}).get("subrol", "")
-    if subrol not in ["Administrador", "Supervisor", "Jefatura"]:
+    subrol = obtener_subrol_actual_sesion()
+    if subrol.lower() not in ["administrador", "supervisor", "jefatura"]:
         return jsonify({"status": "error", "message": "Rol no autorizado para gestionar cotizaciones mayores a $10,000."}), 403
 
     req_json = request.get_json(silent=True) or {}
@@ -1353,7 +1380,7 @@ def aprobar_10k():
                 # Si la cotización es > 10,000 y el cliente/ticket pertenece a 'Corporativos',
                 # la suplencia está prohibida, obligando a seguir el flujo estricto sin excepciones.
                 es_corp = es_ticket_corporativo(f)
-                if subrol == "Supervisor":
+                if subrol.lower() == "supervisor":
                     if precio_float >= obtener_limite_cotizaciones_caras() and es_corp:
                         return jsonify({
                             "status": "error",
@@ -1407,7 +1434,7 @@ def aprobar_10k():
                     except Exception as e:
                         print("Error al enviar confirmación de aprobación a administrador:", e)
 
-                msg_exito = "Cotización aprobada en suplencia por Ausencia. Enviada a Corporativos." if subrol == "Supervisor" else "Cotización aprobada. Enviada a Corporativos."
+                msg_exito = "Cotización aprobada en suplencia por Ausencia. Enviada a Corporativos." if subrol.lower() == "supervisor" else "Cotización aprobada. Enviada a Corporativos."
                 return jsonify({"status": "success", "message": msg_exito})
 
             elif accion == "rechazar":
@@ -1523,7 +1550,12 @@ def confirmar_corp():
                 if not admin_approved:
                     return jsonify({"status": "error", "message": "Esta cotización debe ser aprobada por Administración primero."})
 
+            perf_corp_act = session.get("usuario", {}).get("datos_perfil", {})
+            nombre_corp_act = f"{perf_corp_act.get('nombres', '')} {perf_corp_act.get('apellido_paterno', '')}".strip() or "Corporativo"
+
             f["aprobado_corp"] = True
+            f["corporativo_aprobador"] = nombre_corp_act
+            f["corporativo_nombre"] = nombre_corp_act
             f["timestamp_aprobacion"] = datetime.datetime.now().isoformat()
             f["estado_custom"] = ""
 
@@ -2292,16 +2324,17 @@ def validar_fiscal():
     if 'usuario' not in session or session['usuario']['rol'] != 'administracion':
         return jsonify({"status": "error", "message": "No tienes permisos para validar facturas."}), 403
     
-    subrol = session["usuario"]["datos_perfil"].get("subrol", "")
-    if subrol not in ["Supervisor", "Administrador"]:
+    subrol = obtener_subrol_actual_sesion()
+    if subrol.lower() not in ["supervisor", "administrador", "jefatura"]:
         return jsonify({"status": "error", "message": "Solo el supervisor o administrador en cobertura pueden validar facturas."}), 403
     
-    factura_id = request.json.get('id')
+    req_json = request.get_json(silent=True) or {}
+    factura_id = req_json.get('id') or request.form.get('id')
     data = leer_json('facturas.json')
     for f in data.get('facturas', []):
         if str(f['id']) == str(factura_id):
             f['validacion_fiscal'] = 'Aprobada'
-            if subrol == "Administrador":
+            if subrol.lower() == "administrador":
                 f["validado_fiscal_por_suplencia"] = True
                 perf_actor = session.get("usuario", {}).get("datos_perfil", {})
                 nom_actor = f"{perf_actor.get('nombres', '')} {perf_actor.get('apellido_paterno', '')}".strip() or "Administrador"
@@ -2316,7 +2349,7 @@ def validar_fiscal():
                     correo_prov = u.get('datos_perfil', {}).get('correo', '')
                     break
 
-            if subrol == "Administrador":
+            if subrol.lower() == "administrador":
                 msg_val = "Factura validada correctamente por cobertura (Administrador). El ticket ha pasado a la captura del Documento Contable (último paso del proceso)."
             else:
                 msg_val = "Factura validada correctamente. El ticket ha pasado a la captura del Documento Contable (último paso del proceso)."
@@ -2328,12 +2361,13 @@ def rechazar_fiscal():
     if 'usuario' not in session or session['usuario']['rol'] != 'administracion':
         return jsonify({"status": "error", "message": "No tienes permisos para rechazar facturas."}), 403
     
-    subrol = session["usuario"]["datos_perfil"].get("subrol", "")
-    if subrol not in ["Supervisor", "Administrador"]:
+    subrol = obtener_subrol_actual_sesion()
+    if subrol.lower() not in ["supervisor", "administrador", "jefatura"]:
         return jsonify({"status": "error", "message": "Solo el supervisor o administrador en cobertura pueden rechazar facturas."}), 403
     
-    factura_id = request.json.get('id')
-    motivo = request.json.get('motivo', 'Sin motivo especificado')
+    req_json = request.get_json(silent=True) or {}
+    factura_id = req_json.get('id') or request.form.get('id')
+    motivo = req_json.get('motivo') or request.form.get('motivo') or 'Sin motivo especificado'
     data = leer_json('facturas.json')
     usuarios = leer_json('usuarios.json').get('usuarios', [])
     
@@ -2463,15 +2497,16 @@ def doc50():
 
 @facturas_bp.route('/api/facturas/archivar_final', methods=['POST'])
 def archivar_final():
-    if 'usuario' not in session or session['usuario']['rol'] != 'administracion':
-        return jsonify({"status": "error", "message": "No autorizado"})
+    if 'usuario' not in session or session['usuario'].get('rol') != 'administracion':
+        return jsonify({"status": "error", "message": "No autorizado"}), 403
     
     # Verificar que sea Supervisor o Administrador en cobertura para poder archivar
-    subrol = session['usuario'].get('datos_perfil', {}).get('subrol', '')
-    if subrol not in ['Supervisor', 'Administrador']:
+    subrol = obtener_subrol_actual_sesion()
+    if subrol.lower() not in ['supervisor', 'administrador', 'jefatura']:
         return jsonify({"status": "error", "message": "Solo los Supervisores o Administradores en cobertura pueden archivar tickets."}), 403
         
-    factura_id = request.json.get('id')
+    req_json = request.get_json(silent=True) or {}
+    factura_id = req_json.get('id') or request.form.get('id')
     data = leer_json('facturas.json')
     
     for i, f in enumerate(data.get('facturas', [])):
@@ -2479,7 +2514,7 @@ def archivar_final():
             f['estado'] = 'Archivado_Final'
             f['fecha_archivado'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             nombre_actor = f"{session['usuario'].get('datos_perfil', {}).get('nombres', '')} {session['usuario'].get('datos_perfil', {}).get('apellido_paterno', '')}".strip()
-            if subrol == 'Administrador':
+            if subrol.lower() == 'administrador':
                 f['archivado_por'] = f"{nombre_actor} (Administrador en Cobertura)"
                 f['archivado_por_suplencia'] = True
             else:
@@ -2888,15 +2923,16 @@ def eliminar_silencioso():
 
 @facturas_bp.route("/api/facturas/liberar_doc50", methods=["POST"])
 def liberar_doc50():
-    if "usuario" not in session or session["usuario"]["rol"] != "administracion":
+    if "usuario" not in session or session["usuario"].get("rol") != "administracion":
         return jsonify({"status": "error", "message": "No autorizado"})
     
-    # Validar que sea Administrador o Supervisor (suplencia / cobertura)
-    subrol = session["usuario"]["datos_perfil"].get("subrol")
-    if subrol not in ["Administrador", "Supervisor"]:
+    # Validar que sea Administrador o Supervisor (suplencia / cobertura) o Jefatura
+    subrol = obtener_subrol_actual_sesion()
+    if subrol.lower() not in ["administrador", "supervisor", "jefatura"]:
         return jsonify({"status": "error", "message": "Permiso denegado. Sólo Administradores o Supervisores en cobertura pueden liberar tickets."}), 403
 
-    factura_id = request.json.get("id")
+    req_json = request.get_json(silent=True) or {}
+    factura_id = req_json.get("id") or request.form.get("id")
     data = leer_json("facturas.json")
     for f in data.get("facturas", []):
         if str(f["id"]) == str(factura_id):
@@ -2907,7 +2943,7 @@ def liberar_doc50():
                     "message": "⚠️ Este ticket no puede ser liberado aún. La unidad debe estar entregada y el código validado por el chofer antes de su liberación."
                 }), 400
             f["liberado_admin"] = True
-            if subrol == "Supervisor":
+            if subrol.lower() == "supervisor":
                 f["liberado_por_suplencia"] = True
                 perf_actor = session.get("usuario", {}).get("datos_perfil", {})
                 nom_actor = f"{perf_actor.get('nombres', '')} {perf_actor.get('apellido_paterno', '')}".strip() or "Supervisor"
@@ -2964,7 +3000,7 @@ def liberar_doc50():
                     nombre_admin=nombre_adm_act
                 )
                 
-            if subrol == "Supervisor":
+            if subrol.lower() == "supervisor":
                 msg_liberado = "¡Ticket liberado exitosamente en cobertura! Se ha liberado la captura del Documento Contable y se ha habilitado el campo para que el taller suba su factura."
             else:
                 msg_liberado = "¡Ticket liberado exitosamente! Se ha liberado la captura del Documento Contable y se ha habilitado el campo para que el taller suba su factura."

@@ -40,7 +40,9 @@ ESTADOS_SISTEMA_TICKET = [
     "Esperando Rev/Factura",
     "Esperando Num. Contable",
     "Finalizado / Histórico",
-    "Incosteable"
+    "Incosteable",
+    "En Asignacion/Retrabajo",
+    "Retrabajo"
 ]
 
 def determinar_estado_ticket(f):
@@ -51,6 +53,10 @@ def determinar_estado_ticket(f):
         return "Incosteable"
     elif estado_raw == 'Rechazado_Con_Recomendaciones':
         return "Correcciones/Taller"
+    elif estado_raw == 'En Asignacion/Retrabajo' or f.get('estado_retrabajo') == 'Pendiente':
+        return "En Asignacion/Retrabajo"
+    elif estado_raw == 'Retrabajo' or f.get('estado_retrabajo') in ('Reasignado', 'Por Liberar'):
+        return "Retrabajo"
     elif estado_raw in ('Archivado', 'Archivado_Final'):
         return "Finalizado / Histórico"
     elif is_unassigned:
@@ -166,8 +172,16 @@ def obtener_lista_seccion_reportes():
     cope_a_sup = {}
     cope_a_admin = {}
     nombre_jefatura = "No asignado"
+    nombre_corp_global = "Luisa Alejandra Gimenez"
     for u in usuarios_list:
-        if u.get('rol') == 'administracion':
+        if u.get('rol') == 'corporativos':
+            nombres = u.get('datos_perfil', {}).get('nombres', '')
+            apellido_pat = u.get('datos_perfil', {}).get('apellido_paterno', '')
+            apellido_mat = u.get('datos_perfil', {}).get('apellido_materno', '')
+            nom_corp = re.sub(r'\s+', ' ', f"{nombres} {apellido_pat} {apellido_mat}").strip()
+            if nom_corp:
+                nombre_corp_global = nom_corp
+        elif u.get('rol') == 'administracion':
             subrol = u.get('datos_perfil', {}).get('subrol')
             cope_principal = u.get('datos_perfil', {}).get('cope', '')
             copes_extra = u.get('datos_perfil', {}).get('copes_asignados', [])
@@ -199,8 +213,10 @@ def obtener_lista_seccion_reportes():
         f_id_ret = str(ret.get('factura_id', '')).strip().upper()
         if t_orig:
             retrabajos_map[t_orig] = ret
+            retrabajos_map[t_orig.replace("REP-", "")] = ret
         if f_id_ret:
             retrabajos_map[f_id_ret] = ret
+            retrabajos_map[f_id_ret.replace("FAC-", "")] = ret
 
     # 2. Asignar nombres al ticket y calcular estado
     for f in todos_combinados:
@@ -231,23 +247,35 @@ def obtener_lista_seccion_reportes():
         f['supervisor_nombre'] = sup_nombre
         f['administrador_nombre'] = admin_nombre
         f['jefatura_nombre'] = nombre_jefatura
+        f['corporativo_nombre'] = f.get('corporativo_aprobador') or f.get('corporativo_nombre') or (nombre_corp_global if f.get('aprobado_corp') is True else "")
         f['estado_calculado'] = determinar_estado_ticket(f)
 
         # Cruzar con retrabajos.json para obtener los datos de reingreso
         t_key = str(f.get("id", "")).strip().upper()
         r_key = str(r_id or "").strip().upper()
-        ret_obj = retrabajos_map.get(t_key) or retrabajos_map.get(r_key)
+        ret_obj = (
+            retrabajos_map.get(t_key) or 
+            retrabajos_map.get(t_key.replace("REP-", "")) or 
+            retrabajos_map.get(r_key) or 
+            retrabajos_map.get(r_key.replace("REP-", ""))
+        )
         if ret_obj:
             f['fecha_retrabajo'] = ret_obj.get("fecha_reasignacion") or ret_obj.get("fecha_ingreso") or f.get("fecha_retrabajo")
             if ret_obj.get("estado") == "Finalizado":
                 f['fecha_finalizacion_retrabajo'] = ret_obj.get("fecha_finalizacion_taller") or f.get("fecha_finalizacion_retrabajo")
+            elif ret_obj.get("estado") in ["Por Liberar", "por_liberar"]:
+                f['fecha_finalizacion_retrabajo'] = ret_obj.get("fecha_finalizacion_taller") or f.get("fecha_finalizacion_retrabajo") or ""
             else:
                 f['fecha_finalizacion_retrabajo'] = f.get("fecha_finalizacion_retrabajo") or ""
             f['estado_retrabajo'] = ret_obj.get("estado") or f.get("estado_retrabajo")
             if not f.get("num_retrabajo"):
-                f["num_retrabajo"] = 1
+                f["num_retrabajo"] = 1 if ret_obj.get("estado") != "Pendiente" else 0
             if not f.get("retrabajo"):
-                f["retrabajo"] = "Sí"
+                f["retrabajo"] = "Pendiente" if ret_obj.get("estado") == "Pendiente" else "Sí"
+            if ret_obj.get("unidad_entregada"):
+                f["retrabajo_unidad_entregada"] = ret_obj.get("unidad_entregada")
+            if ret_obj.get("reactivado_desde_caras") or ret_obj.get("es_cotizacion_cara"):
+                f["reactivado_desde_caras"] = True
 
     # Recopilar lista completa de todos los estados posibles del sistema y base de datos
     estados_disponibles = list(ESTADOS_SISTEMA_TICKET)

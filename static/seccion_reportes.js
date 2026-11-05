@@ -325,6 +325,8 @@ function renderizarTablaReportes(lista) {
             estTicketNorm.includes('retrabajo') ||
             estRetNorm === 'reasignado' ||
             estRetNorm === 'pendiente' ||
+            estRetNorm === 'por liberar' ||
+            estRetNorm === 'por_liberar' ||
             rawRetNorm === 'sí' ||
             rawRetNorm === 'si' ||
             rawRetNorm === 'pendiente' ||
@@ -351,26 +353,35 @@ function renderizarTablaReportes(lista) {
         let htmlNumPedido = '';
         let htmlBtnPdfPedido = '';
         let htmlNumOrden = '';
+        let htmlCorporativo = '';
         let htmlNumFactura = '';
         let htmlBtnPdfFactura = '';
         let htmlNumContable = '';
         
         let rawRetrabajo = String(f.retrabajo || f.es_retrabajo || '').trim();
+        let rawEstRet = String(f.estado_retrabajo || '').trim().toLowerCase();
+        let numRet = parseInt(f.num_retrabajo || f.numero_retrabajo || 0, 10);
         let valRetrabajo = '';
-        if (rawRetrabajo.toLowerCase() === 'sí' || rawRetrabajo.toLowerCase() === 'si' || rawRetrabajo.toLowerCase() === 'reasignado') {
+        if (rawRetrabajo.toLowerCase() === 'sí' || rawRetrabajo.toLowerCase() === 'si' || rawRetrabajo.toLowerCase() === 'reasignado' || rawEstRet === 'reasignado' || rawEstRet === 'por liberar' || rawEstRet === 'por_liberar' || rawEstRet === 'finalizado') {
             valRetrabajo = '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Sí</span>';
-        } else if (rawRetrabajo.toLowerCase() === 'pendiente' || rawRetrabajo.toLowerCase() === 'solicitado' || rawRetrabajo.toLowerCase() === 'en revisión' || rawRetrabajo.toLowerCase() === 'en revision') {
+        } else if (rawRetrabajo.toLowerCase() === 'pendiente' || rawRetrabajo.toLowerCase() === 'solicitado' || rawRetrabajo.toLowerCase() === 'en revisión' || rawRetrabajo.toLowerCase() === 'en revision' || rawEstRet === 'pendiente') {
             valRetrabajo = '<span style="background:#eab308; color:#0b1c30; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;" title="Solicitud en revisión (apenas se va a reasignar o cancelar)">Pendiente</span>';
-        } else if (rawRetrabajo.toLowerCase() === 'cancelado') {
+        } else if (rawRetrabajo.toLowerCase() === 'cancelado' || rawEstRet === 'cancelado') {
             valRetrabajo = '<span style="background:#64748b; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Cancelado</span>';
+        } else if (numRet > 0) {
+            valRetrabajo = '<span style="background:#ef4444; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Sí</span>';
         } else {
             valRetrabajo = '<span style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No Aplica</span>';
         }
 
-        let numRet = parseInt(f.num_retrabajo || f.numero_retrabajo || 0, 10);
-        let valNumRetrabajo = (numRet > 0)
-            ? `<span style="background:#f59e0b; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">${numRet}</span>`
-            : '<span style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No Aplica</span>';
+        let valNumRetrabajo = '';
+        if (numRet > 0) {
+            valNumRetrabajo = `<span style="background:#f59e0b; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">${numRet}</span>`;
+        } else if (rawRetrabajo.toLowerCase() === 'pendiente' || rawEstRet === 'pendiente') {
+            valNumRetrabajo = `<span style="background:#eab308; color:#0b1c30; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;" title="Garantía en proceso de reasignación">Pendiente</span>`;
+        } else {
+            valNumRetrabajo = '<span style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No Aplica</span>';
+        }
 
         // ----------------------------------------------------
         // LOGICA DE LAS 3 COLUMNAS DE REINGRESO / RETRABAJO
@@ -378,13 +389,15 @@ function renderizarTablaReportes(lista) {
         // 2. TIEMPO EN TALLER/REINGRESO: Tiempo que tenga en reingreso
         // 3. FECHA DE FINALIZACION/REINGRESO: Fecha en que se concluyo el reingreso
         // ----------------------------------------------------
-        let rawEstRet = String(f.estado_retrabajo || '').trim().toLowerCase();
         let fechaRetRaw = f.fecha_retrabajo || f.fecha_reasignacion || f.fecha_reingreso || '';
         let fechaFinRetRaw = f.fecha_finalizacion_retrabajo || f.fecha_finalizacion_taller || '';
 
         let tieneReingreso = false;
-        if (numRet > 0 || rawRetrabajo.toLowerCase() === 'sí' || rawRetrabajo.toLowerCase() === 'si' || rawEstRet === 'reasignado' || rawEstRet === 'finalizado' || fechaRetRaw) {
-            if (rawRetrabajo.toLowerCase() !== 'cancelado') {
+        if (numRet > 0 || 
+            rawRetrabajo.toLowerCase() === 'sí' || rawRetrabajo.toLowerCase() === 'si' || rawRetrabajo.toLowerCase() === 'reasignado' || rawRetrabajo.toLowerCase() === 'pendiente' ||
+            rawEstRet === 'reasignado' || rawEstRet === 'pendiente' || rawEstRet === 'por liberar' || rawEstRet === 'por_liberar' || rawEstRet === 'finalizado' || 
+            fechaRetRaw) {
+            if (rawRetrabajo.toLowerCase() !== 'cancelado' && rawEstRet !== 'cancelado') {
                 tieneReingreso = true;
             }
         }
@@ -412,7 +425,7 @@ function renderizarTablaReportes(lista) {
                 if (isNaN(dInicio)) dInicio = new Date(fechaRetRaw.replace(/-/g, '/'));
 
                 let dFin = null;
-                if (fechaFinRetRaw && (rawEstRet === 'finalizado' || f.estado === 'Finalizado')) {
+                if (fechaFinRetRaw && (rawEstRet === 'finalizado' || f.estado === 'Finalizado' || f.estado === 'Archivado' || f.estado === 'Finalizado / Histórico')) {
                     dFin = new Date(fechaFinRetRaw);
                     if (isNaN(dFin)) dFin = new Date(fechaFinRetRaw.replace(' ', 'T'));
                     if (isNaN(dFin)) dFin = new Date(fechaFinRetRaw.replace(/-/g, '/'));
@@ -434,17 +447,16 @@ function renderizarTablaReportes(lista) {
             }
 
             // 3. Fecha de Finalizacion / Reingreso
-            if (fechaFinRetRaw && (rawEstRet === 'finalizado' || f.estado === 'Finalizado')) {
+            if (fechaFinRetRaw && (rawEstRet === 'finalizado' || f.estado === 'Finalizado' || f.estado === 'Archivado' || f.estado === 'Finalizado / Histórico')) {
                 valFechaFinReingreso = `<span style="color:#ffffff; font-size:0.9em; white-space:nowrap;">${fechaFinRetRaw}</span>`;
+            } else if (rawEstRet === 'por liberar' || rawEstRet === 'por_liberar') {
+                valFechaFinReingreso = `<span style="background:#eab308; color:#0b1c30; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;" title="Reparado por el taller, en espera de liberación del supervisor">Por Liberar ⏱️</span>`;
             } else {
                 valFechaFinReingreso = `<span style="background:#eab308; color:#0b1c30; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;" title="La unidad se encuentra actualmente en proceso de retrabajo en el taller">En Proceso ⏱️</span>`;
             }
 
             // 4. Retrabajo Finalizado (Sí con círculo verde, No con círculo rojo, No Aplica)
-            let estaFinalizado = Boolean(fechaFinRetRaw && (rawEstRet === 'finalizado' || f.estado === 'Finalizado' || f.estado === 'Archivado' || f.estado === 'Finalizado / Histórico'));
-            if (rawEstRet === 'finalizado') {
-                estaFinalizado = true;
-            }
+            let estaFinalizado = Boolean(rawEstRet === 'finalizado' || (fechaFinRetRaw && (f.estado === 'Finalizado' || f.estado === 'Archivado' || f.estado === 'Finalizado / Histórico') && rawEstRet !== 'por liberar' && rawEstRet !== 'por_liberar' && rawEstRet !== 'pendiente'));
 
             if (estaFinalizado) {
                 valRetrabajoFinalizado = `<span style="background:#15803d; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Sí</span>`;
@@ -454,11 +466,7 @@ function renderizarTablaReportes(lista) {
 
             // 5. Retrabajo / Unidad Entregada
             let entRaw = String(f.retrabajo_unidad_entregada || f.unidad_entregada_retrabajo || '').trim().toLowerCase();
-            if (entRaw === 'sí' || entRaw === 'si') {
-                valRetrabajoUnidadEntregada = `<span style="background:#15803d; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Sí</span>`;
-            } else if (entRaw === 'no') {
-                valRetrabajoUnidadEntregada = `<span style="background:#b91c1c; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No</span>`;
-            } else if (f.fecha_liberacion_retrabajo || rawEstRet === 'finalizado') {
+            if (entRaw === 'sí' || entRaw === 'si' || f.fecha_liberacion_retrabajo || rawEstRet === 'finalizado') {
                 valRetrabajoUnidadEntregada = `<span style="background:#15803d; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Sí</span>`;
             } else {
                 valRetrabajoUnidadEntregada = `<span style="background:#b91c1c; color:white; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No</span>`;
@@ -501,6 +509,22 @@ function renderizarTablaReportes(lista) {
             // Num Orden
             let nOrden = cot ? (cot.numero_orden || pendienteHTML) : (f.numero_orden || pendienteHTML);
             htmlNumOrden += `<div style="${bStyle}">${label}${nOrden}</div>`;
+
+            // Corporativos (después de NUM. DE ORDEN)
+            let precioOpcion = cot ? parseFloat(cot.precio || 0) : (f.precio ? parseFloat(f.precio) : 0);
+            let esCaraOpcion = precioOpcion >= 10000 || (f.precio && parseFloat(f.precio) >= 10000);
+            let valCorp = '';
+            if (esCaraOpcion) {
+                if (f.aprobado_corp === true) {
+                    let nomCorp = f.corporativo_nombre || f.corporativo_aprobador || window.nombreCorporativoGlobal || "Luisa Alejandra Gimenez";
+                    valCorp = `<span style="color:#ffffff; font-weight:600; font-size:0.9em;">${nomCorp}</span>`;
+                } else {
+                    valCorp = `<span style="background:#eab308; color:#0b1c30; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">Esperando Aprobación</span>`;
+                }
+            } else {
+                valCorp = `<span style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:4px 10px; border-radius:12px; font-size:0.85em; font-weight:bold; white-space:nowrap; display:inline-block;">No Aplica</span>`;
+            }
+            htmlCorporativo += `<div style="${bStyle}">${label}${valCorp}</div>`;
 
             // Num Factura
             let nFact = cot ? (cot.factura_folio || pendienteHTML) : (f.factura_folio || pendienteHTML);
@@ -561,7 +585,8 @@ function renderizarTablaReportes(lista) {
         }
 
         // Set row info for filtering and badges
-        let badgeCaras = f.reactivado_desde_caras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
+        let isReactivadaCaras = Boolean(f.reactivado_desde_caras || (reporteOrig && reporteOrig.reactivado_desde_caras));
+        let badgeCaras = isReactivadaCaras ? `<br><span style="color:#f59e0b; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Reactivada C/cara</span>` : '';
         let badgeRetrabajo = isRowRetrabajo ? `<br><span style="color:#ef4444; font-size:0.75em; font-weight:bold; white-space:nowrap;">⚠️ Retrabajo</span>` : '';
         let badgeColorEstado = '#0ea5e9';
         let textColorEstado = 'white';
@@ -573,8 +598,23 @@ function renderizarTablaReportes(lista) {
             textColorEstado = 'white';
         }
 
+        // Evaluar si tiene al menos una cotización individual >= 10,000 (no el total acumulado)
+        let tieneCotizacion10k = false;
+        let limite10k = window.LIMITE_COTIZACIONES_CARAS || 10000;
+        if (f.cotizaciones && Array.isArray(f.cotizaciones) && f.cotizaciones.length > 0) {
+            tieneCotizacion10k = f.cotizaciones.some(c => {
+                let p = parseFloat(String(c.precio || 0).replace(/,/g, ''));
+                return !isNaN(p) && p >= limite10k;
+            });
+        } else if (f.precio) {
+            let p = parseFloat(String(f.precio).replace(/,/g, ''));
+            if (!isNaN(p) && p >= limite10k) {
+                tieneCotizacion10k = true;
+            }
+        }
+
         let rowHtml = `
-            <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-cope="${cleanCope}" data-estado="${estado}" data-fecha="${fechaISO}" data-costo="${ticketGasto}" data-pend-doc50="${isRowPendDoc50 ? '1' : '0'}" data-pend-oc="${isRowPendOC ? '1' : '0'}" data-reactivado="${f.reactivado_desde_caras ? '1' : '0'}" data-retrabajo="${isRowRetrabajo ? '1' : '0'}">
+            <tr data-ticket="${ticket}" data-eco="${cleanEco}" data-prov="${cleanProv}" data-ciudad="${cleanCiudad}" data-cope="${cleanCope}" data-estado="${estado}" data-fecha="${fechaISO}" data-costo="${ticketGasto}" data-pend-doc50="${isRowPendDoc50 ? '1' : '0'}" data-pend-oc="${isRowPendOC ? '1' : '0'}" data-reactivado="${isReactivadaCaras ? '1' : '0'}" data-retrabajo="${isRowRetrabajo ? '1' : '0'}" data-cot-10k="${tieneCotizacion10k ? '1' : '0'}">
                 <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px;"><input type="checkbox" class="chk-reporte" value="${ticket}"></td>
                 <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px;"><span style="color:#0ea5e9; font-weight:bold;">${ticket}</span>${badgeCaras}${badgeRetrabajo}</td>
                 <td class="td-azul-marino col-azul-marino" style="vertical-align:top; padding-top:15px; color:#ffffff;">${numEco}</td>
@@ -603,6 +643,7 @@ function renderizarTablaReportes(lista) {
                 <td class="td-amarillo col-amarillo" style="vertical-align:top; padding-top:15px; color:#ffffff;">${valRetrabajoUnidadEntregada}</td>
                 <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${htmlNumPedido}</td>
                 <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${htmlNumOrden}</td>
+                <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${htmlCorporativo}</td>
                 <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${htmlNumFactura}</td>
                 <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${htmlBtnPdfFactura}</td>
                 <td class="td-negro col-negro" style="vertical-align:top; padding-top:15px; color:#ffffff;">${nombreAdmin}</td>
@@ -707,7 +748,15 @@ function aplicarFiltrosReportes() {
             }
         }
 
-        // 6. Filtro Reactivadas de Cotizaciones Caras (botón toggle)
+        // 6. Filtro Cotizaciones +10,000 (botón toggle)
+        if (match && window.filtroCotizaciones10kActivo) {
+            let esCot10k = tr.getAttribute('data-cot-10k') === '1';
+            if (!esCot10k) {
+                match = false;
+            }
+        }
+
+        // 7. Filtro Reactivadas de Cotizaciones Caras (botón toggle)
         if (match && window.filtroReactivadasCarasActivo) {
             let esReactivado = tr.getAttribute('data-reactivado') === '1';
             if (!esReactivado) {
@@ -715,7 +764,7 @@ function aplicarFiltrosReportes() {
             }
         }
 
-        // 7. Filtro Garantía / Retrabajo (botón toggle)
+        // 8. Filtro Garantía / Retrabajo (botón toggle)
         if (match && window.filtroGarantiaRetrabajoActivo) {
             let esRetrabajo = tr.getAttribute('data-retrabajo') === '1';
             if (!esRetrabajo) {
@@ -767,8 +816,31 @@ function aplicarFiltrosReportes() {
     actualizarMarcadoColumnaYCruceReportes();
 }
 
+window.filtroCotizaciones10kActivo = false;
 window.filtroReactivadasCarasActivo = false;
 window.filtroGarantiaRetrabajoActivo = false;
+
+function toggleFiltroCotizaciones10k() {
+    window.filtroCotizaciones10kActivo = !window.filtroCotizaciones10kActivo;
+    let btn = document.getElementById('btn-filtro-cotizaciones-10k');
+    if (btn) {
+        if (window.filtroCotizaciones10kActivo) {
+            btn.style.background = '#f59e0b';
+            btn.style.color = '#0f172a';
+            btn.style.borderColor = '#d97706';
+            btn.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.4)';
+            btn.innerHTML = '<span style="font-size:1.1em;">💰</span> Cotizaciones +10000';
+        } else {
+            btn.style.background = '#334155';
+            btn.style.color = '#cbd5e1';
+            btn.style.borderColor = '#475569';
+            btn.style.boxShadow = 'none';
+            btn.innerHTML = '<span style="font-size:1.1em;">💰</span> Cotizaciones +10000';
+        }
+    }
+    aplicarFiltrosReportes();
+}
+window.toggleFiltroCotizaciones10k = toggleFiltroCotizaciones10k;
 
 function toggleFiltroGarantia() {
     window.filtroGarantiaRetrabajoActivo = !window.filtroGarantiaRetrabajoActivo;
@@ -824,6 +896,16 @@ function limpiarFiltrosReportes() {
     if (elProv) elProv.value = '';
     if (elCiudad) elCiudad.value = '';
     if (elFecha) elFecha.value = '';
+
+    window.filtroCotizaciones10kActivo = false;
+    let btn10k = document.getElementById('btn-filtro-cotizaciones-10k');
+    if (btn10k) {
+        btn10k.style.background = '#334155';
+        btn10k.style.color = '#cbd5e1';
+        btn10k.style.borderColor = '#475569';
+        btn10k.style.boxShadow = 'none';
+        btn10k.innerHTML = '<span style="font-size:1.1em;">💰</span> Cotizaciones +10000';
+    }
 
     window.filtroReactivadasCarasActivo = false;
     let btn = document.getElementById('btn-filtro-reactivadas');

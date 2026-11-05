@@ -22,6 +22,7 @@ from notificaciones import (
     enviar_correo_retrabajo_listo_chofer,
     enviar_correo_retrabajo_listo_taller,
     enviar_correo_retrabajo_listo_supervisor_respaldo,
+    enviar_correo_retrabajo_caras_listo_supervisor,
 )
 
 reportes_bp = Blueprint("reportes_bp", __name__)
@@ -772,9 +773,21 @@ def buscar_ticket_garantia(ticket_query):
     except Exception:
         pass
 
+    es_reactivado_caras = bool(
+        factura_correspondiente.get("reactivado_desde_caras") 
+        or (reporte_encontrado and reporte_encontrado.get("reactivado_desde_caras"))
+    )
+
+    # REGLA: Si el ticket fue reactivado de cotizaciones caras, NO se puede ingresar desde el reporte del chofer
+    if not es_caras_req and es_reactivado_caras:
+        return jsonify({
+            "status": "bloqueado_caras",
+            "message": "⚠️ Este ticket fue reactivado desde Cotizaciones Caras. La garantía no puede aplicarse desde este reporte; debe gestionarse directamente por el Supervisor desde la sección de 'Retrabajo / Cotizaciones Caras'."
+        })
+
     es_ticket_caras = (
         precio_fact >= limite_caras 
-        or factura_correspondiente.get("reactivado_desde_caras")
+        or es_reactivado_caras
         or "caras" in str(factura_correspondiente.get("estado", "")).lower()
         or "caras" in str(factura_correspondiente.get("estado_previo", "")).lower()
     )
@@ -787,15 +800,15 @@ def buscar_ticket_garantia(ticket_query):
 
     entregado_val = str(factura_correspondiente.get("entregado", "")).strip().lower()
     es_entregado = (entregado_val in ["sí", "si", "s"] or entregado_val.startswith("s"))
-    if not es_entregado and not es_caras_req:
+    if not es_entregado:
         return jsonify({
             "status": "no_elegible",
             "message": "Solo se puede mandar a retrabajo una unidad cuando el chofer ya haya verificado su número de confirmación para cuando el taller en teoría la dejó arreglada y lista."
         })
 
-    # Validación de vigencia de tiempo de garantía del taller
+    # Validación de vigencia de tiempo de garantía del taller (tanto para chofer como para supervisor en cotizaciones caras)
     vigente, segs_trans, segs_tot, segs_rest, f_entrega, n_taller, txt_trans, txt_lim, txt_rest = verificar_vigencia_garantia(factura_correspondiente)
-    if not vigente and not es_caras_req:
+    if not vigente:
         return jsonify({
             "status": "garantia_expirada",
             "message": f"El tiempo de garantía ya pasó para este ticket. El taller '{n_taller}' ofrece un límite de {txt_lim} de garantía y han transcurrido {txt_trans} desde la entrega ({f_entrega}). Ya no es posible aplicar garantía para este servicio.",
@@ -936,6 +949,8 @@ def aplicar_garantia():
     req = request.get_json() or {}
     ticket_id = str(req.get("ticket_id", "")).strip()
     motivo = str(req.get("motivo", "")).strip()
+    tipo = str(req.get("tipo", "")).strip().lower()
+    es_caras = bool(req.get("es_caras", False) or tipo == "caras")
     import re
     motivo = re.sub(r'^["\'«»“”„]+|["\'«»“”„]+$', '', motivo).strip()
 
@@ -998,6 +1013,17 @@ def aplicar_garantia():
 
     if not reporte_encontrado or not factura_correspondiente:
         return jsonify({"status": "error", "message": "No se encontraron los registros de servicio correspondientes para este ticket."}), 404
+
+    es_reactivado_caras = bool(
+        factura_correspondiente.get("reactivado_desde_caras")
+        or (reporte_encontrado and reporte_encontrado.get("reactivado_desde_caras"))
+    )
+    # REGLA ESTRICTA: Si es reactivado desde cotizaciones caras, solo puede aplicarse con tipo="caras" desde el supervisor
+    if not es_caras and es_reactivado_caras:
+        return jsonify({
+            "status": "error",
+            "message": "⚠️ Este ticket fue reactivado desde Cotizaciones Caras. La garantía no puede aplicarse desde este reporte; debe gestionarse directamente por el Supervisor desde la sección de 'Retrabajo / Cotizaciones Caras'."
+        }), 400
 
     # Validación estricta del número de confirmación
     entregado_val = str(factura_correspondiente.get("entregado", "")).strip().lower()
@@ -1144,7 +1170,9 @@ def aplicar_garantia():
         "supervisor_usuario": sup_usuario,
         "supervisor_correo": sup_correo,
         "estado": "Pendiente",
-        "reactivado_desde_caras": bool(factura_correspondiente.get("reactivado_desde_caras") or reporte_encontrado.get("reactivado_desde_caras")),
+        "tipo": "caras" if es_caras else "normal",
+        "es_cotizacion_cara": bool(es_caras or es_reactivado_caras or float(factura_correspondiente.get("precio", 0) or 0) >= 10000),
+        "reactivado_desde_caras": es_reactivado_caras,
         "seccion_1": seccion_1,
         "seccion_2": seccion_2
     }
@@ -1156,10 +1184,13 @@ def aplicar_garantia():
     escribir_json("retrabajos.json", retrabajos_data)
 
     # Actualizar factura en facturas.json
+    ahora_ret_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     for f in facturas_data.get("facturas", []):
         if str(f.get("id")) == str(factura_correspondiente.get("id")):
             f["retrabajo"] = "Pendiente"
             f["estado_retrabajo"] = "Pendiente"
+            f["fecha_retrabajo"] = f.get("fecha_retrabajo") or ahora_ret_str
+            f["fecha_solicitud_retrabajo"] = ahora_ret_str
             if "estado_previo" not in f or not f["estado_previo"] or f["estado_previo"] in ["Retrabajo", "En Asignacion/Retrabajo"]:
                 curr_st = f.get("estado")
                 f["estado_previo"] = curr_st if curr_st not in ["Retrabajo", "En Asignacion/Retrabajo"] else ("Archivado" if f.get("doc_contable_50") or f.get("archivado") else "pendiente")
@@ -1629,9 +1660,26 @@ def finalizar_retrabajo_taller():
     dp = session["usuario"].get("datos_perfil", {})
     taller_nombre = dp.get("nombre_proveedor", "Taller")
 
-    # Generar códigos de validación de 6 dígitos: uno al chofer y otro al supervisor de respaldo
-    codigo_chofer = f"{random.randint(100000, 999999)}"
+    facturas_data = leer_json("facturas.json")
+    f_id = str(encontrado.get("factura_id", "")).strip().upper()
+    es_cara = bool(
+        encontrado.get("tipo") == "caras" or
+        encontrado.get("es_cotizacion_cara") or
+        encontrado.get("reactivado_desde_caras") or
+        (encontrado.get("seccion_1") and encontrado["seccion_1"].get("reactivado_desde_caras")) or
+        (encontrado.get("seccion_2") and encontrado["seccion_2"].get("reactivado_desde_caras"))
+    )
+    if not es_cara:
+        for f_chk in facturas_data.get("facturas", []):
+            if str(f_chk.get("id", "")).strip().upper() == f_id or ticket in str(f_chk.get("retro", "")).upper() or str(f_chk.get("id_reporte", "")).upper() == ticket:
+                if f_chk.get("reactivado_desde_caras") or float(f_chk.get("precio", 0) or 0) >= 10000:
+                    es_cara = True
+                break
+
+    # Generar código de validación:
+    # REGLA: Si es cotización cara con garantía, SOLO se genera y envía código al supervisor (no al chofer).
     codigo_supervisor = f"{random.randint(100000, 999999)}"
+    codigo_chofer = None if es_cara else f"{random.randint(100000, 999999)}"
 
     # Buscar datos del chofer (sección 1 o reportes.json)
     seccion_1 = encontrado.get("seccion_1") or {}
@@ -1660,11 +1708,11 @@ def finalizar_retrabajo_taller():
     encontrado["chofer"] = nombre_chofer
     encontrado["correo_chofer"] = correo_chofer
     encontrado["unidad_entregada"] = "No"
+    if es_cara:
+        encontrado["es_cotizacion_cara"] = True
     escribir_json("retrabajos.json", retrabajos_data)
 
     # Actualizar estado en facturas.json (mantiene f['estado'] en Retrabajo hasta que el supervisor lo valide)
-    facturas_data = leer_json("facturas.json")
-    f_id = str(encontrado.get("factura_id", "")).strip().upper()
     for f in facturas_data.get("facturas", []):
         if str(f.get("id", "")).strip().upper() == f_id or ticket in str(f.get("retro", "")).upper() or str(f.get("id_reporte", "")).upper() == ticket:
             f["estado_retrabajo"] = "Por Liberar"
@@ -1672,27 +1720,15 @@ def finalizar_retrabajo_taller():
             f["codigo_chofer_retrabajo"] = codigo_chofer
             f["codigo_supervisor_retrabajo"] = codigo_supervisor
             f["retrabajo_unidad_entregada"] = "No"
+            if es_cara:
+                f["es_cotizacion_cara"] = True
             break
     escribir_json("facturas.json", facturas_data)
 
     unidad_str = encontrado.get("unidad") or "N/A"
     ticket_display = encontrado.get("ticket_original") or encontrado.get("ticket") or ticket
 
-    # Enviar notificaciones por correo:
-    # 1. Al Chofer con su código de validación
-    try:
-        enviar_correo_retrabajo_listo_chofer(
-            correo_chofer=correo_chofer,
-            nombre_chofer=nombre_chofer,
-            ticket=ticket_display,
-            unidad=unidad_str,
-            nombre_taller=taller_nombre,
-            codigo_chofer=codigo_chofer
-        )
-    except Exception as e:
-        print(f"Error al enviar correo de retrabajo listo al chofer: {e}")
-
-    # 2. Al Supervisor de respaldo con su código de respaldo
+    # Determinar correo del supervisor
     correo_supervisor = encontrado.get("supervisor_correo")
     nombre_supervisor = encontrado.get("supervisor_asignado") or "Supervisor"
     if not correo_supervisor or "@telnor.com" in str(correo_supervisor).lower():
@@ -1708,23 +1744,57 @@ def finalizar_retrabajo_taller():
     if not correo_supervisor or "@telnor.com" in str(correo_supervisor).lower():
         correo_supervisor = "armandoramireztelnor2026@gmail.com"
 
-    try:
-        enviar_correo_retrabajo_listo_supervisor_respaldo(
-            correo_supervisor=correo_supervisor,
-            nombre_supervisor=nombre_supervisor,
-            ticket=ticket_display,
-            unidad=unidad_str,
-            nombre_taller=taller_nombre,
-            nombre_chofer=nombre_chofer,
-            codigo_supervisor=codigo_supervisor
-        )
-    except Exception as e:
-        print(f"Error al enviar correo de código de respaldo al supervisor: {e}")
+    # Enviar notificaciones por correo:
+    if es_cara:
+        # SOLO llega el código al supervisor (el chofer NO recibe código)
+        try:
+            enviar_correo_retrabajo_caras_listo_supervisor(
+                correo_supervisor=correo_supervisor,
+                nombre_supervisor=nombre_supervisor,
+                ticket=ticket_display,
+                unidad=unidad_str,
+                nombre_taller=taller_nombre,
+                codigo_supervisor=codigo_supervisor
+            )
+        except Exception as e:
+            print(f"Error al enviar correo de código exclusivo al supervisor: {e}")
 
-    return jsonify({
-        "status": "success",
-        "message": f"Unidad marcada como LISTA. Se envió código de validación al chofer ({nombre_chofer}) y código de respaldo al supervisor ({nombre_supervisor}) para su liberación y entrega."
-    })
+        return jsonify({
+            "status": "success",
+            "message": f"Unidad marcada como REPARADA. Por tratarse de una cotización cara con garantía, el código de validación ha sido enviado exclusivamente al supervisor ({nombre_supervisor}) para su liberación y entrega."
+        })
+    else:
+        # Retrabajo normal: 1. Al Chofer con su código de validación
+        try:
+            enviar_correo_retrabajo_listo_chofer(
+                correo_chofer=correo_chofer,
+                nombre_chofer=nombre_chofer,
+                ticket=ticket_display,
+                unidad=unidad_str,
+                nombre_taller=taller_nombre,
+                codigo_chofer=codigo_chofer
+            )
+        except Exception as e:
+            print(f"Error al enviar correo de retrabajo listo al chofer: {e}")
+
+        # Retrabajo normal: 2. Al Supervisor de respaldo con su código de respaldo
+        try:
+            enviar_correo_retrabajo_listo_supervisor_respaldo(
+                correo_supervisor=correo_supervisor,
+                nombre_supervisor=nombre_supervisor,
+                ticket=ticket_display,
+                unidad=unidad_str,
+                nombre_taller=taller_nombre,
+                nombre_chofer=nombre_chofer,
+                codigo_supervisor=codigo_supervisor
+            )
+        except Exception as e:
+            print(f"Error al enviar correo de código de respaldo al supervisor: {e}")
+
+        return jsonify({
+            "status": "success",
+            "message": f"Unidad marcada como LISTA. Se envió código de validación al chofer ({nombre_chofer}) y código de respaldo al supervisor ({nombre_supervisor}) para su liberación y entrega."
+        })
 
 
 @reportes_bp.route("/api/garantia/supervisor/por_liberar", methods=["GET"])
@@ -1801,9 +1871,25 @@ def liberar_retrabajo_supervisor():
     if not encontrado:
         return jsonify({"status": "error", "message": "Reporte de retrabajo no encontrado"}), 404
 
-    # Validar código (código del chofer o código de respaldo del supervisor)
-    cod_chofer = str(encontrado.get("codigo_chofer", "")).strip()
-    cod_super = str(encontrado.get("codigo_supervisor", "")).strip()
+    facturas_data = leer_json("facturas.json")
+    f_id = str(encontrado.get("factura_id", "")).strip().upper()
+    es_cara = bool(
+        encontrado.get("tipo") == "caras" or
+        encontrado.get("es_cotizacion_cara") or
+        encontrado.get("reactivado_desde_caras") or
+        (encontrado.get("seccion_1") and encontrado["seccion_1"].get("reactivado_desde_caras")) or
+        (encontrado.get("seccion_2") and encontrado["seccion_2"].get("reactivado_desde_caras"))
+    )
+    if not es_cara:
+        for f_chk in facturas_data.get("facturas", []):
+            if str(f_chk.get("id", "")).strip().upper() == f_id or ticket in str(f_chk.get("retro", "")).upper() or str(f_chk.get("id_reporte", "")).upper() == ticket:
+                if f_chk.get("reactivado_desde_caras") or float(f_chk.get("precio", 0) or 0) >= 10000:
+                    es_cara = True
+                break
+
+    # Validar código (código del supervisor para cotizaciones caras, o código de chofer/supervisor para normal)
+    cod_chofer = str(encontrado.get("codigo_chofer", "") or "").strip()
+    cod_super = str(encontrado.get("codigo_supervisor", "") or "").strip()
 
     es_valido = False
     tipo_codigo = ""
@@ -1812,21 +1898,27 @@ def liberar_retrabajo_supervisor():
         if not codigo_ingresado:
             return jsonify({
                 "status": "error",
-                "message": "Debes ingresar el código de validación (proporcionado por el chofer o el código de respaldo de supervisión)."
+                "message": "Debes ingresar el código de validación enviado a tu correo de supervisión." if es_cara else "Debes ingresar el código de validación (proporcionado por el chofer o el código de respaldo de supervisión)."
             }), 400
 
-        if cod_chofer and codigo_ingresado.upper() == cod_chofer.upper():
+        if cod_super and codigo_ingresado.upper() == cod_super.upper():
+            es_valido = True
+            tipo_codigo = "Código Exclusivo de Supervisión (Cotización Cara)" if es_cara else "Código de Respaldo de Supervisión"
+        elif not es_cara and cod_chofer and codigo_ingresado.upper() == cod_chofer.upper():
             es_valido = True
             tipo_codigo = "Código de Chofer"
-        elif cod_super and codigo_ingresado.upper() == cod_super.upper():
-            es_valido = True
-            tipo_codigo = "Código de Respaldo de Supervisión"
 
         if not es_valido:
-            return jsonify({
-                "status": "error",
-                "message": "❌ Código de validación incorrecto. Ingresa el código recibido por el chofer o el código de respaldo del supervisor."
-            }), 400
+            if es_cara:
+                return jsonify({
+                    "status": "error",
+                    "message": "❌ Código de validación incorrecto. Ingresa el código de 6 dígitos enviado exclusivamente a tu correo de supervisión."
+                }), 400
+            else:
+                return jsonify({
+                    "status": "error",
+                    "message": "❌ Código de validación incorrecto. Ingresa el código recibido por el chofer o el código de respaldo del supervisor."
+                }), 400
     else:
         # Compatibilidad con tickets previos sin código registrado
         es_valido = True

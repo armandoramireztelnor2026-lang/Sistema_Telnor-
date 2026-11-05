@@ -274,9 +274,14 @@
         });
 
         // Limpiar el localStorage al estar en la pantalla de Login (cerrar sesión)
-        localStorage.removeItem('activeViewAdmin');
-        localStorage.removeItem('activeViewProv');
-        localStorage.removeItem('activeViewCorp');
+        try {
+            localStorage.removeItem('activeViewAdmin');
+            localStorage.removeItem('activeViewAdmin_Administrador');
+            localStorage.removeItem('activeViewAdmin_Supervisor');
+            localStorage.removeItem('activeViewAdmin_Jefatura');
+            localStorage.removeItem('activeViewProv');
+            localStorage.removeItem('activeViewCorp');
+        } catch(e) {}
     </script>
 
     <!-- SCRIPT DE APOYO PARA LA NUEVA LÓGICA DE BOTONES -->

@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="/static/style.css?v=1000051">
+    <link rel="stylesheet" href="/static/style.css?v=1000052">
     <link rel="stylesheet" href="/static/manual_sistema.css?v=2">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -166,17 +166,21 @@
             <nav class="nav-menu">
                 <!-- ========== JEFATURA ========== -->
                 {% if usuario.datos_perfil.subrol == 'Jefatura' %}
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('pendientes')">Nuevos Registros</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('accesos')">Accesos (Credenciales)</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('ciudades-copes')">Ciudades / COPEs</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-prov')">Directorio Talleres</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-corp')">Lista de Corporativos</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-admin')">Lista Automotriz</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('panel-control')">Panel de Control</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('flujo-trabajo')">Flujo de Trabajo</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
+                <!-- Sección: Administración -->
+                <div class="sidebar-section-admin" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="sidebar-section-title sidebar-title-admin" style="text-align: center; color: #ffffff; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Administración</div>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('pendientes')">Nuevos Registros</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('accesos')">Accesos (Credenciales)</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('ciudades-copes')">Ciudades / COPEs</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('lista-prov')">Directorio Talleres</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('lista-corp')">Lista de Corporativos</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('lista-admin')">Lista Automotriz</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('panel-control')">Panel de Control</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('flujo-trabajo')">Flujo de Trabajo</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
+                </div>
 
                 <!-- Módulo de Garantía / Tiempo/Garantía (Verde para Jefatura) -->
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
@@ -193,19 +197,28 @@
 
                 <!-- ========== SUPERVISOR ========== -->
                 {% if usuario.datos_perfil.subrol == 'Supervisor' %}
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('reportes')">Bandeja de Reportes</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('facturas')">Cotizaciones y Órdenes</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('facturas_finales')">Facturas</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('documentos-contables')">Documentos Contables</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-prov')">Directorio Talleres</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-corp')">Lista de Corporativos</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('lista-admin')">Lista Automotriz</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('unidades')">Unidades</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('accesos')">Accesos (Credenciales)</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('flujo-trabajo')">Flujo de Trabajo</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
+                <!-- Sección: Flujo del Ticket -->
+                <div class="sidebar-section-flujo" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="sidebar-section-title sidebar-title-flujo" style="text-align: center; color: #38bdf8; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Flujo del Ticket</div>
+                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaAdmin('reportes')">Bandeja de Reportes</button>
+                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaAdmin('facturas')">Cotizaciones y Órdenes</button>
+                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaAdmin('facturas_finales')">Facturas</button>
+                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaAdmin('documentos-contables')">Documentos Contables</button>
+                </div>
+
+                <!-- Sección: Administración -->
+                <div class="sidebar-section-admin" style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
+                    <div class="sidebar-section-title sidebar-title-admin" style="text-align: center; color: #ffffff; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Administración</div>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('lista-prov')">Directorio Talleres</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('lista-corp')">Lista de Corporativos</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('lista-admin')">Lista Automotriz</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('unidades')">Unidades</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('accesos')">Accesos (Credenciales)</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('flujo-trabajo')">Flujo de Trabajo</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
+                </div>
 
                 <!-- Módulo de Cobertura (Separado al final en tono amarillo ligero) -->
                 <div style="margin-top: 15px; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
@@ -218,19 +231,27 @@
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align: center; color: #4ade80; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
                     <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button" onclick="cambiarVistaAdmin('retrabajo')">Retrabajo</button>
-                    <button class="btn-sidebar btn-sidebar-retrabajo" title="Retrabajo/Cotizaciones Caras" type="button" onclick="cambiarVistaAdmin('retrabajo-cotizaciones-caras')">Retrabajo/Cotizaciones Caras</button>
                     <button class="btn-sidebar btn-sidebar-retrabajo" id="btn-sidebar-liberar-retrabajo" title="Liberar/Retrabajo" type="button" onclick="cambiarVistaAdmin('liberar-retrabajo')">Liberar/Retrabajo</button>
                 </div>
                 {% endif %}
 
                 <!-- ========== ADMINISTRADOR ========== -->
                 {% if usuario.datos_perfil.subrol == 'Administrador' %}
-                <button class="btn-sidebar" onclick="verCotizacionesMas10000()">Cotizaciones +10000</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('liberar-doc-contable')">Liberar Doc. Contable</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('flujo-trabajo')">Flujo de Trabajo</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
-                <button class="btn-sidebar" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
+                <!-- Sección: Flujo del Ticket -->
+                <div class="sidebar-section-flujo" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="sidebar-section-title sidebar-title-flujo" style="text-align: center; color: #38bdf8; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Flujo del Ticket</div>
+                    <button class="btn-sidebar btn-sidebar-flujo" onclick="verCotizacionesMas10000()">Cotizaciones +10000</button>
+                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaAdmin('liberar-doc-contable')">Liberar Doc. Contable</button>
+                </div>
+
+                <!-- Sección: Administración -->
+                <div class="sidebar-section-admin" style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
+                    <div class="sidebar-section-title sidebar-title-admin" style="text-align: center; color: #ffffff; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Administración</div>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('flujo-trabajo')">Flujo de Trabajo</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('analitica')">Analítica</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('seccion-reportes')">Sección de Reportes</button>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaAdmin('archivo')">Archivo General</button>
+                </div>
 
                 <!-- Módulos de Cobertura (Separados al final en tono amarillo ligero) -->
                 <div style="margin-top: 15px; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;">
@@ -245,7 +266,7 @@
                 Perfil Actual: <strong>{{ usuario.datos_perfil.subrol }}</strong>
             </div>
             <div class="btn-logout-container"><a href="/logout" class="btn-logout"
-                    onclick="return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
+                    onclick="try { localStorage.removeItem('activeViewAdmin'); localStorage.removeItem('activeViewAdmin_Administrador'); localStorage.removeItem('activeViewAdmin_Supervisor'); localStorage.removeItem('activeViewAdmin_Jefatura'); localStorage.removeItem('activeViewProv'); localStorage.removeItem('activeViewCorp'); } catch(e){} return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
         </aside>
 
         <main class="main-content">
@@ -483,11 +504,16 @@
                     </div>
                 </div>
                 <div class="admin-container">
-                    <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 15px;">
-                        <span class="buscador-icono">&#x1F50D;</span>
-                        <input type="search" id="buscador-retrabajos" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')" class="buscador-pildora"
-                            placeholder="Buscar por ticket, unidad, COPE, chofer..."
-                            onkeyup="filtrarTabla('buscador-retrabajos', 'tabla-retrabajos')">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
+                        <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 0; flex: 1; min-width: 280px;">
+                            <span class="buscador-icono">&#x1F50D;</span>
+                            <input type="search" id="buscador-retrabajos" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')" class="buscador-pildora"
+                                placeholder="Buscar por ticket, unidad, COPE, chofer..."
+                                onkeyup="filtrarTabla('buscador-retrabajos', 'tabla-retrabajos')">
+                        </div>
+                        <button type="button" class="btn-sidebar-retrabajo" onclick="abrirModalGarantiaCotizacionesCaras()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; color: #ffffff !important; border: 1px solid #059669 !important; font-weight: 700; padding: 10px 22px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35); font-size: 0.95rem; white-space: nowrap;">
+                            <span>🛡️</span> <span>Aplicar garantia/Cotizaciones Caras</span>
+                        </button>
                     </div>
                     <div class="table-responsive">
                         <table>
@@ -556,59 +582,6 @@
                                 <tr>
                                     <td colspan="10" style="text-align: center; color: #94a3b8; padding: 25px;">
                                         No hay retrabajos listos pendientes de liberación.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- VISTA: RETRABAJO DE COTIZACIONES CARAS -->
-            <div id="vista-retrabajo-cotizaciones-caras" style="display: none;">
-                <div class="top-bar">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 1.8rem;">🏷️</span>
-                        <div>
-                            <h2 style="margin: 0;">Retrabajo de Cotizaciones caras</h2>
-                            <p style="margin: 2px 0 0 0; color: #94a3b8; font-size: 0.85rem;">Módulo de retrabajos vinculados a cotizaciones extraordinarias</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="admin-container">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
-                        <div class="buscador-wrapper-div" style="max-width: 500px; margin-bottom: 0; flex: 1; min-width: 280px;">
-                            <span class="buscador-icono">&#x1F50D;</span>
-                            <input type="search" id="buscador-retrabajo-cotizaciones-caras" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')" class="buscador-pildora"
-                                placeholder="Buscar por ticket, unidad, COPE, chofer, taller..."
-                                onkeyup="filtrarTabla('buscador-retrabajo-cotizaciones-caras', 'tabla-retrabajo-cotizaciones-caras')">
-                        </div>
-                        <button type="button" class="btn-sidebar-retrabajo" onclick="abrirModalGarantiaCotizacionesCaras()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; color: #ffffff !important; border: 1px solid #059669 !important; font-weight: 700; padding: 10px 22px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35); font-size: 0.95rem; white-space: nowrap;">
-                            <span>🛡️</span> <span>Aplicar garantia/Cotizaciones Caras</span>
-                        </button>
-                    </div>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="white-space: nowrap;">Ticket</th>
-                                    <th style="white-space: nowrap;">Fecha Solicitud</th>
-                                    <th style="white-space: nowrap;">Fecha de Salida (Taller)</th>
-                                    <th style="white-space: nowrap;">Unidad</th>
-                                    <th style="white-space: nowrap;">COPE / Edificio</th>
-                                    <th style="white-space: nowrap;">Ciudad</th>
-                                    <th style="white-space: nowrap;">Taller Previo</th>
-                                    <th style="white-space: nowrap; text-align: right;">Precio Cotizaciones</th>
-                                    <th style="min-width: 260px; max-width: 420px;">Motivo de Garantía</th>
-                                    <th style="white-space: nowrap; text-align: center;">Estado</th>
-                                    <th style="white-space: nowrap; text-align: center;">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-retrabajo-cotizaciones-caras">
-                                <tr>
-                                    <td colspan="11" style="text-align: center; color: #94a3b8; padding: 25px;">
-                                        No hay retrabajos de cotizaciones caras registrados.
                                     </td>
                                 </tr>
                             </tbody>
@@ -711,7 +684,7 @@
                 </div>
             </div>
 
-            <p style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.5; margin: 0 0 14px 0; text-align: center;">
+            <p id="modal-val-instruccion" style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.5; margin: 0 0 14px 0; text-align: center;">
                 Ingresa el <strong>código de 6 dígitos</strong> que el chofer recibió en su correo al entregarse la unidad, o el <strong>código de respaldo</strong> enviado a supervisión:
             </p>
 
@@ -2757,7 +2730,7 @@
                         </div>
 
                         <!-- ==================================================== -->
-                        <!-- PASO 11: CIRCUITO DE GARANTÍA TOTALMENTE SEPARADO   -->
+                        <!-- PASO 11: CIRCUITO DE GARANTÍA Y VALIDACIÓN DE VIGENCIA -->
                         <!-- ==================================================== -->
                         <div id="etapa-11-garantia" class="flujo-step-box flujo-step-todos flujo-step-garantia">
                             
@@ -2769,8 +2742,8 @@
                                 <div class="etapa-header-roles" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                                     <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
                                     <span class="role-pill role-pill-chofer">🚗 Chofer</span>
-                                    <span class="role-pill role-pill-admin">🏢 Administración</span>
                                     <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
+                                    <span class="role-pill role-pill-admin">🏢 Administración</span>
                                     <span class="role-pill role-pill-taller">🔧 Taller</span>
                                     <button type="button" onclick="descargarDiagramaFlujo()" style="margin-left: 8px; padding: 4px 10px; border-radius: 6px; border: 1px solid #10b981; background: rgba(16, 185, 129, 0.25); color: #86efac; font-size: 0.73rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                                         📥 Descargar PDF
@@ -2778,43 +2751,79 @@
                                 </div>
                             </div>
 
-                            <!-- TARJETA SEPARADA 11.1: ACCIÓN CHOFER -->
-                            <div class="flujo-box flujo-box-chofer">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                            <!-- CONTENEDOR DE LAS 2 VÍAS DE INGRESO A GARANTÍA -->
+                            <div style="display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 18px;">
+                                
+                                <!-- VÍA 1: ENTRADA ORDINARIA (CHOFER - TICKETS NORMALES <= 10K) -->
+                                <div class="lane-cotizacion" style="background: rgba(2, 132, 199, 0.05); border: 2px solid #0284c7;">
+                                    <div style="background: rgba(2, 132, 199, 0.18); border: 1px solid #0284c7; border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span class="role-pill role-pill-chofer">🚗 Chofer</span>
+                                        </div>
+                                        <span style="background: #0284c7; color: #ffffff; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 8px;">
+                                            TICKETS ORDINARIOS
+                                        </span>
                                     </div>
-                                    <span style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #c084fc; font-size: 0.72rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
-                                        SOLICITUD DE GARANTÍA
-                                    </span>
+
+                                    <div class="flujo-box flujo-box-chofer" style="margin: 0;">
+                                        <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                            <div style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                                                📝
+                                            </div>
+                                            <div>
+                                                <h4 style="margin: 0 0 5px 0; color: #ffffff; font-size: 0.98rem; font-weight: 800;">
+                                                    Chofer reporta reincidencia con "¿Es Garantía?"
+                                                </h4>
+                                                <p style="margin: 0; color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">
+                                                    Al detectar una falla reincidente en la unidad entregada, el chofer inicia el reporte desde su formulario, marca la casilla <strong>"¿Es Garantía?"</strong> e introduce el <strong>folio del ticket previo</strong>.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style="display: flex; align-items: flex-start; gap: 14px;">
-                                    <div style="background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
-                                        🛡️
+
+                                <!-- VÍA 2: ENTRADA ESPECIAL (SUPERVISOR - COTIZACIONES CARAS REACTIVADAS > 10K) -->
+                                <div class="lane-cotizacion" style="background: rgba(245, 158, 11, 0.05); border: 2px solid #f59e0b;">
+                                    <div style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor Únicamente</span>
+                                        </div>
+                                        <span style="background: #f59e0b; color: #1e1b4b; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 8px;">
+                                            COTIZACIONES CARAS (+10,000)
+                                        </span>
                                     </div>
-                                    <div>
-                                        <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
-                                            Chofer selecciona "¿Es Garantía?" e introduce folio del ticket original
-                                        </h4>
-                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
-                                            Al detectar reincidencia en el vehículo entregado, el chofer inicia un reporte de garantía ingresando el número del ticket previo con el que el taller realizó el trabajo.
-                                        </p>
+
+                                    <div class="flujo-box flujo-box-supervisor" style="margin: 0;">
+                                        <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                            <div style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                                                🔍
+                                            </div>
+                                            <div>
+                                                <h4 style="margin: 0 0 5px 0; color: #ffffff; font-size: 0.98rem; font-weight: 800;">
+                                                    Supervisor busca y aplica garantía en "Retrabajo"
+                                                </h4>
+                                                <p style="margin: 0; color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">
+                                                    <strong>El chofer no puede ingresarlo directamente.</strong> El supervisor va al botón <strong>Retrabajo</strong>, usa la función <strong>"Aplicar Garantía / Cotizaciones Caras"</strong>, busca con el número de ticket, valida vigencia, <strong>ingresa el motivo detallado de la garantía</strong> y confirma para reactivarlo con 2 etiquetas: <code style="color:#fbbf24; background:rgba(245,158,11,0.2); padding:1px 5px; border-radius:3px;">Retrabajo</code> y <code style="color:#c084fc; background:rgba(168,85,247,0.2); padding:1px 5px; border-radius:3px;">Cotizaciones Caras</code>.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+
                             </div>
 
-                            <!-- FLECHA SEPARADORA -->
+                            <!-- FLECHA SEPARADORA HACIA EVALUACIÓN -->
                             <div class="flujo-flecha-conector">
                                 <div class="flujo-flecha-linea" style="background: #a855f7;"></div>
                                 <div class="flujo-flecha-badge" style="border-color: #a855f7; color: #c084fc;">
-                                    <span>⏱️ Consulta en vivo: Fecha actual vs Fecha entrega + Límite del taller</span>
+                                    <span>⏱️ Consulta en vivo: Fecha actual vs Fecha entrega + Límite de Garantía del Taller</span>
                                 </div>
                                 <div class="flujo-flecha-linea" style="background: #a855f7;"></div>
                                 <div class="flujo-flecha-punta" style="color: #a855f7;">▼</div>
                             </div>
 
                             <!-- NODO DE DECISIÓN DE GARANTÍA -->
-                            <div class="flujo-box flujo-box-decision" style="text-align: center; padding: 22px 18px; margin-bottom: 20px;">
+                            <div class="flujo-box flujo-box-decision" style="text-align: center; padding: 20px 18px; margin-bottom: 18px;">
                                 <span style="background: rgba(168, 85, 247, 0.25); border: 1px solid #a855f7; color: #e9d5ff; font-size: 0.75rem; font-weight: 800; padding: 3px 14px; border-radius: 20px; display: inline-block; margin-bottom: 8px;">
                                     ⚖️ EVALUACIÓN AUTOMÁTICA DE VIGENCIA
                                 </span>
@@ -2822,7 +2831,7 @@
                                     ¿El tiempo transcurrido está dentro del límite de ese taller?
                                 </h3>
                                 <p style="margin: 0; color: #cbd5e1; font-size: 0.85rem;">
-                                    El sistema compara los días/horas/segundos exactos configurados para ese taller:
+                                    El sistema compara los días/horas exactos configurados para ese taller prestador del servicio:
                                 </p>
                             </div>
 
@@ -2847,17 +2856,17 @@
 
                                     <div class="flujo-box" style="border-color: #10b981; background: rgba(16, 185, 129, 0.06);">
                                         <h5 style="margin: 0 0 6px 0; color: #86efac; font-size: 0.95rem; font-weight: 800;">
-                                            Trámite aprobado y ticket congelado
+                                            Trámite aprobado y ticket congelado a $0
                                         </h5>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">
-                                            El ticket se reactiva en estado <strong>En Asignación/Retrabajo</strong>. Se inhabilitan cobros en bandejas regulares para proteger la orden.
+                                            El ticket se reactiva en estado <strong>En Asignacion/Retrabajo</strong>. Se inhabilitan cobros en bandejas regulares para proteger la orden y la empresa.
                                         </p>
                                     </div>
 
                                     <div class="flujo-flecha-conector">
                                         <div class="flujo-flecha-linea" style="background: #10b981;"></div>
                                         <div class="flujo-flecha-badge" style="border-color: #10b981; color: #86efac;">
-                                            <span>Canalización prioritaria sin costo</span>
+                                            <span>Turna a Bandeja de Retrabajo de Supervisión</span>
                                         </div>
                                         <div class="flujo-flecha-linea" style="background: #10b981;"></div>
                                         <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
@@ -2865,10 +2874,10 @@
 
                                     <div class="flujo-box flujo-box-taller">
                                         <h5 style="margin: 0 0 6px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
-                                            Reingreso obligatorio al taller
+                                            Aparece en la bandeja con su etiqueta
                                         </h5>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">
-                                            Llega a la bandeja <strong>Garantías y Retrabajos</strong> de Supervisión para reasignar y al Taller para corregir el vehículo sin costo alguno.
+                                            Los tickets ordinarios muestran la etiqueta <strong>Retrabajo</strong>, y los reactivados de cotizaciones caras muestran doble etiqueta <strong>Retrabajo</strong> y <strong>Cotizaciones Caras</strong>.
                                         </p>
                                     </div>
 
@@ -2885,7 +2894,7 @@
                                             Bloqueo Automático Inmediato
                                         </h4>
                                         <div style="margin-top: 6px; display: flex; justify-content: center; gap: 6px;">
-                                            <span class="role-pill role-pill-chofer">🚗 Chofer Notificado</span>
+                                            <span class="role-pill role-pill-chofer">🚗 Notificación Bloqueo</span>
                                         </div>
                                     </div>
 
@@ -2894,14 +2903,14 @@
                                             Rechazo de garantía por el sistema
                                         </h5>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">
-                                            El sistema detecta que transcurrieron más días/horas que los acordados por ese taller. <strong>Bloquea inmediatamente la solicitud</strong>.
+                                            El sistema detecta que transcurrieron más días/horas que los acordados en la política del taller. <strong>Bloquea inmediatamente la solicitud</strong>.
                                         </p>
                                     </div>
 
                                     <div class="flujo-flecha-conector">
                                         <div class="flujo-flecha-linea" style="background: #ef4444;"></div>
                                         <div class="flujo-flecha-badge" style="border-color: #ef4444; color: #fca5a5;">
-                                            <span>Alerta roja explicativa en pantalla</span>
+                                            <span>Alerta explicativa en pantalla</span>
                                         </div>
                                         <div class="flujo-flecha-linea" style="background: #ef4444;"></div>
                                         <div class="flujo-flecha-punta" style="color: #ef4444;">▼</div>
@@ -2909,10 +2918,10 @@
 
                                     <div class="flujo-box" style="border-color: #ef4444;">
                                         <h5 style="margin: 0 0 6px 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
-                                            Aviso al chofer para nuevo reporte
+                                            Aviso para emitir reporte regular nuevo
                                         </h5>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">
-                                            Se le informa detalladamente cuánto tiempo pasó y se le instruye a emitir un <strong>nuevo reporte regular</strong> sujeto a cotización ordinaria.
+                                            Se informa que el tiempo de garantía venció y se instruye a generar un <strong>reporte regular nuevo</strong> sujeto a cotización y costo ordinario.
                                         </p>
                                     </div>
 
@@ -2926,7 +2935,7 @@
                         <div class="flujo-flecha-conector flujo-step-garantia">
                             <div class="flujo-flecha-linea" style="background: #a855f7; height: 22px;"></div>
                             <div class="flujo-flecha-badge" style="border-color: #a855f7; color: #c084fc;">
-                                <span>🛡️ Solicitud de Garantía aprobada: Turna a Bandeja de Retrabajos de Supervisión</span>
+                                <span>🛡️ Garantía Vigente: Ingreso a Bandeja de Retrabajo del Supervisor</span>
                             </div>
                             <div class="flujo-flecha-linea" style="background: #a855f7; height: 22px;"></div>
                             <div class="flujo-flecha-punta" style="color: #a855f7;">▼</div>
@@ -2944,8 +2953,6 @@
                                 </div>
                                 <div class="etapa-header-roles">
                                     <span style="color: #64748b; font-size: 0.72rem; font-weight: 700; margin-right: 4px;">ROLES:</span>
-                                    <span class="role-pill role-pill-chofer">🚗 Chofer</span>
-                                    <span style="color: #64748b; font-size: 0.8rem;">➔</span>
                                     <span class="role-pill role-pill-supervisor">👨‍💼 Supervisor</span>
                                     <span style="color: #64748b; font-size: 0.8rem;">➔</span>
                                     <span class="role-pill role-pill-taller">🔧 Taller</span>
@@ -2970,10 +2977,10 @@
                                     </div>
                                     <div>
                                         <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
-                                            El ticket llega a "Garantías y Retrabajos" del Supervisor
+                                            El ticket llega a la bandeja de "Retrabajo" del Supervisor
                                         </h4>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
-                                            El supervisor analiza el reporte de reincidencia del chofer (Sección 1) y el diagnóstico previo del taller (Sección 2) para dictaminar la procedencia del retrabajo.
+                                            En la bandeja de <strong>Retrabajo</strong> del supervisor se concentran todos los tickets con garantía: los ordinarios con etiqueta <strong>Retrabajo</strong> y las cotizaciones caras reactivadas con 2 etiquetas (<strong>Retrabajo</strong> y <strong>Cotizaciones Caras</strong>). El supervisor revisa la Sección 1 (reporte/motivo de falla) y Sección 2 (diagnóstico anterior del taller).
                                         </p>
                                     </div>
                                 </div>
@@ -2983,7 +2990,7 @@
                             <div class="flujo-flecha-conector">
                                 <div class="flujo-flecha-linea" style="background: #6366f1;"></div>
                                 <div class="flujo-flecha-badge" style="border-color: #6366f1; color: #a5b4fc;">
-                                    <span>⚖️ Evaluación de procedencia por el Supervisor</span>
+                                    <span>⚖️ Evaluación y Reasignación por el Supervisor</span>
                                 </div>
                                 <div class="flujo-flecha-linea" style="background: #6366f1;"></div>
                                 <div class="flujo-flecha-punta" style="color: #6366f1;">▼</div>
@@ -2996,7 +3003,7 @@
                                 <div class="lane-cotizacion" style="background: rgba(239, 68, 68, 0.04); border: 2px solid #ef4444;">
                                     <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 12px;">
                                         <span style="background: #ef4444; color: #ffffff; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
-                                            ❌ SI NO PASA LA EVALUACIÓN
+                                            ❌ SI NO PROCEDE LA EVALUACIÓN
                                         </span>
                                         <h5 style="margin: 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
                                             Se Regresa con Observaciones
@@ -3008,7 +3015,7 @@
                                             Supervisor regresa el reporte
                                         </h5>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
-                                            Si la unidad ingresada es incorrecta, la redacción de la falla no se entiende o no corresponde al trabajo previo cubierto por la garantía, el supervisor cancela/regresa el retrabajo notificando formalmente las causas al chofer.
+                                            Si la unidad o los datos son inconsistentes o la falla no corresponde al trabajo previo cubierto por la garantía, el supervisor cancela o regresa el retrabajo asentando las causas formales.
                                         </p>
                                     </div>
                                 </div>
@@ -3017,10 +3024,10 @@
                                 <div class="lane-cotizacion" style="background: rgba(16, 185, 129, 0.04); border: 2px solid #10b981;">
                                     <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 12px;">
                                         <span style="background: #10b981; color: #022c22; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
-                                            ✅ SI PASA LA EVALUACIÓN
+                                            ✅ SI PROCEDE LA EVALUACIÓN
                                         </span>
                                         <h5 style="margin: 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
-                                            Canalización al Taller del Ticket
+                                            Reasignación al Taller Original ($0 Costo)
                                         </h5>
                                     </div>
 
@@ -3029,7 +3036,7 @@
                                             Supervisor presiona "Reasignar a Taller"
                                         </h5>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
-                                            El supervisor valida la reincidencia y canaliza el ticket directamente al botón de <strong>Retrabajos del Taller</strong> que realizó la reparación original (a costo $0).
+                                            El supervisor valida el motivo y canaliza el ticket directamente al botón de <strong>Retrabajo del Taller</strong> original que reparó la unidad, a costo cero ($0).
                                         </p>
                                     </div>
                                 </div>
@@ -3040,13 +3047,13 @@
                             <div class="flujo-flecha-conector">
                                 <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
                                 <div class="flujo-flecha-badge" style="border-color: #10b981; color: #34d399;">
-                                    <span>🔧 Taller corrige la falla bajo garantía y presiona "Retrabajo Finalizado"</span>
+                                    <span>🔧 Taller recibe en botón Retrabajo, repara el fallo y presiona "Retrabajo Finalizado"</span>
                                 </div>
                                 <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
                                 <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
                             </div>
 
-                            <!-- TARJETA SEPARADA 12.3: ACCIÓN TALLER Y CÓDIGO SEGURO -->
+                            <!-- TARJETA SEPARADA 12.2: ACCIÓN TALLER -->
                             <div class="flujo-box flujo-box-taller">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -3062,23 +3069,80 @@
                                     </div>
                                     <div>
                                         <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.05rem; font-weight: 800;">
-                                            Taller concluye compostura y genera Códigos de Seguridad
+                                            Taller arregla el fallo y marca la unidad como reparada
                                         </h4>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.5;">
-                                            Una vez arreglada la falla, el taller presiona <strong>"Retrabajo Finalizado"</strong>. En ese instante, el sistema genera automáticamente un <strong>código seguro que llega al correo del Chofer</strong>, enviando simultáneamente un <strong>código de respaldo al Supervisor</strong>.
+                                            El taller localiza el vehículo en su sección <strong>Retrabajo</strong> (sea ticket normal o cotización cara), arregla la falla física reportada y al quedar listo presiona el botón <strong>"Retrabajo Finalizado"</strong>, disparando el código seguro de liberación.
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- FLECHA DE CONEXIÓN A LIBERACIÓN FINAL -->
+                            <!-- FLECHA SEPARADORA HACIA GENERACIÓN DE CÓDIGO -->
                             <div class="flujo-flecha-conector">
-                                <div class="flujo-flecha-linea" style="background: #0284c7; height: 20px;"></div>
-                                <div class="flujo-flecha-badge" style="border-color: #0284c7; color: #38bdf8;">
-                                    <span>🔑 Chofer presenta su código ante Supervisión para recoger el auto</span>
+                                <div class="flujo-flecha-linea" style="background: #a855f7; height: 20px;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #a855f7; color: #c084fc;">
+                                    <span>🔑 Generación del Código Seguro de Liberación: Destino según tipo de ticket</span>
                                 </div>
-                                <div class="flujo-flecha-linea" style="background: #0284c7; height: 20px;"></div>
-                                <div class="flujo-flecha-punta" style="color: #0284c7;">▼</div>
+                                <div class="flujo-flecha-linea" style="background: #a855f7; height: 20px;"></div>
+                                <div class="flujo-flecha-punta" style="color: #a855f7;">▼</div>
+                            </div>
+
+                            <!-- BIFURCACIÓN CLAVE 12.3: DESTINO DEL CÓDIGO SEGURO -->
+                            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 18px;">
+                                
+                                <!-- DESTINO A: TICKET NORMAL CON GARANTÍA -->
+                                <div class="lane-cotizacion" style="background: rgba(2, 132, 199, 0.05); border: 2px solid #0284c7;">
+                                    <div style="background: rgba(2, 132, 199, 0.18); border: 1px solid #0284c7; border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 12px;">
+                                        <span style="background: #0284c7; color: #ffffff; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
+                                            🚗 TICKET NORMAL CON GARANTÍA
+                                        </span>
+                                        <h5 style="margin: 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Código al Chofer + Respaldo a Supervisión
+                                        </h5>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #0284c7;">
+                                        <h5 style="margin: 0 0 4px 0; color: #38bdf8; font-size: 0.92rem; font-weight: 800;">
+                                            Notificación dual estándar
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            El sistema genera automáticamente el código seguro y se envía al correo del <strong>Chofer</strong>, emitiendo a la vez un <strong>código de respaldo al Supervisor</strong>. El chofer acude con su código a retirar el auto.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- DESTINO B: COTIZACIÓN CARA REACTIVADA CON GARANTÍA (> 10K) -->
+                                <div class="lane-cotizacion" style="background: rgba(245, 158, 11, 0.06); border: 2px solid #f59e0b;">
+                                    <div style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 12px;">
+                                        <span style="background: #f59e0b; color: #1e1b4b; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;">
+                                            🔒 COTIZACIÓN CARA (+10,000)
+                                        </span>
+                                        <h5 style="margin: 0; color: #ffffff; font-size: 0.95rem; font-weight: 800;">
+                                            Código llega NADA MÁS al Supervisor
+                                        </h5>
+                                    </div>
+
+                                    <div class="flujo-box" style="border-color: #f59e0b; background: rgba(245, 158, 11, 0.08);">
+                                        <h5 style="margin: 0 0 4px 0; color: #fbbf24; font-size: 0.92rem; font-weight: 800;">
+                                            Control estricto de alta cuantía
+                                        </h5>
+                                        <p style="margin: 0; color: #cbd5e1; font-size: 0.8rem; line-height: 1.45;">
+                                            Al ser cotización cara reactivada, <strong>el código seguro le llega ÚNICAMENTE al Supervisor</strong> (a nadie más). Ni el chofer ni el taller reciben el código, garantizando custodia total de la liberación.
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- FLECHA DE CONEXIÓN A VALIDACIÓN Y LIBERACIÓN FINAL -->
+                            <div class="flujo-flecha-conector">
+                                <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                                <div class="flujo-flecha-badge" style="border-color: #10b981; color: #86efac;">
+                                    <span>🔑 Supervisor valida el código en el botón "Liberar/Retrabajo"</span>
+                                </div>
+                                <div class="flujo-flecha-linea" style="background: #10b981; height: 20px;"></div>
+                                <div class="flujo-flecha-punta" style="color: #10b981;">▼</div>
                             </div>
 
                             <!-- TARJETA SEPARADA 12.4: VALIDACIÓN Y CIERRE DE RETRABAJO -->
@@ -3089,7 +3153,7 @@
                                         <span class="role-pill role-pill-chofer">🚗 Chofer</span>
                                     </div>
                                     <span style="background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981; color: #86efac; font-size: 0.75rem; font-weight: 800; padding: 2px 10px; border-radius: 12px;">
-                                        ENTREGA EXITOSA
+                                        LIBERACIÓN Y CIERRE EXITOSO
                                     </span>
                                 </div>
                                 <div style="display: flex; align-items: flex-start; gap: 14px;">
@@ -3098,10 +3162,10 @@
                                     </div>
                                     <div>
                                         <h4 style="margin: 0 0 6px 0; color: #ffffff; font-size: 1.15rem; font-weight: 800;">
-                                            Supervisor valida el Código en "Liberar Retrabajo" y entrega la unidad
+                                            Supervisor valida el código en "Liberar/Retrabajo" y la unidad queda lista
                                         </h4>
                                         <p style="margin: 0; color: #cbd5e1; font-size: 0.85rem; line-height: 1.5;">
-                                            El supervisor abre el módulo <strong>"Liberar Retrabajo"</strong>, captura el código proporcionado por el chofer (o el de respaldo) y confirma la liberación. El sistema autentica la salida, actualiza el estatus a <strong>Finalizado / Entregado</strong> y <strong>aquí concluye todo el flujo de retrabajo</strong>.
+                                            El supervisor abre el módulo <strong>"Liberar/Retrabajo"</strong>, captura el código seguro (el presentado por el chofer o respaldo en tickets normales, o el <strong>código exclusivo que le llegó nada más a él</strong> en cotizaciones caras reactivadas) y confirma la liberación. El sistema autentica la salida, actualiza el estatus a <strong>Finalizado / Entregado</strong> y <strong>aquí concluye todo el flujo de retrabajo</strong>.
                                         </p>
                                     </div>
                                 </div>
@@ -3360,17 +3424,15 @@
 
                     <!-- ADVANCED FILTERS -->
                     <div
-                        style="background:#1e293b; padding:15px; border-radius:8px; border:1px solid #334155; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:15px; align-items:flex-end;">
+                        style="background:#1e293b; padding:15px; border-radius:8px; border:1px solid #334155; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:15px; align-items:center;">
                         <div style="flex:1; min-width:150px;">
-                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Buscar
-                                Texto</label>
+                            <label style="color:#ffffff; font-size:0.95rem; font-weight:700; margin-bottom:6px; display:block; letter-spacing:0.3px;">Buscar Texto</label>
                             <input type="text" id="filtro-texto-reportes" placeholder="Num. Eco, Ticket, etc..."
                                 style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
                                 onkeyup="aplicarFiltrosReportes()">
                         </div>
                         <div style="flex:1; min-width:180px;">
-                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Estado del
-                                Ticket</label>
+                            <label style="color:#ffffff; font-size:0.95rem; font-weight:700; margin-bottom:6px; display:block; letter-spacing:0.3px;">Estado del Ticket</label>
                             <select id="filtro-estado-reportes"
                                 style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
                                 onchange="aplicarFiltrosReportes()">
@@ -3388,30 +3450,35 @@
                                 <option value="Esperando Num. Contable">Esperando Num. Contable</option>
                                 <option value="Finalizado / Histórico">Finalizado / Histórico</option>
                                 <option value="Incosteable">Incosteable</option>
+                                <option value="En Asignacion/Retrabajo">En Asignacion/Retrabajo</option>
+                                <option value="Retrabajo">Retrabajo</option>
                             </select>
                         </div>
                         <div style="flex:1; min-width:150px;">
-                            <label
-                                style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Proveedor</label>
+                            <label style="color:#ffffff; font-size:0.95rem; font-weight:700; margin-bottom:6px; display:block; letter-spacing:0.3px;">Proveedor</label>
                             <input type="text" id="filtro-proveedor-reportes" placeholder="Taller..."
                                 style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
                                 onkeyup="aplicarFiltrosReportes()">
                         </div>
                         <div style="flex:1; min-width:150px;">
-                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Ciudad
-                                Base</label>
+                            <label style="color:#ffffff; font-size:0.95rem; font-weight:700; margin-bottom:6px; display:block; letter-spacing:0.3px;">Ciudad Base</label>
                             <input type="text" id="filtro-ciudad-reportes" placeholder="Ciudad..."
                                 style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
                                 onkeyup="aplicarFiltrosReportes()">
                         </div>
                         <div style="flex:1; min-width:140px;">
-                            <label style="color:#a3b1c6; font-size:0.85em; margin-bottom:5px; display:block;">Fecha Ticket</label>
+                            <label style="color:#ffffff; font-size:0.95rem; font-weight:700; margin-bottom:6px; display:block; letter-spacing:0.3px;">Fecha Ticket</label>
                             <input type="date" id="filtro-fecha-reportes"
                                 style="width:100%; padding:8px; border-radius:5px; border:1px solid #334155; background:#0f172a; color:white;"
                                 onchange="aplicarFiltrosReportes()">
                         </div>
-                        <div style="display:flex; gap:8px; align-items:flex-end;">
+                        <div style="display:flex; gap:8px; align-items:center;">
                             <div style="display:flex; flex-direction:column; gap:8px;">
+                                <button id="btn-filtro-cotizaciones-10k" type="button" onclick="toggleFiltroCotizaciones10k()"
+                                    style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:8px 12px; border-radius:5px; cursor:pointer; height:35px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:0.85em; font-weight:600; transition:all 0.2s; box-sizing:border-box; width:100%; white-space:nowrap;"
+                                    title="Mostrar sólo tickets con cotizaciones +10,000">
+                                    <span style="font-size:1.1em;">💰</span> Cotizaciones +10000
+                                </button>
                                 <button id="btn-filtro-garantia" type="button" onclick="toggleFiltroGarantia()"
                                     style="background:#334155; color:#cbd5e1; border:1px solid #475569; padding:8px 12px; border-radius:5px; cursor:pointer; height:35px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:0.85em; font-weight:600; transition:all 0.2s; box-sizing:border-box; width:100%; white-space:nowrap;"
                                     title="Mostrar sólo tickets en garantía / retrabajo">
@@ -3424,7 +3491,7 @@
                                 </button>
                             </div>
                             <button onclick="limpiarFiltrosReportes()"
-                                style="background:#475569; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; height:35px; align-self:flex-end;">Limpiar</button>
+                                style="background:#475569; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; height:35px; align-self:center;">Limpiar</button>
                         </div>
                     </div>
 
@@ -3461,6 +3528,7 @@
                                     <th class="th-amarillo col-amarillo">RETRABAJO/UNIDAD ENTREGADA</th>
                                     <th class="th-negro col-negro">NUM. PEDIDO</th>
                                     <th class="th-negro col-negro">NUM. DE ORDEN</th>
+                                    <th class="th-negro col-negro">CORPORATIVOS</th>
                                     <th class="th-negro col-negro">NUM. FACTURA</th>
                                     <th class="th-negro col-negro">PDF FACTURA</th>
                                     <th class="th-negro col-negro">ADMINISTRADOR</th>
@@ -3472,7 +3540,7 @@
                             </thead>
                             <tbody id="tabla-seccion-reportes">
                                 <tr>
-                                    <td colspan="35" style="text-align: center; color: #a3b1c6; padding: 20px;">Cargando
+                                    <td colspan="36" style="text-align: center; color: #a3b1c6; padding: 20px;">Cargando
                                         base de datos...</td>
                                 </tr>
                             </tbody>
@@ -4733,14 +4801,14 @@
     </div>
 
     <script src="/static/configuraciones_jefatura.js?v=12"></script>
-    <script src="/static/script.js?v=1000059"></script>
+    <script src="/static/script.js?v=1000060"></script>
     <script src="/static/liberacion.js?v=2"></script>
     <script src="/static/facturas_herramientas.js?v=7"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>
     <script src="/static/facturas_pdf.js?v=3"></script>
     <script src="/static/unidades.js?v=12"></script>
-    <script src="/static/facturas_principal.js?v=83"></script>
-    <script src="/static/seccion_reportes.js?v=1000034"></script>
+    <script src="/static/facturas_principal.js?v=84"></script>
+    <script src="/static/seccion_reportes.js?v=1000037"></script>
     <script src="/static/cotizaciones_10k.js?v=30"></script>
 
     
@@ -5151,7 +5219,23 @@
         setTimeout(function() {
             var sub = document.getElementById('subrol-actual');
             var subrol = sub ? sub.value.trim() : '';
-            var active = localStorage.getItem('activeViewAdmin');
+
+            var vistasValidasPorSubrol = {
+                'Administrador': ['cotizaciones-10k', 'liberar-doc-contable', 'flujo-trabajo', 'analitica', 'seccion-reportes', 'archivo', 'facturas', 'facturas_finales', 'facturas-finales'],
+                'Supervisor': ['reportes', 'facturas', 'facturas_finales', 'facturas-finales', 'documentos-contables', 'documentos_contables', 'lista-prov', 'lista-corp', 'lista-admin', 'unidades', 'accesos', 'flujo-trabajo', 'analitica', 'seccion-reportes', 'archivo', 'cotizaciones-10k', 'liberar-doc-contable', 'retrabajo', 'liberar-retrabajo'],
+                'Jefatura': ['pendientes', 'accesos', 'ciudades-copes', 'lista-prov', 'lista-corp', 'lista-admin', 'panel-control', 'flujo-trabajo', 'analitica', 'seccion-reportes', 'archivo', 'tiempo-garantia', 'configuraciones']
+            };
+
+            var validas = vistasValidasPorSubrol[subrol] || [];
+            var active = (subrol ? localStorage.getItem('activeViewAdmin_' + subrol) : null) || localStorage.getItem('activeViewAdmin');
+
+            if (active && validas.length > 0 && !validas.includes(active)) {
+                active = null;
+                try {
+                    localStorage.removeItem('activeViewAdmin');
+                    if (subrol) localStorage.removeItem('activeViewAdmin_' + subrol);
+                } catch(e) {}
+            }
             
             if (active) {
                 var vistaId = active;
@@ -5173,6 +5257,20 @@
                         verCotizacionesMas10000();
                     } else if (typeof cambiarVistaAdmin === 'function') {
                         cambiarVistaAdmin('cotizaciones-10k');
+                    }
+                }
+            } else if (subrol === 'Supervisor') {
+                var rep = document.getElementById('vista-reportes');
+                if (rep && rep.style.display === 'none') {
+                    if (typeof cambiarVistaAdmin === 'function') {
+                        cambiarVistaAdmin('reportes');
+                    }
+                }
+            } else if (subrol === 'Jefatura') {
+                var pend = document.getElementById('vista-pendientes');
+                if (pend && pend.style.display === 'none') {
+                    if (typeof cambiarVistaAdmin === 'function') {
+                        cambiarVistaAdmin('pendientes');
                     }
                 }
             }
@@ -5417,7 +5515,7 @@ async function buscarTicketGarantiaCaras() {
                 <!-- 2 BOTONES CON DISEÑO DE ARRIBA A ABAJO -->
                 <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 10px;">
                     <button type="button" id="btn-enviar-retrabajo-caras" class="btn-footer-retrabajo" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 8px; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                        <span>🔄</span> Enviar Retrabajo
+                        <span>🛡️</span> Aplicar garantía
                     </button>
                     <button type="button" class="btn-footer-retrabajo" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 600; background: #1e293b; border: 1px solid #475569; border-radius: 8px; color: #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#1e293b'" onclick="cerrarModalDatosGarantiaCaras()">
                         Cancelar
@@ -5425,17 +5523,51 @@ async function buscarTicketGarantiaCaras() {
                 </div>
             `;
 
-            // Configurar botón Enviar Retrabajo (mantiene estado a la espera de instrucciones)
+            // Configurar botón Aplicar Garantía
             const btnEnviar = document.getElementById('btn-enviar-retrabajo-caras');
             if (btnEnviar) {
-                btnEnviar.onclick = () => {
+                btnEnviar.onclick = async () => {
                     const falla = document.getElementById('gar-caras-falla-persiste')?.value.trim();
                     if (!falla) {
                         alert('Por favor ingrese la falla que persiste o no se corrigió.');
                         document.getElementById('gar-caras-falla-persiste')?.focus();
                         return;
                     }
-                    alert('Falla registrada: ' + falla + '\nInterfaz lista. Esperando instrucciones.');
+
+                    if (!confirm('¿Confirmas aplicar la garantía a este ticket de cotización cara?')) return;
+
+                    btnEnviar.disabled = true;
+                    btnEnviar.innerHTML = '<span>⏳</span> Aplicando garantía...';
+
+                    try {
+                        const res = await fetch('/api/garantia/aplicar', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                ticket_id: ticketVal,
+                                motivo: falla,
+                                tipo: 'caras',
+                                es_caras: true
+                            })
+                        });
+                        const data = await res.json();
+
+                        if (data.status === 'success') {
+                            cerrarModalDatosGarantiaCaras();
+                            alert('✅ ' + (data.message || 'Garantía aplicada exitosamente.'));
+                            if (typeof cargarRetrabajosAdmin === 'function') {
+                                cargarRetrabajosAdmin();
+                            }
+                        } else {
+                            alert('⚠️ ' + (data.message || 'Error al aplicar la garantía.'));
+                        }
+                    } catch (err) {
+                        console.error('Error al aplicar garantía caras:', err);
+                        alert('Error de conexión al aplicar la garantía.');
+                    } finally {
+                        btnEnviar.disabled = false;
+                        btnEnviar.innerHTML = '<span>🛡️</span> Aplicar garantía';
+                    }
                 };
             }
 

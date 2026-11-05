@@ -1209,6 +1209,18 @@
                             scrollBody.scrollTop = 0;
                         }
                     }
+                } else if (data.status === 'bloqueado_caras') {
+                    if (divErr) {
+                        divErr.innerHTML = `
+                            <div style="background: rgba(245, 158, 11, 0.18); border: 1.5px solid #f59e0b; border-radius: 8px; padding: 12px; margin-top: 10px; text-align: left;">
+                                <strong style="color: #fbbf24; font-size: 14px; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                                    ⚠️ Ticket de Cotización Cara
+                                </strong>
+                                <span style="color: #f1f5f9; font-size: 13px; line-height: 1.5; display: block;">${data.message}</span>
+                            </div>
+                        `;
+                        divErr.style.display = 'block';
+                    }
                 } else if (data.status === 'garantia_expirada') {
                     if (divErr) {
                         divErr.innerHTML = `

@@ -388,34 +388,38 @@ window.confirmarEnteradoDelegacion = function() {
 
 
 
-window.cerrarModalAlertaCortaDelegacion = function() {
-
+window.cerrarModalAlertaCortaDelegacion = function(esCancelacion = true) {
     const modal = document.getElementById('modal-alerta-corta-delegacion');
-
     if (modal) modal.style.display = 'none';
-
     window.callbackAlertaCortaDelegacion = null;
 
+    if (esCancelacion) {
+        if (window.botonPrevioDelegacion && document.body.contains(window.botonPrevioDelegacion)) {
+            let nav = window.botonPrevioDelegacion.closest('.nav-menu') || window.botonPrevioDelegacion.closest('.sidebar');
+            if (nav) {
+                nav.querySelectorAll('.btn-sidebar').forEach(b => b.classList.remove('active'));
+                window.botonPrevioDelegacion.classList.add('active');
+            }
+        } else {
+            let subrolActual = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value.trim() : '';
+            let savedView = (subrolActual ? localStorage.getItem('activeViewAdmin_' + subrolActual) : null) || localStorage.getItem('activeViewAdmin');
+            if (savedView && typeof marcarBotonActivo === 'function') {
+                marcarBotonActivo(savedView);
+            }
+        }
+    }
+    window.botonPrevioDelegacion = null;
+    window.vistaPreviaDelegacion = null;
 };
 
-
-
 window.confirmarAlertaCortaDelegacion = function() {
-
     const cb = window.callbackAlertaCortaDelegacion;
-
-    window.cerrarModalAlertaCortaDelegacion();
-
+    window.cerrarModalAlertaCortaDelegacion(false);
     if (typeof cb === 'function') {
-
         cb();
-
     } else if (typeof cb === 'string') {
-
         try { (new Function(cb))(); } catch(e) { console.error(e); }
-
     }
-
 };
 
 
@@ -521,21 +525,19 @@ window.abrirVistaDelegada = function(tipo) {
 
 
     if (typeof window.mostrarAlertaCortaDelegacion === 'function') {
-
         window.mostrarAlertaCortaDelegacion(mensaje, callback);
-
     } else {
-
         const textoPlano = (mensaje || '').replace(/<[^>]*>?/gm, '');
-
         if (confirm(`⚠️ DELEGACIÓN POR AUSENCIA\n\n${textoPlano}\n\n¿Deseas continuar?`)) {
-
             if (callback) callback();
-
+            window.botonPrevioDelegacion = null;
+            window.vistaPreviaDelegacion = null;
+        } else {
+            if (typeof window.cerrarModalAlertaCortaDelegacion === 'function') {
+                window.cerrarModalAlertaCortaDelegacion(true);
+            }
         }
-
     }
-
 };
 
 
@@ -7747,7 +7749,7 @@ function abrirModalLiberarTicket(idFactura) {
 
     if (!f) {
 
-        liberarDocContable(idFactura);
+        alert('No se encontró la información del ticket para liberar.');
 
         return;
 

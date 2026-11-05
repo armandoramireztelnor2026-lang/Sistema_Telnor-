@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel Corporativo</title>
-    <link rel="stylesheet" href="/static/style.css?v=51061">
+    <link rel="stylesheet" href="/static/style.css?v=51062">
     <link rel="stylesheet" href="/static/manual_sistema.css?v=2">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -22,8 +22,17 @@
             <div class="sidebar-badge" style="background:#0284c7;">DIRECCIÓN CORP.</div>
             
             <nav class="nav-menu">
-                <button class="btn-sidebar" onclick="cambiarVistaCorp('cotizaciones')">Cotizaciones</button>
-                <button class="btn-sidebar" onclick="cambiarVistaCorp('archivo')">Archivo Histórico</button>
+                <!-- Sección: Flujo del Ticket -->
+                <div class="sidebar-section-flujo" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="sidebar-section-title sidebar-title-flujo" style="text-align: center; color: #38bdf8; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Flujo del Ticket</div>
+                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaCorp('cotizaciones')">Cotizaciones</button>
+                </div>
+
+                <!-- Sección: Administración -->
+                <div class="sidebar-section-admin" style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
+                    <div class="sidebar-section-title sidebar-title-admin" style="text-align: center; color: #ffffff; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Administración</div>
+                    <button class="btn-sidebar btn-sidebar-admin" onclick="cambiarVistaCorp('archivo')">Archivo Histórico</button>
+                </div>
             </nav>
             <div class="btn-logout-container"><a href="/logout" class="btn-logout" onclick="return confirm('¿Estás seguro de salir?');">Cerrar Sesión</a></div>
         </aside>
