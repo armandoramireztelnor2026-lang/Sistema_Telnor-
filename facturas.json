@@ -678,14 +678,17 @@
                     ],
                     "pdf_cotizacion": "pdf_cot_20261104122033_0_122632_Perfil_Usuario.pdf",
                     "numero_orden": "1000001",
-                    "numero_cotizacion_asignacion": "29000001"
+                    "numero_cotizacion_asignacion": "29000001",
+                    "factura_folio": "99999",
+                    "factura_pdf": "FACTURA_FINAL_20261104122033_0_Perfil_Usuario.pdf",
+                    "numero_doc50": "50000100"
                 }
             ],
             "reactivado_desde_caras": false,
             "comentarios": "",
             "autor_comentario": "",
             "eliminado_por": "",
-            "estado": "pendiente",
+            "estado": "Archivado",
             "timestamp_aprobacion": "2026-11-04T12:28:11.792259",
             "numero_cotizacion_asignacion": "29000001",
             "supervisor_aprobador": "Samuel Giron",
@@ -693,9 +696,13 @@
             "estado_custom": "",
             "aprobado_admin_10k": true,
             "aprobado_corp": true,
-            "liberado_admin": false,
-            "fecha_cierre": "2026-11-04 12:49:38",
-            "fecha_entrega": "2026-11-04 12:51:17"
+            "liberado_admin": true,
+            "fecha_cierre": "2026-11-06 13:24:26",
+            "fecha_entrega": "2026-11-04 12:51:17",
+            "factura_folio": "99999",
+            "factura_pdf": "FACTURA_FINAL_20261104122033_0_Perfil_Usuario.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "50000100"
         },
         {
             "id": "20261105090937",
@@ -770,6 +777,65 @@
             "fecha_liberacion_retrabajo": "2026-11-06 11:30:24",
             "fecha_entrega_retrabajo": "2026-11-06 11:30:24",
             "en_retrabajo_activo": false
+        },
+        {
+            "id": "20261106130523",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "unidad": "8090-1302",
+            "responsable": "Dilan Fernandez",
+            "telefono": "6634041184",
+            "titulo": "Notificaciones",
+            "retro": "[TICKET:REP-20261106130227]\r\nEsto una prueba para las notiifcaciones",
+            "diagnostico": "notificaciones",
+            "trabajo_realizar": "notificaciones",
+            "mantenimiento": "Correctivo",
+            "precio": 2123.0,
+            "fecha": "2026-11-06",
+            "numero_orden": "1000121",
+            "compania": "RUMN",
+            "aprobado_admin": true,
+            "aprobado_corp": true,
+            "timestamp": "2026-11-06T13:05:23.562478",
+            "estado_custom": "",
+            "fotos_cotizacion": [],
+            "fotos_evidencia": [],
+            "codigo_liberacion": "50153313",
+            "entregado": "S\u00ed",
+            "cotizaciones": [
+                {
+                    "id_cotizacion": "1",
+                    "precio": 2123.0,
+                    "titulo": "Notificaciones",
+                    "mantenimiento": "Correctivo",
+                    "retro": "[TICKET:REP-20261106130227]\r\nEsto una prueba para las notiifcaciones",
+                    "diagnostico": "notificaciones",
+                    "trabajo_realizar": "notificaciones",
+                    "fotos_evidencia": [
+                        "evidencia_1793999123544_0_Formulario_Supervisor.jpeg"
+                    ],
+                    "pdf_cotizacion": "1793999123544_0_Perfil_Usuario.pdf",
+                    "numero_orden": "1000121",
+                    "numero_cotizacion_asignacion": "29000010",
+                    "factura_folio": "10001",
+                    "factura_pdf": "FACTURA_FINAL_20261106130523_0_Perfil_Usuario.pdf",
+                    "numero_doc50": "50000000"
+                }
+            ],
+            "reactivado_desde_caras": false,
+            "comentarios": "",
+            "autor_comentario": "",
+            "eliminado_por": "",
+            "timestamp_aprobacion": "2026-11-06T13:06:32.017478",
+            "numero_cotizacion_asignacion": "29000010",
+            "supervisor_aprobador": "Samuel Giron",
+            "liberado_admin": true,
+            "fecha_cierre": "2026-11-06 13:21:28",
+            "fecha_entrega": "2026-11-06 13:08:15",
+            "factura_folio": "10001",
+            "factura_pdf": "FACTURA_FINAL_20261106130523_0_Perfil_Usuario.pdf",
+            "validacion_fiscal": "Aprobada",
+            "numero_doc50": "50000000",
+            "estado": "Archivado"
         }
     ]
 }

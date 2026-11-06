@@ -521,6 +521,9 @@ function cambiarVistaAdmin(vista) {
     }
     try { localStorage.setItem('activeViewAdmin', vista); } catch(e){}
     marcarBotonActivo(vista);
+    if (typeof limpiarNotificacionPorVista === 'function') {
+        limpiarNotificacionPorVista(vista);
+    }
     const vistas = ['facturas', 'facturas-finales', 'documentos-contables', 'liberar-doc-contable', 'pendientes', 'accesos', 'lista-prov', 'lista-corp', 'lista-admin', 'reportes', 'seccion-reportes', 'archivo', 'unidades', 'panel-control', 'cotizaciones-10k', 'ciudades-copes', 'analitica', 'retrabajo', 'tiempo-garantia', 'flujo-trabajo', 'liberar-retrabajo', 'configuraciones'];
     vistas.forEach(v => {
         let el = document.getElementById('vista-' + v);
@@ -572,6 +575,9 @@ function cambiarVistaAdmin(vista) {
 function cambiarVistaProv(vista) {
     localStorage.setItem('activeViewProv', vista);
     marcarBotonActivo(vista);
+    if (typeof limpiarNotificacionPorVista === 'function') {
+        limpiarNotificacionPorVista(vista);
+    }
     if (document.getElementById('vista-facturas')) document.getElementById('vista-facturas').style.display = 'none';
     if (document.getElementById('vista-reportes-prov')) {
         document.getElementById('vista-reportes-prov').style.display = 'none';
@@ -614,6 +620,9 @@ function cambiarVistaProv(vista) {
 function cambiarVistaCorp(vista) {
     localStorage.setItem('activeViewCorp', vista);
     marcarBotonActivo(vista);
+    if (typeof limpiarNotificacionPorVista === 'function') {
+        limpiarNotificacionPorVista(vista);
+    }
     if (document.getElementById('vista-cotizaciones-corp')) {
         document.getElementById('vista-cotizaciones-corp').style.display = 'none';
     }
@@ -2543,6 +2552,8 @@ window.addEventListener('load', function() {
         'Jefatura': 'pendientes'
     };
 
+    window._inicializandoVistaDefault = true;
+
     if (rolActual === 'administracion' || subrolActual !== '' || document.getElementById('vista-pendientes') || document.getElementById('vista-cotizaciones-10k')) { 
         let vistasValidas = vistasPermitidasPorSubrol[subrolActual] || [];
         let savedView = (subrolActual ? localStorage.getItem('activeViewAdmin_' + subrolActual) : null) || localStorage.getItem('activeViewAdmin');
@@ -2591,7 +2602,573 @@ window.addEventListener('load', function() {
         let savedView = localStorage.getItem('activeViewCorp');
         cambiarVistaCorp(savedView ? savedView : 'cotizaciones'); 
     }
+
+    window._inicializandoVistaDefault = false;
+    if (typeof inicializarObservadoresNotificacionFlujo === 'function') {
+        inicializarObservadoresNotificacionFlujo();
+    }
+    if (typeof evaluarDatosRealesFlujoTickets === 'function') {
+        evaluarDatosRealesFlujoTickets();
+        if (!window._intervaloNotifFlujoTickets) {
+            window._intervaloNotifFlujoTickets = setInterval(evaluarDatosRealesFlujoTickets, 6000);
+        }
+    }
 });
+
+// --- INDICADORES VISUALES DINÁMICOS DE NOTIFICACIÓN Y RESALTADO EN FLUJO DE TICKETS ---
+window._inicializandoVistaDefault = false;
+window._notificacionesPendientesPorVista = {};
+window._ticketsDestacadosActivos = {};
+window._tokensActualesPorVista = {};
+window._bandejaConResaltadoReciente = null;
+window._timestampResaltadoReciente = 0;
+window._esperandoConfirmacionDelegacion = null;
+
+function normalizarNombreBandeja(vista) {
+    if (!vista) return '';
+    let v = String(vista).trim();
+    if (v === 'facturas-finales') return 'facturas_finales';
+    if (v === 'documentos_contables') return 'documentos-contables';
+    if (v === 'liberar_doc_contable') return 'liberar-doc-contable';
+    if (v === 'liberar_retrabajo') return 'liberar-retrabajo';
+    return v;
+}
+
+function obtenerTbodyPorBandeja(vista) {
+    let v = normalizarNombreBandeja(vista);
+    if (v === 'reportes') return document.getElementById('tabla-reportes') || document.getElementById('tabla-reportes-prov');
+    if (v === 'facturas' || v === 'cotizaciones') return document.getElementById('tabla-facturas');
+    if (v === 'facturas_finales') return document.getElementById('tabla-facturas-finales');
+    if (v === 'documentos-contables') return document.getElementById('tabla-doc-contables');
+    if (v === 'liberar-doc-contable') return document.getElementById('tabla-liberar-doc');
+    if (v === 'cotizaciones-10k') return document.getElementById('tabla-cotizaciones-10k');
+    if (v === 'retrabajo') return document.getElementById('tabla-retrabajos') || document.getElementById('tabla-retrabajos-prov');
+    if (v === 'liberar-retrabajo') return document.getElementById('tabla-liberar-retrabajo');
+    return null;
+}
+
+function obtenerClaveContextoUsuarioNotif() {
+    let rol = document.getElementById('rol-actual') ? document.getElementById('rol-actual').value.trim() : '';
+    let subrol = document.getElementById('subrol-actual') ? document.getElementById('subrol-actual').value.trim() : '';
+    let nomInput = document.getElementById('nombre-usuario-actual') ? document.getElementById('nombre-usuario-actual').value.trim() : '';
+    let nomSidebar = document.querySelector('.sidebar-name') ? document.querySelector('.sidebar-name').innerText.trim() : '';
+    let usuario = nomInput || nomSidebar || 'anon';
+    return `${rol}_${subrol}_${usuario}`.replace(/\s+/g, '_').toLowerCase();
+}
+
+function extraerIdReporteDeFacturaNotif(f) {
+    if (!f) return '';
+    if (typeof obtenerIdReporte === 'function') {
+        let id = obtenerIdReporte(f);
+        if (id) return String(id).trim();
+    }
+    if (f.id_reporte) return String(f.id_reporte).trim();
+    let retro = String(f.retro || '');
+    let m = retro.match(/\[TICKET:(REP-\d+)\]/i);
+    if (m) return m[1].toUpperCase();
+    return String(f.id || '').trim();
+}
+
+function extraerIdTicketDeFila(tr) {
+    if (!tr || !tr.cells || !tr.cells[0]) return '';
+    let cell = tr.cells[0];
+    let txt = (cell.innerText || cell.textContent || '').trim();
+    if (!txt) return '';
+    let matchRep = txt.match(/REP-\d+/i);
+    if (matchRep) return matchRep[0].toUpperCase();
+    let firstEl = cell.querySelector('strong, span');
+    if (firstEl && firstEl.textContent) {
+        let elTxt = firstEl.textContent.trim();
+        if (elTxt) return elTxt;
+    }
+    return txt.split(/[\r\n]+/)[0].trim();
+}
+
+function guardarTokensVistosBandeja(vista, tokensOpcionales) {
+    let v = normalizarNombreBandeja(vista);
+    if (!v) return;
+    let userKey = obtenerClaveContextoUsuarioNotif();
+    let storageKey = `telnor_flujo_seen_v2_${userKey}_${v}`;
+    let tokens = tokensOpcionales || window._tokensActualesPorVista[v] || [];
+    try {
+        localStorage.setItem(storageKey, JSON.stringify(Array.from(new Set(tokens))));
+    } catch (e) {}
+}
+
+function actualizarEstadoVisualBotonBandeja(vista, activo) {
+    let v = normalizarNombreBandeja(vista);
+    if (!v) return;
+    document.querySelectorAll(`.btn-sidebar[data-bandeja-flujo="${v}"]:not(.btn-sidebar-cobertura)`).forEach(btn => {
+        let dot = btn.querySelector('.ticket-notif-dot');
+        if (activo) {
+            btn.classList.add('has-notif-activa');
+            btn.classList.remove('notif-visto');
+            if (dot) dot.classList.remove('notif-hidden');
+        } else {
+            btn.classList.remove('has-notif-activa');
+            btn.classList.add('notif-visto');
+            if (dot) dot.classList.add('notif-hidden');
+        }
+    });
+}
+
+function aplicarResaltadoTicketsNuevos(vista) {
+    let v = normalizarNombreBandeja(vista);
+    let tbody = obtenerTbodyPorBandeja(v);
+    if (!tbody) return;
+
+    let setDestacados = (window._ticketsDestacadosActivos && window._ticketsDestacadosActivos[v])
+        ? window._ticketsDestacadosActivos[v]
+        : null;
+    let setPendientes = (window._notificacionesPendientesPorVista && window._notificacionesPendientesPorVista[v])
+        ? window._notificacionesPendientesPorVista[v]
+        : null;
+
+    let idsResaltar = new Set();
+    if (setDestacados && setDestacados.size > 0) {
+        setDestacados.forEach(id => idsResaltar.add(String(id).toUpperCase().trim()));
+    }
+    if (setPendientes && setPendientes.size > 0) {
+        setPendientes.forEach(id => idsResaltar.add(String(id).toUpperCase().trim()));
+    }
+
+    Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+        if (tr.cells.length === 1 && tr.cells[0].colSpan > 1) {
+            tr.classList.remove('fila-ticket-nuevo');
+            return;
+        }
+        let idFila = extraerIdTicketDeFila(tr);
+        if (idFila && idsResaltar.has(idFila.toUpperCase().trim())) {
+            tr.classList.add('fila-ticket-nuevo');
+        } else {
+            tr.classList.remove('fila-ticket-nuevo');
+        }
+    });
+}
+
+function limpiarResaltadoOtrasBandejas(vistaActiva) {
+    let vActiva = normalizarNombreBandeja(vistaActiva);
+    Object.keys(window._ticketsDestacadosActivos || {}).forEach(k => {
+        if (k !== vActiva) {
+            delete window._ticketsDestacadosActivos[k];
+            aplicarResaltadoTicketsNuevos(k);
+        }
+    });
+}
+
+function limpiarNotificacionBoton(btn) {
+    if (!btn) return;
+    let bandeja = btn.getAttribute('data-bandeja-flujo');
+    if (!bandeja) return;
+    let v = normalizarNombreBandeja(bandeja);
+
+    if (window._bandejaConResaltadoReciente === v && (Date.now() - window._timestampResaltadoReciente) < 350) {
+        actualizarEstadoVisualBotonBandeja(v, false);
+        return;
+    }
+
+    let isDelegacionBtn = btn.classList.contains('btn-sidebar-cobertura') || (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('abrirVistaDelegada'));
+    let pendientes = window._notificacionesPendientesPorVista[v];
+    let teniaNotif = Boolean((pendientes && pendientes.size > 0) || btn.classList.contains('has-notif-activa'));
+
+    actualizarEstadoVisualBotonBandeja(v, false);
+    limpiarResaltadoOtrasBandejas(v);
+
+    if (teniaNotif && pendientes && pendientes.size > 0) {
+        window._ticketsDestacadosActivos[v] = new Set(pendientes);
+        delete window._notificacionesPendientesPorVista[v];
+        guardarTokensVistosBandeja(v);
+        window._bandejaConResaltadoReciente = v;
+        window._timestampResaltadoReciente = Date.now();
+        if (isDelegacionBtn) {
+            window._esperandoConfirmacionDelegacion = v;
+        }
+    } else if (!teniaNotif) {
+        delete window._ticketsDestacadosActivos[v];
+        guardarTokensVistosBandeja(v);
+    }
+
+    aplicarResaltadoTicketsNuevos(v);
+}
+
+function limpiarNotificacionPorVista(vista) {
+    if (!vista || window._inicializandoVistaDefault) return;
+    let v = normalizarNombreBandeja(vista);
+
+    if (window._esperandoConfirmacionDelegacion === v) {
+        window._esperandoConfirmacionDelegacion = null;
+        actualizarEstadoVisualBotonBandeja(v, false);
+        limpiarResaltadoOtrasBandejas(v);
+        aplicarResaltadoTicketsNuevos(v);
+        setTimeout(() => aplicarResaltadoTicketsNuevos(v), 180);
+        return;
+    }
+
+    let pendientes = window._notificacionesPendientesPorVista[v];
+    let btnConNotif = document.querySelector(`.btn-sidebar.has-notif-activa[data-bandeja-flujo="${v}"]`);
+    let teniaNotif = Boolean((pendientes && pendientes.size > 0) || btnConNotif);
+
+    actualizarEstadoVisualBotonBandeja(v, false);
+    limpiarResaltadoOtrasBandejas(v);
+
+    if (teniaNotif && pendientes && pendientes.size > 0) {
+        window._ticketsDestacadosActivos[v] = new Set(pendientes);
+        delete window._notificacionesPendientesPorVista[v];
+        guardarTokensVistosBandeja(v);
+        window._bandejaConResaltadoReciente = v;
+        window._timestampResaltadoReciente = Date.now();
+    } else if (!teniaNotif) {
+        delete window._ticketsDestacadosActivos[v];
+        guardarTokensVistosBandeja(v);
+    }
+
+    aplicarResaltadoTicketsNuevos(v);
+    setTimeout(() => aplicarResaltadoTicketsNuevos(v), 180);
+}
+
+function activarNotificacionPorVista(vista) {
+    if (!vista) return;
+    actualizarEstadoVisualBotonBandeja(vista, true);
+}
+
+async function evaluarDatosRealesFlujoTickets() {
+    const botonesFlujo = document.querySelectorAll('.btn-sidebar[data-bandeja-flujo]:not(.btn-sidebar-cobertura)');
+    if (!botonesFlujo || botonesFlujo.length === 0) return;
+    if (window._evaluandoFlujoEnCurso) return;
+    window._evaluandoFlujoEnCurso = true;
+
+    try {
+        const rolActual = document.getElementById('rol-actual') ? document.getElementById('rol-actual').value.trim() : '';
+        const provActualEl = document.querySelector('.sidebar-name');
+        const provActual = provActualEl ? provActualEl.innerText.trim() : '';
+
+        const vistasPresentes = new Set();
+        botonesFlujo.forEach(b => {
+            const attr = b.getAttribute('data-bandeja-flujo');
+            if (attr) vistasPresentes.add(normalizarNombreBandeja(attr));
+        });
+
+        const promesas = [
+            fetch('/api/facturas/lista', { cache: 'no-store' }).then(r => r.ok ? r.json() : { facturas: [] }).catch(() => ({ facturas: [] })),
+            fetch('/api/reportes/lista', { cache: 'no-store' }).then(r => r.ok ? r.json() : { reportes: [] }).catch(() => ({ reportes: [] }))
+        ];
+
+        const pedirRetSup = (rolActual === 'administracion' && vistasPresentes.has('retrabajo'));
+        const pedirLibRetSup = (rolActual === 'administracion' && vistasPresentes.has('liberar-retrabajo'));
+        const pedirRetProv = (rolActual === 'proveedores' && vistasPresentes.has('retrabajo'));
+
+        if (pedirRetSup) {
+            promesas.push(fetch('/api/garantia/supervisor/lista', { cache: 'no-store' }).then(r => r.ok ? r.json() : { retrabajos: [] }).catch(() => ({ retrabajos: [] })));
+        } else {
+            promesas.push(Promise.resolve({ retrabajos: [] }));
+        }
+
+        if (pedirLibRetSup) {
+            promesas.push(fetch('/api/garantia/supervisor/por_liberar', { cache: 'no-store' }).then(r => r.ok ? r.json() : { retrabajos: [] }).catch(() => ({ retrabajos: [] })));
+        } else {
+            promesas.push(Promise.resolve({ retrabajos: [] }));
+        }
+
+        if (pedirRetProv) {
+            promesas.push(fetch('/api/garantia/proveedor/lista', { cache: 'no-store' }).then(r => r.ok ? r.json() : { retrabajos: [] }).catch(() => ({ retrabajos: [] })));
+        } else {
+            promesas.push(Promise.resolve({ retrabajos: [] }));
+        }
+
+        const [dataFac, dataRep, dataRetSup, dataLibRetSup, dataRetProv] = await Promise.all(promesas);
+        const facturas = Array.isArray(dataFac.facturas) ? dataFac.facturas : [];
+        const reportes = Array.isArray(dataRep.reportes) ? dataRep.reportes : [];
+        const retrabajosSup = Array.isArray(dataRetSup.retrabajos) ? dataRetSup.retrabajos : [];
+        const porLiberarSup = Array.isArray(dataLibRetSup.retrabajos) ? dataLibRetSup.retrabajos : [];
+        const retrabajosProv = Array.isArray(dataRetProv.retrabajos) ? dataRetProv.retrabajos : [];
+
+        const bandejasActuales = {};
+        vistasPresentes.forEach(v => { bandejasActuales[v] = []; });
+
+        // 1. BANDEJA DE REPORTES (SUPERVISOR / PROVEEDOR)
+        if (vistasPresentes.has('reportes')) {
+            if (rolActual === 'administracion') {
+                reportes.forEach(r => {
+                    const yaFacturado = facturas.some(f => extraerIdReporteDeFacturaNotif(f) === String(r.id));
+                    if (!yaFacturado && r.id) {
+                        const rId = String(r.id).trim();
+                        bandejasActuales['reportes'].push({
+                            ticketId: rId,
+                            token: `rep:${rId}`,
+                            globalSig: `R|${rId}|${String(r.estado || '').trim()}|${String(r.asignado_a || '').trim()}`
+                        });
+                    }
+                });
+            } else if (rolActual === 'proveedores') {
+                reportes.forEach(r => {
+                    const esMio = !provActual || r.asignado_a === provActual;
+                    const yaFacturado = facturas.some(f => extraerIdReporteDeFacturaNotif(f) === String(r.id));
+                    if (esMio && !yaFacturado && r.id) {
+                        const rId = String(r.id).trim();
+                        bandejasActuales['reportes'].push({
+                            ticketId: rId,
+                            token: `rep_prov:${rId}:${String(r.asignado_a || '').trim()}`,
+                            globalSig: `R|${rId}|${String(r.estado || '').trim()}|${String(r.asignado_a || '').trim()}`
+                        });
+                    }
+                });
+            }
+        }
+
+        // 2. BANDEJAS BASADAS EN FACTURAS / COTIZACIONES
+        const lim10k = window.LIMITE_COTIZACIONES_CARAS || 10000;
+        facturas.forEach(f => {
+            const idRep = extraerIdReporteDeFacturaNotif(f) || String(f.id || '').trim();
+            if (!idRep) return;
+
+            const canceladoCara = (f.estado === 'Cancelado_Cotizacion_Cara');
+            const enRetrabajoActivo = Boolean(
+                f.en_retrabajo_activo ||
+                f.estado === 'Retrabajo' ||
+                f.estado === 'En Asignacion/Retrabajo' ||
+                f.estado_retrabajo === 'Pendiente' ||
+                f.estado_retrabajo === 'Reasignado' ||
+                f.estado_retrabajo === 'Por Liberar' ||
+                (f.retrabajo === 'Sí' && f.estado_retrabajo !== 'Finalizado' && f.estado_retrabajo !== 'Cancelado' && f.retrabajo_unidad_entregada !== 'Sí')
+            );
+
+            if (canceladoCara || enRetrabajoActivo) return;
+
+            const precioParaAp = parseFloat(f.precio_estimado || f.precio || 0);
+            const apAdmin = f.aprobado_admin !== undefined ? f.aprobado_admin : (f.estado === 'Confirmada');
+            const apCorp = f.aprobado_corp !== undefined ? f.aprobado_corp : (f.estado === 'Confirmada');
+            const ap10k = f.aprobado_admin_10k !== undefined ? f.aprobado_admin_10k : false;
+            const apAdminTotal = (precioParaAp >= lim10k) ? (f.aprobado_admin === true && f.aprobado_admin_10k === true) : apAdmin;
+            const confirmadaTotal = Boolean(apAdminTotal && apCorp);
+            const entregadoTexto = f.entregado || 'No';
+            const estaEntregada = (entregadoTexto === 'Sí' || entregadoTexto === 'Si' || String(f.entregado || '').trim().toLowerCase() === 'sí' || String(f.entregado || '').trim().toLowerCase() === 'si');
+            const valFiscal = f.validacion_fiscal || 'Pendiente';
+            const fGlobalSig = `F|${idRep}|${String(f.estado || '')}|${Boolean(f.aprobado_admin)}|${Boolean(ap10k)}|${Boolean(f.aprobado_corp)}|${entregadoTexto}|${Boolean(f.liberado_admin)}|${valFiscal}|${String(f.factura_folio || '')}|${Boolean(f.codigo_liberacion)}`;
+
+            // Cotizaciones +10,000
+            if (vistasPresentes.has('cotizaciones-10k') && rolActual === 'administracion') {
+                const archivadoORechazado = (f.estado === 'Archivado' || f.estado === 'Rechazado_Con_Recomendaciones');
+                if (precioParaAp >= lim10k && ap10k === false && f.aprobado_admin === true && !archivadoORechazado) {
+                    bandejasActuales['cotizaciones-10k'].push({
+                        ticketId: idRep,
+                        token: `cot10k:${idRep}`,
+                        globalSig: fGlobalSig
+                    });
+                }
+            }
+
+            // Excluir archivados del resto de bandejas activas
+            if (f.estado === 'Archivado' || (rolActual === 'proveedores' && valFiscal === 'Aprobada') || (rolActual === 'corporativos' && confirmadaTotal)) {
+                return;
+            }
+
+            // Documentos Contables (Supervisor)
+            if (vistasPresentes.has('documentos-contables') && rolActual === 'administracion') {
+                if (valFiscal === 'Aprobada' && f.liberado_admin === true) {
+                    bandejasActuales['documentos-contables'].push({
+                        ticketId: idRep,
+                        token: `doc_cont:${idRep}`,
+                        globalSig: fGlobalSig
+                    });
+                }
+            }
+
+            // Liberar Doc. Contable (Administrador / Cobertura Supervisor)
+            if (vistasPresentes.has('liberar-doc-contable') && rolActual === 'administracion') {
+                if (f.liberado_admin === false && estaEntregada) {
+                    bandejasActuales['liberar-doc-contable'].push({
+                        ticketId: idRep,
+                        token: `lib_doc:${idRep}`,
+                        globalSig: fGlobalSig
+                    });
+                }
+            }
+
+            // Cotizaciones (Corporativos)
+            if (vistasPresentes.has('cotizaciones') && rolActual === 'corporativos') {
+                let esMas10k = precioParaAp >= lim10k;
+                if (!esMas10k && Array.isArray(f.cotizaciones) && f.cotizaciones.length > 0) {
+                    esMas10k = f.cotizaciones.some(c => parseFloat(c.precio || 0) >= lim10k);
+                }
+                if (esMas10k && f.aprobado_admin === true && f.aprobado_admin_10k === true && f.estado !== 'Rechazado_Con_Recomendaciones') {
+                    bandejasActuales['cotizaciones'].push({
+                        ticketId: idRep,
+                        token: `cot_corp:${idRep}`,
+                        globalSig: fGlobalSig
+                    });
+                }
+            }
+
+            // Facturas Finales vs Cotizaciones y Órdenes
+            if (rolActual === 'proveedores' || rolActual === 'administracion') {
+                if (entregadoTexto === 'Sí') {
+                    if (vistasPresentes.has('facturas_finales')) {
+                        if (!(rolActual === 'administracion' && valFiscal === 'Aprobada')) {
+                            bandejasActuales['facturas_finales'].push({
+                                ticketId: idRep,
+                                token: `fac_fin:${idRep}:${String(f.factura_folio || '')}:${valFiscal}:${Boolean(f.liberado_admin)}`,
+                                globalSig: fGlobalSig
+                            });
+                        }
+                    }
+                } else {
+                    if (vistasPresentes.has('facturas')) {
+                        bandejasActuales['facturas'].push({
+                            ticketId: idRep,
+                            token: `fac_cot:${idRep}:${String(f.estado || '')}:${Boolean(f.aprobado_admin)}:${Boolean(f.aprobado_admin_10k)}:${Boolean(f.aprobado_corp)}:${Boolean(f.codigo_liberacion)}`,
+                            globalSig: fGlobalSig
+                        });
+                    }
+                }
+            }
+        });
+
+        // 3. BANDEJAS DE GARANTÍA / RETRABAJO
+        if (pedirRetSup && vistasPresentes.has('retrabajo')) {
+            retrabajosSup.forEach(r => {
+                const st = String(r.estado || '').trim().toLowerCase();
+                const ent = String(r.unidad_entregada || '').trim().toLowerCase();
+                if (['finalizado', 'cancelado', 'entregado', 'por liberar', 'por_liberar', 'pendiente liberacion', 'listo_taller'].includes(st) || ['sí', 'si'].includes(ent)) {
+                    return;
+                }
+                const tId = String(r.ticket_original || r.ticket || r.id || '').trim();
+                if (tId) {
+                    bandejasActuales['retrabajo'].push({
+                        ticketId: tId,
+                        token: `ret_sup:${tId}:${st}`,
+                        globalSig: `G_SUP|${tId}|${st}`
+                    });
+                }
+            });
+        }
+
+        if (pedirLibRetSup && vistasPresentes.has('liberar-retrabajo')) {
+            porLiberarSup.forEach(r => {
+                const tId = String(r.ticket_original || r.ticket || r.id || '').trim();
+                if (tId) {
+                    bandejasActuales['liberar-retrabajo'].push({
+                        ticketId: tId,
+                        token: `lib_ret:${tId}`,
+                        globalSig: `G_LIB|${tId}`
+                    });
+                }
+            });
+        }
+
+        if (pedirRetProv && vistasPresentes.has('retrabajo')) {
+            retrabajosProv.forEach(r => {
+                const tId = String(r.ticket_original || r.ticket || r.id || '').trim();
+                if (tId) {
+                    bandejasActuales['retrabajo'].push({
+                        ticketId: tId,
+                        token: `ret_prov:${tId}`,
+                        globalSig: `G_PROV|${tId}`
+                    });
+                }
+            });
+        }
+
+        // 4. LÍNEA BASE GLOBAL Y COMPARACIÓN CONTRA ESTADO VISTO EN LOCALSTORAGE
+        const baselineKey = 'telnor_flujo_baseline_global_v2';
+        let rawBaseline = null;
+        try { rawBaseline = localStorage.getItem(baselineKey); } catch (e) {}
+        let baselineSet = null;
+
+        if (rawBaseline === null) {
+            const todasSigs = [];
+            reportes.forEach(r => {
+                if (r && r.id) todasSigs.push(`R|${String(r.id).trim()}|${String(r.estado || '').trim()}|${String(r.asignado_a || '').trim()}`);
+            });
+            facturas.forEach(f => {
+                const idRep = extraerIdReporteDeFacturaNotif(f) || String(f.id || '').trim();
+                if (!idRep) return;
+                const ap10k = f.aprobado_admin_10k !== undefined ? f.aprobado_admin_10k : false;
+                const entregadoTexto = f.entregado || 'No';
+                const valFiscal = f.validacion_fiscal || 'Pendiente';
+                todasSigs.push(`F|${idRep}|${String(f.estado || '')}|${Boolean(f.aprobado_admin)}|${Boolean(ap10k)}|${Boolean(f.aprobado_corp)}|${entregadoTexto}|${Boolean(f.liberado_admin)}|${valFiscal}|${String(f.factura_folio || '')}|${Boolean(f.codigo_liberacion)}`);
+            });
+            Object.values(bandejasActuales).forEach(arr => {
+                arr.forEach(it => { if (it.globalSig) todasSigs.push(it.globalSig); });
+            });
+            baselineSet = new Set(todasSigs);
+            try { localStorage.setItem(baselineKey, JSON.stringify(Array.from(baselineSet))); } catch (e) {}
+        } else {
+            try { baselineSet = new Set(JSON.parse(rawBaseline) || []); } catch (e) { baselineSet = new Set(); }
+        }
+
+        const userKey = obtenerClaveContextoUsuarioNotif();
+        vistasPresentes.forEach(vista => {
+            const items = bandejasActuales[vista] || [];
+            const tokensActuales = items.map(it => it.token);
+            window._tokensActualesPorVista[vista] = tokensActuales;
+
+            const storageKey = `telnor_flujo_seen_v2_${userKey}_${vista}`;
+            let rawSeen = null;
+            try { rawSeen = localStorage.getItem(storageKey); } catch (e) {}
+
+            let seenSet;
+            if (rawSeen === null) {
+                // Si es la primera vez que entra este rol/usuario, marcamos como vistos únicamente los tickets que ya existían en la línea base inicial
+                const tokensBase = items
+                    .filter(it => !baselineSet || baselineSet.has(it.globalSig) || rawBaseline === null)
+                    .map(it => it.token);
+                seenSet = new Set(tokensBase);
+                guardarTokensVistosBandeja(vista, tokensBase);
+            } else {
+                let seenArr = [];
+                try { seenArr = JSON.parse(rawSeen) || []; } catch (e) { seenArr = []; }
+                seenSet = new Set(seenArr);
+            }
+
+            const nuevosItems = items.filter(it => !seenSet.has(it.token));
+            if (nuevosItems.length > 0) {
+                const nuevosIds = new Set(nuevosItems.map(it => it.ticketId));
+                window._notificacionesPendientesPorVista[vista] = nuevosIds;
+                actualizarEstadoVisualBotonBandeja(vista, true);
+                aplicarResaltadoTicketsNuevos(vista);
+            } else {
+                delete window._notificacionesPendientesPorVista[vista];
+                actualizarEstadoVisualBotonBandeja(vista, false);
+                guardarTokensVistosBandeja(vista, tokensActuales);
+                aplicarResaltadoTicketsNuevos(vista);
+            }
+        });
+    } catch (err) {
+        console.error('Error al evaluar estado real de flujo de tickets:', err);
+    } finally {
+        window._evaluandoFlujoEnCurso = false;
+    }
+}
+
+function inicializarObservadoresNotificacionFlujo() {
+    const rolEl = document.getElementById('rol-actual');
+    const esCorp = rolEl && rolEl.value === 'corporativos';
+    const mapaTbodyVista = [
+        { id: 'tabla-reportes', vista: 'reportes' },
+        { id: 'tabla-reportes-prov', vista: 'reportes' },
+        { id: 'tabla-facturas', vista: esCorp ? 'cotizaciones' : 'facturas' },
+        { id: 'tabla-facturas-finales', vista: 'facturas_finales' },
+        { id: 'tabla-doc-contables', vista: 'documentos-contables' },
+        { id: 'tabla-liberar-doc', vista: 'liberar-doc-contable' },
+        { id: 'tabla-cotizaciones-10k', vista: 'cotizaciones-10k' },
+        { id: 'tabla-retrabajos', vista: 'retrabajo' },
+        { id: 'tabla-retrabajos-prov', vista: 'retrabajo' },
+        { id: 'tabla-liberar-retrabajo', vista: 'liberar-retrabajo' }
+    ];
+
+    mapaTbodyVista.forEach(({ id, vista }) => {
+        const tbody = document.getElementById(id);
+        if (!tbody || tbody.dataset.notifObserverAttached) return;
+        tbody.dataset.notifObserverAttached = 'true';
+
+        const observer = new MutationObserver(() => {
+            aplicarResaltadoTicketsNuevos(vista);
+        });
+
+        observer.observe(tbody, { childList: true });
+    });
+}
+
 // --- EFECTO DE SELECCION GLOBAL PARA FILAS DE TABLA ---
 document.addEventListener('click', function (e) {
     let tr = e.target.closest('tbody tr');
@@ -2609,6 +3186,7 @@ document.addEventListener('click', function (e) {
 document.addEventListener('click', function (e) {
     let btn = e.target.closest('.btn-sidebar');
     if (!btn) return;
+    limpiarNotificacionBoton(btn);
     let nav = btn.closest('.nav-menu') || btn.closest('.sidebar');
     if (!nav) return;
 

@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
-    <link rel="stylesheet" href="/static/style.css?v=1000052">
+    <link rel="stylesheet" href="/static/style.css?v=1000063">
     <link rel="stylesheet" href="/static/manual_sistema.css?v=202609">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -386,10 +386,10 @@
                 <!-- Sección: Flujo del Ticket -->
                 <div class="sidebar-section-flujo" style="display: flex; flex-direction: column; gap: 10px;">
                     <div class="sidebar-section-title sidebar-title-flujo" style="text-align: center; color: #38bdf8; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Flujo del Ticket</div>
-                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaAdmin('reportes')">Bandeja de Reportes</button>
-                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaAdmin('facturas')">Cotizaciones y Órdenes</button>
-                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaAdmin('facturas_finales')">Facturas</button>
-                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaAdmin('documentos-contables')">Documentos Contables</button>
+                    <button class="btn-sidebar btn-sidebar-flujo" data-bandeja-flujo="reportes" onclick="cambiarVistaAdmin('reportes')">Bandeja de Reportes<span class="ticket-notif-dot" aria-hidden="true"></span></button>
+                    <button class="btn-sidebar btn-sidebar-flujo" data-bandeja-flujo="facturas" onclick="cambiarVistaAdmin('facturas')">Cotizaciones y Órdenes<span class="ticket-notif-dot" aria-hidden="true"></span></button>
+                    <button class="btn-sidebar btn-sidebar-flujo" data-bandeja-flujo="facturas_finales" onclick="cambiarVistaAdmin('facturas_finales')">Facturas<span class="ticket-notif-dot" aria-hidden="true"></span></button>
+                    <button class="btn-sidebar btn-sidebar-flujo" data-bandeja-flujo="documentos-contables" onclick="cambiarVistaAdmin('documentos-contables')">Documentos Contables<span class="ticket-notif-dot" aria-hidden="true"></span></button>
                 </div>
 
                 <!-- Sección: Administración -->
@@ -416,8 +416,8 @@
                 <!-- Módulo de Garantía / Retrabajo (Verde, hasta abajo de delegar) -->
                 <div style="margin-top: 15px; padding-top: 5px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align: center; color: #4ade80; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Garantía</div>
-                    <button class="btn-sidebar btn-sidebar-retrabajo" title="Garantía" type="button" onclick="cambiarVistaAdmin('retrabajo')">Retrabajo</button>
-                    <button class="btn-sidebar btn-sidebar-retrabajo" id="btn-sidebar-liberar-retrabajo" title="Liberar/Retrabajo" type="button" onclick="cambiarVistaAdmin('liberar-retrabajo')">Liberar/Retrabajo</button>
+                    <button class="btn-sidebar btn-sidebar-retrabajo" data-bandeja-flujo="retrabajo" title="Garantía" type="button" onclick="cambiarVistaAdmin('retrabajo')">Retrabajo<span class="ticket-notif-dot" aria-hidden="true"></span></button>
+                    <button class="btn-sidebar btn-sidebar-retrabajo" id="btn-sidebar-liberar-retrabajo" data-bandeja-flujo="liberar-retrabajo" title="Liberar/Retrabajo" type="button" onclick="cambiarVistaAdmin('liberar-retrabajo')">Liberar/Retrabajo<span class="ticket-notif-dot" aria-hidden="true"></span></button>
                 </div>
                 {% endif %}
 
@@ -426,8 +426,8 @@
                 <!-- Sección: Flujo del Ticket -->
                 <div class="sidebar-section-flujo" style="display: flex; flex-direction: column; gap: 10px;">
                     <div class="sidebar-section-title sidebar-title-flujo" style="text-align: center; color: #38bdf8; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Flujo del Ticket</div>
-                    <button class="btn-sidebar btn-sidebar-flujo" onclick="verCotizacionesMas10000()">Cotizaciones +10000</button>
-                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaAdmin('liberar-doc-contable')">Liberar Doc. Contable</button>
+                    <button class="btn-sidebar btn-sidebar-flujo" data-bandeja-flujo="cotizaciones-10k" onclick="verCotizacionesMas10000()">Cotizaciones +10000<span class="ticket-notif-dot" aria-hidden="true"></span></button>
+                    <button class="btn-sidebar btn-sidebar-flujo" data-bandeja-flujo="liberar-doc-contable" onclick="cambiarVistaAdmin('liberar-doc-contable')">Liberar Doc. Contable<span class="ticket-notif-dot" aria-hidden="true"></span></button>
                 </div>
 
                 <!-- Sección: Administración -->
@@ -4987,7 +4987,7 @@
     </div>
 
     <script src="/static/configuraciones_jefatura.js?v=12"></script>
-    <script src="/static/script.js?v=1000060"></script>
+    <script src="/static/script.js?v=1000063"></script>
     <script src="/static/liberacion.js?v=2"></script>
     <script src="/static/facturas_herramientas.js?v=7"></script>
     <script src="/static/facturas_archivos.js?v=1788550327"></script>

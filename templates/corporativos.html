@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel Corporativo</title>
-    <link rel="stylesheet" href="/static/style.css?v=51062">
+    <link rel="stylesheet" href="/static/style.css?v=1000062">
     <link rel="stylesheet" href="/static/manual_sistema.css?v=202609">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -212,7 +212,7 @@
                 <!-- Sección: Flujo del Ticket -->
                 <div class="sidebar-section-flujo" style="display: flex; flex-direction: column; gap: 10px;">
                     <div class="sidebar-section-title sidebar-title-flujo" style="text-align: center; color: #38bdf8; font-size: 1.05rem; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: 0.8px; white-space: nowrap; width: 100%; box-sizing: border-box; padding: 4px 0 2px 0;">Flujo del Ticket</div>
-                    <button class="btn-sidebar btn-sidebar-flujo" onclick="cambiarVistaCorp('cotizaciones')">Cotizaciones</button>
+                    <button class="btn-sidebar btn-sidebar-flujo" data-bandeja-flujo="cotizaciones" onclick="cambiarVistaCorp('cotizaciones')">Cotizaciones<span class="ticket-notif-dot" aria-hidden="true"></span></button>
                 </div>
 
                 <!-- Sección: Administración -->
@@ -485,7 +485,7 @@
         </div>
     </div>
 
-    <script src="/static/script.js?v=1000005"></script>
+    <script src="/static/script.js?v=1000062"></script>
 
     <!-- Módulos de Facturación -->
     <script src="/static/facturas_herramientas.js?v=6"></script>
