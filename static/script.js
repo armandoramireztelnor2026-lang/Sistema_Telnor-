@@ -2211,12 +2211,28 @@ function procesarEdicion() {
     });
 }
 
-function togglePass(id) {
+function togglePass(id, btn) {
     let input = document.getElementById('pass-' + id);
+    if (!input) return;
+    if (!btn) btn = document.getElementById('btn-pass-' + id);
+
+    const svgAbierto = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    const svgCerrado = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #38bdf8;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+
     if (input.type === 'password') {
         input.type = 'text';
+        if (btn) {
+            btn.innerHTML = svgCerrado;
+            btn.style.color = '#38bdf8';
+            btn.title = 'Ocultar Contraseña';
+        }
     } else {
         input.type = 'password';
+        if (btn) {
+            btn.innerHTML = svgAbierto;
+            btn.style.color = '#94a3b8';
+            btn.title = 'Ver Contraseña';
+        }
     }
 }
 
@@ -2243,9 +2259,11 @@ function cargarAccesos() {
                 let rolYNombre = `<span style="text-transform: capitalize; font-weight:bold; color:#0284c7;">${rolTexto}</span><br><small style="color:#a3b1c6;">${nombreCompleto}</small>`;
 
                 let passHtml = `
-                    <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
                         <input type="password" value="${user.password}" id="pass-${user.usuario}" readonly style="background:transparent; border:none; color:#f59e0b; font-weight:bold; letter-spacing:2px; width:120px; outline:none;">
-                        <button onclick="togglePass('${user.usuario}')" style="background:none; border:none; cursor:pointer; font-size:18px;" title="Ver Contraseña">👁️</button>
+                        <button id="btn-pass-${user.usuario}" onclick="togglePass('${user.usuario}', this)" style="background:none; border:none; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; padding:4px; color:#94a3b8; border-radius:6px; transition:color 0.2s, background 0.2s;" onmouseover="this.style.color='#38bdf8'; this.style.background='rgba(56,189,248,0.1)'" onmouseout="this.style.color=(document.getElementById('pass-${user.usuario}')?.type === 'text' ? '#38bdf8' : '#94a3b8'); this.style.background='none'" title="Ver Contraseña">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
                     </div>`;
 
                 tbody.innerHTML += `<tr><td>${rolYNombre}</td><td><strong style="color:#40916c;">${user.usuario}</strong></td><td>${passHtml}</td><td><button class="btn-info" onclick="renovarPassword('${user.usuario}')">🔄 Renovar Clave</button></td></tr>`;

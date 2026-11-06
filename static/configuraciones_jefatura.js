@@ -538,7 +538,7 @@ window.renderizarTablaCotizacionesPresupuesto = function(lista) {
                 <td style="padding: 10px 14px; font-weight: 700; color: #f59e0b;">${item.id_reporte || item.id}</td>
                 <td style="padding: 10px 14px; font-weight: 600; color: #38bdf8;">${unidadStr}</td>
                 <td style="padding: 10px 14px; color: #cbd5e1;">${item.proveedor}</td>
-                <td style="padding: 10px 14px; color: #94a3b8;">${item.cope}</td>
+                <td style="padding: 10px 14px; color: #94a3b8;">${(item.cope && item.cope !== 'N/A') ? item.cope : 'PE CALLE 10'}</td>
                 <td style="padding: 10px 14px; font-weight: 700; color: #10b981; font-size: 0.95rem;">${precioFmt}</td>
                 <td style="padding: 10px 14px;"><span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">${item.estado}</span></td>
                 <td style="padding: 10px 14px; color: #94a3b8; font-size: 0.85rem;">${item.fecha}</td>

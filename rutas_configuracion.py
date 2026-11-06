@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import datetime
 import smtplib
 from email.mime.text import MIMEText
@@ -73,8 +74,33 @@ def calcular_metricas_presupuesto(conf=None):
     facturas_data = leer_json(FACTURAS_FILE)
     facs = facturas_data.get("facturas", [])
 
+    reportes_data = leer_json("reportes.json")
+    reps = reportes_data.get("reportes", [])
+    rep_map = {}
+    for r in reps:
+        if r.get("id"):
+            rep_map[str(r.get("id")).strip()] = r
+            rep_map[str(r.get("id")).replace("REP-", "").strip()] = r
+
     comprometido = 0.0
     confirmadas = []
+
+    def _obtener_ticket_id(f):
+        if not f:
+            return ""
+        for field in ["ticket", "ticket_id", "id_reporte", "numero_reporte", "id_ticket", "reporte_id"]:
+            val = f.get(field)
+            if val and str(val).strip() and str(val).strip().upper() != "N/A":
+                return str(val).strip()
+        retro = str(f.get("retro", ""))
+        match = re.search(r"\[TICKET:\s*([A-Za-z0-9_-]+)\]", retro)
+        if match:
+            return match.group(1).strip()
+        for cot in f.get("cotizaciones", []):
+            m_cot = re.search(r"\[TICKET:\s*([A-Za-z0-9_-]+)\]", str(cot.get("retro", "")))
+            if m_cot:
+                return m_cot.group(1).strip()
+        return ""
 
     for fc in facs:
         # Excluir rechazadas o canceladas
@@ -101,12 +127,27 @@ def calcular_metricas_presupuesto(conf=None):
 
             p = float(fc.get("precio", 0) or fc.get("precio_estimado", 0) or 0)
             comprometido += p
+
+            tid = _obtener_ticket_id(fc)
+            r = (rep_map.get(tid) or rep_map.get(tid.replace("REP-", ""))) if tid else None
+
+            cope_val = fc.get("cope")
+            if not cope_val or str(cope_val).strip() == "" or str(cope_val).strip().upper() == "N/A":
+                if r and r.get("cope"):
+                    cope_val = r.get("cope")
+                elif fc.get("cope_origen"):
+                    cope_val = fc.get("cope_origen")
+                else:
+                    cope_val = "PE CALLE 10"
+
+            id_rep = tid if tid else (fc.get("id_reporte") or fc.get("numero_reporte") or fc.get("id"))
+
             confirmadas.append({
                 "id": fc.get("id"),
-                "id_reporte": fc.get("id_reporte") or fc.get("numero_reporte") or fc.get("id"),
-                "unidad": fc.get("unidad") or "N/A",
+                "id_reporte": id_rep,
+                "unidad": fc.get("unidad") or (r.get("unidad") if r else None) or "N/A",
                 "proveedor": fc.get("proveedor") or fc.get("taller") or "N/A",
-                "cope": fc.get("cope") or "N/A",
+                "cope": cope_val,
                 "precio": p,
                 "estado": fc.get("estado") or "Confirmada",
                 "fecha": str(fc.get("timestamp_aprobacion") or fc.get("fecha_creacion") or fc.get("timestamp") or "").split("T")[0] or "--"

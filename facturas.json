@@ -754,14 +754,22 @@
             "factura_pdf": "FACTURA_FINAL_20261105090937_0_Perfil_Usuario.pdf",
             "validacion_fiscal": "Aprobada",
             "numero_doc50": "5092312312",
-            "estado": "En Asignacion/Retrabajo",
-            "retrabajo": "Pendiente",
-            "estado_retrabajo": "Pendiente",
+            "estado": "Archivado",
+            "retrabajo": "S\u00ed",
+            "estado_retrabajo": "Finalizado",
             "estado_previo": "Archivado",
             "ultimo_motivo_retrabajo": "ok ahora seguiremos con la prueba",
             "motivo_cancelacion_retrabajo": "estpe s una prueba",
-            "num_retrabajo": 0,
-            "fecha_retrabajo": "2026-11-05 09:09:37"
+            "num_retrabajo": 1,
+            "fecha_retrabajo": "2026-11-05 22:48:42",
+            "fecha_finalizacion_retrabajo": "2026-11-06 11:29:41",
+            "codigo_chofer_retrabajo": null,
+            "codigo_supervisor_retrabajo": "568669",
+            "retrabajo_unidad_entregada": "S\u00ed",
+            "es_cotizacion_cara": true,
+            "fecha_liberacion_retrabajo": "2026-11-06 11:30:24",
+            "fecha_entrega_retrabajo": "2026-11-06 11:30:24",
+            "en_retrabajo_activo": false
         }
     ]
 }

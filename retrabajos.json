@@ -189,7 +189,7 @@
             "supervisor_asignado": "Samuel Giron",
             "supervisor_usuario": "Samuel_Giron-RUMN-2026-admin",
             "supervisor_correo": "armandoramireztelnor2026@gmail.com",
-            "estado": "Pendiente",
+            "estado": "Finalizado",
             "tipo": "caras",
             "es_cotizacion_cara": true,
             "reactivado_desde_caras": true,
@@ -238,7 +238,21 @@
                     }
                 ],
                 "fotos_evidencia": []
-            }
+            },
+            "fecha_reasignacion": "2026-11-05 22:48:42",
+            "supervisor_reasigno": "Samuel Giron",
+            "proveedor": "AUTOPARTES Y MOTORES B.C.",
+            "fecha_finalizacion_taller": "2026-11-06 11:29:41",
+            "codigo_chofer": null,
+            "codigo_supervisor": "568669",
+            "chofer": "CARDENAS",
+            "correo_chofer": "armandoramireztelnor2026@gmail.com",
+            "unidad_entregada": "S\u00ed",
+            "fecha_liberacion": "2026-11-06 11:30:24",
+            "supervisor_libero": "Samuel Giron",
+            "fecha_entrega": "2026-11-06 11:30:24",
+            "codigo_validado_por": "Samuel Giron",
+            "tipo_codigo_validado": "C\u00f3digo Exclusivo de Supervisi\u00f3n (Cotizaci\u00f3n Cara)"
         }
     ]
 }
