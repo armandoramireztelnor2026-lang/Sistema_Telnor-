@@ -7,11 +7,161 @@
     <link rel="stylesheet" href="/static/style.css?v=60111">
     <style>
         * { box-sizing: border-box; }
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background-color: #081422; }
-        .report-container { width: 100%; max-width: 800px; background-color: #112641; padding: 30px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin: auto; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+            position: relative;
+            overflow-x: hidden;
+            color: #f8fafc;
+            background: 
+                radial-gradient(ellipse 95% 75% at 15% 15%, rgba(18, 52, 110, 0.75) 0%, transparent 65%),
+                radial-gradient(ellipse 85% 70% at 85% 85%, rgba(11, 34, 76, 0.85) 0%, transparent 60%),
+                radial-gradient(circle at 50% 50%, #091e46 0%, #05122b 55%, #020713 100%) !important;
+            background-attachment: fixed !important;
+        }
+
+        /* =========================================================
+           FONDO UNIFICADO AZUL MARINO (IDÉNTICO A INICIO DE SESIÓN)
+           ========================================================= */
+        .fluid-bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .fluid-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.55;
+            animation: floatFluid 18s ease-in-out infinite alternate;
+        }
+
+        .fluid-blob-1 {
+            width: 680px;
+            height: 680px;
+            background: radial-gradient(circle, #12346e 0%, #091e46 65%, transparent 100%);
+            top: -200px;
+            left: -160px;
+        }
+
+        .fluid-blob-2 {
+            width: 750px;
+            height: 750px;
+            background: radial-gradient(circle, #0d2857 0%, #05122b 70%, transparent 100%);
+            bottom: -240px;
+            right: -160px;
+            animation-delay: -6s;
+        }
+
+        .fluid-blob-3 {
+            width: 520px;
+            height: 520px;
+            background: radial-gradient(circle, rgba(29, 78, 216, 0.35) 0%, rgba(9, 30, 70, 0.2) 65%, transparent 100%);
+            top: 32%;
+            left: 52%;
+            transform: translate(-50%, -50%);
+            animation-delay: -11s;
+        }
+
+        @keyframes floatFluid {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(25px, -20px) scale(1.06); }
+            100% { transform: translate(-20px, 25px) scale(0.96); }
+        }
+
+        .fluid-wave-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            max-height: 280px;
+            opacity: 0.45;
+        }
+
+        .fluid-wave-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            max-height: 320px;
+            opacity: 0.55;
+        }
+
+        .ambient-logo-telnor-corner {
+            position: absolute;
+            top: -45px;
+            left: -45px;
+            width: 420px;
+            height: 420px;
+            object-fit: contain;
+            opacity: 0.08;
+            mix-blend-mode: screen;
+            filter: drop-shadow(0 0 30px rgba(30, 64, 175, 0.4));
+            transform: rotate(-10deg);
+            pointer-events: none;
+        }
+
+        .ambient-logo-rumn-margin {
+            position: absolute;
+            bottom: 45px;
+            right: -30px;
+            width: 450px;
+            height: auto;
+            object-fit: contain;
+            opacity: 0.09;
+            mix-blend-mode: lighten;
+            filter: contrast(1.15) brightness(1.1);
+            transform: rotate(4deg);
+            pointer-events: none;
+        }
+
+        .ambient-logo-telnor-nombre-margin {
+            position: absolute;
+            bottom: 65px;
+            left: 35px;
+            width: 240px;
+            height: auto;
+            object-fit: contain;
+            filter: invert(1) hue-rotate(185deg) brightness(1.35) contrast(1.15);
+            mix-blend-mode: screen;
+            opacity: 0.22;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .ambient-logo-telnor-corner { width: 250px; height: 250px; }
+            .ambient-logo-rumn-margin { width: 260px; }
+            .ambient-logo-telnor-nombre-margin { width: 150px; bottom: 50px; left: 15px; }
+        }
+
+        /* CONTENEDOR DEL FORMULARIO CON ALTA LEGIBILIDAD SOBRE EL FONDO AZUL MARINO */
+        .report-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 800px;
+            background: linear-gradient(165deg, rgba(9, 30, 70, 0.92) 0%, rgba(5, 18, 43, 0.96) 100%);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(59, 130, 246, 0.32);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 22px 50px rgba(1, 5, 15, 0.8), 0 0 28px rgba(18, 52, 110, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            margin: auto;
+        }
         .report-header { text-align: center; margin-bottom: 25px; }
-        .report-header h2 { color: #f59e0b; margin-bottom: 10px; }
-        .report-header p { color: #a3b1c6; font-size: 14px; }
+        .report-header h2 { color: #fbbf24; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+        .report-header p { color: #cbd5e1; font-size: 14px; }
+        .report-container .input-group label { color: #f1f5f9; font-weight: 600; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); }
         .form-grid-smart { display: grid; grid-template-columns: 1fr; gap: 15px; }
         @media (min-width: 600px) { .form-grid-smart { grid-template-columns: 1fr 1fr; } .full-width-smart { grid-column: span 2; } body { align-items: center; } }
         @media (max-width: 599px) { body { align-items: flex-start; } }
@@ -373,6 +523,46 @@
     </style>
 </head>
 <body>
+
+    <!-- FONDO AMBIENTAL AZUL MARINO UNIFICADO CON EL INICIO DE SESIÓN -->
+    <div class="fluid-bg-canvas">
+        <div class="fluid-blob fluid-blob-1"></div>
+        <div class="fluid-blob fluid-blob-2"></div>
+        <div class="fluid-blob fluid-blob-3"></div>
+
+        <!-- Onda fluida superior superpuesta (Estrictamente Azul Marino) -->
+        <svg class="fluid-wave-top" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="gradWaveTop" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#061633;stop-opacity:0.75" />
+                    <stop offset="50%" style="stop-color:#0d2d63;stop-opacity:0.5" />
+                    <stop offset="100%" style="stop-color:#030917;stop-opacity:0.8" />
+                </linearGradient>
+            </defs>
+            <path fill="url(#gradWaveTop)" d="M0,128L60,144C120,160,240,192,360,186.7C480,181,600,139,720,138.7C840,139,960,181,1080,181.3C1200,181,1320,139,1380,117.3L1440,96L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+        </svg>
+
+        <!-- Onda fluida inferior superpuesta (Estrictamente Azul Marino) -->
+        <svg class="fluid-wave-bottom" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="gradWaveBottom" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#030917;stop-opacity:0.85" />
+                    <stop offset="50%" style="stop-color:#091e46;stop-opacity:0.65" />
+                    <stop offset="100%" style="stop-color:#12346e;stop-opacity:0.55" />
+                </linearGradient>
+            </defs>
+            <path fill="url(#gradWaveBottom)" d="M0,224L80,208C160,192,320,160,480,165.3C640,171,800,213,960,218.7C1120,224,1280,192,1360,176L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+        </svg>
+
+        <!-- IMAGEN 1 (Esquina Superior Izquierda): telnor_logo.png ambientada como marca de agua gigante -->
+        <img src="/static/telnor_logo.png" alt="" class="ambient-logo-telnor-corner">
+
+        <!-- IMAGEN 2 (Margen Inferior Derecho): RUMN_logo.png ambientada a gran escala con modo de mezcla -->
+        <img src="/static/RUMN_logo.png" alt="" class="ambient-logo-rumn-margin">
+
+        <!-- IMAGEN 3 (Margen Inferior Izquierdo): telnor_nombre.jpg fusionada con el fondo marino (screen blend) -->
+        <img src="/static/telnor_nombre.jpg" alt="" class="ambient-logo-telnor-nombre-margin">
+    </div>
 
     <!-- PANTALLA DE CARGA FLOTANTE -->
     <div id="loader-reporte">

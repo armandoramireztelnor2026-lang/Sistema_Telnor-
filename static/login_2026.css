@@ -1,0 +1,1052 @@
+/* =========================================================
+   ARCHIVO: static/login_2026.css
+   DISEÑO EXCLUSIVO MODERNO 2026: Interfaz Principal de Inicio de Sesión
+   Tono Dominante: Estrictamente Azul Marino Profundo y Corporativo
+   Ambientación: Logos distribuidos en márgenes, esquinas y fondo con
+   opacidad, escala y modos de mezcla (mix-blend-mode)
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --navy-abyss: #020713;
+    --navy-deep: #040d21;
+    --navy-base: #071736;
+    --navy-mid: #0b224c;
+    --navy-royal: #12346e;
+    --navy-accent: #1d4ed8;
+    --navy-highlight: #3b82f6;
+    --navy-border: rgba(37, 99, 235, 0.32);
+    --pill-radius: 9999px;
+}
+
+/* --- CUERPO PRINCIPAL: ESTRICTAMENTE AZUL MARINO --- */
+body.index-body {
+    background: linear-gradient(135deg, #020713 0%, #05122b 38%, #091e46 72%, #040e24 100%) !important;
+    background-attachment: fixed !important;
+    color: #f8fafc !important;
+    font-family: 'Poppins', 'Plus Jakarta Sans', sans-serif !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 0 80px 0 !important;
+    position: relative !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+}
+
+/* --- CAPA DE AMBIENTACIÓN: FORMAS FLUIDAS Y LOGOS DISTRIBUIDOS EN EL ENTORNO --- */
+.fluid-bg-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+/* Esferas orgánicas en tonos estrictamente azul marino */
+.fluid-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(85px);
+    opacity: 0.5;
+    pointer-events: none;
+    animation: blobFloat 18s ease-in-out infinite alternate;
+}
+
+.fluid-blob-1 {
+    width: 680px;
+    height: 680px;
+    background: radial-gradient(circle, rgba(18, 52, 110, 0.75) 0%, rgba(7, 23, 54, 0.3) 65%, transparent 100%);
+    top: -220px;
+    left: -140px;
+}
+
+.fluid-blob-2 {
+    width: 620px;
+    height: 620px;
+    background: radial-gradient(circle, rgba(29, 78, 216, 0.38) 0%, rgba(9, 30, 70, 0.2) 68%, transparent 100%);
+    bottom: -200px;
+    right: -120px;
+    animation-duration: 22s;
+    animation-delay: -6s;
+}
+
+.fluid-blob-3 {
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(15, 44, 96, 0.55) 0%, transparent 72%);
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-duration: 25s;
+}
+
+@keyframes blobFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, 20px) scale(1.05); }
+    100% { transform: translate(-20px, -15px) scale(0.96); }
+}
+
+/* Ondas fluidas SVG en degradados azul marino */
+.fluid-wave-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.fluid-wave-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* =========================================================
+   DISTRIBUCIÓN ESPACIAL DE LAS 3 IMÁGENES PARA AMBIENTACIÓN
+   (Prohibido agruparlas en un solo lugar; integradas con
+   opacidad, escala y mix-blend-mode en distintas zonas)
+   ========================================================= */
+
+/* 1. IMAGEN 1: telnor_logo.png -> Esquina Superior Izquierda (Marca de agua monumental) */
+.ambient-logo-telnor-corner {
+    position: fixed;
+    top: -55px;
+    left: -55px;
+    width: 420px;
+    height: 420px;
+    object-fit: contain;
+    opacity: 0.08;
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 40px rgba(30, 64, 175, 0.6));
+    transform: rotate(-10deg);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 2. IMAGEN 2: RUMN_logo.png -> Margen Inferior Derecho (Elemento gráfico ambiental a gran escala) */
+.ambient-logo-rumn-margin {
+    position: fixed;
+    bottom: 30px;
+    right: -35px;
+    width: 450px;
+    height: auto;
+    object-fit: contain;
+    opacity: 0.09;
+    mix-blend-mode: lighten;
+    filter: contrast(1.15) drop-shadow(0 10px 35px rgba(2, 7, 19, 0.9));
+    transform: rotate(4deg);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 3. IMAGEN 3: telnor_nombre.jpg -> Margen Inferior Izquierdo (Integrado con inversión + screen blend) */
+.ambient-logo-telnor-nombre-margin {
+    position: fixed;
+    bottom: 28px;
+    left: 36px;
+    width: 240px;
+    height: auto;
+    object-fit: contain;
+    /* Inversión cromática + screen para fundir el fondo blanco con el azul marino */
+    filter: invert(1) hue-rotate(185deg) brightness(1.35) contrast(1.15);
+    mix-blend-mode: screen;
+    opacity: 0.22;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* --- BARRA SUPERIOR MINIMALISTA --- */
+.login-topbar {
+    position: relative;
+    z-index: 50;
+    width: 100%;
+    max-width: 1340px;
+    margin: 0 auto;
+    padding: 22px 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    box-sizing: border-box;
+}
+
+/* Insignia izquierda con SOLO telnor_logo.png (sin agrupar los 3 logos) */
+.login-top-left-emblem {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(5, 17, 40, 0.78);
+    border: 1px solid rgba(37, 99, 235, 0.35);
+    padding: 9px 20px;
+    border-radius: var(--pill-radius);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+}
+
+.login-top-left-emblem img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.45));
+}
+
+.login-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #bfdbfe;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+}
+
+.login-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #3b82f6;
+    box-shadow: 0 0 10px #60a5fa;
+    display: inline-block;
+    animation: pulseGlow 2.2s infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+/* BOTÓN DE REPORTE EXTERNO (ESTILO PÍLDORA AZUL MARINO PROFUNDO CON ACENTO ÁMBAR) */
+.btn-reportar-top {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    background: linear-gradient(135deg, #0d2857 0%, #173f82 55%, #1e4fad 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(96, 165, 250, 0.45) !important;
+    padding: 13px 28px !important;
+    border-radius: var(--pill-radius) !important;
+    font-weight: 700 !important;
+    font-size: 0.92rem !important;
+    cursor: pointer !important;
+    font-family: 'Poppins', sans-serif !important;
+    box-shadow: 0 8px 25px rgba(2, 8, 23, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    white-space: nowrap !important;
+}
+
+.btn-reportar-top:hover {
+    transform: translateY(-3px) !important;
+    background: linear-gradient(135deg, #133570 0%, #1d4ed8 100%) !important;
+    border-color: #93c5fd !important;
+    box-shadow: 0 12px 32px rgba(29, 78, 216, 0.45) !important;
+}
+
+/* --- ENCABEZADO HERO CON PRESENCIA CENTRAL DE RUMN_logo.png --- */
+.header-titles {
+    text-align: center !important;
+    margin: 15px auto 40px auto !important;
+    padding: 0 20px !important;
+    max-width: 880px !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.hero-rumn-emblem-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.hero-rumn-emblem {
+    height: 76px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 24px rgba(2, 7, 19, 0.85)) drop-shadow(0 0 18px rgba(59, 130, 246, 0.25));
+    opacity: 0.96;
+    transition: transform 0.35s ease;
+}
+
+.hero-rumn-emblem:hover {
+    transform: scale(1.04);
+}
+
+.cyber-badge-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(11, 34, 76, 0.75);
+    border: 1px solid rgba(59, 130, 246, 0.38);
+    color: #93c5fd;
+    padding: 6px 20px;
+    border-radius: var(--pill-radius);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 18px rgba(2, 7, 19, 0.5);
+}
+
+.header-titles h1 {
+    font-size: 2.75rem !important;
+    margin: 0 0 10px 0 !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px !important;
+    background: linear-gradient(135deg, #ffffff 20%, #dbeafe 65%, #93c5fd 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 6px 20px rgba(2, 8, 24, 0.7));
+    line-height: 1.15 !important;
+}
+
+.header-titles p {
+    font-size: 1.1rem !important;
+    color: #94a3b8 !important;
+    margin: 0 0 20px 0 !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.3px !important;
+}
+
+.tech-divider-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.tech-divider-bar {
+    flex: 1;
+    height: 2px;
+    border-radius: var(--pill-radius);
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.65), transparent);
+}
+
+.tech-divider-diamond {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #3b82f6;
+    box-shadow: 0 0 12px #3b82f6;
+}
+
+/* --- TARJETAS DE SELECCIÓN DE PORTAL (AZUL MARINO GLASSMORPHISM) --- */
+.cards-container {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 30px !important;
+    flex-wrap: wrap !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 24px 35px !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.card-index {
+    background: linear-gradient(165deg, rgba(8, 25, 56, 0.85) 0%, rgba(4, 13, 33, 0.94) 100%) !important;
+    border: 1px solid rgba(37, 99, 235, 0.32) !important;
+    border-radius: 28px !important;
+    padding: 36px 28px !important;
+    width: 335px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    box-shadow: 0 22px 50px rgba(1, 5, 15, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(22px) saturate(150%) !important;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+.card-index::before {
+    content: '';
+    position: absolute;
+    top: -55px;
+    left: -20%;
+    width: 140%;
+    height: 130px;
+    background: radial-gradient(ellipse at center, rgba(29, 78, 216, 0.25) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.card-index:hover {
+    transform: translateY(-9px) !important;
+    border-color: rgba(59, 130, 246, 0.65) !important;
+    box-shadow: 0 28px 60px rgba(1, 5, 15, 0.8), 0 0 28px rgba(29, 78, 216, 0.32) !important;
+}
+
+.card-index img {
+    width: 112px !important;
+    height: 112px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    margin-bottom: 20px !important;
+    border: 3px solid rgba(59, 130, 246, 0.5) !important;
+    padding: 4px !important;
+    background: linear-gradient(135deg, #071736, #1d4ed8) !important;
+    box-shadow: 0 10px 28px rgba(2, 7, 19, 0.7) !important;
+    transition: all 0.35s ease !important;
+}
+
+.card-index:hover img {
+    transform: scale(1.05);
+    border-color: #93c5fd !important;
+}
+
+.card-index h3 {
+    font-size: 1.4rem !important;
+    margin: 0 0 6px 0 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.card-role-desc {
+    font-size: 0.82rem;
+    color: #93c5fd;
+    margin-bottom: 24px;
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+/* Botones de las tarjetas en Estilo Píldora (Pill-Shape) en Azul Marino */
+.btn-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+.btn-action {
+    width: 100% !important;
+    padding: 13px 24px !important;
+    border-radius: var(--pill-radius) !important;
+    font-weight: 700 !important;
+    font-size: 0.93rem !important;
+    cursor: pointer !important;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    font-family: 'Poppins', sans-serif !important;
+    letter-spacing: 0.3px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+}
+
+/* Botones Primarios en Degradado Azul Marino a Azul Real */
+.btn-prov-primary,
+.btn-admin-primary,
+.btn-corp-primary {
+    background: linear-gradient(135deg, #0b224c 0%, #153c7a 55%, #1d4ed8 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(96, 165, 250, 0.35) !important;
+    box-shadow: 0 8px 22px rgba(2, 7, 19, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.22) !important;
+}
+
+.btn-prov-primary:hover,
+.btn-admin-primary:hover,
+.btn-corp-primary:hover {
+    transform: translateY(-2px) !important;
+    background: linear-gradient(135deg, #102e63 0%, #1d4ed8 60%, #2563eb 100%) !important;
+    border-color: #93c5fd !important;
+    box-shadow: 0 10px 28px rgba(29, 78, 216, 0.45) !important;
+}
+
+/* Botones Secundarios Píldora en Azul Marino Translúcido */
+.btn-prov-secondary,
+.btn-admin-secondary,
+.btn-corp-secondary {
+    background: rgba(7, 23, 54, 0.65) !important;
+    color: #bfdbfe !important;
+    border: 1.5px solid rgba(59, 130, 246, 0.38) !important;
+}
+
+.btn-prov-secondary:hover,
+.btn-admin-secondary:hover,
+.btn-corp-secondary:hover {
+    background: rgba(18, 52, 110, 0.85) !important;
+    border-color: #60a5fa !important;
+    color: #ffffff !important;
+    transform: translateY(-2px) !important;
+}
+
+/* =========================================================
+   TARJETA DIVIDIDA (SPLIT-CARD) PARA EL LOGIN EN AZUL MARINO
+   ========================================================= */
+.auth-box {
+    margin: 40px auto 35px auto !important;
+    padding: 0 !important;
+    background: rgba(5, 16, 38, 0.88) !important;
+    border: 1px solid rgba(59, 130, 246, 0.38) !important;
+    border-radius: 32px !important;
+    box-shadow: 0 30px 70px rgba(1, 4, 12, 0.8), 0 0 35px rgba(18, 52, 110, 0.45) !important;
+    backdrop-filter: blur(26px) saturate(160%) !important;
+    max-width: 940px !important;
+    width: 92% !important;
+    overflow: hidden !important;
+    position: relative !important;
+    z-index: 25 !important;
+    box-sizing: border-box !important;
+    animation: splitCardAppear 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.auth-box.registro-modo {
+    max-width: 1060px !important;
+}
+
+@keyframes splitCardAppear {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.auth-split-container {
+    display: flex;
+    flex-direction: row;
+    min-height: 520px;
+    width: 100%;
+}
+
+/* --- COLUMNA IZQUIERDA: PANEL GRÁFICO AZUL MARINO CON AMBIENTACIÓN DISTRIBUIDA --- */
+.auth-graphic-side {
+    flex: 0 0 42%;
+    background: linear-gradient(155deg, #030b1e 0%, #091e46 48%, #12346e 100%);
+    padding: 42px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    color: #ffffff;
+    border-right: 1px solid rgba(59, 130, 246, 0.22);
+    box-sizing: border-box;
+}
+
+/* Marca de agua ambiental en esquina del panel izquierdo */
+.panel-bg-watermark {
+    position: absolute;
+    top: -35px;
+    left: -35px;
+    width: 240px;
+    height: 240px;
+    object-fit: contain;
+    opacity: 0.08;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    transform: rotate(-14deg);
+}
+
+.graphic-center-showcase {
+    position: relative;
+    z-index: 2;
+    margin: auto 0;
+    padding: 20px 0;
+}
+
+.graphic-welcome-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #93c5fd;
+    background: rgba(29, 78, 216, 0.25);
+    border: 1px solid rgba(96, 165, 250, 0.35);
+    padding: 5px 14px;
+    border-radius: var(--pill-radius);
+    margin-bottom: 16px;
+}
+
+.graphic-welcome-title {
+    font-size: 1.55rem;
+    font-weight: 800;
+    margin: 0 0 12px 0;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+}
+
+.graphic-welcome-text {
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+    max-width: 265px;
+    margin: 0 auto;
+}
+
+/* Firma ambiental inferior con telnor_nombre.jpg fusionado mediante mix-blend-mode */
+.graphic-bottom-signature {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.graphic-blended-telnor-nombre {
+    width: 145px;
+    height: auto;
+    object-fit: contain;
+    filter: invert(1) hue-rotate(185deg) brightness(1.4) contrast(1.15);
+    mix-blend-mode: screen;
+    opacity: 0.65;
+}
+
+/* --- COLUMNA DERECHA: CONTENEDOR DEL FORMULARIO DE LOGIN --- */
+.auth-form-side {
+    flex: 1;
+    padding: 44px 42px;
+    background: rgba(6, 18, 42, 0.75);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* Botón Cerrar Píldora */
+.auth-box-back-btn {
+    position: absolute;
+    top: 20px;
+    right: 22px;
+    background: rgba(15, 36, 74, 0.7);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: var(--pill-radius);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: 'Poppins', sans-serif;
+    z-index: 10;
+}
+
+.auth-box-back-btn:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #f87171;
+    color: #ffffff;
+}
+
+/* ÍCONO CIRCULAR DE AVATAR EN LA PARTE SUPERIOR DEL CONTENEDOR DEL LOGIN */
+.login-avatar-circle {
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #091e46 0%, #153c7a 55%, #1d4ed8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px auto;
+    box-shadow: 0 10px 25px rgba(2, 7, 19, 0.7), 0 0 0 6px rgba(29, 78, 216, 0.16);
+    border: 2px solid rgba(147, 197, 253, 0.5);
+    color: #ffffff;
+}
+
+.login-avatar-circle svg {
+    width: 36px;
+    height: 36px;
+    stroke: #ffffff;
+    stroke-width: 2;
+    fill: none;
+}
+
+/* Título del Formulario */
+.auth-box h2 {
+    font-size: 1.58rem !important;
+    margin: 0 0 22px 0 !important;
+    font-weight: 800 !important;
+    font-family: 'Poppins', sans-serif !important;
+    color: #ffffff !important;
+    text-align: center !important;
+}
+
+#login-view-proveedores,
+#login-view-administracion,
+#login-view-corporativos,
+#registro-view-proveedores,
+#registro-view-administracion,
+#registro-view-corporativos {
+    width: 100%;
+}
+
+/* Cuadrícula de campos */
+.auth-box .form-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+    margin-bottom: 22px !important;
+    margin-top: 8px !important;
+    text-align: left !important;
+    width: 100% !important;
+}
+
+.auth-box .full-width {
+    grid-column: span 2 !important;
+}
+
+/* --- INPUTS CON ÍCONOS MINIMALISTAS Y FORMA DE PÍLDORA (PILL-SHAPE) --- */
+.pill-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.pill-input-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #60a5fa;
+    pointer-events: none;
+    z-index: 3;
+    transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.pill-input-icon svg {
+    width: 19px;
+    height: 19px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+}
+
+.auth-box .input-group label {
+    display: block !important;
+    color: #bfdbfe !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 7px !important;
+    padding-left: 14px !important;
+    letter-spacing: 0.6px !important;
+    text-transform: uppercase !important;
+}
+
+/* Estilo Píldora (Pill-Shape) en Azul Marino Profundo */
+.auth-box .input-group input:not([type="file"]),
+.auth-box .input-group select {
+    width: 100% !important;
+    padding: 14px 22px 14px 48px !important;
+    background-color: rgba(3, 11, 28, 0.85) !important;
+    border: 1.5px solid rgba(59, 130, 246, 0.35) !important;
+    border-radius: var(--pill-radius) !important;
+    color: #ffffff !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 0.94rem !important;
+    outline: none !important;
+    transition: all 0.25s ease !important;
+    box-sizing: border-box !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45) !important;
+}
+
+.auth-box .input-group > input:not([type="file"]),
+.auth-box .input-group > select {
+    padding: 14px 22px !important;
+}
+
+.auth-box .file-upload input[type="file"] {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.auth-box .input-group textarea {
+    width: 100% !important;
+    padding: 14px 22px !important;
+    background-color: rgba(3, 11, 28, 0.85) !important;
+    border: 1.5px solid rgba(59, 130, 246, 0.35) !important;
+    border-radius: 22px !important;
+    color: #ffffff !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 0.94rem !important;
+    outline: none !important;
+    transition: all 0.25s ease !important;
+    box-sizing: border-box !important;
+}
+
+.auth-box .input-group input::placeholder,
+.auth-box .input-group textarea::placeholder {
+    color: #64748b !important;
+    font-weight: 400 !important;
+}
+
+.auth-box .input-group input:hover,
+.auth-box .input-group select:hover,
+.auth-box .input-group textarea:hover {
+    border-color: rgba(96, 165, 250, 0.65) !important;
+    background-color: rgba(6, 18, 42, 0.95) !important;
+}
+
+.auth-box .input-group input:focus,
+.auth-box .input-group select:focus,
+.auth-box .input-group textarea:focus {
+    background-color: rgba(3, 11, 28, 0.98) !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.25), 0 0 18px rgba(37, 99, 235, 0.4) !important;
+}
+
+.pill-input-wrapper:focus-within .pill-input-icon {
+    color: #93c5fd;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Zona de subida de archivos (File Upload) */
+.auth-box .file-upload {
+    background-color: rgba(3, 11, 28, 0.65) !important;
+    border: 2px dashed rgba(59, 130, 246, 0.45) !important;
+    border-radius: 24px !important;
+    padding: 20px !important;
+    text-align: center !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+    margin-bottom: 6px !important;
+}
+
+.auth-box .file-upload:hover {
+    background-color: rgba(18, 52, 110, 0.35) !important;
+    border-color: #60a5fa !important;
+}
+
+/* BOTÓN PRIMARIO DE ENVÍO (ESTILO PÍLDORA AZUL MARINO A AZUL REAL) */
+.auth-box .btn-primary {
+    width: 100% !important;
+    padding: 15px 28px !important;
+    border-radius: var(--pill-radius) !important;
+    font-size: 1.02rem !important;
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, #0b224c 0%, #153c7a 50%, #1d4ed8 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(96, 165, 250, 0.4) !important;
+    cursor: pointer !important;
+    box-shadow: 0 8px 25px rgba(2, 7, 19, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    font-family: 'Poppins', sans-serif !important;
+    letter-spacing: 0.5px !important;
+    margin-top: 6px !important;
+}
+
+.auth-box .btn-primary:hover {
+    transform: translateY(-2px) !important;
+    background: linear-gradient(135deg, #102e63 0%, #1d4ed8 60%, #2563eb 100%) !important;
+    border-color: #93c5fd !important;
+    box-shadow: 0 12px 32px rgba(29, 78, 216, 0.5) !important;
+}
+
+/* Enlace para alternar Login / Registro */
+.auth-box .toggle-link {
+    display: inline-block !important;
+    margin-top: 20px !important;
+    color: #93c5fd !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    padding: 7px 20px !important;
+    border-radius: var(--pill-radius) !important;
+    background: rgba(11, 34, 76, 0.55) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.auth-box .toggle-link:hover {
+    color: #ffffff !important;
+    background: rgba(29, 78, 216, 0.4) !important;
+    border-color: #60a5fa !important;
+}
+
+/* --- SECCIÓN QR MÓVIL (CÓDIGO QR TOTALMENTE CUADRADO) --- */
+.login-qr-section-container {
+    max-width: 460px;
+    margin: 45px auto 30px auto;
+    padding: 32px 26px;
+    background: linear-gradient(165deg, rgba(8, 25, 56, 0.85) 0%, rgba(4, 13, 33, 0.94) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    border-radius: 28px;
+    box-shadow: 0 20px 45px rgba(1, 5, 15, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px);
+    text-align: center;
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.login-qr-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: #93c5fd;
+    background: rgba(18, 52, 110, 0.5);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    padding: 5px 16px;
+    border-radius: var(--pill-radius);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+}
+
+.login-qr-title {
+    font-size: 1.24rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 6px 0;
+}
+
+.login-qr-subtitle {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    margin: 0 0 20px 0;
+}
+
+/* CONTENEDOR DEL CÓDIGO QR 100% CUADRADO (EXACTO 280px x 280px) */
+#qrcode,
+.login-qr-square {
+    display: inline-block !important;
+    background: #ffffff !important;
+    padding: 15px !important;
+    border-radius: 0 !important;
+    width: 250px !important;
+    height: 250px !important;
+    box-sizing: content-box !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 25px rgba(29, 78, 216, 0.35) !important;
+    border: 2px solid #2563eb !important;
+    line-height: 0 !important;
+    margin: 0 auto !important;
+}
+
+#qrcode canvas {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+#qrcode img {
+    display: block !important;
+    width: 250px !important;
+    height: 250px !important;
+    max-width: 250px !important;
+    max-height: 250px !important;
+    border-radius: 0 !important;
+    margin: 0 auto !important;
+}
+
+.login-qr-footer-hint {
+    margin-top: 16px;
+    font-size: 0.84rem;
+    color: #93c5fd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* --- PIE DE PÁGINA --- */
+.login-footer-strip {
+    text-align: center;
+    margin-top: 40px;
+    padding: 18px;
+    color: #64748b;
+    font-size: 0.8rem;
+    position: relative;
+    z-index: 10;
+}
+
+.login-footer-strip span {
+    color: #93c5fd;
+    font-weight: 600;
+}
+
+/* --- RESPONSIVIDAD --- */
+@media (max-width: 900px) {
+    .login-topbar {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 18px;
+    }
+    .header-titles h1 {
+        font-size: 2.2rem !important;
+    }
+    .auth-split-container {
+        flex-direction: column;
+    }
+    .auth-graphic-side {
+        flex: none;
+        padding: 30px 24px;
+        border-right: none;
+        border-bottom: 1px solid rgba(59, 130, 246, 0.22);
+    }
+    .auth-form-side {
+        padding: 34px 24px;
+    }
+    .ambient-logo-telnor-corner {
+        width: 260px;
+        height: 260px;
+    }
+    .ambient-logo-rumn-margin {
+        width: 280px;
+    }
+    .ambient-logo-telnor-nombre-margin {
+        width: 160px;
+        left: 16px;
+        bottom: 16px;
+    }
+}
+
+@media (max-width: 600px) {
+    .header-titles h1 {
+        font-size: 1.8rem !important;
+    }
+    .auth-box .form-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .auth-box .full-width {
+        grid-column: span 1 !important;
+    }
+}

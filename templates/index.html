@@ -1,32 +1,103 @@
 <!-- =========================================================
      ARCHIVO: templates/index.html
-     PROPÓSITO: Interfaz Principal - Formularios con Vista Previa
+     PROPÓSITO: Interfaz Principal - Inicio de Sesión y Portales (Diseño Moderno 2026)
      ========================================================= -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Facturación | RUMN</title>
+    <title>Plataforma de Facturación | TELNOR - RUMN</title>
+    <!-- Estilos base existentes -->
     <link rel="stylesheet" href="/static/style.css?v=51050">
+    <!-- Estilos exclusivos 2026 para la interfaz de inicio de sesión -->
+    <link rel="stylesheet" href="/static/login_2026.css?v=202607">
 </head>
 <body class="index-body">
-    <!-- BOTÓN DE REPORTE EXTERNO -->
-    <button onclick="window.open('/reportar', '_blank')" style="position: absolute; top: 25px; right: 25px; background-color: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: bold; cursor: pointer; z-index: 100; font-family: 'Poppins', sans-serif; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); transition: transform 0.2s;">
-        ⚠️ Levantar Reporte de Falla
-    </button>
 
-    <div class="header-titles">
-        <h1>Sistema de Facturación Central</h1>
-        <p>Seleccione su portal de acceso corporativo</p>
+    <!-- FONDO AMBIENTAL AZUL MARINO CON FORMAS FLUIDAS Y DISTRIBUCIÓN ESPACIAL DE IMÁGENES -->
+    <div class="fluid-bg-canvas">
+        <div class="fluid-blob fluid-blob-1"></div>
+        <div class="fluid-blob fluid-blob-2"></div>
+        <div class="fluid-blob fluid-blob-3"></div>
+
+        <!-- Onda fluida superior superpuesta (Estrictamente Azul Marino) -->
+        <svg class="fluid-wave-top" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="gradWaveTop" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#061633;stop-opacity:0.75" />
+                    <stop offset="50%" style="stop-color:#0d2d63;stop-opacity:0.5" />
+                    <stop offset="100%" style="stop-color:#030917;stop-opacity:0.8" />
+                </linearGradient>
+            </defs>
+            <path fill="url(#gradWaveTop)" d="M0,128L60,144C120,160,240,192,360,186.7C480,181,600,139,720,138.7C840,139,960,181,1080,181.3C1200,181,1320,139,1380,117.3L1440,96L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+        </svg>
+
+        <!-- Onda fluida inferior superpuesta (Estrictamente Azul Marino) -->
+        <svg class="fluid-wave-bottom" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="gradWaveBottom" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#030917;stop-opacity:0.85" />
+                    <stop offset="50%" style="stop-color:#091e46;stop-opacity:0.65" />
+                    <stop offset="100%" style="stop-color:#12346e;stop-opacity:0.55" />
+                </linearGradient>
+            </defs>
+            <path fill="url(#gradWaveBottom)" d="M0,224L80,208C160,192,320,160,480,165.3C640,171,800,213,960,218.7C1120,224,1280,192,1360,176L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+        </svg>
+
+        <!-- IMAGEN 1 (Esquina Superior Izquierda): telnor_logo.png ambientada como marca de agua gigante -->
+        <img src="/static/telnor_logo.png" alt="" class="ambient-logo-telnor-corner">
+
+        <!-- IMAGEN 2 (Margen Inferior Derecho): RUMN_logo.png ambientada a gran escala con modo de mezcla -->
+        <img src="/static/RUMN_logo.png" alt="" class="ambient-logo-rumn-margin">
+
+        <!-- IMAGEN 3 (Margen Inferior Izquierdo): telnor_nombre.jpg fusionada con el fondo marino (screen blend) -->
+        <img src="/static/telnor_nombre.jpg" alt="" class="ambient-logo-telnor-nombre-margin">
     </div>
 
+    <!-- BARRA SUPERIOR MINIMALISTA -->
+    <header class="login-topbar">
+        <div class="login-top-left-emblem">
+            <img src="/static/telnor_logo.png" alt="Logo Telnor" class="login-telnor-icon">
+            <div class="login-status-pill">
+                <span class="login-status-dot"></span>
+                <span>ENLACE CENTRAL ACTIVO</span>
+            </div>
+        </div>
+
+        <!-- BOTÓN DE REPORTE EXTERNO (ESTILO PÍLDORA, ONCLICK INTACTO) -->
+        <button class="btn-reportar-top" onclick="window.open('/reportar', '_blank')">
+            <span>⚠️</span>
+            <span>Levantar Reporte de Falla</span>
+        </button>
+    </header>
+
+    <!-- ENCABEZADO PRINCIPAL CON EMBLEMA CENTRAL RUMN -->
+    <div class="header-titles">
+        <div class="hero-rumn-emblem-wrapper">
+            <img src="/static/RUMN_logo.png" alt="RUMN" class="hero-rumn-emblem">
+        </div>
+        <div class="cyber-badge-header">
+            <span>PLATAFORMA INTEGRAL DE GESTIÓN VEHICULAR Y FACTURACIÓN</span>
+        </div>
+        <h1>Sistema de Facturación Central</h1>
+        <p>Seleccione su portal de acceso corporativo</p>
+        
+        <div class="tech-divider-line">
+            <div class="tech-divider-bar"></div>
+            <div class="tech-divider-diamond"></div>
+            <div class="tech-divider-bar"></div>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE PORTALES -->
     <div class="cards-container">
         
         <!-- Tarjeta Proveedores -->
         <div class="card-index card-prov">
             <img src="/static/imagen_proveedores.jpg" alt="Portal Proveedores">
             <h3>Portal de Talleres</h3>
+            <div class="card-role-desc">Talleres Mecánicos y Proveeduría</div>
             <div class="btn-group">
                 <button class="btn-action btn-prov-primary" onclick="abrirDirecto('proveedores', 'login')">Ingresar a Taller</button>
                 <button class="btn-action btn-prov-secondary" onclick="abrirDirecto('proveedores', 'registro')">Registrar mi Taller</button>
@@ -37,6 +108,7 @@
         <div class="card-index card-admin">
             <img src="/static/imagen_administracion.jpg" alt="Portal Administración">
             <h3>Panel Administrativo</h3>
+            <div class="card-role-desc">Supervisión, Jefatura y Administrador</div>
             <div class="btn-group">
                 <button class="btn-action btn-admin-primary" onclick="abrirDirecto('administracion', 'login')">Ingresar a Panel</button>
                 <button class="btn-action btn-admin-secondary" onclick="abrirDirecto('administracion', 'registro')">Solicitar Credenciales</button>
@@ -47,6 +119,7 @@
         <div class="card-index card-corp">
             <img src="/static/imagen_corporativos.jpg" alt="Portal Corporativos">
             <h3>Portal Corporativo</h3>
+            <div class="card-role-desc">Dirección y Aprobación Ejecutiva</div>
             <div class="btn-group">
                 <button class="btn-action btn-corp-primary" onclick="abrirDirecto('corporativos', 'login')">Acceso Ejecutivo</button>
                 <button class="btn-action btn-corp-secondary" onclick="abrirDirecto('corporativos', 'registro')">Solicitar Acceso</button>
@@ -56,198 +129,332 @@
     </div>
 
     <!-- ==========================================
-         CUADRO: PROVEEDORES
+         CUADRO: PROVEEDORES (LAYOUT DIVIDIDO / SPLIT-CARD)
          ========================================== -->
     <div id="auth-proveedores" class="auth-box">
-        <h2 id="titulo-proveedores">Ingreso - Proveedores</h2>
-        
-        <div id="login-view-proveedores">
-            <div class="form-grid" style="grid-template-columns: 1fr;">
-                <div class="input-group" style="text-align: left;">
-                    <label for="user-proveedores" style="display:block; color:#94a3b8; font-size:0.85em; font-weight:600; margin-bottom:6px; letter-spacing:0.5px;">USUARIO TALLER (PROVEEDOR)</label>
-                    <input type="text" id="user-proveedores" placeholder="Ingresa tu usuario">
+        <div class="auth-split-container">
+            <!-- Lado Izquierdo: Elementos Gráficos Ambientados en Azul Marino -->
+            <div class="auth-graphic-side">
+                <!-- Marca de agua en esquina superior del panel -->
+                <img src="/static/telnor_logo.png" alt="" class="panel-bg-watermark">
+                
+                <div class="graphic-center-showcase">
+                    <div class="graphic-welcome-badge">ACCESO PROVEEDURÍA</div>
+                    <h3 class="graphic-welcome-title">Portal de Talleres</h3>
+                    <p class="graphic-welcome-text">Gestione diagnósticos, cotizaciones, reparaciones y facturación de unidades en tiempo real.</p>
                 </div>
-                <div class="input-group" style="text-align: left;">
-                    <label for="pass-proveedores" style="display:block; color:#94a3b8; font-size:0.85em; font-weight:600; margin-bottom:6px; letter-spacing:0.5px;">CONTRASEÑA</label>
-                    <input type="password" id="pass-proveedores" placeholder="••••••••">
+
+                <!-- Firma Telnor fusionada con modo de mezcla screen en el borde inferior -->
+                <div class="graphic-bottom-signature">
+                    <img src="/static/telnor_nombre.jpg" alt="Telnor" class="graphic-blended-telnor-nombre">
+                    <div class="graphic-wave-footer">Red de Proveedores Autorizados</div>
                 </div>
             </div>
-            <button class="btn-primary" onclick="procesarLogin('proveedores')">Iniciar Sesión</button>
+
+            <!-- Lado Derecho: Formulario con Avatar Circular e Inputs Píldora -->
+            <div class="auth-form-side">
+                <!-- Ícono Circular de Avatar Superior -->
+                <div class="login-avatar-circle">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+
+                <h2 id="titulo-proveedores">Ingreso - Proveedores</h2>
+                
+                <div id="login-view-proveedores">
+                    <div class="form-grid" style="grid-template-columns: 1fr;">
+                        <div class="input-group" style="text-align: left;">
+                            <label for="user-proveedores">USUARIO TALLER (PROVEEDOR)</label>
+                            <div class="pill-input-wrapper">
+                                <span class="pill-input-icon">
+                                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </span>
+                                <input type="text" id="user-proveedores" placeholder="Ingresa tu usuario">
+                            </div>
+                        </div>
+                        <div class="input-group" style="text-align: left;">
+                            <label for="pass-proveedores">CONTRASEÑA</label>
+                            <div class="pill-input-wrapper">
+                                <span class="pill-input-icon">
+                                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                </span>
+                                <input type="password" id="pass-proveedores" placeholder="••••••••">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="procesarLogin('proveedores')">Iniciar Sesión</button>
+                </div>
+
+                <form id="registro-view-proveedores" style="display:none;" onsubmit="event.preventDefault(); procesarRegistro('proveedores');">
+                    <div class="form-grid">
+                        <div class="input-group full-width file-upload">
+                            <span class="file-label" id="label-prov">📸 Haz clic para subir el Logo</span>
+                            <span class="file-sub" id="sub-prov">Formatos aceptados: JPG, PNG</span>
+                            <img id="preview-prov" class="image-preview" src="" alt="Vista previa">
+                            <input type="file" id="foto-prov" accept="image/*" required onchange="mostrarVistaPrevia(this, 'preview-prov', 'label-prov', 'sub-prov')">
+                        </div>
+                        
+                        <div class="input-group"><input type="text" id="nom-prov" placeholder="Nombre de la Empresa" required></div>
+                        <div class="input-group"><input type="email" id="correo-prov" placeholder="Correo electrónico" required></div>
+                        <div class="input-group"><input type="text" id="encargado-prov" placeholder="Encargado (Nombre Completo)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                        <div class="input-group"><input type="text" id="responsable-prov" placeholder="Responsable (Opcional)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')"></div>
+                        <div class="input-group"><input type="text" id="tel-prov" placeholder="Teléfono" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                        <div class="input-group"><input type="text" id="cp-prov" placeholder="Código Postal" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                        
+                        <div class="input-group full-width">
+                            <select id="ciudad-prov" name="ciudad" required>
+                                <option value="" disabled selected>Seleccione Ciudad Base...</option>
+                                <option value="Tijuana">Tijuana</option>
+                                <option value="Tecate">Tecate</option>
+                                <option value="Ensenada">Ensenada</option>
+                                <option value="San Quintin">San Quintin</option>
+                                <option value="Mexicali">Mexicali</option>
+                                <option value="San Luis Rio Colorado">San Luis Rio Colorado</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group full-width"><input type="text" id="dir-prov" placeholder="Dirección Completa" required></div>
+                        <div class="input-group full-width"><textarea id="desc-prov" placeholder="Descripción del Proveedor / Servicios" required></textarea></div>
+                    </div>
+                    <button class="btn-primary" type="submit">Enviar Solicitud</button>
+                </form>
+                <span class="toggle-link" id="link-proveedores" onclick="toggleModo('proveedores')">¿No tienes cuenta? Solicitar Registro</span>
+            </div>
         </div>
-
-        <form id="registro-view-proveedores" style="display:none;" onsubmit="event.preventDefault(); procesarRegistro('proveedores');">
-            <div class="form-grid">
-                <div class="input-group full-width file-upload">
-                    <span class="file-label" id="label-prov">📸 Haz clic para subir el Logo</span>
-                    <span class="file-sub" id="sub-prov">Formatos aceptados: JPG, PNG</span>
-                    <img id="preview-prov" class="image-preview" src="" alt="Vista previa">
-                    <input type="file" id="foto-prov" accept="image/*" required onchange="mostrarVistaPrevia(this, 'preview-prov', 'label-prov', 'sub-prov')">
-                </div>
-                
-                <div class="input-group"><input type="text" id="nom-prov" placeholder="Nombre de la Empresa" required></div>
-                <div class="input-group"><input type="email" id="correo-prov" placeholder="Correo electrónico" required></div>
-                <div class="input-group"><input type="text" id="encargado-prov" placeholder="Encargado (Nombre Completo)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
-                <div class="input-group"><input type="text" id="responsable-prov" placeholder="Responsable (Opcional)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')"></div>
-                <div class="input-group"><input type="text" id="tel-prov" placeholder="Teléfono" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
-                <div class="input-group"><input type="text" id="cp-prov" placeholder="Código Postal" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
-                
-                <div class="input-group full-width">
-                    <select id="ciudad-prov" name="ciudad" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;">
-                        <option value="" disabled selected>Seleccione Ciudad Base...</option>
-                        <option value="Tijuana">Tijuana</option>
-                        <option value="Tecate">Tecate</option>
-                        <option value="Ensenada">Ensenada</option>
-                        <option value="San Quintin">San Quintin</option>
-                        <option value="Mexicali">Mexicali</option>
-                        <option value="San Luis Rio Colorado">San Luis Rio Colorado</option>
-                    </select>
-                </div>
-
-                <div class="input-group full-width"><input type="text" id="dir-prov" placeholder="Dirección Completa" required></div>
-                <div class="input-group full-width"><textarea id="desc-prov" placeholder="Descripción del Proveedor / Servicios" required style="width: 100%; min-height: 80px; padding: 12px 15px; border-radius: 8px; border: 1px solid #1f395a; background-color: #112641; color: white; font-family: 'Poppins', sans-serif; resize: vertical;"></textarea></div>
-            </div>
-            <button class="btn-primary" type="submit">Enviar Solicitud</button>
-        </form>
-        <span class="toggle-link" id="link-proveedores" onclick="toggleModo('proveedores')">¿No tienes cuenta? Solicitar Registro</span>
     </div>
 
     <!-- ==========================================
-         CUADRO: ADMINISTRACIÓN
+         CUADRO: ADMINISTRACIÓN (LAYOUT DIVIDIDO / SPLIT-CARD)
          ========================================== -->
     <div id="auth-administracion" class="auth-box">
-        <h2 id="titulo-administracion">Ingreso - Administración</h2>
-        
-        <div id="login-view-administracion">
-            <div class="form-grid" style="grid-template-columns: 1fr;">
-                <div class="input-group" style="text-align: left;">
-                    <label for="user-administracion" style="display:block; color:#94a3b8; font-size:0.85em; font-weight:600; margin-bottom:6px; letter-spacing:0.5px;">USUARIO ADMINISTRATIVO</label>
-                    <input type="text" id="user-administracion" placeholder="Ingresa tu usuario">
+        <div class="auth-split-container">
+            <!-- Lado Izquierdo: Elementos Gráficos Ambientados en Azul Marino -->
+            <div class="auth-graphic-side">
+                <!-- Marca de agua en esquina superior del panel -->
+                <img src="/static/telnor_logo.png" alt="" class="panel-bg-watermark">
+                
+                <div class="graphic-center-showcase">
+                    <div class="graphic-welcome-badge">ACCESO OPERATIVO</div>
+                    <h3 class="graphic-welcome-title">Panel Administrativo</h3>
+                    <p class="graphic-welcome-text">Control operativo de flota, asignación de talleres, supervisión de garantías y liberación contable.</p>
                 </div>
-                <div class="input-group" style="text-align: left;">
-                    <label for="pass-administracion" style="display:block; color:#94a3b8; font-size:0.85em; font-weight:600; margin-bottom:6px; letter-spacing:0.5px;">CONTRASEÑA</label>
-                    <input type="password" id="pass-administracion" placeholder="••••••••">
+
+                <!-- Firma Telnor fusionada con modo de mezcla screen en el borde inferior -->
+                <div class="graphic-bottom-signature">
+                    <img src="/static/telnor_nombre.jpg" alt="Telnor" class="graphic-blended-telnor-nombre">
+                    <div class="graphic-wave-footer">Gestión y Supervisión Central</div>
                 </div>
             </div>
-            <button class="btn-primary" onclick="procesarLogin('administracion')">Iniciar Sesión</button>
+
+            <!-- Lado Derecho: Formulario con Avatar Circular e Inputs Píldora -->
+            <div class="auth-form-side">
+                <!-- Ícono Circular de Avatar Superior -->
+                <div class="login-avatar-circle">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+
+                <h2 id="titulo-administracion">Ingreso - Administración</h2>
+                
+                <div id="login-view-administracion">
+                    <div class="form-grid" style="grid-template-columns: 1fr;">
+                        <div class="input-group" style="text-align: left;">
+                            <label for="user-administracion">USUARIO ADMINISTRATIVO</label>
+                            <div class="pill-input-wrapper">
+                                <span class="pill-input-icon">
+                                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </span>
+                                <input type="text" id="user-administracion" placeholder="Ingresa tu usuario">
+                            </div>
+                        </div>
+                        <div class="input-group" style="text-align: left;">
+                            <label for="pass-administracion">CONTRASEÑA</label>
+                            <div class="pill-input-wrapper">
+                                <span class="pill-input-icon">
+                                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                </span>
+                                <input type="password" id="pass-administracion" placeholder="••••••••">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="procesarLogin('administracion')">Iniciar Sesión</button>
+                </div>
+
+                <form id="registro-view-administracion" style="display:none;" onsubmit="event.preventDefault(); procesarRegistro('administracion');">
+                    <div class="form-grid">
+                        <div class="input-group full-width file-upload">
+                            <span class="file-label" id="label-admin">📸 Haz clic para subir Foto de Perfil</span>
+                            <span class="file-sub" id="sub-admin">Formatos aceptados: JPG, PNG</span>
+                            <img id="preview-admin" class="image-preview" src="" alt="Vista previa">
+                            <input type="file" id="foto-admin" accept="image/*" required onchange="mostrarVistaPrevia(this, 'preview-admin', 'label-admin', 'sub-admin')">
+                        </div>
+                        
+                        <div class="input-group"><input type="text" id="nom-admin" placeholder="Nombre(s)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                        <div class="input-group"><input type="text" id="ap-admin" placeholder="Apellido Paterno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                        <div class="input-group"><input type="text" id="am-admin" placeholder="Apellido Materno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                        <div class="input-group"><input type="text" id="num-admin" placeholder="Número de Empleado" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                        
+                        <div class="input-group">
+                            <select id="subrol-admin" name="subrol" required>
+                                <option value="" disabled selected>Puesto / Categoría...</option>
+                                <option value="Jefatura">Jefatura</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Administrador">Administrador</option>
+                            </select>
+                        </div>
+                        <div class="input-group"><input type="email" id="correo-admin" placeholder="Correo Electrónico (Para alertas)" required></div>
+
+                        <!-- CAMPOS EN CASCADA PARA ADMIN -->
+                        <div class="input-group">
+                            <select id="ciudad-admin" name="ciudad" required onchange="actualizarCopeSelect('ciudad-admin', 'cope-admin')">
+                                <option value="" disabled selected>Seleccione Ciudad Base...</option>
+                                <option value="Tijuana">Tijuana</option>
+                                <option value="Tecate">Tecate</option>
+                                <option value="Ensenada">Ensenada</option>
+                                <option value="San Quintin">San Quintin</option>
+                                <option value="Mexicali">Mexicali</option>
+                                <option value="San Luis Rio Colorado">San Luis Rio Colorado</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <select id="cope-admin" name="cope" required>
+                                <option value="" disabled selected>Primero seleccione una ciudad...</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group full-width"><input type="text" id="area-admin" placeholder="Área de asignación" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                    </div>
+                    <button class="btn-primary" type="submit">Enviar Solicitud</button>
+                </form>
+                <span class="toggle-link" id="link-administracion" onclick="toggleModo('administracion')">¿No tienes cuenta? Solicitar Registro</span>
+            </div>
         </div>
-
-        <form id="registro-view-administracion" style="display:none;" onsubmit="event.preventDefault(); procesarRegistro('administracion');">
-            <div class="form-grid">
-                <div class="input-group full-width file-upload">
-                    <span class="file-label" id="label-admin">📸 Haz clic para subir Foto de Perfil</span>
-                    <span class="file-sub" id="sub-admin">Formatos aceptados: JPG, PNG</span>
-                    <img id="preview-admin" class="image-preview" src="" alt="Vista previa">
-                    <input type="file" id="foto-admin" accept="image/*" required onchange="mostrarVistaPrevia(this, 'preview-admin', 'label-admin', 'sub-admin')">
-                </div>
-                
-                <div class="input-group"><input type="text" id="nom-admin" placeholder="Nombre(s)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
-                <div class="input-group"><input type="text" id="ap-admin" placeholder="Apellido Paterno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
-                <div class="input-group"><input type="text" id="am-admin" placeholder="Apellido Materno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
-                <div class="input-group"><input type="text" id="num-admin" placeholder="Número de Empleado" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
-                
-                <div class="input-group">
-                    <select id="subrol-admin" name="subrol" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;">
-                        <option value="" disabled selected>Puesto / Categoría...</option>
-                        <option value="Jefatura">Jefatura</option>
-                        <option value="Supervisor">Supervisor</option>
-                        <option value="Administrador">Administrador</option>
-                    </select>
-                </div>
-                <div class="input-group"><input type="email" id="correo-admin" placeholder="Correo Electrónico (Para alertas)" required></div>
-
-                <!-- ¡NUEVOS CAMPOS EN CASCADA PARA ADMIN! -->
-                <div class="input-group">
-                    <select id="ciudad-admin" name="ciudad" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;" onchange="actualizarCopeSelect('ciudad-admin', 'cope-admin')">
-                        <option value="" disabled selected>Seleccione Ciudad Base...</option>
-                        <option value="Tijuana">Tijuana</option>
-                        <option value="Tecate">Tecate</option>
-                        <option value="Ensenada">Ensenada</option>
-                        <option value="San Quintin">San Quintin</option>
-                        <option value="Mexicali">Mexicali</option>
-                        <option value="San Luis Rio Colorado">San Luis Rio Colorado</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <select id="cope-admin" name="cope" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;">
-                        <option value="" disabled selected>Primero seleccione una ciudad...</option>
-                    </select>
-                </div>
-
-                <div class="input-group full-width"><input type="text" id="area-admin" placeholder="Área de asignación" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
-            </div>
-            <button class="btn-primary" type="submit">Enviar Solicitud</button>
-        </form>
-        <span class="toggle-link" id="link-administracion" onclick="toggleModo('administracion')">¿No tienes cuenta? Solicitar Registro</span>
     </div>
 
     <!-- ==========================================
-         CUADRO: CORPORATIVOS
+         CUADRO: CORPORATIVOS (LAYOUT DIVIDIDO / SPLIT-CARD)
          ========================================== -->
     <div id="auth-corporativos" class="auth-box">
-        <h2 id="titulo-corporativos">Ingreso - Corporativo</h2>
-        
-        <div id="login-view-corporativos">
-            <div class="form-grid" style="grid-template-columns: 1fr;">
-                <div class="input-group" style="text-align: left;">
-                    <label for="user-corporativos" style="display:block; color:#94a3b8; font-size:0.85em; font-weight:600; margin-bottom:6px; letter-spacing:0.5px;">USUARIO EJECUTIVO</label>
-                    <input type="text" id="user-corporativos" placeholder="Ingresa tu usuario corporativo">
+        <div class="auth-split-container">
+            <!-- Lado Izquierdo: Elementos Gráficos Ambientados en Azul Marino -->
+            <div class="auth-graphic-side">
+                <!-- Marca de agua en esquina superior del panel -->
+                <img src="/static/telnor_logo.png" alt="" class="panel-bg-watermark">
+                
+                <div class="graphic-center-showcase">
+                    <div class="graphic-welcome-badge">ACCESO DIRECTIVO</div>
+                    <h3 class="graphic-welcome-title">Portal Corporativo</h3>
+                    <p class="graphic-welcome-text">Autorización ejecutiva de presupuestos mayores, analítica financiera y auditoría directiva.</p>
                 </div>
-                <div class="input-group" style="text-align: left;">
-                    <label for="pass-corporativos" style="display:block; color:#94a3b8; font-size:0.85em; font-weight:600; margin-bottom:6px; letter-spacing:0.5px;">CONTRASEÑA</label>
-                    <input type="password" id="pass-corporativos" placeholder="••••••••">
+
+                <!-- Firma Telnor fusionada con modo de mezcla screen en el borde inferior -->
+                <div class="graphic-bottom-signature">
+                    <img src="/static/telnor_nombre.jpg" alt="Telnor" class="graphic-blended-telnor-nombre">
+                    <div class="graphic-wave-footer">Nivel Ejecutivo y Dirección</div>
                 </div>
             </div>
-            <button class="btn-primary" onclick="procesarLogin('corporativos')">Iniciar Sesión</button>
+
+            <!-- Lado Derecho: Formulario con Avatar Circular e Inputs Píldora -->
+            <div class="auth-form-side">
+                <!-- Ícono Circular de Avatar Superior -->
+                <div class="login-avatar-circle">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+
+                <h2 id="titulo-corporativos">Ingreso - Corporativo</h2>
+                
+                <div id="login-view-corporativos">
+                    <div class="form-grid" style="grid-template-columns: 1fr;">
+                        <div class="input-group" style="text-align: left;">
+                            <label for="user-corporativos">USUARIO EJECUTIVO</label>
+                            <div class="pill-input-wrapper">
+                                <span class="pill-input-icon">
+                                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                </span>
+                                <input type="text" id="user-corporativos" placeholder="Ingresa tu usuario corporativo">
+                            </div>
+                        </div>
+                        <div class="input-group" style="text-align: left;">
+                            <label for="pass-corporativos">CONTRASEÑA</label>
+                            <div class="pill-input-wrapper">
+                                <span class="pill-input-icon">
+                                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                </span>
+                                <input type="password" id="pass-corporativos" placeholder="••••••••">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="procesarLogin('corporativos')">Iniciar Sesión</button>
+                </div>
+
+                <form id="registro-view-corporativos" style="display:none;" onsubmit="event.preventDefault(); procesarRegistro('corporativos');">
+                    <div class="form-grid">
+                        <div class="input-group full-width file-upload">
+                            <span class="file-label" id="label-corp">📸 Haz clic para subir Foto de Perfil</span>
+                            <span class="file-sub" id="sub-corp">Formatos aceptados: JPG, PNG</span>
+                            <img id="preview-corp" class="image-preview" src="" alt="Vista previa">
+                            <input type="file" id="foto-corp" accept="image/*" required onchange="mostrarVistaPrevia(this, 'preview-corp', 'label-corp', 'sub-corp')">
+                        </div>
+                        
+                        <div class="input-group"><input type="text" id="nom-corp" placeholder="Nombre(s)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                        <div class="input-group"><input type="text" id="ap-corp" placeholder="Apellido Paterno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                        <div class="input-group"><input type="text" id="am-corp" placeholder="Apellido Materno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                        <div class="input-group"><input type="text" id="num-corp" placeholder="Número de Empleado" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
+                        
+                        <!-- CAMPOS EN CASCADA PARA CORPORATIVOS -->
+                        <div class="input-group">
+                            <select id="ciudad-corp" name="ciudad" required onchange="actualizarCopeSelect('ciudad-corp', 'cope-corp')">
+                                <option value="" disabled selected>Seleccione Ciudad Base...</option>
+                                <option value="Tijuana">Tijuana</option>
+                                <option value="Tecate">Tecate</option>
+                                <option value="Ensenada">Ensenada</option>
+                                <option value="San Quintin">San Quintin</option>
+                                <option value="Mexicali">Mexicali</option>
+                                <option value="San Luis Rio Colorado">San Luis Rio Colorado</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <select id="cope-corp" name="cope" required>
+                                <option value="" disabled selected>Primero seleccione una ciudad...</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group"><input type="email" id="correo-corp" placeholder="Correo Electrónico (Para alertas)" required></div>
+                        <div class="input-group full-width"><input type="text" id="area-corp" placeholder="Área Corporativa" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
+                    </div>
+                    <button class="btn-primary" type="submit">Enviar Solicitud</button>
+                </form>
+                <span class="toggle-link" id="link-corporativos" onclick="toggleModo('corporativos')">¿No tienes cuenta? Solicitar Registro</span>
+            </div>
         </div>
-
-        <form id="registro-view-corporativos" style="display:none;" onsubmit="event.preventDefault(); procesarRegistro('corporativos');">
-            <div class="form-grid">
-                <div class="input-group full-width file-upload">
-                    <span class="file-label" id="label-corp">📸 Haz clic para subir Foto de Perfil</span>
-                    <span class="file-sub" id="sub-corp">Formatos aceptados: JPG, PNG</span>
-                    <img id="preview-corp" class="image-preview" src="" alt="Vista previa">
-                    <input type="file" id="foto-corp" accept="image/*" required onchange="mostrarVistaPrevia(this, 'preview-corp', 'label-corp', 'sub-corp')">
-                </div>
-                
-                <div class="input-group"><input type="text" id="nom-corp" placeholder="Nombre(s)" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
-                <div class="input-group"><input type="text" id="ap-corp" placeholder="Apellido Paterno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
-                <div class="input-group"><input type="text" id="am-corp" placeholder="Apellido Materno" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
-                <div class="input-group"><input type="text" id="num-corp" placeholder="Número de Empleado" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required></div>
-                
-                <!-- ¡NUEVOS CAMPOS EN CASCADA PARA CORPORATIVOS! -->
-                <div class="input-group">
-                    <select id="ciudad-corp" name="ciudad" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;" onchange="actualizarCopeSelect('ciudad-corp', 'cope-corp')">
-                        <option value="" disabled selected>Seleccione Ciudad Base...</option>
-                        <option value="Tijuana">Tijuana</option>
-                        <option value="Tecate">Tecate</option>
-                        <option value="Ensenada">Ensenada</option>
-                        <option value="San Quintin">San Quintin</option>
-                        <option value="Mexicali">Mexicali</option>
-                        <option value="San Luis Rio Colorado">San Luis Rio Colorado</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <select id="cope-corp" name="cope" required style="width: 100%; padding: 14px 18px; background-color: #081422; color: #fff; border: 2px solid #1f395a; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none; cursor: pointer;">
-                        <option value="" disabled selected>Primero seleccione una ciudad...</option>
-                    </select>
-                </div>
-
-                <div class="input-group"><input type="email" id="correo-corp" placeholder="Correo Electrónico (Para alertas)" required></div>
-                <div class="input-group full-width"><input type="text" id="area-corp" placeholder="Área Corporativa" oninput="this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '')" required></div>
-            </div>
-            <button class="btn-primary" type="submit">Enviar Solicitud</button>
-        </form>
-        <span class="toggle-link" id="link-corporativos" onclick="toggleModo('corporativos')">¿No tienes cuenta? Solicitar Registro</span>
     </div>
 
-    <!-- SECCIÓN QR PARA REPORTE MÓVIL -->
-    <div style="text-align: center; margin-top: 40px; margin-bottom: 40px; color: white; display: flex; flex-direction: column; align-items: center;">
-        <h3 style="margin-bottom: 15px; font-family: 'Poppins', sans-serif;">Escanea para Levantar Reporte desde tu Móvil</h3>
-        <div id="qrcode" style="display: inline-block; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);"></div>
-        <p style="margin-top: 10px; font-size: 0.9em; color: #94a3b8;">Usa la cámara de tu celular</p>
+    <!-- SECCIÓN QR PARA REPORTE MÓVIL (CÓDIGO QR TOTALMENTE CUADRADO) -->
+    <div class="login-qr-section-container">
+        <div class="login-qr-badge">
+            <span>📱 ACCESO MÓVIL EN TIEMPO REAL</span>
+        </div>
+        <h3 class="login-qr-title">Escanea para Levantar Reporte desde tu Móvil</h3>
+        <p class="login-qr-subtitle">Usa la cámara de tu celular para iniciar un reporte inmediato en ruta</p>
+        <div id="qrcode" class="login-qr-square"></div>
+        <div class="login-qr-footer-hint">
+            <span>🔒 Conexión segura regional directa a plataforma de reportes</span>
+        </div>
     </div>
 
-    <!-- SCRIPTS ORIGINALES -->
+    <!-- FOOTER DISCRETO -->
+    <footer class="login-footer-strip">
+        <div>TELNOR &copy; 2026 | <span>RUMN Red Unificada de Mantenimiento y Notificaciones</span> | Enlace Central de Operaciones</div>
+    </footer>
+
+    <!-- SCRIPTS ORIGINALES (INTACTOS, CERO MODIFICACIONES LÓGICAS) -->
     <script src="/static/script.js?v=1788806395"></script>
     <script src="/static/qrcode.min.js"></script>
     <script>
@@ -284,7 +491,7 @@
         } catch(e) {}
     </script>
 
-    <!-- SCRIPT DE APOYO PARA LA NUEVA LÓGICA DE BOTONES -->
+    <!-- SCRIPT DE APOYO PARA LA LÓGICA DE BOTONES (INTACTO) -->
     <script>
         function abrirDirecto(rol, vista) {
             if(typeof mostrarAuth === 'function') {

@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <title>Panel de Administración</title>
     <link rel="stylesheet" href="/static/style.css?v=1000052">
-    <link rel="stylesheet" href="/static/manual_sistema.css?v=2">
+    <link rel="stylesheet" href="/static/manual_sistema.css?v=202609">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .asignacion-zona {
@@ -131,10 +131,196 @@
             background-color: #d97706;
             transform: translateY(-2px);
         }
+
+        /* =========================================================
+           FONDO EXCLUSIVO PARA INTERFACES DE ROLES (AZUL MARINO CON
+           DISEÑO GEOMÉTRICO DIAGONAL E IMÁGENES ULTRA SUTILES)
+           ========================================================= */
+        body {
+            background:
+                linear-gradient(135deg, rgba(6, 20, 48, 0.92) 0%, rgba(3, 10, 26, 0.96) 50%, rgba(8, 28, 66, 0.92) 100%),
+                radial-gradient(circle at 80% 15%, rgba(20, 58, 125, 0.45) 0%, transparent 55%),
+                radial-gradient(circle at 20% 85%, rgba(12, 38, 86, 0.5) 0%, transparent 55%),
+                #030918 !important;
+            background-attachment: fixed !important;
+        }
+
+        .dashboard-container {
+            background: transparent !important;
+        }
+
+        .sidebar {
+            background-color: rgba(4, 12, 28, 0.92) !important;
+        }
+
+        .main-content {
+            background: transparent !important;
+        }
+
+        .fluid-bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            background-image:
+                repeating-linear-gradient(
+                    -45deg,
+                    rgba(59, 130, 246, 0.018) 0px,
+                    rgba(59, 130, 246, 0.018) 1px,
+                    transparent 1px,
+                    transparent 48px
+                ),
+                repeating-linear-gradient(
+                    45deg,
+                    rgba(30, 64, 175, 0.015) 0px,
+                    rgba(30, 64, 175, 0.015) 1px,
+                    transparent 1px,
+                    transparent 48px
+                );
+        }
+
+        /* Haces diagonales arquitectónicos en azul marino (distintos al login) */
+        .fluid-blob {
+            position: absolute;
+            border-radius: 24px;
+            filter: blur(95px);
+            opacity: 0.32;
+            transform: rotate(-18deg);
+        }
+
+        .fluid-blob-1 {
+            width: 820px;
+            height: 340px;
+            background: linear-gradient(90deg, #0d2b61 0%, #173f8a 50%, transparent 100%);
+            top: -80px;
+            right: -120px;
+        }
+
+        .fluid-blob-2 {
+            width: 780px;
+            height: 320px;
+            background: linear-gradient(90deg, transparent 0%, #0a224e 50%, #05132e 100%);
+            bottom: -90px;
+            left: 180px;
+        }
+
+        .fluid-blob-3 {
+            width: 600px;
+            height: 260px;
+            background: radial-gradient(ellipse, rgba(23, 63, 138, 0.28) 0%, transparent 75%);
+            top: 42%;
+            left: 55%;
+            transform: translate(-50%, -50%) rotate(-18deg);
+        }
+
+        /* Líneas geométricas sutiles en lugar de las ondas pronunciadas del login */
+        .fluid-wave-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            max-height: 180px;
+            opacity: 0.18;
+            transform: scaleX(-1);
+        }
+
+        .fluid-wave-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            max-height: 200px;
+            opacity: 0.22;
+            transform: scaleX(-1);
+        }
+
+        /* Imágenes de fondo mucho más sutiles y en disposición distinta al login */
+        .ambient-logo-telnor-corner {
+            position: absolute;
+            bottom: -35px;
+            left: 310px;
+            width: 360px;
+            height: 360px;
+            object-fit: contain;
+            opacity: 0.028;
+            mix-blend-mode: screen;
+            filter: grayscale(20%) brightness(1.1);
+            transform: rotate(6deg);
+            pointer-events: none;
+        }
+
+        .ambient-logo-rumn-margin {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            width: 340px;
+            height: auto;
+            object-fit: contain;
+            opacity: 0.032;
+            mix-blend-mode: screen;
+            filter: grayscale(15%) contrast(1.05);
+            transform: rotate(-3deg);
+            pointer-events: none;
+        }
+
+        .ambient-logo-telnor-nombre-margin {
+            position: absolute;
+            bottom: 28px;
+            right: 55px;
+            width: 190px;
+            height: auto;
+            object-fit: contain;
+            filter: invert(1) hue-rotate(185deg) brightness(1.25) contrast(1.1);
+            mix-blend-mode: screen;
+            opacity: 0.055;
+            pointer-events: none;
+        }
     </style>
 </head>
 
 <body>
+    <!-- FONDO AMBIENTAL AZUL MARINO UNIFICADO -->
+    <div class="fluid-bg-canvas">
+        <div class="fluid-blob fluid-blob-1"></div>
+        <div class="fluid-blob fluid-blob-2"></div>
+        <div class="fluid-blob fluid-blob-3"></div>
+
+        <!-- Onda fluida superior superpuesta (Estrictamente Azul Marino) -->
+        <svg class="fluid-wave-top" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="gradWaveTop" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#061633;stop-opacity:0.75" />
+                    <stop offset="50%" style="stop-color:#0d2d63;stop-opacity:0.5" />
+                    <stop offset="100%" style="stop-color:#030917;stop-opacity:0.8" />
+                </linearGradient>
+            </defs>
+            <path fill="url(#gradWaveTop)" d="M0,128L60,144C120,160,240,192,360,186.7C480,181,600,139,720,138.7C840,139,960,181,1080,181.3C1200,181,1320,139,1380,117.3L1440,96L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+        </svg>
+
+        <!-- Onda fluida inferior superpuesta (Estrictamente Azul Marino) -->
+        <svg class="fluid-wave-bottom" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="gradWaveBottom" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#030917;stop-opacity:0.85" />
+                    <stop offset="50%" style="stop-color:#091e46;stop-opacity:0.65" />
+                    <stop offset="100%" style="stop-color:#12346e;stop-opacity:0.55" />
+                </linearGradient>
+            </defs>
+            <path fill="url(#gradWaveBottom)" d="M0,224L80,208C160,192,320,160,480,165.3C640,171,800,213,960,218.7C1120,224,1280,192,1360,176L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+        </svg>
+
+        <!-- IMAGEN 1 (Esquina Superior): telnor_logo.png ambientada como marca de agua gigante -->
+        <img src="/static/telnor_logo.png" alt="" class="ambient-logo-telnor-corner">
+
+        <!-- IMAGEN 2 (Margen Inferior Derecho): RUMN_logo.png ambientada a gran escala con modo de mezcla -->
+        <img src="/static/RUMN_logo.png" alt="" class="ambient-logo-rumn-margin">
+
+        <!-- IMAGEN 3 (Margen Inferior Izquierdo): telnor_nombre.jpg fusionada con el fondo marino (screen blend) -->
+        <img src="/static/telnor_nombre.jpg" alt="" class="ambient-logo-telnor-nombre-margin">
+    </div>
     <!-- PANTALLA DE CARGA FLOTANTE -->
     <div id="loader-confirmacion">
         <div class="loader-box">
@@ -5213,7 +5399,7 @@
     <script src="/static/panel_control.js?v=1"></script>
     <script src="/static/ciudades_copes.js?v=1"></script>
     <script src="/static/analitica.js?v=4"></script>
-    <script src="/static/manual_sistema.js?v=2"></script>
+    <script src="/static/manual_sistema.js?v=202609"></script>
     <!-- FOOLPROOF FALLBACK -->
     <script>
         setTimeout(function() {
